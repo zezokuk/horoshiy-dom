@@ -616,3 +616,4 @@ body { padding-bottom: 76px; }
 @media (min-width: 1024px) and (max-width: 1360px) { .nav { gap: 18px; font-size: 14px; } .header__phone { font-size: 15px; } }
 .numbers b span { font: inherit; color: inherit; } /* CountUp renders the number in a <span>; the 15px label rule must not shrink it */
 .crumbs a + a::before { content: "/"; margin-right: 8px; opacity: .5; } /* region › estate › house: separators between links too */
+.logo__name, .logo__name small { white-space: nowrap; } /* with the region switcher the logo wrapped into two lines */

@@ -17,7 +17,15 @@ PAGES = [
     ("estate", f"http://krd.{R}/objects/kalina"),
     ("house", f"http://krd.{R}/houses/yv-tip9"),
     ("catalog", f"http://{R}/catalog"),
+    ("projects", f"http://{R}/projects"),
+    ("project", f"http://{R}/projects/tip-5"),
+    ("build", f"http://{R}/build"),
+    ("about", f"http://{R}/about"),
+    ("contacts", f"http://{R}/contacts"),
 ]
+# python tools/shots.py <tag> projects,build  — only these pages
+if len(sys.argv) > 2:
+    PAGES = [p for p in PAGES if p[0] in sys.argv[2].split(",")]
 SIZES = [("desktop", 1440, 900, 1, False), ("phone", 390, 844, 2, True)]
 
 proc = subprocess.Popen([EDGE, "--headless=new", "--remote-debugging-port=9341", "--remote-allow-origins=*",

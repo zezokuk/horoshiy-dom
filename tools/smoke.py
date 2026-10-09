@@ -48,6 +48,15 @@ pages = [
     ("house page", f"http://krd.{HOST}/houses/yv-tip9", 200, "Тип 9"),  # price uses a no-break space, so check the type
     ("region catalog", f"http://krd.{HOST}/catalog", 200, "Дома в продаже"),
     ("admin login", f"http://{HOST}/admin/login", 200, ""),
+    ("projects", f"http://{HOST}/projects", 200, "проектов домов"),
+    ("project page", f"http://{HOST}/projects/tip-5", 200, "Построить такой дом"),
+    ("unknown project → 404", f"http://{HOST}/projects/tip-99", 404, ""),
+    ("build", f"http://{HOST}/build", 200, "за 6 месяцев"),
+    ("mortgage", f"http://{HOST}/mortgage", 200, "Семейная ипотека"),
+    ("about", f"http://{HOST}/about", 200, "Строительная компания"),
+    ("contacts", f"http://{HOST}/contacts", 200, "аул Козет"),
+    ("privacy", f"http://{HOST}/privacy", 200, "Оператор"),
+    ("consent", f"http://{HOST}/consent", 200, "согласие на обработку"),
 ]
 for name, url, code, marker in pages:
     s, body, _ = req(url)
