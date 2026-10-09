@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { HouseCard } from '@/components/HouseCard'
+import { HouseReady } from '@/components/HouseReady'
 import { MortgageCalc } from '@/components/MortgageCalc'
 import { getCompany, getHouse, getHouses, getRegion } from '@/lib/data'
 import { STATUS_LABEL, formatPrice, telHref } from '@/lib/format'
@@ -57,6 +58,7 @@ export default async function HousePage({ params }: Props) {
       <div className="container house">
         <div style={{ display: 'grid', gap: 20 }}>
           <div className="house__photo">
+            <HouseReady />
             {h.photo && <img src={h.photo} alt={`${h.title} в посёлке ${e.name}`} fetchPriority="high" />}
             <span className={`badge badge--${h.status}`}>{STATUS_LABEL[h.status]}</span>
           </div>

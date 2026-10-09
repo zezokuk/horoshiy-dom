@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Cormorant_Garamond, Manrope } from 'next/font/google'
 import { Metrika } from '@/components/Metrika'
+import { MorphLayer } from '@/components/MorphLayer'
 import { Reveal, ScrollProgress } from '@/components/Motion'
 import { INDEXABLE, MAIN_URL } from '@/lib/site'
 import './globals.css'
@@ -35,6 +36,8 @@ export default function FrontendLayout({ children }: { children: React.ReactNode
         <ScrollProgress />
         <Reveal />
         {children}
+        {/* here, above the page layouts: the «3D → house» transition must survive the route change */}
+        <MorphLayer />
         <Metrika />
       </body>
     </html>

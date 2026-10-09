@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { BuildSection } from '@/components/BuildSection'
 import { LeadInline } from '@/components/LeadForm'
 import { ProjectCard } from '@/components/ProjectCard'
 import { Words } from '@/components/Words'
@@ -13,16 +14,6 @@ export const metadata: Metadata = {
   description: 'Капитальный кирпичный дом под ключ за 6 месяцев по одному из проверенных проектов «Хорошего дома».',
   alternates: { canonical: '/build' },
 }
-
-// Same stages as the demo's 3D build scene (components/BuildSection there) — the 3D version comes over later.
-const STAGES = [
-  { title: 'Выбираете проект', text: 'Проверенные планировки — или адаптируем проект под вашу семью.' },
-  { title: 'Фундамент', text: 'Основа дома — с неё начинается стройка на участке.' },
-  { title: 'Стены', text: 'Капитальная коробка из сертифицированных материалов.' },
-  { title: 'Кровля', text: 'Крыша по проекту — такая же, как у построенных домов в посёлках.' },
-  { title: 'Окна и коммуникации', text: 'Окна, газ, вода, электричество 15 кВт, септик, отопление.' },
-  { title: 'Двор и ключи', text: 'Предчистовая отделка, двор и парковка на 2 машины — заезжайте.' },
-]
 
 export default async function BuildPage() {
   const [company, projects, houses] = await Promise.all([getCompany(), getProjects(), getHouses()])
@@ -39,28 +30,10 @@ export default async function BuildPage() {
         </p>
       </div>
 
-      {/* green section: the .step styles (light text, auto numbers) are made for it, as in the demo */}
-      <section className="section section--green">
-        <div className="container">
-          <div className="head" data-reveal>
-            <span className="idx">Этапы</span>
-            <Words text="От проекта до *ключей*" />
-          </div>
-          <div className="steps">
-            {STAGES.map((s, i) => (
-              <div key={s.title} className="step" data-reveal style={{ ['--d' as string]: `${(i % 3) * 80}ms` }}>
-                <h3>{s.title}</h3>
-                <p>{s.text}</p>
-              </div>
-            ))}
-          </div>
-          <p className="note" style={{ marginTop: 16, color: '#cfd6cd' }}>
-            Примерный график — точные сроки фиксируем в договоре.
-          </p>
-        </div>
-      </section>
+      {/* the house assembles in 3D while the page scrolls; the stage list is server-rendered inside it */}
+      <BuildSection projects={projects.length} ctaHref="#calc" />
 
-      <section className="section section--paper">
+      <section className="section section--paper" id="calc">
         <div className="container">
           <div className="head head--split">
             <div style={{ display: 'grid', gap: 14 }} data-reveal>

@@ -238,6 +238,10 @@ export interface Estate {
   description?: string | null;
   cover?: (number | null) | Media;
   scheme?: (number | null) | Media;
+  /**
+   * Картинка на месте 3D, пока он загружается. Можно оставить пустым
+   */
+  poster?: (number | null) | Media;
   lat?: number | null;
   lng?: number | null;
   streets?: string[] | null;
@@ -252,7 +256,7 @@ export interface Estate {
   infrastructure?: string[] | null;
   extras?: string[] | null;
   /**
-   * Пока условная раскладка: {"rows":[6,6],"road":"between","commercial":3}. Позже — участки по генплану застройщика
+   * Ряды участков для 3D-генплана: {"rows":[6,6],"road":"between","commercial":3} — два ряда по 6, улица между ними, 3 коммерческих здания. Пусто — сетка по числу домов. Позже — участки по генплану застройщика
    */
   genplan?:
     | {
@@ -288,6 +292,10 @@ export interface House {
   title: string;
   status: 'free' | 'reserved' | 'sold';
   price: number;
+  /**
+   * Где дом стоит на 3D-генплане посёлка. Пусто — встанет на свободный участок сам
+   */
+  plotNo?: number | null;
   area: number;
   mansard?: number | null;
   /**
@@ -540,6 +548,7 @@ export interface EstatesSelect<T extends boolean = true> {
   description?: T;
   cover?: T;
   scheme?: T;
+  poster?: T;
   lat?: T;
   lng?: T;
   streets?: T;
@@ -569,6 +578,7 @@ export interface HousesSelect<T extends boolean = true> {
   title?: T;
   status?: T;
   price?: T;
+  plotNo?: T;
   area?: T;
   mansard?: T;
   plot?: T;

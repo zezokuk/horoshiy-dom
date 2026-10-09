@@ -2,7 +2,7 @@
  * Fill the database from the demo site's data (site/lib/data.ts) and the client's original slides.
  *
  *   npm run seed            — only if the database is empty
- *   npm run seed -- --reset — wipe catalog collections and fill again
+ *   npm run seed:reset      — wipe catalog collections and fill again
  *
  * Photos are cut from the ORIGINAL slides (1673 px wide), not from the demo's compressed copies;
  * Payload then makes the WebP sizes. Crop boxes are the same as in site/tools/crop_site.py.
@@ -14,6 +14,8 @@ import crypto from 'crypto'
 import sharp from 'sharp'
 import { getPayload, type Payload } from 'payload'
 import config from '../payload.config'
+import { genplanConfig, layout } from '../lib/genplan'
+import type { HouseView } from '../lib/view'
 import {
   ADVANTAGES,
   COMPANY,
@@ -28,6 +30,7 @@ import {
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const SLIDES = path.resolve(dirname, '../../../исходники-презентации')
+const POSTERS = path.resolve(dirname, '../../../site/public/img/genplan') // 3D posters rendered by site/tools/posters.py
 const ENV = path.resolve(dirname, '../../.env')
 
 type Box = { left: number; top: number; width: number; height: number }
@@ -59,6 +62,14 @@ async function slideCrop(payload: Payload, slide: string, kind: keyof typeof CRO
   return doc.id as number
 }
 
+/** Upload a ready image file as is (the demo's 3D posters); undefined if the file is missing. */
+async function fileUpload(payload: Payload, file: string, alt: string) {
+  if (!fs.existsSync(file)) return undefined
+  const data = fs.readFileSync(file)
+  const doc = await payload.create({ collection: 'media', data: { alt }, file: { data, mimetype: 'image/webp', name: path.basename(file), size: data.length } })
+  return doc.id as number
+}
+
 const baseType = (t: string) => t.replace(/\s*\(.*\)\s*$/, '') // «Тип 5 (В2)» → «Тип 5»
 const slugOfType = (t: string) => 'tip-' + baseType(t).replace(/\D/g, '')
 
@@ -83,7 +94,8 @@ async function wipe(payload: Payload) {
 
 async function run() {
   const payload = await getPayload({ config })
-  const reset = process.argv.includes('--reset')
+  // `payload run` does not pass extra CLI arguments to the script, so the switch is an env var (npm run seed:reset)
+  const reset = process.env.SEED_RESET === '1' || process.argv.includes('--reset')
   await ensureAdmin(payload)
   if (reset) await wipe(payload)
   else if ((await payload.count({ collection: 'regions' })).totalDocs > 0) {
@@ -183,6 +195,7 @@ async function run() {
         description: e.description,
         cover: await slideCrop(payload, COVERS[e.slug], 'cover', `Обложка проекта «${e.name}»`),
         scheme: await slideCrop(payload, SCHEMES[e.slug], 'scheme', `Генплан «${e.name}» от застройщика`),
+        poster: await fileUpload(payload, path.join(POSTERS, `${e.slug}.webp`), `3D-вид посёлка «${e.name}»`),
         lat: e.coords[0],
         lng: e.coords[1],
         streets: e.streets ?? [],
@@ -194,6 +207,15 @@ async function run() {
       },
     })
     estates.set(e.slug, doc.id as number)
+  }
+
+  // Plots on the 3D plan: the demo spread each estate's houses over the plots in price-grid order.
+  // Saving the result as «Участок на генплане» keeps every house where the demo (and its 3D posters) put it.
+  const plotNo = new Map<string, number>()
+  for (const e of ESTATES) {
+    const units = UNITS.filter((u) => u.estate === e.slug)
+    const asViews = units.map((u) => ({ code: u.id, status: u.status, plotNo: null }) as unknown as HouseView)
+    for (const p of layout(genplanConfig(e.genplan, e.homes, units.length), asViews).plots) if (p.unit) plotNo.set(p.unit.code, p.n)
   }
 
   // Houses (price grid rows)
@@ -208,6 +230,7 @@ async function run() {
         title: u.type,
         status: u.status,
         price: u.price,
+        plotNo: plotNo.get(u.id),
         area: u.area,
         mansard: u.mansard,
         plot: u.plot,

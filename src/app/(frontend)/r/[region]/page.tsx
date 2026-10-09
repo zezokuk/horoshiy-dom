@@ -1,13 +1,14 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { EstateCard } from '@/components/EstateCard'
+import { EstatesView } from '@/components/EstatesView'
+import { Genplan } from '@/components/Genplan'
 import { HouseCard } from '@/components/HouseCard'
 import { LeadInline } from '@/components/LeadForm'
 import { Words } from '@/components/Words'
 import { getEstates, getHouses, getProjects, getRegion, img } from '@/lib/data'
 import { formatMillions, plural, telHref } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
-import { estateView, houseView } from '@/lib/view'
+import { estateView, genplanEstate, houseView } from '@/lib/view'
 
 export const revalidate = 60
 
@@ -75,6 +76,12 @@ export default async function RegionPage({ params }: Props) {
   const priceFrom = free.length ? Math.min(...free.map((h) => h.price)) : null
   // a real house, not an estate cover: covers carry the estate's name printed on them («ЮЖНЫЙ ВЕТЕР»)
   const cover = img(region.cover, 'wide') || free[0]?.photo || views[0]?.cover
+  // 3D showcase: the estate with the most free houses (ties: the first in the admin's order)
+  const top = [...estates].sort((a, b) => (views.find((v) => v.slug === b.slug)?.free ?? 0) - (views.find((v) => v.slug === a.slug)?.free ?? 0))[0]
+  const showcase = top && {
+    estate: top,
+    houses: houses.filter((h) => (typeof h.estate === 'object' ? h.estate?.id : h.estate) === top.id).map(houseView),
+  }
 
   return (
     <>
@@ -118,15 +125,16 @@ export default async function RegionPage({ params }: Props) {
 
       <section className="section" id="estates">
         <div className="container">
-          <div className="head" data-reveal>
-            <span className="idx">01 / Посёлки</span>
-            <Words text="Где можно *жить*" />
+          <div className="head head--split">
+            <div style={{ display: 'grid', gap: 14 }} data-reveal>
+              <span className="idx">01 / Посёлки</span>
+              <Words text="Где можно *жить*" />
+            </div>
+            <p className="lead" data-reveal>
+              Выберите посёлок на карте — откроется его 3D-генплан со свободными домами и ценами.
+            </p>
           </div>
-          <div className="grid grid--3">
-            {views.map((e) => (
-              <EstateCard key={e.slug} e={e} />
-            ))}
-          </div>
+          <EstatesView estates={views} />
           <LeadInline
             title="Не знаете, какой посёлок выбрать?"
             text="Расскажите о семье и бюджете — подберём 2–3 свободных дома и пришлём подборку."
@@ -136,12 +144,35 @@ export default async function RegionPage({ params }: Props) {
         </div>
       </section>
 
-      {free.length > 0 && (
-        <section className="section section--paper">
+      {showcase && (
+        <section className="section section--paper" id="genplan3d">
           <div className="container">
             <div className="head head--split">
               <div style={{ display: 'grid', gap: 14 }} data-reveal>
-                <span className="idx">02 / В продаже</span>
+                <span className="idx">02 / Посёлок в 3D</span>
+                <Words text={`Посмотрите на «${showcase.estate.name}» *сверху*`} />
+              </div>
+              <div style={{ display: 'grid', gap: 16, justifyItems: 'start' }} data-reveal>
+                <p className="lead">
+                  Покрутите посёлок, приблизьте улицу и нажмите на дом: свободные подсвечены и подписаны ценой. Так вы сразу видите соседей, участок и
+                  дорогу.
+                </p>
+                <a href={regionHref(region.slug, `/objects/${showcase.estate.slug}`)} className="btn btn--green">
+                  Подробнее о посёлке
+                </a>
+              </div>
+            </div>
+            <Genplan estate={genplanEstate(showcase.estate, showcase.houses.length)} houses={showcase.houses} />
+          </div>
+        </section>
+      )}
+
+      {free.length > 0 && (
+        <section className={`section ${showcase ? '' : 'section--paper'}`}>
+          <div className="container">
+            <div className="head head--split">
+              <div style={{ display: 'grid', gap: 14 }} data-reveal>
+                <span className="idx">{showcase ? '03' : '02'} / В продаже</span>
                 <Words text="Свободные *дома*" />
               </div>
               <a href={regionHref(region.slug, '/catalog')} className="btn btn--green" data-reveal>
@@ -160,7 +191,7 @@ export default async function RegionPage({ params }: Props) {
       <section className="section" id="office">
         <div className="container split" style={{ alignItems: 'start' }}>
           <div style={{ display: 'grid', gap: 14 }} data-reveal>
-            <span className="idx">03 / Офис продаж</span>
+            <span className="idx">{String(2 + (showcase ? 1 : 0) + (free.length ? 1 : 0)).padStart(2, '0')} / Офис продаж</span>
             <Words text="Приезжайте *в гости*" />
             <p className="lead">Покажем построенные дома вживую или проведём показ по видеосвязи, если вы в другом городе.</p>
           </div>

@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { EstatesMap } from '@/components/EstatesMap'
+import { Genplan } from '@/components/Genplan'
 import { HouseCard } from '@/components/HouseCard'
 import { LeadInline } from '@/components/LeadForm'
 import { getEstate, getHouses, getRegion, img } from '@/lib/data'
 import { formatMillions, plural } from '@/lib/format'
 import { regionHref } from '@/lib/site'
-import { houseView } from '@/lib/view'
+import { estateView, genplanEstate, houseView } from '@/lib/view'
 import type { Region } from '@/payload-types'
 
 export const revalidate = 60
@@ -35,8 +37,10 @@ export default async function EstatePage({ params }: Props) {
   const d = await load(params)
   if (!d) notFound()
   const { region, estate: e } = d
-  const houses = (await getHouses({ estate: e.id })).map(houseView)
+  const rawHouses = await getHouses({ estate: e.id })
+  const houses = rawHouses.map(houseView)
   const free = houses.filter((h) => h.status === 'free')
+  const scheme = img(e.scheme, 'wide')
   const sorted = [...houses].sort((a, b) => (a.status === b.status ? a.price - b.price : a.status === 'free' ? -1 : 1))
   const photo = free[0]?.photo ?? houses[0]?.photo
   const target = { region: region.slug, context: `${region.name}: ${e.name}`, phone: region.office?.phone, hours: region.office?.hours }
@@ -91,15 +95,19 @@ export default async function EstatePage({ params }: Props) {
 
       <section className="section" id="genplan" style={{ paddingTop: 40 }}>
         <div className="container">
-          <div className="head">
-            <p className="eyebrow">Генплан</p>
-            <h2 className="title title--lg">Генплан застройщика</h2>
-            <p className="lead">Интерактивный 3D-генплан переносим из демо-версии — пока схема из презентации.</p>
-          </div>
-          {img(e.scheme, 'wide') && (
-            <div className="photo" style={{ maxWidth: 760 }}>
-              <img src={img(e.scheme, 'wide')} alt={`Генплан «${e.name}»`} loading="lazy" />
+          <div className="head head--split">
+            <div style={{ display: 'grid', gap: 14 }}>
+              <p className="eyebrow">Генплан</p>
+              <h2 className="title title--lg">Выберите дом в 3D</h2>
             </div>
+            <p className="lead">Покрутите посёлок и нажмите на дом. Свободные подсвечены зелёным и подписаны ценой — увидите фото, площадь и участок.</p>
+          </div>
+          <Genplan estate={genplanEstate(e, houses.length)} houses={houses} />
+          {scheme && (
+            <details className="scheme-src">
+              <summary>Генплан застройщика</summary>
+              <img src={scheme} alt={`Генплан «${e.name}» от застройщика`} loading="lazy" />
+            </details>
           )}
           <LeadInline title={`Показ в «${e.name}»`} text="Покажем дома вживую или по видеосвязи — в удобное время, без обязательств." cta="Записаться на показ" target={target} />
         </div>
@@ -135,16 +143,9 @@ export default async function EstatePage({ params }: Props) {
                 ))}
               </ul>
             )}
-            {e.lat && e.lng && (
-              <a className="btn btn--green" style={{ justifySelf: 'start', marginTop: 8 }} href={`https://yandex.ru/maps/?rtext=~${e.lat},${e.lng}&rtt=auto`} target="_blank" rel="noreferrer">
-                Построить маршрут
-              </a>
-            )}
-          </div>
-          <div style={{ display: 'grid', gap: 18 }}>
             {!!e.infrastructure?.length && (
               <>
-                <h3 className="title" style={{ fontSize: 24 }}>
+                <h3 className="title" style={{ fontSize: 24, marginTop: 10 }}>
                   Рядом
                 </h3>
                 <ul className="dots">
@@ -156,7 +157,7 @@ export default async function EstatePage({ params }: Props) {
             )}
             {!!e.utilities?.length && (
               <>
-                <h3 className="title" style={{ fontSize: 24 }}>
+                <h3 className="title" style={{ fontSize: 24, marginTop: 10 }}>
                   Коммуникации
                 </h3>
                 <div className="chips">
@@ -168,7 +169,13 @@ export default async function EstatePage({ params }: Props) {
                 </div>
               </>
             )}
+            {e.lat && e.lng && (
+              <a className="btn btn--green" style={{ justifySelf: 'start', marginTop: 8 }} href={`https://yandex.ru/maps/?rtext=~${e.lat},${e.lng}&rtt=auto`} target="_blank" rel="noreferrer">
+                Построить маршрут
+              </a>
+            )}
           </div>
+          {e.lat && e.lng ? <EstatesMap estates={[estateView(e, rawHouses)]} /> : null}
         </div>
       </section>
     </>

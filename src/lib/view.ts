@@ -1,5 +1,6 @@
 import type { Estate, House, Media, Region } from '@/payload-types'
 import type { HouseStatus } from './format'
+import { genplanConfig, type GenplanEstate } from './genplan'
 import { regionHref } from './site'
 
 /**
@@ -24,6 +25,7 @@ export type HouseView = {
   estateName: string
   regionSlug: string
   href: string
+  plotNo: number | null
 }
 
 export type EstateView = {
@@ -95,6 +97,7 @@ export function houseView(h: House): HouseView {
     estateName: estate?.name ?? '',
     regionSlug,
     href: regionHref(regionSlug, `/houses/${h.code}`),
+    plotNo: h.plotNo ?? null,
   }
 }
 
@@ -118,5 +121,16 @@ export function estateView(e: Estate, houses: House[]): EstateView {
   }
 }
 
-export const houseTitle = (h: { title: string; area: number; mansard?: number | null }) =>
+/** The estate's part of the 3D plan / scheme. `houses` = how many houses it has now, so none drops off the plan. */
+export function genplanEstate(e: Estate, houses: number): GenplanEstate {
+  return {
+    slug: e.slug,
+    name: e.name,
+    streets: e.streets ?? [],
+    poster: url(e.poster, 'wide'),
+    config: genplanConfig(e.genplan, e.homes ?? 0, houses),
+  }
+}
+
+export const houseTitle =(h: { title: string; area: number; mansard?: number | null }) =>
   `${h.title} · ${h.area.toLocaleString('ru-RU')} м²${h.mansard ? ` + ${h.mansard} м² мансарда` : ''}`

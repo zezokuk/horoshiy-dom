@@ -44,6 +44,13 @@ export const Houses: CollectionConfig = {
     },
     { name: 'price', label: 'Цена, ₽', type: 'number', required: true, admin: { position: 'sidebar' } },
     {
+      name: 'plotNo',
+      label: 'Участок на генплане, №',
+      type: 'number',
+      min: 1,
+      admin: { position: 'sidebar', description: 'Где дом стоит на 3D-генплане посёлка. Пусто — встанет на свободный участок сам' },
+    },
+    {
       type: 'row',
       fields: [
         { name: 'area', label: 'Площадь, м²', type: 'number', required: true },

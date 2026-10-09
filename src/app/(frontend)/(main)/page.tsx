@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { preload } from 'react-dom'
+import { BuildSection } from '@/components/BuildSection'
 import { HouseCard } from '@/components/HouseCard'
 import { LeadInline } from '@/components/LeadForm'
 import { MortgageCalc } from '@/components/MortgageCalc'
@@ -182,6 +183,8 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      <BuildSection projects={projects.length} />
 
       <section className="section section--green">
         <div className="container" style={{ display: 'grid', gap: 56 }}>

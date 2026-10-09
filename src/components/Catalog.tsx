@@ -20,12 +20,16 @@ export function Catalog({ houses, regions, estates }: { houses: HouseView[]; reg
   const [onlyFree, setOnlyFree] = useState(true)
   const [sort, setSort] = useState<Sort>('price-asc')
 
+  // Filters from the URL are applied after hydration: the page is cached (ISR) without them, so reading
+  // window.location during render would make the server and client HTML differ. One extra render, on load only.
   useEffect(() => {
     const q = new URLSearchParams(window.location.search)
+    /* eslint-disable react-hooks/set-state-in-effect */
     if (q.get('region')) setRegion(q.get('region')!)
     if (q.get('estate')) setEstate(q.get('estate')!)
     if (q.get('max')) setMaxPrice(Number(q.get('max')))
     if (q.get('area')) setMinArea(Number(q.get('area')))
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [])
 
   const estateOptions = estates.filter((e) => region === 'all' || e.region === region)

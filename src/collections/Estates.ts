@@ -34,6 +34,13 @@ export const Estates: CollectionConfig = {
     { name: 'cover', label: 'Обложка', type: 'upload', relationTo: 'media' },
     { name: 'scheme', label: 'Генплан застройщика (картинка)', type: 'upload', relationTo: 'media' },
     {
+      name: 'poster',
+      label: 'Заставка 3D-генплана',
+      type: 'upload',
+      relationTo: 'media',
+      admin: { description: 'Картинка на месте 3D, пока он загружается. Можно оставить пустым' },
+    },
+    {
       type: 'row',
       fields: [
         { name: 'lat', label: 'Широта', type: 'number' },
@@ -63,7 +70,8 @@ export const Estates: CollectionConfig = {
       label: 'Генплан (раскладка)',
       type: 'json',
       admin: {
-        description: 'Пока условная раскладка: {"rows":[6,6],"road":"between","commercial":3}. Позже — участки по генплану застройщика',
+        description:
+          'Ряды участков для 3D-генплана: {"rows":[6,6],"road":"between","commercial":3} — два ряда по 6, улица между ними, 3 коммерческих здания. Пусто — сетка по числу домов. Позже — участки по генплану застройщика',
       },
     },
   ],

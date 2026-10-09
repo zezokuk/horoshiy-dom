@@ -62,6 +62,20 @@ for name, url, code, marker in pages:
     s, body, _ = req(url)
     check(name, s == code and (not marker or marker in body), f"{s} {url}" + ("" if not marker or marker in body else f" (no «{marker}»)"))
 
+# features carried over from the demo: map of estates, 3D plan + scheme, 3D build (server-rendered parts)
+features = [
+    ("region: map/list switch", f"http://krd.{HOST}/", ["На карте", "Списком"]),
+    ("region: 3D showcase of an estate", f"http://krd.{HOST}/", ["Посёлок в 3D", "3D-вид", "Схема"]),
+    ("estate: 3D plan with scheme tab + poster", f"http://krd.{HOST}/objects/yuzhnyy-veter", ["Выберите дом в 3D", "3D-вид", "Схема", "Открыть 3D"]),
+    ("estate: developer's master plan kept", f"http://krd.{HOST}/objects/yuzhnyy-veter", ["Генплан застройщика"]),
+    ("home: 3D build section", f"http://{HOST}/", ["Листайте вниз", "Двор и ключи"]),  # «Шаг 1 из 6» is split by React comments
+    ("build page: 3D build section", f"http://{HOST}/build", ["Листайте вниз", "12 проверенных планировок"]),
+]
+for name, url, markers in features:
+    s, body, _ = req(url)
+    missing = [m for m in markers if m not in body]
+    check(name, s == 200 and not missing, f"{s}" + (f" missing {missing}" if missing else ""))
+
 # routing rules
 s, _, h = req(f"http://{HOST}/r/krd/objects/kalina")
 check("main /r/krd/… → 308 to subdomain", s == 308 and h.get("location", "").startswith(f"http://krd.{HOST}/objects/kalina"), f"{s} {h.get('location')}")
