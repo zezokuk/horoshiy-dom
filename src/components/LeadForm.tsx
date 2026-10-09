@@ -1,0 +1,150 @@
+'use client'
+
+import { useEffect, useState, type FormEvent } from 'react'
+import { readAttribution } from '@/lib/attribution'
+import { telHref } from '@/lib/format'
+import { mainHref } from '@/lib/site'
+import { goal } from './Metrika'
+
+// Every form posts to the CMS: the lead lands in admin → «Заявки» and the region's manager gets a Telegram message.
+const ENDPOINT = '/api/leads/submit'
+
+function formatPhone(raw: string) {
+  const d = raw.replace(/\D/g, '').replace(/^8/, '7').slice(0, 11)
+  const n = d.startsWith('7') ? d.slice(1) : d
+  let out = '+7'
+  if (n.length) out += ` (${n.slice(0, 3)}`
+  if (n.length >= 3) out += `) ${n.slice(3, 6)}`
+  if (n.length >= 6) out += `-${n.slice(6, 8)}`
+  if (n.length >= 8) out += `-${n.slice(8, 10)}`
+  return out
+}
+
+export type LeadTarget = { region?: string; context?: string; phone?: string | null; hours?: string | null }
+
+export function LeadForm({ light = false, row = false, cta = 'Отправить', target = {} }: { light?: boolean; row?: boolean; cta?: string; target?: LeadTarget }) {
+  const [phone, setPhone] = useState('')
+  const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
+
+  async function submit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const data = Object.fromEntries(new FormData(e.currentTarget))
+    if (phone.replace(/\D/g, '').length < 11) return
+    setState('sending')
+    try {
+      const { utm, ref } = readAttribution()
+      const res = await fetch(ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, phone, region: target.region, context: target.context, page: window.location.href, utm, ref }),
+      })
+      if (!res.ok) throw new Error(String(res.status))
+      goal('lead_submit', { region: target.region, context: target.context })
+      setState('done')
+    } catch {
+      setState('error')
+    }
+  }
+
+  if (state === 'done') {
+    return (
+      <div className={`form ${light ? 'form--light' : ''}`}>
+        <div className="form__ok">
+          <b>Спасибо! Заявка принята.</b>
+          <p>Менеджер перезвонит{target.hours ? ` в рабочее время (${target.hours.toLowerCase()})` : ' в ближайшее рабочее время'}.</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <form className={`form ${light ? 'form--light' : ''} ${row ? 'form--row' : ''}`} onSubmit={submit}>
+      {/* Trap for bots: hidden from people, bots fill every field — the server silently drops such leads. */}
+      <div className="form__hp" aria-hidden="true">
+        <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+      </div>
+      <input type="text" name="name" placeholder="Ваше имя" autoComplete="name" required />
+      <input
+        type="tel"
+        name="phone"
+        placeholder="+7 (___) ___-__-__"
+        autoComplete="tel"
+        inputMode="tel"
+        value={phone}
+        onChange={(e) => setPhone(formatPhone(e.target.value))}
+        pattern="\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}"
+        title="Номер в формате +7 (999) 123-45-67"
+        required
+      />
+      <label className="form__consent">
+        <input type="checkbox" name="consent" required />
+        <span>
+          Даю <a href={mainHref('/consent')}>согласие на обработку персональных данных</a> и ознакомлен с{' '}
+          <a href={mainHref('/privacy')}>политикой</a>
+        </span>
+      </label>
+      <button className="btn btn--gold" type="submit" disabled={state === 'sending'}>
+        {state === 'sending' ? 'Отправляем…' : cta}
+      </button>
+      {state === 'error' && (
+        <p role="alert">
+          Не получилось отправить.{' '}
+          {target.phone ? (
+            <>
+              Позвоните нам: <a href={telHref(target.phone)}>{target.phone}</a>
+            </>
+          ) : (
+            'Попробуйте ещё раз через минуту.'
+          )}
+        </p>
+      )}
+    </form>
+  )
+}
+
+/** Compact lead strip placed between sections, so the form is always close (not only at the bottom). */
+export function LeadInline({ title, text, cta, target }: { title: string; text: string; cta: string; target?: LeadTarget }) {
+  return (
+    <div className="lead-inline" data-reveal>
+      <div className="lead-inline__text">
+        <b>{title}</b>
+        <p>{text}</p>
+      </div>
+      <LeadForm light row cta={cta} target={target} />
+    </div>
+  )
+}
+
+/** Desktop floating «call me back» pill (mobile already has the sticky bottom bar). */
+export function FloatingCall() {
+  const [shown, setShown] = useState(false)
+  useEffect(() => {
+    const on = () => setShown(window.scrollY > window.innerHeight * 0.8) // appears after the first screen
+    on()
+    window.addEventListener('scroll', on, { passive: true })
+    return () => window.removeEventListener('scroll', on)
+  }, [])
+  return (
+    <a href="#lead" className={`float-call ${shown ? 'is-shown' : ''}`} aria-label="Заказать обратный звонок">
+      <span className="float-call__dot" />
+      Заказать звонок
+    </a>
+  )
+}
+
+export function LeadSection({ title, text, cta, target }: { title: string; text: string; cta: string; target?: LeadTarget }) {
+  return (
+    <section className="section" id="lead" style={{ paddingBottom: 96 }}>
+      <div className="container">
+        <div className="lead-box">
+          <div style={{ display: 'grid', gap: 16 }}>
+            <p className="eyebrow">Подбор дома</p>
+            <h2 className="title title--lg">{title}</h2>
+            <p className="lead">{text}</p>
+          </div>
+          <LeadForm cta={cta} target={target} />
+        </div>
+      </div>
+    </section>
+  )
+}
