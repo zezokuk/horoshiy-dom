@@ -9,7 +9,7 @@ const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v))
 const phase = (p: number, from: number, to: number) => clamp((p - from) / (to - from))
 const ease = (k: number) => 1 - Math.pow(1 - k, 3)
 
-/** Same timeline as BuildSection's stage list (start of each step, 0..1 of the scroll). */
+/** Start of each step, 0..1 of the build (BuildStory maps its text cards onto this timeline). */
 const BUILD_STEPS = [0, 0.03, 0.16, 0.36, 0.52, 0.64]
 
 /**
@@ -18,8 +18,13 @@ const BUILD_STEPS = [0, 0.03, 0.16, 0.36, 0.52, 0.64]
  * an empty plot with survey stakes, the blueprint and a translucent «ghost» of the future house.
  * Then: foundation → walls → roof → windows → yard. `progress` (0..1) comes from the sticky section.
  */
-export default function BuildHouse3D({ progress }: { progress: { current: number } }) {
+export default function BuildHouse3D({ progress, shift }: { progress: { current: number }; shift?: { x: number; y: number } }) {
   const host = useRef<HTMLDivElement>(null)
+  // where the house sits in the frame (fractions of the canvas): right of a text column, or above cards on a phone
+  const shiftRef = useRef(shift)
+  useEffect(() => {
+    shiftRef.current = shift
+  })
 
   useEffect(() => {
     const el = host.current
@@ -46,6 +51,14 @@ export default function BuildHouse3D({ progress }: { progress: { current: number
     const scene = new THREE.Scene()
     scene.fog = new THREE.Fog('#efe4d1', 70, 170) // horizon melts into the card background
     const camera = new THREE.PerspectiveCamera(34, el.clientWidth / el.clientHeight, 0.1, 400)
+    const frame = (w: number, h: number) => {
+      camera.aspect = w / h
+      const s = shiftRef.current
+      if (s) camera.setViewOffset(w, h, -s.x * w, s.y * h, w, h)
+      else camera.clearViewOffset()
+      camera.updateProjectionMatrix()
+    }
+    frame(el.clientWidth, el.clientHeight)
 
     scene.add(new THREE.HemisphereLight('#fffaf0', '#9c9581', 1.5))
     const sun = new THREE.DirectionalLight('#ffe8c8', 2.6)
@@ -248,8 +261,10 @@ export default function BuildHouse3D({ progress }: { progress: { current: number
 
       // camera: wide «this is your street» shot at the start, settles closer as the house appears
       const ang = -0.7 + p * 0.95
-      const dist = 50 - p * 12
-      camera.position.set(Math.sin(ang) * dist, 21 - p * 7, plotZ + Math.cos(ang) * dist)
+      // a tall phone screen sees a narrow slice: step back so the whole plot fits across
+      const k = Math.min(2.2, Math.max(1, 1.1 / camera.aspect))
+      const dist = (50 - p * 12) * k
+      camera.position.set(Math.sin(ang) * dist, (21 - p * 7) * k, plotZ + Math.cos(ang) * dist)
       camera.lookAt(0, 2.2, plotZ)
     }
 
@@ -282,8 +297,7 @@ export default function BuildHouse3D({ progress }: { progress: { current: number
       if (!w || !h) return
       renderer.setSize(w, h)
       labels.setSize(w, h)
-      camera.aspect = w / h
-      camera.updateProjectionMatrix()
+      frame(w, h)
       draw()
     })
     ro.observe(el)

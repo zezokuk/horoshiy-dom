@@ -16,6 +16,8 @@ PAGES = [
     ("msk", f"http://msk.{R}/"),
     ("estate", f"http://krd.{R}/objects/kalina"),
     ("house", f"http://krd.{R}/houses/yv-tip9"),
+    ("tour", f"http://krd.{R}/houses/di-tip12"),
+    ("locations", f"http://{R}/locations"),
     ("catalog", f"http://{R}/catalog"),
     ("projects", f"http://{R}/projects"),
     ("project", f"http://{R}/projects/tip-5"),

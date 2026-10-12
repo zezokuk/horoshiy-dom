@@ -9,9 +9,9 @@ import { StickyCta } from './StickyCta'
 
 /** Brand site menu: what the company does and where. */
 const brandNav = (): NavItem[] => [
-  { href: mainHref('/#regions'), label: 'Регионы' },
-  { href: mainHref('/catalog'), label: 'Готовые дома' },
   { href: mainHref('/build'), label: 'Построить' },
+  { href: mainHref('/catalog'), label: 'Готовые дома' },
+  { href: mainHref('/locations'), label: 'Локации' },
   { href: mainHref('/mortgage'), label: 'Ипотека' },
   { href: mainHref('/about'), label: 'О компании' },
 ]
@@ -32,8 +32,8 @@ export async function Shell({ region, children }: { region?: Region; children: R
   const current = region ? regionView(region) : undefined
   const phone = region?.office?.phone || company.phone
   const nav = region ? regionNav(region.slug) : brandNav()
-  const target = { region: region?.slug, phone, hours: region?.office?.hours }
   const soon = region?.status === 'soon'
+  const target = { region: region?.slug, phone, hours: region?.office?.hours, interest: soon ? ('future' as const) : undefined }
 
   return (
     <>
@@ -54,8 +54,9 @@ export async function Shell({ region, children }: { region?: Region; children: R
             ? 'Оставьте телефон — сообщим о старте продаж, ценах и первых домах раньше всех.'
             : 'Расскажем, какие дома свободны прямо сейчас, рассчитаем ипотеку и привезём на показ.'
         }
-        cta={soon ? 'Записаться в лист ожидания' : 'Подобрать дом'}
+        cta={soon ? 'Записаться в лист ожидания' : 'Отправить'}
         target={target}
+        ask={!soon}
       />
       <Footer company={company} regions={views} nav={nav} current={current} />
       <StickyCta phone={phone} />

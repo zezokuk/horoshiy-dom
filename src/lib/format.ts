@@ -12,5 +12,13 @@ export function plural(n: number, one: string, few: string, many: string) {
   return many
 }
 
+/** Monthly annuity payment, rounded to roubles. Checked against the client's slide: 4 400 000 ₽, 6 %, 30 лет → 26 380 ₽. */
+export function annuity(credit: number, ratePct: number, years: number) {
+  const n = years * 12
+  const r = ratePct / 100 / 12
+  if (credit <= 0 || n <= 0) return 0
+  return Math.round(r ? (credit * r) / (1 - Math.pow(1 + r, -n)) : credit / n)
+}
+
 export type HouseStatus = 'free' | 'reserved' | 'sold'
 export const STATUS_LABEL: Record<HouseStatus, string> = { free: 'Свободен', reserved: 'Бронь', sold: 'Продан' }

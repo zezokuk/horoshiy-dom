@@ -20,11 +20,33 @@ function formatPhone(raw: string) {
   return out
 }
 
-export type LeadTarget = { region?: string; context?: string; phone?: string | null; hours?: string | null }
+export type Interest = 'buy' | 'build' | 'future' | 'mortgage'
+export type LeadTarget = { region?: string; context?: string; phone?: string | null; hours?: string | null; interest?: Interest }
 
-export function LeadForm({ light = false, row = false, cta = 'Отправить', target = {} }: { light?: boolean; row?: boolean; cta?: string; target?: LeadTarget }) {
+// the three ways in (home page): the manager sees in the lead what the person came for
+const ASK: { value: Interest; label: string }[] = [
+  { value: 'buy', label: 'Купить готовый' },
+  { value: 'build', label: 'Построить' },
+  { value: 'future', label: 'Пока присматриваюсь' },
+]
+
+export function LeadForm({
+  light = false,
+  row = false,
+  cta = 'Отправить',
+  target = {},
+  ask = false,
+}: {
+  light?: boolean
+  row?: boolean
+  cta?: string
+  target?: LeadTarget
+  /** show «Купить готовый / Построить / Пока присматриваюсь» */
+  ask?: boolean
+}) {
   const [phone, setPhone] = useState('')
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
+  const [interest, setInterest] = useState<Interest | undefined>(target.interest)
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -36,7 +58,7 @@ export function LeadForm({ light = false, row = false, cta = 'Отправить
       const res = await fetch(ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, phone, region: target.region, context: target.context, page: window.location.href, utm, ref }),
+        body: JSON.stringify({ ...data, phone, region: target.region, context: target.context, interest, page: window.location.href, utm, ref }),
       })
       if (!res.ok) throw new Error(String(res.status))
       goal('lead_submit', { region: target.region, context: target.context })
@@ -51,7 +73,11 @@ export function LeadForm({ light = false, row = false, cta = 'Отправить
       <div className={`form ${light ? 'form--light' : ''}`}>
         <div className="form__ok">
           <b>Спасибо! Заявка принята.</b>
-          <p>Менеджер перезвонит{target.hours ? ` в рабочее время (${target.hours.toLowerCase()})` : ' в ближайшее рабочее время'}.</p>
+          <p>
+            {interest === 'future'
+              ? 'Сообщим о новых посёлках, акциях и старте продаж — без навязчивых звонков.'
+              : `Менеджер перезвонит${target.hours ? ` в рабочее время (${target.hours.toLowerCase()})` : ' в ближайшее рабочее время'}.`}
+          </p>
         </div>
       </div>
     )
@@ -63,6 +89,15 @@ export function LeadForm({ light = false, row = false, cta = 'Отправить
       <div className="form__hp" aria-hidden="true">
         <input type="text" name="website" tabIndex={-1} autoComplete="off" />
       </div>
+      {ask && (
+        <div className="form__ask" role="radiogroup" aria-label="Что вас интересует">
+          {ASK.map((a) => (
+            <button key={a.value} type="button" role="radio" aria-checked={interest === a.value} className={interest === a.value ? 'is-on' : ''} onClick={() => setInterest(a.value)}>
+              {a.label}
+            </button>
+          ))}
+        </div>
+      )}
       <input type="text" name="name" placeholder="Ваше имя" autoComplete="name" required />
       <input
         type="tel"
@@ -132,7 +167,7 @@ export function FloatingCall() {
   )
 }
 
-export function LeadSection({ title, text, cta, target }: { title: string; text: string; cta: string; target?: LeadTarget }) {
+export function LeadSection({ title, text, cta, target, ask = false }: { title: string; text: string; cta: string; target?: LeadTarget; ask?: boolean }) {
   return (
     <section className="section" id="lead" style={{ paddingBottom: 96 }}>
       <div className="container">
@@ -142,7 +177,7 @@ export function LeadSection({ title, text, cta, target }: { title: string; text:
             <h2 className="title title--lg">{title}</h2>
             <p className="lead">{text}</p>
           </div>
-          <LeadForm cta={cta} target={target} />
+          <LeadForm cta={cta} target={target} ask={ask} />
         </div>
       </div>
     </section>

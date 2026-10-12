@@ -1,7 +1,7 @@
 import { cache } from 'react'
 import { getPayload, type Where } from 'payload'
 import config from '@payload-config'
-import type { Company, Estate, House, Media, Project, Region } from '@/payload-types'
+import type { Company, Estate, House, Media, Project, Promo, Region } from '@/payload-types'
 
 /**
  * All reads go through Payload's Local API (no HTTP): fast, typed, and the same access rules as the admin.
@@ -70,6 +70,27 @@ export const getProject = cache(async (slug: string): Promise<Project | null> =>
   const p = await payloadClient()
   const { docs } = await p.find({ collection: 'projects', where: { slug: { equals: slug } }, depth: 1, limit: 1 })
   return docs[0] ?? null
+})
+
+/** Active promos. Brand pages (no region): all of them, regional ones carry their region. A region: company-wide + its own.
+ *  Expired ones hide themselves. */
+export const getPromos = cache(async (regionId?: number): Promise<Promo[]> => {
+  const p = await payloadClient()
+  const today = new Date().toISOString().slice(0, 10)
+  const { docs } = await p.find({
+    collection: 'promos',
+    where: {
+      and: [
+        { active: { equals: true } },
+        { or: [{ until: { exists: false } }, { until: { greater_than_equal: today } }] },
+        ...(regionId ? [{ or: [{ region: { exists: false } }, { region: { equals: regionId } }] }] : []),
+      ],
+    },
+    sort: 'order',
+    depth: 1,
+    limit: 12,
+  })
+  return docs
 })
 
 // ---------- helpers for templates ----------

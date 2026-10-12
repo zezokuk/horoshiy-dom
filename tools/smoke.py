@@ -3,7 +3,7 @@
     python tools/smoke.py [base_host]        (default horoshiy.localhost:3000; run `npm run dev` first)
 Checks status codes, a marker text on each page, the subdomain rewrite/redirect rules and POST /api/leads/submit.
 """
-import json, sys, urllib.error, urllib.parse, urllib.request
+import json, os, re, sqlite3, sys, time, urllib.error, urllib.parse, urllib.request
 
 HOST = sys.argv[1] if len(sys.argv) > 1 else "horoshiy.localhost:3000"
 ok = True
@@ -68,8 +68,13 @@ features = [
     ("region: 3D showcase of an estate", f"http://krd.{HOST}/", ["Посёлок в 3D", "3D-вид", "Схема"]),
     ("estate: 3D plan with scheme tab + poster", f"http://krd.{HOST}/objects/yuzhnyy-veter", ["Выберите дом в 3D", "3D-вид", "Схема", "Открыть 3D"]),
     ("estate: developer's master plan kept", f"http://krd.{HOST}/objects/yuzhnyy-veter", ["Генплан застройщика"]),
-    ("home: 3D build section", f"http://{HOST}/", ["Листайте вниз", "Двор и ключи"]),  # «Шаг 1 из 6» is split by React comments
-    ("build page: 3D build section", f"http://{HOST}/build", ["Листайте вниз", "12 проверенных планировок"]),
+    ("home: company first, then three ways in", f"http://{HOST}/", ["там, где", "Три пути", "Построить дом", "Купить готовый", "Посмотреть локации", "/locations"]),
+    ("home: lead form asks what the visitor is after", f"http://{HOST}/", ["Пока присматриваюсь"]),
+    ("locations page: regions, all estates on a map, «на будущее» form", f"http://{HOST}/locations", ["Где мы строим", "Все посёлки", "На карте", "Подписаться"]),
+    ("build page: 3D story with text cards", f"http://{HOST}/build", ["story__bg", "Листайте вниз", "Двор и ключи", "12 проверенных планировок"]),
+    ("house with a tour: plan circles + videos", f"http://krd.{HOST}/houses/di-tip12", ["tour__dot", "Кладовая: прачечная на 1 м²", "Детская 9,2 м²"]),
+    ("house: slide-like facts + family mortgage", f"http://krd.{HOST}/houses/di-tip12", ["Площадь дома", "Стоимость дома", "Расчёт по семейной ипотеке", "fm__card"]),
+    ("house without a tour: plain plan, mortgage", f"http://krd.{HOST}/houses/yv-tip9", ["Расчёт по семейной ипотеке"]),
 ]
 for name, url, markers in features:
     s, body, _ = req(url)
@@ -81,11 +86,24 @@ s, _, h = req(f"http://{HOST}/r/krd/objects/kalina")
 check("main /r/krd/… → 308 to subdomain", s == 308 and h.get("location", "").startswith(f"http://krd.{HOST}/objects/kalina"), f"{s} {h.get('location')}")
 s, _, h = req(f"http://krd.{HOST}/projects")
 check("subdomain /projects → 308 to main", s == 308 and h.get("location", "").startswith(f"http://{HOST}/projects"), f"{s} {h.get('location')}")
+s, _, h = req(f"http://krd.{HOST}/locations")
+check("subdomain /locations → 308 to main", s == 308 and h.get("location", "").startswith(f"http://{HOST}/locations"), f"{s} {h.get('location')}")
+s, body, _ = req(f"http://krd.{HOST}/houses/di-tip12")
+video = re.search(r'src="(/api/media/file/[^"]+\.mp4)"', body) or re.search(r'"video":"(/api/media/file/[^"]+\.mp4)"', body.replace('\\"', '"'))
+if video:
+    vs, _, vh = req(f"http://krd.{HOST}{video.group(1)}")
+    check("tour video is served as video/mp4", vs == 200 and vh.get("content-type", "").startswith("video/mp4"), f"{vs} {vh.get('content-type')} {video.group(1)}")
+else:
+    check("tour video url in the page", False)
 
 # leads
 s, body, _ = req(f"http://krd.{HOST}/api/leads/submit", {"name": "Тест смоук", "phone": "+7 (965) 414-93-93", "consent": "on", "region": "krd",
                                                          "context": "smoke", "utm": {"utm_source": "test", "bad": "x"}})
 check("lead accepted", s == 200 and '"ok":true' in body, f"{s} {body[:100]}")
+mark = f"Смоук будущее {int(time.time())}"
+s, body, _ = req(f"http://{HOST}/api/leads/submit", {"name": mark, "phone": "+7 (965) 414-93-93", "consent": "on", "interest": "future", "context": "smoke"})
+row = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "platform.db")).execute("select interest from leads where name = ?", (mark,)).fetchone()
+check("lead «на будущее» saved with its interest", s == 200 and row and row[0] == "future", f"{s} {row}")
 s, body, _ = req(f"http://{HOST}/api/leads/submit", {"name": "x", "phone": "123", "consent": "on"})
 check("bad phone → 422", s == 422, f"{s}")
 s, body, _ = req(f"http://{HOST}/api/leads/submit", {"name": "Бот", "phone": "+79654149393", "consent": "on", "website": "spam"})

@@ -9,7 +9,7 @@ import { leadEndpoint } from './leadEndpoint'
 export const Leads: CollectionConfig = {
   slug: 'leads',
   labels: { singular: 'Заявка', plural: 'Заявки' },
-  admin: { useAsTitle: 'name', defaultColumns: ['createdAt', 'name', 'phone', 'region', 'status', 'context'], group: 'Продажи' },
+  admin: { useAsTitle: 'name', defaultColumns: ['createdAt', 'name', 'phone', 'region', 'interest', 'status', 'context'], group: 'Продажи' },
   defaultSort: '-createdAt',
   access: { read: inMyRegions('region'), create: () => false, update: inMyRegions('region'), delete: adminOnly },
   endpoints: [leadEndpoint],
@@ -31,6 +31,19 @@ export const Leads: CollectionConfig = {
     { name: 'name', label: 'Имя', type: 'text', required: true },
     { name: 'phone', label: 'Телефон', type: 'text', required: true },
     { name: 'region', label: 'Регион', type: 'relationship', relationTo: 'regions', index: true },
+    {
+      name: 'interest',
+      label: 'Что интересует',
+      type: 'select',
+      index: true,
+      options: [
+        { label: 'Купить готовый дом', value: 'buy' },
+        { label: 'Построить дом', value: 'build' },
+        { label: 'Присматривается, на будущее', value: 'future' },
+        { label: 'Ипотека', value: 'mortgage' },
+      ],
+      admin: { position: 'sidebar', description: '«На будущее» — база для рассылки акций и новых посёлков' },
+    },
     { name: 'context', label: 'Что смотрел', type: 'text' },
     { name: 'page', label: 'Страница', type: 'text' },
     { name: 'utm', label: 'Реклама (UTM)', type: 'json' },

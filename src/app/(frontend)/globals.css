@@ -624,3 +624,142 @@ button.g3--loading { width: 100%; border: 0; font: inherit; cursor: pointer; }
 .scheme-src { margin-top: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
 .scheme-src summary { cursor: pointer; padding: 12px 16px; font-weight: 600; color: var(--green-deep); }
 .scheme-src img { display: block; width: 100%; max-width: 760px; margin: 0 auto 16px; border-radius: 8px; }
+/* ===== 12.10: three ways in, promos, build story, house page like the client's slide ===== */
+
+/* home: «Что вас интересует» — build / buy / look */
+.ways { display: grid; gap: 18px; }
+@media (min-width: 900px) { .ways { grid-template-columns: repeat(3, 1fr); } }
+.way { position: relative; display: grid; align-content: end; min-height: 420px; border-radius: var(--radius); overflow: hidden; color: #fff; background: var(--green-deep); isolation: isolate; box-shadow: 0 24px 50px -34px rgba(20,28,22,.7); transition: transform .35s ease, box-shadow .35s ease; }
+.way img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform .8s ease; }
+.way::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(20,28,22,0) 25%, rgba(20,28,22,.82) 72%, rgba(20,28,22,.94) 100%); }
+.way:hover { transform: translateY(-4px); box-shadow: 0 34px 60px -34px rgba(20,28,22,.8); }
+.way:hover img { transform: scale(1.05); }
+.way__body { display: grid; gap: 10px; padding: 26px; }
+.way__num { font-family: var(--font-serif); color: var(--gold-soft); font-size: 22px; }
+.way h3 { font-family: var(--font-serif); font-size: clamp(30px, 3vw, 38px); line-height: 1.05; font-weight: 600; }
+.way p { color: #e3e6df; font-size: 15px; }
+.way__go { margin-top: 6px; font-weight: 600; color: var(--gold-soft); }
+
+/* promos */
+.promos { display: grid; gap: 18px; }
+@media (min-width: 760px) { .promos { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); } }
+.promo { display: grid; grid-template-rows: auto 1fr; background: var(--paper); border: 1.5px solid var(--gold); border-radius: var(--radius); overflow: hidden; transition: transform .3s ease; }
+.promo:hover { transform: translateY(-3px); }
+.promo img { width: 100%; aspect-ratio: 16 / 8; object-fit: cover; }
+.promo__body { display: grid; gap: 8px; padding: 20px 22px 22px; align-content: start; }
+.promo__tag { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); font-weight: 700; }
+.promo b { font-family: var(--font-serif); font-size: 26px; line-height: 1.1; }
+.promo p { color: var(--muted); }
+.promo__cta { font-weight: 600; color: var(--green); }
+
+/* lead form: «what are you after» */
+.form__ask { display: flex; flex-wrap: wrap; gap: 8px; }
+.form__ask button { padding: 9px 14px; border-radius: 999px; border: 1.5px solid rgba(234,223,201,.45); background: transparent; color: inherit; font: inherit; font-size: 14px; cursor: pointer; transition: background .2s, border-color .2s; }
+.form__ask button.is-on { background: var(--grad-gold); border-color: transparent; color: #fff; }
+.form--light .form__ask button { border-color: var(--line); }
+
+/* «Построить дом»: the 3D house is the background, stage cards scroll over it */
+.story { position: relative; }
+.story__bg { position: sticky; top: var(--header-h); height: calc(100svh - var(--header-h)); overflow: hidden; background: radial-gradient(circle at 62% 42%, #fffaf1 0%, #efe4d1 70%); }
+.story__bg .build3d__canvas { position: absolute; inset: 0; }
+.story__badge { position: absolute; right: 18px; top: 18px; background: var(--grad-forest); color: #fff; border-radius: 16px; padding: 12px 16px; display: grid; gap: 2px; z-index: 2; }
+.story__badge b { font-family: var(--font-serif); font-size: 20px; color: #f0e2c4; }
+.story__badge span { font-size: 13px; }
+.story__progress { position: absolute; left: 18px; right: 18px; bottom: 14px; height: 4px; border-radius: 4px; background: rgba(38,53,44,.14); overflow: hidden; z-index: 2; }
+.story__progress div { height: 100%; background: linear-gradient(90deg, var(--gold), var(--green)); transform: scaleX(0); transform-origin: left; }
+/* the text flows over the sticky background: pull it up by one background height */
+.story__flow { position: relative; z-index: 3; margin-top: calc(-1 * (100svh - var(--header-h))); display: grid; gap: 62vh; padding-top: 14vh; padding-bottom: 30vh; pointer-events: none; }
+.story__card { pointer-events: auto; max-width: 440px; display: grid; gap: 10px; padding: 24px 26px; border-radius: 20px; background: rgba(251,248,242,.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--line); box-shadow: 0 24px 50px -30px rgba(20,28,22,.45); transition: transform .4s ease, box-shadow .4s ease; }
+.story__card.is-on { transform: translateX(6px); box-shadow: 0 28px 60px -28px rgba(20,28,22,.55); border-color: var(--gold); }
+.story__card h3 { font-family: var(--font-serif); font-size: 30px; line-height: 1.05; }
+.story__card p { color: var(--muted); }
+.story__num { font-family: var(--font-serif); font-size: 22px; color: var(--gold-ink); }
+.story__card--intro { max-width: 520px; }
+.story__card--intro .build3d__mouse { margin-top: 6px; }
+.story__card--end { gap: 14px; }
+@media (max-width: 899px) {
+  /* phone: the house in the upper part, cards in the lower part of the screen */
+  .story__flow { gap: 70vh; padding-top: 48vh; }
+  .story__card { margin-inline: auto; padding: 18px 20px; }
+  .story__card h3 { font-size: 26px; }
+  .story__badge { left: 12px; right: auto; top: 12px; padding: 10px 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .story__card { transition: none; } }
+
+/* house page — like the client's slide */
+.hs { display: grid; gap: 22px; }
+.hs__photo { aspect-ratio: 16 / 8; background: var(--gold-soft); }
+.hs__photo img { width: 100%; height: 100%; object-fit: cover; }
+.hs__facts { position: absolute; right: 16px; top: 16px; display: grid; grid-template-columns: auto auto; background: rgba(38,53,44,.92); color: #fff; border-radius: 14px; overflow: hidden; }
+.hs__facts div { display: grid; gap: 2px; padding: 12px 20px; text-align: center; }
+.hs__facts div + div { border-left: 1px solid rgba(234,223,201,.3); }
+.hs__facts span { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-soft); }
+.hs__facts b { font-family: var(--font-serif); font-size: 32px; line-height: 1; }
+.hs__facts small { font-size: 15px; }
+@media (max-width: 640px) {
+  .hs__photo { aspect-ratio: 4 / 3; }
+  .hs__facts { right: 10px; top: auto; bottom: 10px; }
+  .hs__facts div { padding: 8px 12px; }
+  .hs__facts b { font-size: 24px; }
+}
+.hs__grid { display: grid; gap: 24px; }
+@media (min-width: 1024px) { .hs__grid { grid-template-columns: 1.3fr .7fr; align-items: start; } }
+.hs__price span { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.hs__mortgage { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-radius: 16px; background: var(--grad-forest); color: #fff; }
+.hs__mortgage span { display: grid; gap: 2px; font-size: 14px; }
+.hs__mortgage b { font-family: var(--font-serif); font-size: 22px; color: #f0e2c4; }
+.hs__mortgage i { font-style: normal; font-size: 22px; }
+.hs__calc { border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); padding: 4px 20px; }
+.hs__calc summary { cursor: pointer; padding: 14px 0; font-weight: 600; color: var(--green-deep); }
+.hs__calc[open] { padding-bottom: 20px; }
+
+/* plan with video points */
+.tour { display: grid; gap: 14px; }
+.tour__plan { position: relative; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.tour__plan img { display: block; width: 100%; height: auto; }
+.tour__dot { position: absolute; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; background: var(--green-deep); color: #fff; font: 700 16px/1 var(--font-sans); box-shadow: 0 0 0 4px rgba(255,255,255,.9), 0 10px 20px -8px rgba(0,0,0,.5); display: grid; place-items: center; transition: transform .2s ease; }
+.tour__dot::before { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--gold); animation: ping 2s infinite; pointer-events: none; }
+.tour__dot:hover, .tour__dot:focus-visible { transform: scale(1.12); outline: none; }
+.tour__tip { position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%); white-space: nowrap; background: rgba(28,38,32,.9); color: #fff; font: 600 13px/1 var(--font-sans); font-style: normal; padding: 8px 12px; border-radius: 999px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+.tour__dot:hover .tour__tip, .tour__dot:focus-visible .tour__tip { opacity: 1; }
+@media (max-width: 640px) { .tour__dot { width: 32px; height: 32px; margin: -16px 0 0 -16px; font-size: 14px; } }
+.tour__list { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tour__hint { width: 100%; font-size: 14px; color: var(--muted); }
+.tour__chip { cursor: pointer; font: inherit; font-size: 14px; }
+.tour__chip b { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--green-deep); color: #fff; font-size: 12px; margin-right: 4px; }
+.tour__modal { border: 0; padding: 0; background: transparent; max-width: min(420px, 94vw); max-height: 94svh; overflow: visible; }
+.tour__modal::backdrop { background: rgba(20,28,22,.78); backdrop-filter: blur(4px); }
+.tour__box { display: grid; border-radius: 20px; overflow: hidden; background: var(--green-ink); box-shadow: 0 40px 80px -30px rgba(0,0,0,.7); }
+.tour__box video { display: block; width: 100%; max-height: calc(94svh - 64px); aspect-ratio: 9 / 15.3; object-fit: contain; background: #000; }
+.tour__bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; color: #fff; }
+.tour__bar b { font-size: 15px; }
+.tour__nav { display: flex; gap: 8px; }
+.tour__nav button { border: 1px solid rgba(234,223,201,.4); background: transparent; color: #fff; border-radius: 999px; padding: 8px 12px; font: inherit; font-size: 14px; cursor: pointer; }
+
+/* family mortgage block — like the slide */
+.fm { display: grid; gap: 16px; }
+.fm__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; border-radius: 18px; background: var(--grad-forest); color: #fff; }
+.fm__label { font-family: var(--font-serif); font-size: 26px; line-height: 1.1; }
+.fm__terms { display: flex; gap: 26px; }
+.fm__terms div { display: grid; }
+.fm__terms b { font-family: var(--font-serif); font-size: 34px; line-height: 1; color: #f0e2c4; }
+.fm__terms span { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-soft); }
+.fm__cards { display: grid; gap: 16px; }
+@media (min-width: 760px) { .fm__cards { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); } }
+.fm__card { display: grid; gap: 10px; padding: 22px; border-radius: 18px; background: var(--paper); border: 1px solid var(--line); }
+.fm__title { font-size: 18px; text-transform: uppercase; letter-spacing: .04em; }
+.fm__card dl { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 4px 0 0; }
+.fm__card dt { font-size: 13px; color: var(--muted); }
+.fm__card dd { margin: 0; font-size: 18px; font-weight: 600; }
+.fm__pay { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; border-top: 1px solid var(--line); padding-top: 10px; }
+.fm__pay span { color: var(--muted); font-size: 14px; }
+.fm__pay b { font-family: var(--font-serif); font-size: 34px; line-height: 1; color: var(--green-deep); }
+/* phone: the plan is wider than the screen and scrolls sideways, so the rooms and circles are big enough to tap */
+@media (max-width: 640px) {
+  .tour__scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--radius); }
+  .tour__scroll .tour__plan { width: 165%; }
+}@media (max-width: 899px) {
+  .story__card.is-on { transform: none; }
+  .story__flow { padding-top: 62vh; }
+}@media (max-width: 899px) { .story__card { margin-inline: 0; max-width: none; } }.story__flow { grid-template-columns: minmax(0, 1fr); } /* a big serif headline must not widen the column past the screen */
+.story__card h2 { overflow-wrap: anywhere; }

@@ -72,6 +72,7 @@ export interface Config {
     houses: House;
     projects: Project;
     leads: Lead;
+    promos: Promo;
     media: Media;
     users: User;
     'payload-kv': PayloadKv;
@@ -86,6 +87,7 @@ export interface Config {
     houses: HousesSelect<false> | HousesSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
+    promos: PromosSelect<false> | PromosSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -308,6 +310,24 @@ export interface House {
   photo?: (number | null) | Media;
   plan?: (number | null) | Media;
   /**
+   * Как на слайде: «1 ребёнок» / «2 ребёнка» с первым взносом и кредитом от банка. Платёж считается сам по ставке и сроку из «Компания → Ипотека». Пусто — показываем общий расчёт
+   */
+  mortgagePlans?:
+    | {
+        /**
+         * «1 ребёнок»
+         */
+        title: string;
+        /**
+         * «(до 7 лет)»
+         */
+        note?: string | null;
+        down: number;
+        credit: number;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * На сайте не показывается
    */
   note?: string | null;
@@ -335,6 +355,22 @@ export interface Project {
   photo?: (number | null) | Media;
   plan?: (number | null) | Media;
   /**
+   * Кружки на планировке: посетитель нажимает — открывается видео. Положение — в процентах от левого верхнего угла картинки плана. Видео — вертикальное, до 1 минуты
+   */
+  tour?:
+    | {
+        /**
+         * Например: «Кладовая: прачечная на 1 м²»
+         */
+        label: string;
+        x: number;
+        y: number;
+        video: number | Media;
+        poster?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * Из 3D-задания (3D-задание/README.md). Проверка: site/tools/check3d.py
    */
   spec3d?:
@@ -359,6 +395,10 @@ export interface Lead {
   name: string;
   phone: string;
   region?: (number | null) | Region;
+  /**
+   * «На будущее» — база для рассылки акций и новых посёлков
+   */
+  interest?: ('buy' | 'build' | 'future' | 'mortgage') | null;
   context?: string | null;
   page?: string | null;
   utm?:
@@ -373,6 +413,36 @@ export interface Lead {
   ref?: string | null;
   delivery?: string | null;
   managerNote?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "promos".
+ */
+export interface Promo {
+  id: number;
+  /**
+   * «Скидка 300 000 ₽ на дома в Динской»
+   */
+  title: string;
+  text?: string | null;
+  image?: (number | null) | Media;
+  /**
+   * Пусто — акция для всех регионов
+   */
+  region?: (number | null) | Region;
+  /**
+   * Например: /catalog или https://krd.… Пусто — кнопка открывает заявку
+   */
+  link?: string | null;
+  cta?: string | null;
+  active?: boolean | null;
+  /**
+   * После этой даты скрывается сама
+   */
+  until?: string | null;
+  order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -448,6 +518,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'leads';
         value: number | Lead;
+      } | null)
+    | ({
+        relationTo: 'promos';
+        value: number | Promo;
       } | null)
     | ({
         relationTo: 'media';
@@ -587,6 +661,15 @@ export interface HousesSelect<T extends boolean = true> {
   features?: T;
   photo?: T;
   plan?: T;
+  mortgagePlans?:
+    | T
+    | {
+        title?: T;
+        note?: T;
+        down?: T;
+        credit?: T;
+        id?: T;
+      };
   note?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -607,6 +690,16 @@ export interface ProjectsSelect<T extends boolean = true> {
   features?: T;
   photo?: T;
   plan?: T;
+  tour?:
+    | T
+    | {
+        label?: T;
+        x?: T;
+        y?: T;
+        video?: T;
+        poster?: T;
+        id?: T;
+      };
   spec3d?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -620,12 +713,30 @@ export interface LeadsSelect<T extends boolean = true> {
   name?: T;
   phone?: T;
   region?: T;
+  interest?: T;
   context?: T;
   page?: T;
   utm?: T;
   ref?: T;
   delivery?: T;
   managerNote?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "promos_select".
+ */
+export interface PromosSelect<T extends boolean = true> {
+  title?: T;
+  text?: T;
+  image?: T;
+  region?: T;
+  link?: T;
+  cta?: T;
+  active?: T;
+  until?: T;
+  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -778,6 +889,15 @@ export interface Company {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Условия меняются — обновите здесь, и пересчитаются все дома. Точные условия определяет банк
+   */
+  family?: {
+    rate?: number | null;
+    years?: number | null;
+    minDown?: number | null;
+    limit?: number | null;
+  };
   mortgage?:
     | {
         title: string;
@@ -828,6 +948,14 @@ export interface CompanySelect<T extends boolean = true> {
         q?: T;
         a?: T;
         id?: T;
+      };
+  family?:
+    | T
+    | {
+        rate?: T;
+        years?: T;
+        minDown?: T;
+        limit?: T;
       };
   mortgage?:
     | T

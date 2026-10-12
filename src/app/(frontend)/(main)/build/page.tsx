@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { BuildSection } from '@/components/BuildSection'
+import { BuildStory } from '@/components/BuildStory'
 import { LeadInline } from '@/components/LeadForm'
 import { ProjectCard } from '@/components/ProjectCard'
 import { Words } from '@/components/Words'
@@ -31,7 +31,7 @@ export default async function BuildPage() {
       </div>
 
       {/* the house assembles in 3D while the page scrolls; the stage list is server-rendered inside it */}
-      <BuildSection projects={projects.length} ctaHref="#calc" />
+      <BuildStory projects={projects.length} ctaHref="#calc" />
 
       <section className="section section--paper" id="calc">
         <div className="container">
@@ -53,7 +53,7 @@ export default async function BuildPage() {
             title="Рассчитаем стройку"
             text="Расскажите, где хотите строить и какой дом нужен — посчитаем сроки и стоимость."
             cta="Рассчитать стройку"
-            target={{ context: 'Стройка: расчёт', phone: company.phone }}
+            target={{ context: 'Стройка: расчёт', phone: company.phone, interest: 'build' }}
           />
         </div>
       </section>

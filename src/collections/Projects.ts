@@ -31,6 +31,28 @@ export const Projects: CollectionConfig = {
     { name: 'photo', label: 'Фото', type: 'upload', relationTo: 'media' },
     { name: 'plan', label: 'Планировка', type: 'upload', relationTo: 'media' },
     {
+      name: 'tour',
+      label: 'Точки на плане (видео комнат)',
+      type: 'array',
+      labels: { singular: 'Точка', plural: 'Точки' },
+      admin: {
+        description:
+          'Кружки на планировке: посетитель нажимает — открывается видео. Положение — в процентах от левого верхнего угла картинки плана. Видео — вертикальное, до 1 минуты',
+      },
+      fields: [
+        { name: 'label', label: 'Подпись', type: 'text', required: true, admin: { description: 'Например: «Кладовая: прачечная на 1 м²»' } },
+        {
+          type: 'row',
+          fields: [
+            { name: 'x', label: 'Слева, %', type: 'number', required: true, min: 0, max: 100 },
+            { name: 'y', label: 'Сверху, %', type: 'number', required: true, min: 0, max: 100 },
+          ],
+        },
+        { name: 'video', label: 'Видео', type: 'upload', relationTo: 'media', required: true },
+        { name: 'poster', label: 'Обложка видео', type: 'upload', relationTo: 'media' },
+      ],
+    },
+    {
       name: 'spec3d',
       label: '3D-описание (JSON)',
       type: 'json',

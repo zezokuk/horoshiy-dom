@@ -6,6 +6,7 @@ import type { Endpoint, PayloadRequest } from 'payload'
  * The lead is SAVED FIRST (admin → «Заявки»), then the manager of its region is notified in Telegram.
  * Bot token: TELEGRAM_BOT_TOKEN in .env; chat ids: region «Telegram для заявок» or, if empty, the company setting.
  */
+const INTEREST = { buy: 'купить готовый дом', build: 'построить дом', future: 'присматривается, на будущее', mortgage: 'ипотека' } as const
 const hits = new Map<string, number[]>() // ip → timestamps; in memory is enough for one server
 const LIMIT = 5
 const WINDOW = 10 * 60 * 1000
@@ -80,13 +81,15 @@ export const leadEndpoint: Endpoint = {
       : { docs: [] }
     const region = docs[0]
     const context = clean(json.context, 200)
+    const interestRaw = clean(json.interest, 20)
+    const interest = (['buy', 'build', 'future', 'mortgage'] as const).find((v) => v === interestRaw)
     const page = clean(json.page, 300)
     const ref = clean(json.ref, 300)
 
     const lead = await req.payload.create({
       collection: 'leads',
       overrideAccess: true,
-      data: { name, phone, region: region?.id, context, page, ref, utm, status: 'new' },
+      data: { name, phone, region: region?.id, interest, context, page, ref, utm, status: 'new' },
     })
 
     const company = await req.payload.findGlobal({ slug: 'company', depth: 0, overrideAccess: true })
@@ -98,6 +101,7 @@ export const leadEndpoint: Endpoint = {
       `<b>Имя:</b> ${esc(name)}`,
       `<b>Телефон:</b> ${esc(phone)}`,
       region && `<b>Регион:</b> ${esc(region.name)}`,
+      interest && `<b>Хочет:</b> ${INTEREST[interest]}`,
       context && `<b>Интерес:</b> ${esc(context)}`,
       page && `<b>Страница:</b> ${esc(page)}`,
       utmText && `<b>Реклама:</b> ${esc(utmText)}`,

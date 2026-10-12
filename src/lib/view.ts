@@ -1,4 +1,4 @@
-import type { Estate, House, Media, Region } from '@/payload-types'
+import type { Estate, House, Media, Project, Promo, Region } from '@/payload-types'
 import type { HouseStatus } from './format'
 import { genplanConfig, type GenplanEstate } from './genplan'
 import { regionHref } from './site'
@@ -118,6 +118,29 @@ export function estateView(e: Estate, houses: House[]): EstateView {
     free: free.length,
     priceFrom: free.length ? Math.min(...free.map((h) => h.price)) : null,
     href: regionHref(region?.slug ?? '', `/objects/${e.slug}`),
+  }
+}
+
+/** A point on the house plan that opens a room video. x, y — percent of the plan picture. */
+export type TourPoint = { n: number; label: string; x: number; y: number; video: string; poster?: string }
+
+export function tourView(p: Project | null | undefined): TourPoint[] {
+  return (p?.tour ?? [])
+    .map((t, i) => ({ n: i + 1, label: t.label, x: t.x, y: t.y, video: url(t.video) ?? '', poster: url(t.poster, 'card') }))
+    .filter((t) => t.video)
+}
+
+export type PromoView = { id: number; title: string; text: string | null; image?: string; regionName: string | null; href: string; cta: string }
+
+export function promoView(p: Promo): PromoView {
+  return {
+    id: p.id,
+    title: p.title,
+    text: p.text ?? null,
+    image: url(p.image, 'card'),
+    regionName: obj<Region>(p.region)?.name ?? null,
+    href: p.link || '#lead',
+    cta: p.cta || 'Узнать условия',
   }
 }
 

@@ -5,10 +5,11 @@ import { Genplan } from '@/components/Genplan'
 import { HouseCard } from '@/components/HouseCard'
 import { LeadInline } from '@/components/LeadForm'
 import { Words } from '@/components/Words'
-import { getEstates, getHouses, getProjects, getRegion, img } from '@/lib/data'
+import { PromoCards } from '@/components/PromoCards'
+import { getEstates, getHouses, getProjects, getPromos, getRegion, img } from '@/lib/data'
 import { formatMillions, plural, telHref } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
-import { estateView, genplanEstate, houseView } from '@/lib/view'
+import { estateView, genplanEstate, houseView, promoView } from '@/lib/view'
 
 export const revalidate = 60
 
@@ -70,7 +71,7 @@ export default async function RegionPage({ params }: Props) {
     )
   }
 
-  const [estates, houses] = await Promise.all([getEstates(region.id), getHouses({ region: region.id })])
+  const [estates, houses, promos] = await Promise.all([getEstates(region.id), getHouses({ region: region.id }), getPromos(region.id)])
   const views = estates.map((e) => estateView(e, houses))
   const free = houses.filter((h) => h.status === 'free').map(houseView)
   const priceFrom = free.length ? Math.min(...free.map((h) => h.price)) : null
@@ -143,6 +144,14 @@ export default async function RegionPage({ params }: Props) {
           />
         </div>
       </section>
+
+      {promos.length > 0 && (
+        <section className="section" id="promo" style={{ paddingTop: 0 }}>
+          <div className="container">
+            <PromoCards promos={promos.map(promoView)} />
+          </div>
+        </section>
+      )}
 
       {showcase && (
         <section className="section section--paper" id="genplan3d">

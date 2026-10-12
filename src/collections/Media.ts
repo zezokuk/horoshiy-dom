@@ -9,7 +9,7 @@ export const Media: CollectionConfig = {
   access: { read: anyone, create: staffOnly, update: staffOnly, delete: staffOnly },
   fields: [{ name: 'alt', label: 'Описание (для слабовидящих и поиска)', type: 'text', required: true }],
   upload: {
-    mimeTypes: ['image/*', 'application/pdf'],
+    mimeTypes: ['image/*', 'application/pdf', 'video/mp4', 'video/webm', 'video/quicktime'], // video: room tours on house plans
     formatOptions: { format: 'webp', options: { quality: 84 } },
     imageSizes: [
       { name: 'card', width: 640, formatOptions: { format: 'webp', options: { quality: 80 } } },

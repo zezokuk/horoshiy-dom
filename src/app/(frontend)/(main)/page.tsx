@@ -1,41 +1,101 @@
 import type { Metadata } from 'next'
 import { preload } from 'react-dom'
-import { BuildSection } from '@/components/BuildSection'
-import { HouseCard } from '@/components/HouseCard'
-import { LeadInline } from '@/components/LeadForm'
 import { MortgageCalc } from '@/components/MortgageCalc'
 import { CountUp, HeroAura } from '@/components/Motion'
-import { Regions, type RegionStats } from '@/components/Regions'
+import { PromoCards } from '@/components/PromoCards'
 import { Words } from '@/components/Words'
-import { getCompany, getEstates, getHouses, getProjects, getRegions, img, srcSet } from '@/lib/data'
+import {
+  getCompany,
+  getEstates,
+  getHouses,
+  getProjects,
+  getPromos,
+  getRegions,
+  img,
+  srcSet,
+} from '@/lib/data'
 import { formatMillions, plural } from '@/lib/format'
 import { mainHref } from '@/lib/site'
-import { estateView, houseView, regionView } from '@/lib/view'
+import { estateView, houseView, promoView } from '@/lib/view'
 
 export const revalidate = 60 // statuses and prices change in the admin; the page refreshes within a minute
 
 export const metadata: Metadata = { alternates: { canonical: '/' } }
 
+/**
+ * The brand home: the company first (who we are, values, trust), then three ways in —
+ * build a house, buy a ready one, or just look at the places (for those not ready yet: they leave a contact
+ * «на будущее» and get promos and new estates later).
+ */
 export default async function Home() {
-  const [company, regions, estates, houses, projects] = await Promise.all([getCompany(), getRegions(), getEstates(), getHouses(), getProjects()])
-  const views = regions.map(regionView)
+  const [company, regions, estates, houses, projects, promos] = await Promise.all([
+    getCompany(),
+    getRegions(),
+    getEstates(),
+    getHouses(),
+    getProjects(),
+    getPromos(),
+  ])
   const free = houses.filter((h) => h.status === 'free').map(houseView)
+  const priceFrom = free.length ? Math.min(...free.map((h) => h.price)) : null
   const years = company.since ? new Date().getFullYear() - company.since : null
   const estateViews = estates.map((e) => estateView(e, houses))
-  const stats: Record<string, RegionStats> = {}
-  for (const r of views) {
-    const mine = estateViews.filter((e) => e.regionSlug === r.slug)
-    const prices = mine.map((e) => e.priceFrom).filter((p): p is number => p !== null)
-    stats[r.slug] = {
-      estates: mine.length,
-      free: mine.reduce((s, e) => s + e.free, 0),
-      priceFrom: prices.length ? Math.min(...prices) : null,
-      cover: mine[0]?.coverCard,
-    }
-  }
+  const active = regions.filter((r) => r.status === 'active')
+  const soon = regions.filter((r) => r.status === 'soon')
   const hero = company.heroPhoto
   const heroSrc = img(hero, 'wide')
-  if (heroSrc) preload(heroSrc, { as: 'image', fetchPriority: 'high', imageSrcSet: srcSet(hero), imageSizes: '(min-width: 960px) 1600px, 660px' })
+  if (heroSrc)
+    preload(heroSrc, {
+      as: 'image',
+      fetchPriority: 'high',
+      imageSrcSet: srcSet(hero),
+      imageSizes: '(min-width: 960px) 1600px, 660px',
+    })
+
+  // three different pictures for the three ways in: the «dream» project render, a real house on sale (not the type
+  // already shown in the hero), and an estate seen from above (its 3D poster — covers have the name printed on them)
+  const buildProject = projects.find((p) => p.slug === 'tip-12') ?? projects[0]
+  const buildPhoto = img(buildProject?.photo, 'card')
+  const heroType = (company.heroCaption || '').match(/Тип \d+/)?.[0]
+  const buyPhoto = (
+    free.find(
+      (h) =>
+        h.photoCard &&
+        h.title.split(' (')[0] !== heroType &&
+        h.title.split(' (')[0] !== buildProject?.name,
+    ) ?? free[0]
+  )?.photoCard
+  const lookPhoto = img(estates.find((e) => e.poster)?.poster, 'card') ?? estateViews[0]?.coverCard
+  const minArea = Math.min(...projects.map((p) => p.area || 999))
+
+  const ways = [
+    {
+      n: '01',
+      href: mainHref('/build'),
+      photo: buildPhoto,
+      title: 'Построить дом',
+      text: `${projects.length} проверенных проектов от ${minArea} м². Капитальный кирпичный дом под ключ за 6 месяцев.`,
+      go: 'Как мы строим →',
+    },
+    {
+      n: '02',
+      href: mainHref('/catalog'),
+      photo: buyPhoto,
+      title: 'Купить готовый',
+      text: `Дома с отделкой, участком и подключёнными коммуникациями. Можно заезжать после сделки.`,
+      go: free.length
+        ? `${free.length} ${plural(free.length, 'дом', 'дома', 'домов')}${priceFrom ? ` от ${formatMillions(priceFrom)}` : ''} →`
+        : 'Смотреть дома →',
+    },
+    {
+      n: '03',
+      href: mainHref('/locations'),
+      photo: lookPhoto,
+      title: 'Посмотреть локации',
+      text: 'Пока присматриваетесь? Посмотрите наши посёлки и регионы — сообщим об акциях и новых местах первыми.',
+      go: `${estates.length} ${plural(estates.length, 'посёлок', 'посёлка', 'посёлков')}${soon.length ? ` · скоро ещё ${soon.length} ${plural(soon.length, 'регион', 'региона', 'регионов')}` : ''} →`,
+    },
+  ]
 
   return (
     <>
@@ -55,15 +115,17 @@ export default async function Home() {
             </span>
           </h1>
           <p className="hero2__lead">
-            Строим и продаём капитальные кирпичные дома с участком: готовые — в наших посёлках, под заказ — по {projects.length} проверенным
-            проектам. Ипотека и регистрация за 2 недели, гарантия 5 лет.
+            Строим и продаём капитальные кирпичные дома с участком
+            {active.length ? ` — ${active.map((r) => r.name).join(', ')}` : ''}
+            {soon.length ? `, скоро — ${soon.map((r) => r.name).join(', ')}` : ''}. Ипотека и
+            регистрация за 2 недели, гарантия 5 лет.
           </p>
           <div className="btns">
-            <a href="#regions" className="btn btn--gold">
-              Выбрать регион
+            <a href="#choose" className="btn btn--gold">
+              С чего начнём?
             </a>
-            <a href={mainHref('/catalog')} className="btn btn--ghost">
-              Готовые дома{free.length ? ` · ${free.length}` : ''}
+            <a href={mainHref('/about')} className="btn btn--ghost">
+              О компании
             </a>
           </div>
           <div className="hero2__stats">
@@ -89,7 +151,14 @@ export default async function Home() {
         </div>
         <div className="hero2__photo">
           {heroSrc && (
-            <img src={heroSrc} srcSet={srcSet(hero)} sizes="(min-width: 960px) 1600px, 660px" alt={typeof hero === 'object' ? hero?.alt ?? '' : ''} fetchPriority="high" decoding="async" />
+            <img
+              src={heroSrc}
+              srcSet={srcSet(hero)}
+              sizes="(min-width: 960px) 1600px, 660px"
+              alt={typeof hero === 'object' ? (hero?.alt ?? '') : ''}
+              fetchPriority="high"
+              decoding="async"
+            />
           )}
           <HeroAura />
           <div className="hero2__chips">
@@ -105,68 +174,53 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="section" id="services">
+      <section className="section" id="choose">
         <div className="container">
           <div className="head" data-reveal>
-            <span className="idx">01 / Что мы делаем</span>
-            <Words text="Купить готовый или *построить* — с одной командой" />
+            <span className="idx">Что вас интересует</span>
+            <Words text="Три пути к *своему дому*" />
           </div>
-          <div className="services">
-            <a href={mainHref('/catalog')} className="service" data-reveal>
-              <span className="service__num">01</span>
-              <h3>Купить готовый дом</h3>
-              <p>Кирпичные дома с предчистовой отделкой, участком и подключёнными коммуникациями. Можно заезжать после сделки.</p>
-              <span className="service__go">
-                {free.length} {plural(free.length, 'дом', 'дома', 'домов')} в продаже →
-              </span>
-            </a>
-            <a href={mainHref('/build')} className="service" data-reveal style={{ ['--d' as string]: '80ms' }}>
-              <span className="service__num">02</span>
-              <h3>Построить дом</h3>
-              <p>
-                {projects.length} проверенных проектов от {Math.min(...projects.map((p) => p.area || 999))} м². Капитальный дом под ключ за 6 месяцев.
-              </p>
-              <span className="service__go">Выбрать проект →</span>
-            </a>
-            <a href={mainHref('/mortgage')} className="service" data-reveal style={{ ['--d' as string]: '160ms' }}>
-              <span className="service__num">03</span>
-              <h3>Подобрать ипотеку</h3>
-              <p>{(company.mortgage || []).map((m) => m.title).join(', ') || 'Ипотека'}. Поможем с банком и документами.</p>
-              <span className="service__go">Рассчитать платёж →</span>
-            </a>
+          <div className="ways">
+            {ways.map((w, i) => (
+              <a
+                key={w.n}
+                href={w.href}
+                className="way"
+                data-reveal
+                style={{ ['--d' as string]: `${i * 90}ms` }}
+              >
+                {w.photo && <img src={w.photo} alt="" loading="lazy" decoding="async" />}
+                <div className="way__body">
+                  <span className="way__num">{w.n}</span>
+                  <h3>{w.title}</h3>
+                  <p>{w.text}</p>
+                  <span className="way__go">{w.go}</span>
+                </div>
+              </a>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="section section--paper" id="regions">
-        <div className="container">
-          <div className="head head--split">
-            <div style={{ display: 'grid', gap: 14 }} data-reveal>
-              <span className="idx">02 / Где мы строим</span>
-              <Words text="Выберите *регион*" />
-            </div>
-            <p className="lead" data-reveal>
-              В каждом регионе — свои посёлки, цены и офис продаж. Новые регионы открываем с листа ожидания: запишитесь, и мы сообщим первыми.
-            </p>
-          </div>
-          <Regions regions={views} stats={stats} />
-        </div>
-      </section>
-
-      <section className="section">
+      <section className="section section--paper">
         <div className="container family">
           <div style={{ display: 'grid', gap: 20 }}>
             <div style={{ display: 'grid', gap: 14 }} data-reveal>
-              <span className="idx">03 / Почему «хороший»</span>
+              <span className="idx">Почему «хороший»</span>
               <Words text="Дом, в котором растут дети и собирается *семья*" />
               <p className="lead">
-                Мы строим не квадратные метры, а место, куда хочется возвращаться: свой двор вместо подъезда, тишина вместо трассы, школа
-                рядом вместо пробок.
+                Мы строим не квадратные метры, а место, куда хочется возвращаться: свой двор вместо
+                подъезда, тишина вместо трассы, школа рядом вместо пробок.
               </p>
             </div>
             <div className="values">
               {(company.values || []).map((v, i) => (
-                <div key={v.id ?? v.title} className="value" data-reveal style={{ ['--d' as string]: `${i * 80}ms` }}>
+                <div
+                  key={v.id ?? v.title}
+                  className="value"
+                  data-reveal
+                  style={{ ['--d' as string]: `${i * 80}ms` }}
+                >
                   <i>{i + 1}</i>
                   <b>{v.title}</b>
                   <p>{v.text}</p>
@@ -184,8 +238,6 @@ export default async function Home() {
         </div>
       </section>
 
-      <BuildSection projects={projects.length} />
-
       <section className="section section--green">
         <div className="container" style={{ display: 'grid', gap: 56 }}>
           <div className="numbers">
@@ -199,7 +251,9 @@ export default async function Home() {
             )}
             <div data-reveal style={{ ['--d' as string]: '80ms' }}>
               <b>
-                <CountUp to={company.homesBuilt || estates.reduce((s, e) => s + (e.homes || 0), 0)} />
+                <CountUp
+                  to={company.homesBuilt || estates.reduce((s, e) => s + (e.homes || 0), 0)}
+                />
               </b>
               <span>{company.homesBuilt ? 'домов построено' : 'домов в наших посёлках'}</span>
             </div>
@@ -220,7 +274,7 @@ export default async function Home() {
       </section>
 
       {/* advantages on a light background: in the green section the white cards got light headings and became unreadable */}
-      <section className="section section--paper">
+      <section className="section">
         <div className="container">
           <div className="head" data-reveal>
             <span className="idx">Почему нам доверяют</span>
@@ -228,7 +282,12 @@ export default async function Home() {
           </div>
           <div className="features">
             {(company.advantages || []).map((a, i) => (
-              <div key={a.id ?? a.title} className="feature" data-reveal style={{ ['--d' as string]: `${(i % 3) * 80}ms` }}>
+              <div
+                key={a.id ?? a.title}
+                className="feature"
+                data-reveal
+                style={{ ['--d' as string]: `${(i % 3) * 80}ms` }}
+              >
                 <span className="feature__num">0{i + 1}</span>
                 <h3>{a.title}</h3>
                 <p>{a.text}</p>
@@ -238,43 +297,23 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="section">
-        <div className="container">
-          <div className="head head--split">
-            <div style={{ display: 'grid', gap: 14 }} data-reveal>
-              <span className="idx">04 / В продаже сейчас</span>
-              <Words text="Свободные *дома*" />
+      {promos.length > 0 && (
+        <section className="section section--paper" id="promo">
+          <div className="container">
+            <div className="head" data-reveal>
+              <span className="idx">Акции</span>
+              <Words text="Сейчас *выгодно*" />
             </div>
-            <div style={{ display: 'grid', gap: 16, justifyItems: 'start' }} data-reveal>
-              <p className="lead">
-                {free.length} из {houses.length} домов текущих очередей свободны, от {free.length ? formatMillions(Math.min(...free.map((h) => h.price))) : '—'}.
-              </p>
-              <a href={mainHref('/catalog')} className="btn btn--green">
-                Все дома с фильтрами
-              </a>
-            </div>
+            <PromoCards promos={promos.map(promoView)} />
           </div>
-          <div className="grid grid--3">
-            {free.slice(0, 6).map((h, i) => (
-              <div key={h.code} data-reveal style={{ ['--d' as string]: `${(i % 3) * 80}ms` }}>
-                <HouseCard h={h} />
-              </div>
-            ))}
-          </div>
-          <LeadInline
-            title="Не знаете, что выбрать?"
-            text="Расскажите о семье и бюджете — подберём 2–3 дома или проект и пришлём подборку."
-            cta="Подобрать дом"
-            target={{ context: 'Главная: подбор', phone: company.phone }}
-          />
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section className="section section--paper">
+      <section className={`section ${promos.length ? '' : 'section--paper'}`}>
         <div className="container">
           <div className="head head--split">
             <div style={{ display: 'grid', gap: 14 }} data-reveal>
-              <span className="idx">05 / Ипотека</span>
+              <span className="idx">Ипотека</span>
               <Words text="Посчитайте платёж за *минуту*" />
             </div>
             <div className="chips" data-reveal>
@@ -292,7 +331,7 @@ export default async function Home() {
       <section className="section">
         <div className="container split" style={{ alignItems: 'start' }}>
           <div style={{ display: 'grid', gap: 14 }} data-reveal>
-            <span className="idx">06 / Вопросы</span>
+            <span className="idx">Вопросы</span>
             <Words text="Частые *вопросы*" />
             <p className="lead">Не нашли ответ — позвоните, менеджер ответит за пару минут.</p>
           </div>

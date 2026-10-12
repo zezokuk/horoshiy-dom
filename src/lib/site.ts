@@ -13,7 +13,7 @@ export const MAIN_URL = `${PROTOCOL}://${ROOT_DOMAIN}`
 export const INDEXABLE = process.env.NEXT_PUBLIC_INDEX === '1'
 
 /** Pages that exist only once for the whole company — on the main domain, never on a region subdomain (no duplicates). */
-export const GLOBAL_PATHS = ['/projects', '/about', '/mortgage', '/contacts', '/privacy', '/consent', '/build']
+export const GLOBAL_PATHS = ['/locations', '/projects', '/about', '/mortgage', '/contacts', '/privacy', '/consent', '/build']
 
 /** Link to a page of a region: regionHref('krd', '/objects/kalina'). */
 export function regionHref(slug: string, path = '/') {

@@ -30,6 +30,7 @@ import {
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const SLIDES = path.resolve(dirname, '../../../исходники-презентации')
+const TOURS = path.resolve(dirname, '../../../медиамои/web') // room videos cut by ffmpeg from медиамои/*.MP4
 const POSTERS = path.resolve(dirname, '../../../site/public/img/genplan') // 3D posters rendered by site/tools/posters.py
 const ENV = path.resolve(dirname, '../../.env')
 
@@ -62,11 +63,11 @@ async function slideCrop(payload: Payload, slide: string, kind: keyof typeof CRO
   return doc.id as number
 }
 
-/** Upload a ready image file as is (the demo's 3D posters); undefined if the file is missing. */
-async function fileUpload(payload: Payload, file: string, alt: string) {
+/** Upload a ready file as is (the demo's 3D posters, room videos); undefined if the file is missing. */
+async function fileUpload(payload: Payload, file: string, alt: string, mimetype = 'image/webp') {
   if (!fs.existsSync(file)) return undefined
   const data = fs.readFileSync(file)
-  const doc = await payload.create({ collection: 'media', data: { alt }, file: { data, mimetype: 'image/webp', name: path.basename(file), size: data.length } })
+  const doc = await payload.create({ collection: 'media', data: { alt }, file: { data, mimetype, name: path.basename(file), size: data.length } })
   return doc.id as number
 }
 
@@ -87,7 +88,7 @@ async function ensureAdmin(payload: Payload) {
 }
 
 async function wipe(payload: Payload) {
-  for (const collection of ['houses', 'projects', 'estates', 'regions', 'media'] as const) {
+  for (const collection of ['promos', 'houses', 'projects', 'estates', 'regions', 'media'] as const) {
     await payload.delete({ collection, where: { id: { exists: true } }, overrideAccess: true })
   }
 }
@@ -174,6 +175,20 @@ async function run() {
     })
     projects.set(t, doc.id as number)
   }
+
+  // Room videos on the «Тип 12» plan, points where the client marked them (медиамои/photo_…550: 1 — кладовая, 2 — детская).
+  // The videos are PLACEHOLDERS: screen recordings of other people's reels, cropped. Replace with the client's own before launch.
+  const tour = [
+    { label: 'Кладовая: прачечная на 1 м²', x: 32.3, y: 61, file: 'tour-laundry' },
+    { label: 'Детская 9,2 м²', x: 26.5, y: 37, file: 'tour-bedroom' },
+  ]
+  const tourItems = []
+  for (const s of tour) {
+    const video = await fileUpload(payload, path.join(TOURS, `${s.file}.mp4`), `Видео: ${s.label} (заглушка)`, 'video/mp4')
+    const poster = await fileUpload(payload, path.join(TOURS, `${s.file}.jpg`), `Обложка видео: ${s.label}`, 'image/jpeg')
+    if (video) tourItems.push({ label: s.label, x: s.x, y: s.y, video, poster })
+  }
+  if (tourItems.length) await payload.update({ collection: 'projects', id: projects.get('Тип 12')!, data: { tour: tourItems } })
 
   // Estates
   const estates = new Map<string, number>()

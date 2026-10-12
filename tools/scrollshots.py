@@ -1,5 +1,5 @@
-"""Viewport screenshots while really scrolling: the sticky 3D build section at several points of its scroll
-(the highlighted stage must match what the 3D shows, the canvas must not be blank) and the 3D showcase on a phone.
+"""Viewport screenshots while really scrolling: the «Построить» 3D story: with a stage card in the
+middle of the screen the badge names that stage and the 3D background is drawn and the 3D showcase on a phone.
 
     python tools/scrollshots.py        (npm run dev first; saves tools/.shots/ss_*.png)
 """
@@ -10,8 +10,6 @@ from PIL import Image
 EDGE = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".shots")
 R = "horoshiy.localhost:3000"
-# the stage list must match the 3D at that point of the scroll (BUILD_STEPS in BuildHouse3D)
-EXPECT = {0.1: "Фундамент", 0.5: "Кровля", 0.9: "Двор и ключи"}
 ok = True
 
 proc = subprocess.Popen([EDGE, "--headless=new", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--remote-debugging-port=9342",
@@ -49,18 +47,20 @@ try:
         box = [int(v * k) for v in (r["x"], max(0, r["y"]), r["x"] + r["width"], min(r["y"] + r["height"], vh))]
         return len({(a >> 4, b >> 4, c >> 4) for a, b, c in Image.open(path).convert("RGB").crop(box).resize((64, 40)).getdata()})
 
+    STAGES = ["Выбираете проект", "Фундамент", "Стены", "Кровля", "Окна и коммуникации", "Двор и ключи"]
     for size, w, h, dpr, mobile in [("desktop", 1440, 900, 1, False), ("phone", 390, 844, 2, True)]:
         cmd("Emulation.setDeviceMetricsOverride", width=w, height=h, deviceScaleFactor=dpr, mobile=mobile)
         cmd("Page.navigate", url=f"http://{R}/build")
         time.sleep(5)
-        for p, want in EXPECT.items():
-            js(f"(()=>{{const s=document.getElementById('build');scrollTo(0, s.offsetTop + (s.offsetHeight-innerHeight)*{p})}})()")
-            time.sleep(3.5)  # the scene follows the scroll with easing; swiftshader is slow
-            badge = js("document.querySelector('.build3d__badge span')?.textContent")
-            n = shot(f"build_{size}_{int(p * 100)}", ".build3d__canvas canvas")
-            good = badge == want and isinstance(n, int) and n > 8
+        for j in (1, 3, 5):  # card j in the middle of the screen -> the badge names stage j, the 3D shows it
+            js(f"(()=>{{const c=document.querySelectorAll('.story__card:not(.story__card--intro):not(.story__card--end)')[{j}];"
+               f"const r=c.getBoundingClientRect();scrollTo(0, scrollY + r.top + r.height/2 - innerHeight*(innerWidth>=900?0.55:0.74))}})()")
+            time.sleep(4)  # the scene follows the scroll with easing; swiftshader is slow
+            badge = js("document.querySelector('.story__badge span')?.textContent")
+            n = shot(f"story_{size}_{j}", ".build3d__canvas canvas")
+            good = badge == STAGES[j] and isinstance(n, int) and n > 8
             ok &= good
-            print(f"{'PASS' if good else 'FAIL'} {size:7s} build {int(p * 100):3d}%  stage «{badge}» (want «{want}»)  canvas colours {n}")
+            print(f"{'PASS' if good else 'FAIL'} {size:7s} story card {j}  badge «{badge}» (want «{STAGES[j]}»)  canvas colours {n}")
 
     # phone: the region page's 3D showcase, after the fly-in
     cmd("Page.navigate", url=f"http://krd.{R}/")

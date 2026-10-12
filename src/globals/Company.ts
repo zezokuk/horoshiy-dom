@@ -64,6 +64,23 @@ export const Company: GlobalConfig = {
               ],
             },
             {
+              name: 'family',
+              label: 'Семейная ипотека — для расчёта на странице дома',
+              type: 'group',
+              admin: { description: 'Условия меняются — обновите здесь, и пересчитаются все дома. Точные условия определяет банк' },
+              fields: [
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'rate', label: 'Ставка, %', type: 'number', defaultValue: 6 },
+                    { name: 'years', label: 'Срок, лет', type: 'number', defaultValue: 30 },
+                    { name: 'minDown', label: 'Мин. первый взнос, %', type: 'number', defaultValue: 20 },
+                    { name: 'limit', label: 'Лимит кредита, ₽', type: 'number', defaultValue: 6000000 },
+                  ],
+                },
+              ],
+            },
+            {
               name: 'mortgage',
               label: 'Ипотечные программы',
               type: 'array',

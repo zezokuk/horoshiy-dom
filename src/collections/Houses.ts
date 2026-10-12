@@ -68,6 +68,32 @@ export const Houses: CollectionConfig = {
     { name: 'features', label: 'Особенности', type: 'text', hasMany: true },
     { name: 'photo', label: 'Фото', type: 'upload', relationTo: 'media' },
     { name: 'plan', label: 'Планировка', type: 'upload', relationTo: 'media' },
+    {
+      name: 'mortgagePlans',
+      label: 'Расчёт ипотеки для этого дома',
+      type: 'array',
+      labels: { singular: 'Вариант', plural: 'Варианты' },
+      admin: {
+        description:
+          'Как на слайде: «1 ребёнок» / «2 ребёнка» с первым взносом и кредитом от банка. Платёж считается сам по ставке и сроку из «Компания → Ипотека». Пусто — показываем общий расчёт',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'title', label: 'Заголовок', type: 'text', required: true, admin: { description: '«1 ребёнок»' } },
+            { name: 'note', label: 'Уточнение', type: 'text', admin: { description: '«(до 7 лет)»' } },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            { name: 'down', label: 'Первый взнос, ₽', type: 'number', required: true },
+            { name: 'credit', label: 'Кредит, ₽', type: 'number', required: true },
+          ],
+        },
+      ],
+    },
     { name: 'note', label: 'Заметка для своих', type: 'textarea', access: { read: staffField }, admin: { description: 'На сайте не показывается' } },
   ],
 }
