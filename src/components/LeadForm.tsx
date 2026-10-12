@@ -23,7 +23,7 @@ function formatPhone(raw: string) {
 export type Interest = 'buy' | 'build' | 'future' | 'mortgage'
 export type LeadTarget = { region?: string; context?: string; phone?: string | null; hours?: string | null; interest?: Interest }
 
-// the three ways in (home page): the manager sees in the lead what the person came for
+// the ways in (home page: build / buy, or just looking at the places): the manager sees in the lead what the person came for
 const ASK: { value: Interest; label: string }[] = [
   { value: 'buy', label: 'Купить готовый' },
   { value: 'build', label: 'Построить' },

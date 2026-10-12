@@ -15,7 +15,7 @@ import {
   srcSet,
 } from '@/lib/data'
 import { formatMillions, plural } from '@/lib/format'
-import { mainHref } from '@/lib/site'
+import { mainHref, regionHref } from '@/lib/site'
 import { estateView, houseView, promoView } from '@/lib/view'
 
 export const revalidate = 60 // statuses and prices change in the admin; the page refreshes within a minute
@@ -23,9 +23,9 @@ export const revalidate = 60 // statuses and prices change in the admin; the pag
 export const metadata: Metadata = { alternates: { canonical: '/' } }
 
 /**
- * The brand home: the company first (who we are, values, trust), then three ways in —
- * build a house, buy a ready one, or just look at the places (for those not ready yet: they leave a contact
- * «на будущее» and get promos and new estates later).
+ * The brand home: the company first (who we are, values, trust), then two ways in — build a house or buy a ready
+ * one — and under both the places band that ties them together: where the houses stand and where we build
+ * (for those not ready yet: they leave a contact «на будущее» and get promos and new estates later).
  */
 export default async function Home() {
   const [company, regions, estates, houses, projects, promos] = await Promise.all([
@@ -52,8 +52,8 @@ export default async function Home() {
       imageSizes: '(min-width: 960px) 1600px, 660px',
     })
 
-  // three different pictures for the three ways in: the «dream» project render, a real house on sale (not the type
-  // already shown in the hero), and an estate seen from above (its 3D poster — covers have the name printed on them)
+  // three different pictures: the «dream» project render (build), a real house on sale (buy; not the type already
+  // shown in the hero), and an estate seen from above for the places band (its 3D poster — covers have the name printed on them)
   const buildProject = projects.find((p) => p.slug === 'tip-12') ?? projects[0]
   const buildPhoto = img(buildProject?.photo, 'card')
   const heroType = (company.heroCaption || '').match(/Тип \d+/)?.[0]
@@ -86,14 +86,6 @@ export default async function Home() {
       go: free.length
         ? `${free.length} ${plural(free.length, 'дом', 'дома', 'домов')}${priceFrom ? ` от ${formatMillions(priceFrom)}` : ''} →`
         : 'Смотреть дома →',
-    },
-    {
-      n: '03',
-      href: mainHref('/locations'),
-      photo: lookPhoto,
-      title: 'Посмотреть локации',
-      text: 'Пока присматриваетесь? Посмотрите наши посёлки и регионы — сообщим об акциях и новых местах первыми.',
-      go: `${estates.length} ${plural(estates.length, 'посёлок', 'посёлка', 'посёлков')}${soon.length ? ` · скоро ещё ${soon.length} ${plural(soon.length, 'регион', 'региона', 'регионов')}` : ''} →`,
     },
   ]
 
@@ -178,9 +170,12 @@ export default async function Home() {
         <div className="container">
           <div className="head" data-reveal>
             <span className="idx">Что вас интересует</span>
-            <Words text="Три пути к *своему дому*" />
+            <Words text="Два пути к *своему дому*" />
           </div>
           <div className="ways">
+            <span className="ways__or" aria-hidden>
+              или
+            </span>
             {ways.map((w, i) => (
               <a
                 key={w.n}
@@ -198,6 +193,40 @@ export default async function Home() {
                 </div>
               </a>
             ))}
+          </div>
+
+          {/* the places tie both ways together: where the ready houses stand and where we build */}
+          <div className="places" data-reveal>
+            {lookPhoto && <img src={lookPhoto} alt="" loading="lazy" decoding="async" />}
+            <div className="places__text">
+              <span className="way__num">Где это всё</span>
+              <h3>Посмотреть локации</h3>
+              <p>
+                Готовые дома стоят в наших посёлках, а построить можем и на вашем участке. Пока присматриваетесь —
+                посмотрите места, сообщим об акциях и новых посёлках первыми.
+              </p>
+            </div>
+            <ul className="places__list">
+              {estateViews.map((e) => (
+                <li key={e.slug}>
+                  <a href={e.href}>
+                    <b>{e.name}</b>
+                    <span>{e.free ? `${e.free} ${plural(e.free, 'дом', 'дома', 'домов')} в продаже` : 'всё продано'}</span>
+                  </a>
+                </li>
+              ))}
+              {soon.map((r) => (
+                <li key={r.slug} className="is-soon">
+                  <a href={regionHref(r.slug)}>
+                    <b>{r.name}</b>
+                    <span>скоро</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <a href={mainHref('/locations')} className="btn btn--gold places__go">
+              Все локации на карте →
+            </a>
           </div>
         </div>
       </section>
