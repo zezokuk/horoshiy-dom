@@ -25,11 +25,18 @@ export const getRegion = cache(async (slug: string): Promise<Region | null> => {
   return docs[0] ?? null
 })
 
+/** Ids of the regions a visitor may see. Company-wide lists (home, /locations, /catalog) use it so that a draft
+ *  estate in a hidden region never shows up there and never links to its 404. */
+const publicRegionIds = async () => {
+  const ids = (await getRegions()).map((r) => r.id)
+  return ids.length ? ids : [0] // no public region at all: match nothing rather than send an empty «in»
+}
+
 export const getEstates = cache(async (regionId?: number): Promise<Estate[]> => {
   const p = await payloadClient()
   const { docs } = await p.find({
     collection: 'estates',
-    where: regionId ? { region: { equals: regionId } } : {},
+    where: regionId ? { region: { equals: regionId } } : { region: { in: await publicRegionIds() } },
     sort: 'order',
     depth: 1,
     limit: 200,
@@ -48,6 +55,7 @@ export const getHouses = cache(async (f: HouseFilter = {}): Promise<House[]> => 
   const p = await payloadClient()
   const and: Where[] = []
   if (f.region) and.push({ region: { equals: f.region } })
+  else if (!f.estate) and.push({ region: { in: await publicRegionIds() } })
   if (f.estate) and.push({ estate: { equals: f.estate } })
   if (f.status) and.push({ status: { equals: f.status } })
   const { docs } = await p.find({ collection: 'houses', where: and.length ? { and } : {}, sort: 'price', depth: 2, limit: 500 })
@@ -83,7 +91,7 @@ export const getPromos = cache(async (regionId?: number): Promise<Promo[]> => {
       and: [
         { active: { equals: true } },
         { or: [{ until: { exists: false } }, { until: { greater_than_equal: today } }] },
-        ...(regionId ? [{ or: [{ region: { exists: false } }, { region: { equals: regionId } }] }] : []),
+        { or: [{ region: { exists: false } }, { region: regionId ? { equals: regionId } : { in: await publicRegionIds() } }] },
       ],
     },
     sort: 'order',
