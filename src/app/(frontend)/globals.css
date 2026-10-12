@@ -215,8 +215,10 @@ ul { margin: 0; padding: 0; list-style: none; }
 @media (min-width: 1024px) { .obj-hero { grid-template-columns: 1.1fr .9fr; align-items: stretch; } }
 .obj-hero__img { border-radius: var(--radius); overflow: hidden; min-height: 360px; position: relative; }
 .obj-hero__img img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+.obj-hero--solo { grid-template-columns: minmax(0, 760px) !important; } /* no picture yet: the text alone, not half a blank screen */
 .facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); }
 .fact { background: var(--paper); padding: 18px 20px; }
+.fact:last-child:nth-child(odd) { grid-column: 1 / -1; } /* an odd number of facts: the last one spans, no blank cell */
 .fact b { display: block; font-family: var(--font-serif); font-size: 30px; line-height: 1.05; color: var(--green-deep); }
 .fact span { font-size: 13px; color: var(--muted); }
 
@@ -667,24 +669,37 @@ button.g3--loading { width: 100%; border: 0; font: inherit; cursor: pointer; }
 .story__badge span { font-size: 13px; }
 .story__progress { position: absolute; left: 18px; right: 18px; bottom: 14px; height: 4px; border-radius: 4px; background: rgba(38,53,44,.14); overflow: hidden; z-index: 2; }
 .story__progress div { height: 100%; background: linear-gradient(90deg, var(--gold), var(--green)); transform: scaleX(0); transform-origin: left; }
-/* the text flows over the sticky background: pull it up by one background height */
-.story__flow { position: relative; z-index: 3; margin-top: calc(-1 * (100svh - var(--header-h))); display: grid; gap: 62vh; padding-top: 14vh; padding-bottom: 30vh; pointer-events: none; }
-.story__card { pointer-events: auto; max-width: 440px; display: grid; gap: 10px; padding: 24px 26px; border-radius: 20px; background: rgba(251,248,242,.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--line); box-shadow: 0 24px 50px -30px rgba(20,28,22,.45); transition: transform .4s ease, box-shadow .4s ease; }
+/* the text flows over the sticky background: pull it up by one background height.
+   Short gaps on purpose: two or three screens of scrolling and the house stands. */
+.story__flow { position: relative; z-index: 3; margin-top: calc(-1 * (100svh - var(--header-h))); display: grid; grid-template-columns: minmax(0, 1fr); gap: 22vh; padding-top: 8vh; padding-bottom: 26vh; pointer-events: none; }
+.story__card { pointer-events: auto; max-width: 440px; display: grid; gap: 8px; padding: 22px 26px; border-radius: 20px; background: rgba(251,248,242,.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--line); box-shadow: 0 24px 50px -30px rgba(20,28,22,.45); transition: transform .4s ease, box-shadow .4s ease, border-color .4s ease; }
 .story__card.is-on { transform: translateX(6px); box-shadow: 0 28px 60px -28px rgba(20,28,22,.55); border-color: var(--gold); }
-.story__card h3 { font-family: var(--font-serif); font-size: 30px; line-height: 1.05; }
+.story__card h3 { font-family: var(--font-serif); font-size: 28px; line-height: 1.05; }
 .story__card p { color: var(--muted); }
-.story__num { font-family: var(--font-serif); font-size: 22px; color: var(--gold-ink); }
-.story__card--intro { max-width: 520px; }
-.story__card--intro .build3d__mouse { margin-top: 6px; }
-.story__card--end { gap: 14px; }
+.story__big { font-family: var(--font-serif); font-weight: 400; font-size: 46px; line-height: .95; color: var(--gold-ink); }
+.story__card--intro { max-width: 520px; gap: 14px; }
+.story__card--intro .build3d__mouse { border-color: var(--gold); }
+.story__card--intro .build3d__mouse::after { background: var(--gold); }
+.story__card--intro h1 { overflow-wrap: anywhere; }
+.story__card--end { gap: 12px; }
+.story__card--end .btns { margin-top: 4px; }
 @media (max-width: 899px) {
-  /* phone: the house in the upper part, cards in the lower part of the screen */
-  .story__flow { gap: 70vh; padding-top: 48vh; }
-  .story__card { margin-inline: auto; padding: 18px 20px; }
-  .story__card h3 { font-size: 26px; }
+  /* phone: the house in the upper part, cards in the lower part of the screen, one at a time */
+  .story__flow { gap: 30vh; padding-top: 50vh; }
+  .story__card { max-width: none; padding: 18px 20px; }
+  .story__card.is-on { transform: none; }
+  .story__card h3 { font-size: 24px; }
+  .story__big { font-size: 38px; }
   .story__badge { left: 12px; right: auto; top: 12px; padding: 10px 14px; }
 }
 @media (prefers-reduced-motion: reduce) { .story__card { transition: none; } }
+
+/* «Это построили мы»: real photos of standing houses */
+.built { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.built__item { position: relative; display: block; border-radius: var(--radius); overflow: hidden; background: var(--gold-soft); }
+.built__item img { display: block; width: 100%; height: auto; aspect-ratio: 640 / 348; object-fit: cover; transition: transform .6s ease; }
+.built__item:hover img { transform: scale(1.04); }
+.built__item span { position: absolute; left: 12px; bottom: 12px; right: 12px; justify-self: start; width: fit-content; max-width: calc(100% - 24px); padding: 7px 12px; border-radius: 999px; background: rgba(28,38,32,.86); color: #fff; font-size: 14px; }
 
 /* house page — like the client's slide */
 .hs { display: grid; gap: 22px; }
@@ -702,8 +717,9 @@ button.g3--loading { width: 100%; border: 0; font: inherit; cursor: pointer; }
   .hs__facts div { padding: 8px 12px; }
   .hs__facts b { font-size: 24px; }
 }
+.hs__photo--none { aspect-ratio: auto !important; min-height: 132px; background: var(--grad-forest); }
 .hs__grid { display: grid; gap: 24px; }
-@media (min-width: 1024px) { .hs__grid { grid-template-columns: 1.3fr .7fr; align-items: start; } }
+@media (min-width: 1024px) { .hs__grid { grid-template-columns: 1.3fr .7fr; align-items: start; } .hs__grid--solo { grid-template-columns: minmax(0, 560px); } }
 .hs__price span { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 .hs__mortgage { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-radius: 16px; background: var(--grad-forest); color: #fff; }
 .hs__mortgage span { display: grid; gap: 2px; font-size: 14px; }
@@ -758,8 +774,4 @@ button.g3--loading { width: 100%; border: 0; font: inherit; cursor: pointer; }
 @media (max-width: 640px) {
   .tour__scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--radius); }
   .tour__scroll .tour__plan { width: 165%; }
-}@media (max-width: 899px) {
-  .story__card.is-on { transform: none; }
-  .story__flow { padding-top: 62vh; }
-}@media (max-width: 899px) { .story__card { margin-inline: 0; max-width: none; } }.story__flow { grid-template-columns: minmax(0, 1fr); } /* a big serif headline must not widen the column past the screen */
-.story__card h2 { overflow-wrap: anywhere; }
+}

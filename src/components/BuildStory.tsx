@@ -1,37 +1,32 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 
 const BuildHouse3D = dynamic(() => import('./BuildHouse3D'), { ssr: false })
 
-const stagesFor = (projects: number) => [
-  { title: 'Выбираете проект', text: `${projects} проверенных планировок — или адаптируем проект под вашу семью. Считаем смету и сроки, фиксируем в договоре.` },
-  { title: 'Фундамент', text: 'Основа дома — с неё начинается стройка на вашем участке.' },
-  { title: 'Стены', text: 'Капитальная кирпичная коробка из сертифицированных материалов.' },
-  { title: 'Кровля', text: 'Крыша по проекту — такая же, как у построенных домов в наших посёлках.' },
-  { title: 'Окна и коммуникации', text: 'Окна, газ, вода, электричество 15 кВт, септик, отопление.' },
-  { title: 'Двор и ключи', text: 'Предчистовая отделка, двор и парковка на 2 машины — заезжайте. Гарантия на дом 5 лет.' },
-]
-
-// 3D timeline (BUILD_STEPS in BuildHouse3D): the end of each stage. Card j in the middle of the screen = stage j built.
-const ENDS = [0.03, 0.16, 0.36, 0.52, 0.64, 0.8]
+/** What the 3D shows while a card is read: card i finishes stage i. */
+const STAGES = ['Фундамент', 'Стены', 'Кровля', 'Окна и коммуникации', 'Двор и парковка']
+// 3D timeline (BUILD_STEPS in BuildHouse3D): the end of each stage
+const ENDS = [0.16, 0.36, 0.52, 0.64, 0.8]
 const lerp = (a: number, b: number, k: number) => a + (b - a) * Math.min(1, Math.max(0, k))
 
+export type TrustPoint = { big?: string; title: string; text: string }
+
 /**
- * «Построить дом»: the 3D house is the background of the whole screen, the stages are text cards scrolling over it.
- * The build follows the reading: as a card comes to the middle of the screen, its stage assembles behind it.
- * Without JS (or with reduced motion) the cards are plain readable text and the house is shown finished.
+ * «Построить дом»: the 3D house is the background, over it a short run of reasons to trust us.
+ * The house is built while they are read — one stage per reason — so a couple of screens of scrolling
+ * and it stands finished. Without JS (or with reduced motion) the cards are plain text and the house is shown finished.
  */
-export function BuildStory({ projects, ctaHref = '#calc' }: { projects: number; ctaHref?: string }) {
-  const STAGES = stagesFor(projects)
+export function BuildStory({ intro, points, end }: { intro: ReactNode; points: TrustPoint[]; end: ReactNode }) {
   const section = useRef<HTMLElement>(null)
   const cards = useRef<(HTMLElement | null)[]>([])
   const progress = useRef(0)
   const bar = useRef<HTMLDivElement>(null)
-  const [stage, setStage] = useState(-1) // -1: the intro card
+  const [stage, setStage] = useState(-1) // -1: the empty plot
   const [near, setNear] = useState(false)
   const [wide, setWide] = useState(true)
+  const n = Math.min(points.length, STAGES.length)
 
   useEffect(() => {
     const el = section.current
@@ -40,28 +35,33 @@ export function BuildStory({ projects, ctaHref = '#calc' }: { projects: number; 
     io.observe(el)
     const onScroll = () => {
       // the reading line: mid-screen on a desktop (text beside the house), low on a phone (text under the house)
-      const mid = window.innerHeight * (window.innerWidth >= 900 ? 0.55 : 0.74)
-      const centers = cards.current.map((c) => (c ? c.getBoundingClientRect().top + c.offsetHeight / 2 : Infinity))
-      // fractional index of the card at the middle of the screen: -1 = before the first stage card
-      let f = -1
-      if (centers[0] <= mid) {
-        f = centers.length - 1
-        for (let j = 0; j < centers.length - 1; j++) {
-          if (centers[j + 1] > mid) {
-            f = j + (centers[j] - mid) / (centers[j] - centers[j + 1])
+      const h = window.innerHeight
+      const phone = window.innerWidth < 900
+      const line = h * (phone ? 0.74 : 0.55)
+      // phone: the house is in the upper half — a card that has been read fades out on its way up instead of covering it
+      el.querySelectorAll<HTMLElement>('.story__card').forEach((c) => {
+        const bottom = c.getBoundingClientRect().bottom
+        c.style.opacity = phone ? String(Math.min(1, Math.max(0, (bottom - h * 0.5) / (h * 0.15)))) : ''
+      })
+      const centers = cards.current.slice(0, n).map((c) => (c ? c.getBoundingClientRect().top + c.offsetHeight / 2 : Infinity))
+      // fractional index of the card on the reading line; -1..0 while the first one is on its way
+      let f = -Math.min(1, (centers[0] - line) / (h * 0.45))
+      if (centers[0] <= line) {
+        f = n - 1
+        for (let j = 0; j < n - 1; j++) {
+          if (centers[j + 1] > line) {
+            f = j + (centers[j] - line) / (centers[j] - centers[j + 1])
             break
           }
         }
-      } else {
-        const intro = window.innerHeight // the first card starts one screen below the top of the section
-        f = -Math.min(1, (centers[0] - mid) / intro)
       }
       const j = Math.floor(f)
-      const p = f < 0 ? lerp(0, ENDS[0], f + 1) : j >= ENDS.length - 1 ? ENDS[ENDS.length - 1] : lerp(ENDS[j], ENDS[j + 1], f - j)
-      // after the last card the house is finished (1 = camera settled)
-      progress.current = el.getBoundingClientRect().bottom < window.innerHeight * 1.2 ? 1 : p
-      if (bar.current) bar.current.style.transform = `scaleX(${Math.min(1, progress.current / 0.8)})`
-      setStage(f < -0.5 ? -1 : Math.min(STAGES.length - 1, Math.max(0, Math.round(f))))
+      const p = f < 0 ? lerp(0, ENDS[0], f + 1) : j >= n - 1 ? ENDS[n - 1] : lerp(ENDS[j], ENDS[j + 1], f - j)
+      // past the last reason the house is finished (1 = camera settled)
+      progress.current = el.getBoundingClientRect().bottom < h * 1.2 ? 1 : p
+      if (bar.current) bar.current.style.transform = `scaleX(${Math.min(1, progress.current / ENDS[n - 1])})`
+      // (a hair before the exact line counts: sub-pixel layout leaves f at 3.999)
+      setStage(f <= -0.5 ? -1 : f >= n - 1.02 ? n : Math.max(0, Math.round(f)))
     }
     const onResize = () => {
       setWide(window.innerWidth >= 900)
@@ -75,7 +75,7 @@ export function BuildStory({ projects, ctaHref = '#calc' }: { projects: number; 
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onResize)
     }
-  }, [STAGES.length])
+  }, [n])
 
   return (
     <section className="story" ref={section} id="build">
@@ -83,8 +83,8 @@ export function BuildStory({ projects, ctaHref = '#calc' }: { projects: number; 
         {/* desktop: the house to the right of the text column; phone: above the cards */}
         {near && <BuildHouse3D progress={progress} shift={wide ? { x: 0.2, y: 0 } : { x: 0, y: 0.24 }} />}
         <div className="story__badge">
-          <b>{stage < 0 ? 'Ваш участок' : `Шаг ${stage + 1} из ${STAGES.length}`}</b>
-          <span>{stage < 0 ? 'Листайте — построим дом' : STAGES[stage].title}</span>
+          <b>{stage < 0 ? 'Ваш участок' : stage >= n ? 'Дом готов' : `Этап ${stage + 1} из ${n}`}</b>
+          <span>{stage < 0 ? 'Листайте — построим дом' : stage >= n ? 'Можно заезжать' : STAGES[stage]}</span>
         </div>
         <div className="story__progress">
           <div ref={bar} />
@@ -92,26 +92,15 @@ export function BuildStory({ projects, ctaHref = '#calc' }: { projects: number; 
       </div>
 
       <div className="story__flow container">
-        <div className="story__card story__card--intro">
-          <span className="idx">Построим ваш дом</span>
-          <h2 className="title title--lg">Капитальный дом за 6 месяцев</h2>
-          <p>Листайте вниз — дом построится у вас на глазах, этап за этапом.</p>
-          <span className="build3d__mouse" aria-hidden />
-        </div>
-        {STAGES.map((s, i) => (
-          <article key={s.title} ref={(n) => void (cards.current[i] = n)} className={`story__card ${i === stage ? 'is-on' : ''}`}>
-            <span className="story__num">{String(i + 1).padStart(2, '0')}</span>
+        <div className="story__card story__card--intro">{intro}</div>
+        {points.slice(0, n).map((s, i) => (
+          <article key={s.title} ref={(c) => void (cards.current[i] = c)} className={`story__card ${i === Math.min(stage, n - 1) ? 'is-on' : ''}`}>
+            {s.big && <b className="story__big">{s.big}</b>}
             <h3>{s.title}</h3>
             <p>{s.text}</p>
           </article>
         ))}
-        <div className="story__card story__card--end">
-          <h3>Готово — заезжайте</h3>
-          <p className="note">Примерный график — точные сроки фиксируем в договоре.</p>
-          <a href={ctaHref} className="btn btn--gold">
-            Рассчитать стройку на моём участке
-          </a>
-        </div>
+        <div className="story__card story__card--end">{end}</div>
       </div>
     </section>
   )

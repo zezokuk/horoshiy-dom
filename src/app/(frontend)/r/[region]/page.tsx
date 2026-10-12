@@ -76,7 +76,7 @@ export default async function RegionPage({ params }: Props) {
   const free = houses.filter((h) => h.status === 'free').map(houseView)
   const priceFrom = free.length ? Math.min(...free.map((h) => h.price)) : null
   // a real house, not an estate cover: covers carry the estate's name printed on them («ЮЖНЫЙ ВЕТЕР»)
-  const cover = img(region.cover, 'wide') || free[0]?.photo || views[0]?.cover
+  const cover = img(region.cover, 'wide') || free[0]?.photo || houses.map(houseView).find((h) => h.photo)?.photo || views.find((v) => v.cover)?.cover
   // 3D showcase: the estate with the most free houses (ties: the first in the admin's order)
   const top = [...estates].sort((a, b) => (views.find((v) => v.slug === b.slug)?.free ?? 0) - (views.find((v) => v.slug === a.slug)?.free ?? 0))[0]
   const showcase = top && {
@@ -87,8 +87,12 @@ export default async function RegionPage({ params }: Props) {
   return (
     <>
       <div className="container intro">
-        <div className="obj-hero">
-          <div className="obj-hero__img">{cover && <img src={cover} alt={region.name} fetchPriority="high" />}</div>
+        <div className={`obj-hero ${cover ? '' : 'obj-hero--solo'}`}>
+          {cover && (
+            <div className="obj-hero__img">
+              <img src={cover} alt={region.name} fetchPriority="high" />
+            </div>
+          )}
           <div style={{ display: 'grid', gap: 20, alignContent: 'start' }}>
             <p className="eyebrow">Регион</p>
             <h1 className="title title--xl">{region.name}</h1>

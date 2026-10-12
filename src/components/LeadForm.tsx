@@ -167,13 +167,27 @@ export function FloatingCall() {
   )
 }
 
-export function LeadSection({ title, text, cta, target, ask = false }: { title: string; text: string; cta: string; target?: LeadTarget; ask?: boolean }) {
+export function LeadSection({
+  title,
+  text,
+  cta,
+  target,
+  ask = false,
+  eyebrow = 'Подбор дома',
+}: {
+  title: string
+  text: string
+  cta: string
+  target?: LeadTarget
+  ask?: boolean
+  eyebrow?: string
+}) {
   return (
     <section className="section" id="lead" style={{ paddingBottom: 96 }}>
       <div className="container">
         <div className="lead-box">
           <div style={{ display: 'grid', gap: 16 }}>
-            <p className="eyebrow">Подбор дома</p>
+            <p className="eyebrow">{eyebrow}</p>
             <h2 className="title title--lg">{title}</h2>
             <p className="lead">{text}</p>
           </div>

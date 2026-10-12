@@ -1,4 +1,4 @@
-import { STATUS_LABEL, formatPrice } from '@/lib/format'
+import { STATUS_LABEL, formatPrice, plural } from '@/lib/format'
 import type { HouseView } from '@/lib/view'
 
 function tagsFor(h: HouseView) {
@@ -37,7 +37,7 @@ export function HouseCard({ h, showEstate = true }: { h: HouseView; showEstate?:
         <div className="house-card__meta">
           {showEstate && <span>{h.estateName}</span>}
           {h.plot && <span>{h.plot}</span>}
-          {h.bedrooms && <span>{h.bedrooms} спальни</span>}
+          {!!h.bedrooms && <span>{h.bedrooms} {plural(h.bedrooms, 'спальня', 'спальни', 'спален')}</span>}
           <span>{h.title}</span>
         </div>
         <div className="tags">

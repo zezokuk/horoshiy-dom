@@ -42,7 +42,11 @@ export default async function EstatePage({ params }: Props) {
   const free = houses.filter((h) => h.status === 'free')
   const scheme = img(e.scheme, 'wide')
   const sorted = [...houses].sort((a, b) => (a.status === b.status ? a.price - b.price : a.status === 'free' ? -1 : 1))
-  const photo = free[0]?.photo ?? houses[0]?.photo
+  // a fresh estate may have no houses or pictures yet: fall back to its 3D poster or cover, else no picture column
+  const photo = free[0]?.photo ?? houses.find((h) => h.photo)?.photo ?? img(e.poster, 'wide') ?? img(e.cover, 'wide')
+  const priceFrom = free.length ? Math.min(...free.map((h) => h.price)) : null
+  const plot = houses.find((h) => h.plot)?.plot?.replace(/\s*сот\.?$/, '')
+  const eyebrow = [e.kind, e.place].filter(Boolean).join(' · ')
   const target = { region: region.slug, context: `${region.name}: ${e.name}`, phone: region.office?.phone, hours: region.office?.hours }
 
   return (
@@ -52,17 +56,19 @@ export default async function EstatePage({ params }: Props) {
           <a href={regionHref(region.slug)}>{region.name}</a>
           <span>{e.name}</span>
         </nav>
-        <div className="obj-hero">
-          <div className="obj-hero__img">{photo && <img src={photo} alt={`Дом в посёлке ${e.name}`} fetchPriority="high" />}</div>
+        <div className={`obj-hero ${photo ? '' : 'obj-hero--solo'}`}>
+          {photo && (
+            <div className="obj-hero__img">
+              <img src={photo} alt={`Дом в посёлке ${e.name}`} fetchPriority="high" />
+            </div>
+          )}
           <div style={{ display: 'grid', gap: 20, alignContent: 'start' }}>
-            <p className="eyebrow">
-              {e.kind} · {e.place}
-            </p>
+            {eyebrow && <p className="eyebrow">{eyebrow}</p>}
             <h1 className="title title--xl">{e.name}</h1>
             {e.tagline && <p className="lead">{e.tagline}</p>}
             {e.description && <p>{e.description}</p>}
             <div className="facts">
-              {e.homes && (
+              {!!e.homes && (
                 <div className="fact">
                   <b>{e.homes}</b>
                   <span>{plural(e.homes, 'дом', 'дома', 'домов')} в проекте</span>
@@ -72,14 +78,18 @@ export default async function EstatePage({ params }: Props) {
                 <b>{free.length}</b>
                 <span>свободно сейчас</span>
               </div>
-              <div className="fact">
-                <b>{free.length ? formatMillions(Math.min(...free.map((h) => h.price))) : '—'}</b>
-                <span>цена от</span>
-              </div>
-              <div className="fact">
-                <b>{houses[0]?.plot?.replace(' сот.', '') ?? '—'}</b>
-                <span>соток участок</span>
-              </div>
+              {priceFrom && (
+                <div className="fact">
+                  <b>{formatMillions(priceFrom)}</b>
+                  <span>цена от</span>
+                </div>
+              )}
+              {plot && (
+                <div className="fact">
+                  <b>{plot}</b>
+                  <span>соток участок</span>
+                </div>
+              )}
             </div>
             <div className="btns">
               <a href="#genplan" className="btn btn--green">

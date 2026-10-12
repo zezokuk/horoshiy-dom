@@ -6,7 +6,7 @@ import { HouseReady } from '@/components/HouseReady'
 import { MortgageCalc } from '@/components/MortgageCalc'
 import { PlanTour } from '@/components/PlanTour'
 import { getCompany, getHouse, getHouses, getRegion, img } from '@/lib/data'
-import { STATUS_LABEL, formatPrice, telHref } from '@/lib/format'
+import { STATUS_LABEL, formatPrice, plural, telHref } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
 import { houseTitle, houseView, tourView } from '@/lib/view'
 import type { Estate, Project, Region } from '@/payload-types'
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { house: h, estate: e, region } = d
   return {
     title: `Дом ${h.area} м² в посёлке «${e.name}» — ${formatPrice(h.price)}`,
-    description: `${houseTitle(h)}, участок ${h.plot || '—'}, ${e.place}. ${STATUS_LABEL[h.status]}.`,
+    description: [houseTitle(h), h.plot && `участок ${h.plot}`, e.place].filter(Boolean).join(', ') + `. ${STATUS_LABEL[h.status]}.`,
     alternates: { canonical: regionHref(region.slug, `/houses/${h.code}`) },
   }
 }
@@ -56,6 +56,8 @@ export default async function HousePage({ params }: Props) {
     .slice(0, 3)
   const phone = region.office?.phone || company.phone
   const plot = h.plot?.replace(/\s*сот\.?$/, '')
+  // a house just added in the admin may have no photo yet: the project's picture, else a slim band with the facts
+  const photo = h.photo ?? img(project?.photo, 'wide')
 
   return (
     <>
@@ -68,9 +70,9 @@ export default async function HousePage({ params }: Props) {
       </div>
 
       <div className="container hs">
-        <div className="house__photo hs__photo">
+        <div className={`house__photo hs__photo ${photo ? '' : 'hs__photo--none'}`}>
           <HouseReady />
-          {h.photo && <img src={h.photo} alt={`${h.title} в посёлке ${e.name}`} fetchPriority="high" />}
+          {photo && <img src={photo} alt={`${h.title} в посёлке ${e.name}`} fetchPriority="high" />}
           <span className={`badge badge--${h.status}`}>{STATUS_LABEL[h.status]}</span>
           <div className="hs__facts">
             <div>
@@ -90,34 +92,42 @@ export default async function HousePage({ params }: Props) {
           </div>
         </div>
 
-        <div className="hs__grid">
-          <div className="hs__plan">
-            {planSrc && (tour.length ? <PlanTour plan={planSrc} alt={`Планировка: ${h.title}`} points={tour} /> : (
-              <div className="plan">
-                <img src={planSrc} alt={`Планировка: ${h.title}`} loading="lazy" />
-              </div>
-            ))}
-          </div>
+        <div className={`hs__grid ${planSrc ? '' : 'hs__grid--solo'}`}>
+          {planSrc && (
+            <div className="hs__plan">
+              {tour.length ? (
+                <PlanTour plan={planSrc} alt={`Планировка: ${h.title}`} points={tour} />
+              ) : (
+                <div className="plan">
+                  <img src={planSrc} alt={`Планировка: ${h.title}`} loading="lazy" />
+                </div>
+              )}
+            </div>
+          )}
 
           <aside className="house__side hs__side">
-            <p className="eyebrow">
-              {e.name} · {e.place}
-            </p>
+            <p className="eyebrow">{[e.name, e.place].filter(Boolean).join(' · ')}</p>
             <h1 className="title title--md">{h.title}</h1>
             <div className="hs__price">
               <span>Стоимость дома</span>
               <div className="house__price">{formatPrice(h.price)}</div>
             </div>
-            <div className="specs">
-              <div>
-                <b>{h.bedrooms ?? '—'}</b>
-                <span>спальни</span>
+            {!!(h.bedrooms || h.bathrooms) && (
+              <div className="specs">
+                {!!h.bedrooms && (
+                  <div>
+                    <b>{h.bedrooms}</b>
+                    <span>{plural(h.bedrooms, 'спальня', 'спальни', 'спален')}</span>
+                  </div>
+                )}
+                {!!h.bathrooms && (
+                  <div>
+                    <b>{h.bathrooms}</b>
+                    <span>{plural(h.bathrooms, 'санузел', 'санузла', 'санузлов')}</span>
+                  </div>
+                )}
               </div>
-              <div>
-                <b>{h.bathrooms ?? '—'}</b>
-                <span>санузлы</span>
-              </div>
-            </div>
+            )}
             {h.features.length > 0 && (
               <div className="chips">
                 {h.features.map((f) => (

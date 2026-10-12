@@ -45,14 +45,16 @@ try:
             return "no element"
         k, vh = js("devicePixelRatio"), js("innerHeight")
         box = [int(v * k) for v in (r["x"], max(0, r["y"]), r["x"] + r["width"], min(r["y"] + r["height"], vh))]
-        return len({(a >> 4, b >> 4, c >> 4) for a, b, c in Image.open(path).convert("RGB").crop(box).resize((64, 40)).getdata()})
+        return len({(a >> 4, b >> 4, c >> 4) for a, b, c in Image.open(path).convert("RGB").crop(box).resize((64, 40)).get_flattened_data()})
 
-    STAGES = ["Выбираете проект", "Фундамент", "Стены", "Кровля", "Окна и коммуникации", "Двор и ключи"]
+    STAGES = ["Фундамент", "Стены", "Кровля", "Окна и коммуникации", "Можно заезжать"]
     for size, w, h, dpr, mobile in [("desktop", 1440, 900, 1, False), ("phone", 390, 844, 2, True)]:
         cmd("Emulation.setDeviceMetricsOverride", width=w, height=h, deviceScaleFactor=dpr, mobile=mobile)
         cmd("Page.navigate", url=f"http://{R}/build")
         time.sleep(5)
-        for j in (1, 3, 5):  # card j in the middle of the screen -> the badge names stage j, the 3D shows it
+        n = shot(f"story_{size}_top", ".build3d__canvas canvas")
+        print(f"      {size} first screen: canvas colours {n}")
+        for j in (0, 2, 4):  # reason j on the reading line -> the badge names stage j (the last one: the house is done)
             js(f"(()=>{{const c=document.querySelectorAll('.story__card:not(.story__card--intro):not(.story__card--end)')[{j}];"
                f"const r=c.getBoundingClientRect();scrollTo(0, scrollY + r.top + r.height/2 - innerHeight*(innerWidth>=900?0.55:0.74))}})()")
             time.sleep(4)  # the scene follows the scroll with easing; swiftshader is slow

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { HouseCard } from '@/components/HouseCard'
 import { LeadInline } from '@/components/LeadForm'
 import { getCompany, getHouses, getProject, img } from '@/lib/data'
-import { formatMillions } from '@/lib/format'
+import { formatMillions, plural } from '@/lib/format'
 import { mainHref } from '@/lib/site'
 import { houseView } from '@/lib/view'
 
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!p) return {}
   return {
     title: `Проект «${p.name}»${p.area ? `, ${p.area} м²` : ''}`,
-    description: `Проект дома «${p.name}»: ${p.area ?? '—'} м²${p.mansard ? ` + ${p.mansard} м² мансарда` : ''}, ${p.bedrooms ?? '—'} спальни. Строим под ключ за 6 месяцев.`,
+    description: `Проект дома «${p.name}»: ${p.area ?? '—'} м²${p.mansard ? ` + ${p.mansard} м² мансарда` : ''}, ${p.bedrooms ? `${p.bedrooms} ${plural(p.bedrooms, 'спальня', 'спальни', 'спален')}` : 'спальни по проекту'}. Строим под ключ за 6 месяцев.`,
     alternates: { canonical: `/projects/${p.slug}` },
   }
 }
@@ -54,7 +54,7 @@ export default async function ProjectPage({ params }: Props) {
             {p.name}
             {p.area ? ` · ${p.area.toLocaleString('ru-RU')} м²` : ''}
           </h1>
-          {p.mansard && <p className="lead">+ {p.mansard} м² мансарда</p>}
+          {!!p.mansard && <p className="lead">+ {p.mansard} м² мансарда</p>}
           <div className="specs">
             <div>
               <b>{p.storeys === 2 ? '2' : '1'}</b>

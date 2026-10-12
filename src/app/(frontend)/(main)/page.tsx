@@ -129,7 +129,7 @@ export default async function Home() {
             </a>
           </div>
           <div className="hero2__stats">
-            {years && (
+            {!!years && (
               <div>
                 <b>{years} лет</b>
                 <span>строим дома</span>
@@ -241,7 +241,7 @@ export default async function Home() {
       <section className="section section--green">
         <div className="container" style={{ display: 'grid', gap: 56 }}>
           <div className="numbers">
-            {years && (
+            {!!years && (
               <div data-reveal>
                 <b>
                   <CountUp to={years} />

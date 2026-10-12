@@ -25,14 +25,23 @@ const regionNav = (slug: string): NavItem[] => [
   { href: regionHref(slug, '/#office'), label: 'Контакты' },
 ]
 
+/** A region that is not selling yet has no estates, catalog or office: the waitlist, then what exists elsewhere. */
+const soonNav = (): NavItem[] => [
+  { href: '#lead', label: 'Лист ожидания' },
+  { href: mainHref('/catalog'), label: 'Готовые дома' },
+  { href: mainHref('/locations'), label: 'Локации' },
+  { href: mainHref('/build'), label: 'Построить' },
+  { href: mainHref('/about'), label: 'О компании' },
+]
+
 /** Page frame shared by the brand site and every region: header, page, lead form, footer. */
 export async function Shell({ region, children }: { region?: Region; children: React.ReactNode }) {
   const [company, regions] = await Promise.all([getCompany(), getRegions()])
   const views = regions.map(regionView)
   const current = region ? regionView(region) : undefined
   const phone = region?.office?.phone || company.phone
-  const nav = region ? regionNav(region.slug) : brandNav()
   const soon = region?.status === 'soon'
+  const nav = soon ? soonNav() : region ? regionNav(region.slug) : brandNav()
   const target = { region: region?.slug, phone, hours: region?.office?.hours, interest: soon ? ('future' as const) : undefined }
 
   return (
@@ -43,7 +52,7 @@ export async function Shell({ region, children }: { region?: Region; children: R
         regions={views}
         current={current}
         homeHref={region ? regionHref(region.slug) : mainHref('/')}
-        ctaHref={region ? regionHref(region.slug, '/catalog') : mainHref('/catalog')}
+        ctaHref={region && !soon ? regionHref(region.slug, '/catalog') : mainHref('/catalog')}
         slogan={company.slogan}
       />
       <main>{children}</main>
@@ -57,9 +66,10 @@ export async function Shell({ region, children }: { region?: Region; children: R
         cta={soon ? 'Записаться в лист ожидания' : 'Отправить'}
         target={target}
         ask={!soon}
+        eyebrow={soon ? 'Лист ожидания' : undefined}
       />
       <Footer company={company} regions={views} nav={nav} current={current} />
-      <StickyCta phone={phone} />
+      <StickyCta phone={phone} label={soon ? 'Узнать первым' : undefined} />
       <FloatingCall />
     </>
   )

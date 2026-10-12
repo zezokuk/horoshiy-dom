@@ -9,7 +9,7 @@ const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v))
 const phase = (p: number, from: number, to: number) => clamp((p - from) / (to - from))
 const ease = (k: number) => 1 - Math.pow(1 - k, 3)
 
-/** Start of each step, 0..1 of the build (BuildStory maps its text cards onto this timeline). */
+/** Start of each step, 0..1 of the build (BuildStory's ENDS: the end of each step; keep them in sync). */
 const BUILD_STEPS = [0, 0.03, 0.16, 0.36, 0.52, 0.64]
 
 /**

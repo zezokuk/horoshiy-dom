@@ -1,3 +1,4 @@
+import { plural } from '@/lib/format'
 import { mainHref } from '@/lib/site'
 
 export type ProjectCardData = {
@@ -36,7 +37,7 @@ export function ProjectCard({ p }: { p: ProjectCardData }) {
         </div>
         <div className="house-card__meta">
           {p.storeys && <span>{p.storeys === 2 ? 'Два этажа' : 'Один этаж'}</span>}
-          {p.bedrooms && <span>{p.bedrooms} спальни</span>}
+          {!!p.bedrooms && <span>{p.bedrooms} {plural(p.bedrooms, 'спальня', 'спальни', 'спален')}</span>}
         </div>
       </div>
     </a>
