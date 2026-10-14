@@ -66,8 +66,8 @@ for name, url, code, marker in pages:
 features = [
     ("region: map/list switch", f"http://krd.{HOST}/", ["На карте", "Списком"]),
     ("region: 3D showcase of an estate", f"http://krd.{HOST}/", ["Посёлок в 3D", "3D-вид", "Схема"]),
-    ("estate: 3D plan with scheme tab + poster", f"http://krd.{HOST}/objects/yuzhnyy-veter", ["Выберите дом в 3D", "3D-вид", "Схема", "Открыть 3D"]),
-    ("estate: developer's master plan kept", f"http://krd.{HOST}/objects/yuzhnyy-veter", ["Генплан застройщика"]),
+    ("estate: 3D plan with scheme tab + poster", f"http://krd.{HOST}/objects/dinskaya", ["Выберите дом в 3D", "3D-вид", "Схема", "Открыть 3D"]),
+    ("estate: developer's master plan kept", f"http://krd.{HOST}/objects/dinskaya", ["Генплан застройщика"]),
     ("home: company first, then two ways in + the places band under both", f"http://{HOST}/",
      ["там, где", "Два пути", "Построить дом", "Купить готовый", "ways__or", "Посмотреть локации", "places__list", "/objects/kalina", "/locations"]),
     ("home: lead form asks what the visitor is after", f"http://{HOST}/", ["Пока присматриваюсь"]),
@@ -91,12 +91,8 @@ check("subdomain /projects → 308 to main", s == 308 and h.get("location", "").
 s, _, h = req(f"http://krd.{HOST}/locations")
 check("subdomain /locations → 308 to main", s == 308 and h.get("location", "").startswith(f"http://{HOST}/locations"), f"{s} {h.get('location')}")
 s, body, _ = req(f"http://krd.{HOST}/houses/di-tip12")
-video = re.search(r'src="(/api/media/file/[^"]+\.mp4)"', body) or re.search(r'"video":"(/api/media/file/[^"]+\.mp4)"', body.replace('\\"', '"'))
-if video:
-    vs, _, vh = req(f"http://krd.{HOST}{video.group(1)}")
-    check("tour video is served as video/mp4", vs == 200 and vh.get("content-type", "").startswith("video/mp4"), f"{vs} {vh.get('content-type')} {video.group(1)}")
-else:
-    check("tour video url in the page", False)
+# the old placeholders were other people's reels: they must never come back (housetest checks real videos on temporary data)
+check("no placeholder room videos (tour-*) on the house page", s == 200 and "tour-laundry" not in body and "tour-bedroom" not in body, f"{s}")
 
 # leads
 s, body, _ = req(f"http://krd.{HOST}/api/leads/submit", {"name": "Тест смоук", "phone": "+7 (965) 414-93-93", "consent": "on", "region": "krd",
@@ -112,5 +108,20 @@ s, body, _ = req(f"http://{HOST}/api/leads/submit", {"name": "Бот", "phone": 
 check("honeypot → 200 silent", s == 200, f"{s}")
 s, body, _ = req(f"http://{HOST}/api/leads?limit=1")
 check("leads not public", s in (401, 403) or '"docs":[]' in body, f"{s} {body[:80]}")
+
+# clean up: the test leads go away, so the admin shows only real ones (and nothing test-like gets into a video)
+ENV = dict(l.strip().split("=", 1) for l in open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"), encoding="utf-8") if "=" in l and not l.startswith("#"))
+s, body, _ = req(f"http://{HOST}/api/users/login", {"email": ENV["SEED_ADMIN_EMAIL"], "password": ENV["SEED_ADMIN_PASSWORD"]}, "POST")
+token = json.loads(body).get("token") if s == 200 else None
+left = None
+if token:
+    for name in ["Тест смоук", mark]:
+        q = urllib.parse.quote(name)
+        r = urllib.request.Request(f"http://127.0.0.1:{HOST.split(':')[1]}/api/leads?where[name][equals]={q}", method="DELETE",
+                                   headers={"Host": HOST, "Authorization": f"JWT {token}"})
+        urllib.request.urlopen(r, timeout=120).read()
+    left = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "platform.db")).execute(
+        "select count(*) from leads where context = 'smoke'").fetchone()[0]
+check("test leads deleted", left == 0, f"left {left}")
 print("ALL OK" if ok else "SOME FAILED")
 sys.exit(0 if ok else 1)

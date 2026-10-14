@@ -65,7 +65,11 @@ export async function GET(req: Request) {
       out.push(
         free.length
           ? `Свободно ${free.length} ${plural(free.length, 'дом', 'дома', 'домов')}${mine.length > free.length ? ` из ${mine.length}` : ''}:`
-          : 'Свободных домов сейчас нет.',
+          : e.status === 'planned'
+            ? 'Старт продаж скоро: можно записаться, чтобы узнать о нём первыми.'
+            : e.status === 'soldOut'
+              ? `Продан полностью${e.homes ? `: построили и продали ${e.homes} ${plural(e.homes, 'дом', 'дома', 'домов')}` : ''}.`
+              : 'Свободных домов сейчас нет.',
       )
       out.push(...free.map(houseLine))
     }

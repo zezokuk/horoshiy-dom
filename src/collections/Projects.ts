@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { adminOnly, anyone } from './access'
+import { revalidateAfterChange, revalidateAfterDelete } from './revalidate'
 
 /** A house design (Тип 1 … Тип 12) — shared by all regions: sold as a ready house or built on order. */
 export const Projects: CollectionConfig = {
@@ -8,6 +9,7 @@ export const Projects: CollectionConfig = {
   admin: { useAsTitle: 'name', defaultColumns: ['name', 'area', 'storeys', 'bedrooms'], group: 'Каталог' },
   defaultSort: 'order',
   access: { read: anyone, create: adminOnly, update: adminOnly, delete: adminOnly },
+  hooks: { afterChange: [revalidateAfterChange], afterDelete: [revalidateAfterDelete] },
   fields: [
     { name: 'name', label: 'Название', type: 'text', required: true, admin: { description: 'Как в шахматке: «Тип 5»' } },
     { name: 'slug', label: 'Адрес страницы', type: 'text', required: true, unique: true, index: true },
@@ -37,7 +39,7 @@ export const Projects: CollectionConfig = {
       labels: { singular: 'Точка', plural: 'Точки' },
       admin: {
         description:
-          'Кружки на планировке: посетитель нажимает — открывается видео. Положение — в процентах от левого верхнего угла картинки плана. Видео — вертикальное, до 1 минуты',
+          'Кружки на планировке: посетитель нажимает — открывается видео. Положение — в процентах от левого верхнего угла картинки плана. Видео — вертикальное, до 1 минуты. Пока видео нет — кружок покажет обложку (или карточку «видео этой комнаты скоро»)',
       },
       fields: [
         { name: 'label', label: 'Подпись', type: 'text', required: true, admin: { description: 'Например: «Кладовая: прачечная на 1 м²»' } },
@@ -48,7 +50,7 @@ export const Projects: CollectionConfig = {
             { name: 'y', label: 'Сверху, %', type: 'number', required: true, min: 0, max: 100 },
           ],
         },
-        { name: 'video', label: 'Видео', type: 'upload', relationTo: 'media', required: true },
+        { name: 'video', label: 'Видео', type: 'upload', relationTo: 'media' },
         { name: 'poster', label: 'Обложка видео', type: 'upload', relationTo: 'media' },
       ],
     },

@@ -9,7 +9,7 @@ import { leadEndpoint } from './leadEndpoint'
 export const Leads: CollectionConfig = {
   slug: 'leads',
   labels: { singular: 'Заявка', plural: 'Заявки' },
-  admin: { useAsTitle: 'name', defaultColumns: ['createdAt', 'name', 'phone', 'region', 'interest', 'status', 'context'], group: 'Продажи' },
+  admin: { useAsTitle: 'name', defaultColumns: ['createdAt', 'name', 'phone', 'house', 'estate', 'source', 'interest', 'status'], group: 'Продажи' },
   defaultSort: '-createdAt',
   access: { read: inMyRegions('region'), create: () => false, update: inMyRegions('region'), delete: adminOnly },
   endpoints: [leadEndpoint],
@@ -43,6 +43,20 @@ export const Leads: CollectionConfig = {
         { label: 'Ипотека', value: 'mortgage' },
       ],
       admin: { position: 'sidebar', description: '«На будущее» — база для рассылки акций и новых посёлков' },
+    },
+    // where the lead came from: the house / estate page it was sent from and the traffic source — what a CRM needs to count ads
+    {
+      type: 'row',
+      fields: [
+        { name: 'house', label: 'Дом', type: 'relationship', relationTo: 'houses' },
+        { name: 'estate', label: 'Посёлок', type: 'relationship', relationTo: 'estates' },
+      ],
+    },
+    {
+      name: 'source',
+      label: 'Источник',
+      type: 'text',
+      admin: { description: 'Реклама (по UTM), переход с сайта (по referrer) или прямой заход — определяется сам' },
     },
     { name: 'context', label: 'Что смотрел', type: 'text' },
     { name: 'page', label: 'Страница', type: 'text' },

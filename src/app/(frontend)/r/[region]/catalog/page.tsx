@@ -30,7 +30,7 @@ export default async function RegionCatalog({ params }: Props) {
         <p className="lead">Фильтры по посёлку, бюджету и площади. Статусы и цены обновляются по мере продаж.</p>
       </div>
       <div className="container" style={{ paddingBottom: 40 }}>
-        <Catalog houses={houses.map(houseView)} estates={estates.map((e) => ({ value: e.slug, label: e.name, region: region.slug }))} />
+        <Catalog houses={houses.map(houseView)} estates={estates.filter((e) => e.status !== 'planned').map((e) => ({ value: e.slug, label: e.name, region: region.slug }))} />
       </div>
     </>
   )

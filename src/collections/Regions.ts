@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { adminOnly, anyone, staffField } from './access'
+import { revalidateAfterChange, revalidateAfterDelete } from './revalidate'
 
 /**
  * A region where the company builds or sells (Краснодар и Адыгея, Москва и область, побережье…).
@@ -12,6 +13,7 @@ export const Regions: CollectionConfig = {
   admin: { useAsTitle: 'name', defaultColumns: ['name', 'slug', 'status', 'order'], group: 'Каталог' },
   defaultSort: 'order',
   access: { read: anyone, create: adminOnly, update: adminOnly, delete: adminOnly },
+  hooks: { afterChange: [revalidateAfterChange], afterDelete: [revalidateAfterDelete] },
   fields: [
     { name: 'name', label: 'Название', type: 'text', required: true, admin: { description: 'Например: Краснодар и Адыгея' } },
     { name: 'shortName', label: 'Коротко (в шапке и на карте)', type: 'text', required: true },

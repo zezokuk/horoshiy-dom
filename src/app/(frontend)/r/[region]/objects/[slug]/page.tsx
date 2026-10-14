@@ -9,7 +9,7 @@ import { formatMillions, plural } from '@/lib/format'
 import { regionHref } from '@/lib/site'
 import { JsonLd, breadcrumbsLd, estateLd } from '@/lib/seo'
 import { estateView, genplanEstate, houseView } from '@/lib/view'
-import type { Region } from '@/payload-types'
+import type { Estate, Region } from '@/payload-types'
 
 export const revalidate = 60
 
@@ -29,7 +29,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { estate: e, region } = d
   return {
     title: `${e.kind || 'Посёлок'} «${e.name}», ${e.place}`,
-    description: [e.tagline, e.description].filter(Boolean).join('. '),
+    // a fresh estate may have no texts yet: a plain line instead of an empty description
+    description:
+      [e.tagline, e.description].filter(Boolean).join('. ') ||
+      (e.status === 'planned'
+        ? `${e.kind || 'Посёлок'} «${e.name}»${e.place ? `, ${e.place}` : ''}. Старт продаж скоро — оставьте телефон, чтобы узнать первыми.`
+        : `${e.kind || 'Посёлок'} «${e.name}»${e.place ? `, ${e.place}` : ''}: дома с участком, генплан и цены.`),
     alternates: { canonical: regionHref(region.slug, `/objects/${e.slug}`) },
   }
 }
@@ -38,6 +43,7 @@ export default async function EstatePage({ params }: Props) {
   const d = await load(params)
   if (!d) notFound()
   const { region, estate: e } = d
+  if (e.status === 'planned') return <ComingEstate region={region} e={e} />
   const rawHouses = await getHouses({ estate: e.id })
   const houses = rawHouses.map(houseView)
   const free = houses.filter((h) => h.status === 'free')
@@ -83,8 +89,8 @@ export default async function EstatePage({ params }: Props) {
                 </div>
               )}
               <div className="fact">
-                <b>{free.length}</b>
-                <span>свободно сейчас</span>
+                <b>{free.length || 'Продан'}</b>
+                <span>{free.length ? 'свободно сейчас' : 'полностью'}</span>
               </div>
               {priceFrom && (
                 <div className="fact">
@@ -194,6 +200,71 @@ export default async function EstatePage({ params }: Props) {
             )}
           </div>
           {e.lat && e.lng ? <EstatesMap estates={[estateView(e, rawHouses)]} /> : null}
+        </div>
+      </section>
+    </>
+  )
+}
+
+/**
+ * An estate whose sales have not started (status «Скоро»): no houses, prices or plan yet — only where it is and a form
+ * «tell me when sales start». The lead is marked «на будущее» and linked to the estate: a waitlist that collects demand
+ * before the first house is built.
+ */
+function ComingEstate({ region, e }: { region: Region; e: Estate }) {
+  const photo = img(e.poster, 'wide') ?? img(e.cover, 'wide')
+  const target = {
+    region: region.slug,
+    estate: e.slug,
+    context: `${e.name}: старт продаж`,
+    interest: 'future' as const,
+    phone: region.office?.phone,
+    hours: region.office?.hours,
+  }
+  return (
+    <>
+      <JsonLd
+        data={breadcrumbsLd([
+          { name: region.name, url: regionHref(region.slug) },
+          { name: e.name, url: regionHref(region.slug, `/objects/${e.slug}`) },
+        ])}
+      />
+      <div className="container intro">
+        <nav className="crumbs" aria-label="Навигация">
+          <a href={regionHref(region.slug)}>{region.name}</a>
+          <span>{e.name}</span>
+        </nav>
+        <div className={`obj-hero ${photo ? '' : 'obj-hero--solo'}`}>
+          {photo && (
+            <div className="obj-hero__img">
+              <img src={photo} alt={`Посёлок ${e.name}`} fetchPriority="high" />
+            </div>
+          )}
+          <div style={{ display: 'grid', gap: 20, alignContent: 'start' }}>
+            <p className="eyebrow">{['Скоро', e.place].filter(Boolean).join(' · ')}</p>
+            <h1 className="title title--xl">{e.name}</h1>
+            <p className="lead">{e.tagline || 'Новый посёлок. Старт продаж скоро.'}</p>
+            {e.description && <p>{e.description}</p>}
+            <div className="btns">
+              <a href="#soon" className="btn btn--gold">
+                Узнать о старте продаж
+              </a>
+              <a href={regionHref(region.slug, '/catalog')} className="btn btn--ghost" style={{ color: 'var(--green-deep)' }}>
+                Готовые дома сейчас
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <section className="section" id="soon" style={{ paddingTop: 24 }}>
+        <div className="container" style={{ display: 'grid', gap: 40 }}>
+          <LeadInline
+            title="Узнать о старте продаж первыми"
+            text="Оставьте телефон — сообщим, когда откроются продажи, появятся первые дома и цены. Без навязчивых звонков."
+            cta="Узнать о старте"
+            target={target}
+          />
+          {e.lat && e.lng ? <EstatesMap estates={[estateView(e, [])]} zoom={12} /> : null}
         </div>
       </section>
     </>

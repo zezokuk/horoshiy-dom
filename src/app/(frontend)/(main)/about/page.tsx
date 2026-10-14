@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { Words } from '@/components/Words'
 import { getCompany, getEstates, getProjects, getRegions } from '@/lib/data'
-import { mainHref } from '@/lib/site'
+import { plural } from '@/lib/format'
+import { mainHref, regionHref } from '@/lib/site'
 import { regionView } from '@/lib/view'
 
 export const revalidate = 60
@@ -15,6 +16,10 @@ export const metadata: Metadata = {
 export default async function AboutPage() {
   const [company, regions, estates, projects] = await Promise.all([getCompany(), getRegions(), getEstates(), getProjects()])
   const active = regions.filter((r) => r.status === 'active').map(regionView)
+  const built = estates.filter((e) => e.status !== 'planned')
+  // sold-out estates are the company's track record: built, sold, people live there
+  const sold = built.filter((e) => e.status === 'soldOut')
+  const soldHomes = sold.reduce((s, e) => s + (e.homes || 0), 0)
   return (
     <>
       <div className="container intro">
@@ -24,10 +29,35 @@ export default async function AboutPage() {
         </nav>
         <h1 className="title title--lg">Строительная компания «{company.name}»</h1>
         <p className="lead">
-          {company.since ? `С ${company.since} года ` : ''}строим и продаём капитальные кирпичные дома для круглогодичной жизни. Сегодня — {estates.length}{' '}
-          посёлков и {projects.length} проектов домов{active.length ? ` в регионе ${active.map((r) => r.name).join(', ')}` : ''}.
+          {company.since ? `С ${company.since} года ` : ''}строим и продаём капитальные кирпичные дома для круглогодичной жизни. Сегодня — {built.length}{' '}
+          {plural(built.length, 'посёлок', 'посёлка', 'посёлков')} и {projects.length} проектов домов
+          {active.length ? ` в регионе ${active.map((r) => r.name).join(', ')}` : ''}.
         </p>
       </div>
+
+      {sold.length > 0 && (
+        <section className="section" style={{ paddingBottom: 0 }}>
+          <div className="container">
+            <div className="head" data-reveal>
+              <span className="idx">Уже построили и продали</span>
+              <Words text={soldHomes ? `${soldHomes} ${plural(soldHomes, 'дом', 'дома', 'домов')} — *в них уже живут*` : 'Посёлки, где *уже живут*'} />
+            </div>
+            <ul className="sold-list">
+              {sold.map((e) => {
+                const r = typeof e.region === 'object' ? e.region : null
+                return (
+                  <li key={e.slug} data-reveal>
+                    <a href={r ? regionHref(r.slug, `/objects/${e.slug}`) : '#'}>
+                      <b>«{e.name}»</b>
+                      <span>{[e.place, e.homes ? `${e.homes} ${plural(e.homes, 'дом', 'дома', 'домов')}` : '', 'продан полностью'].filter(Boolean).join(' · ')}</span>
+                    </a>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        </section>
+      )}
 
       <section className="section">
         <div className="container">

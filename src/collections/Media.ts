@@ -7,7 +7,24 @@ export const Media: CollectionConfig = {
   labels: { singular: 'Файл', plural: 'Фото и файлы' },
   admin: { group: 'Настройки' },
   access: { read: anyone, create: staffOnly, update: staffOnly, delete: staffOnly },
-  fields: [{ name: 'alt', label: 'Описание (для слабовидящих и поиска)', type: 'text', required: true }],
+  // the description is optional: a manager adding a house from a phone just picks a photo. Empty → made from the file name;
+  // the site's own pages describe house pictures themselves («Тип 5 в посёлке Динская»)
+  hooks: {
+    beforeChange: [
+      ({ data }) => {
+        if (!data.alt?.trim() && data.filename) data.alt = String(data.filename).replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ')
+        return data
+      },
+    ],
+  },
+  fields: [
+    {
+      name: 'alt',
+      label: 'Описание (для слабовидящих и поиска)',
+      type: 'text',
+      admin: { description: 'Можно не заполнять' },
+    },
+  ],
   upload: {
     mimeTypes: ['image/*', 'application/pdf', 'video/mp4', 'video/webm', 'video/quicktime'], // video: room tours on house plans
     formatOptions: { format: 'webp', options: { quality: 84 } },

@@ -1,4 +1,6 @@
 import type { Endpoint, PayloadRequest } from 'payload'
+import { leadSource } from '../lib/leadSource'
+import { ROOT_DOMAIN } from '../lib/site'
 
 /**
  * POST /api/leads/submit — every form on every (sub)domain posts here.
@@ -85,11 +87,34 @@ export const leadEndpoint: Endpoint = {
     const interest = (['buy', 'build', 'future', 'mortgage'] as const).find((v) => v === interestRaw)
     const page = clean(json.page, 300)
     const ref = clean(json.ref, 300)
+    const source = leadSource(utm, ref, ROOT_DOMAIN)
+
+    // the lead links to the house / estate it was sent from (the manager sees exactly which house): a form may name them,
+    // otherwise they come from the page address — so the shared form at the bottom of every page knows them too
+    const path = (() => {
+      try {
+        return new URL(page).pathname
+      } catch {
+        return ''
+      }
+    })()
+    const houseCode = clean(json.house, 60) || (path.match(/\/houses\/([\w-]+)\/?$/)?.[1] ?? '')
+    const estateSlug = clean(json.estate, 60) || (path.match(/\/objects\/([\w-]+)\/?$/)?.[1] ?? '')
+    const [house, estateDoc] = await Promise.all([
+      houseCode
+        ? req.payload.find({ collection: 'houses', where: { code: { equals: houseCode } }, limit: 1, depth: 0, overrideAccess: true }).then((r) => r.docs[0])
+        : undefined,
+      estateSlug
+        ? req.payload.find({ collection: 'estates', where: { slug: { equals: estateSlug } }, limit: 1, depth: 0, overrideAccess: true }).then((r) => r.docs[0])
+        : undefined,
+    ])
+    const estateId = estateDoc?.id ?? (house ? (typeof house.estate === 'object' ? house.estate.id : house.estate) : undefined)
+    const estateName = estateDoc?.name ?? (estateId ? (await req.payload.findByID({ collection: 'estates', id: estateId, depth: 0, overrideAccess: true })).name : '')
 
     const lead = await req.payload.create({
       collection: 'leads',
       overrideAccess: true,
-      data: { name, phone, region: region?.id, interest, context, page, ref, utm, status: 'new' },
+      data: { name, phone, region: region?.id, interest, house: house?.id, estate: estateId, source, context, page, ref, utm, status: 'new' },
     })
 
     const company = await req.payload.findGlobal({ slug: 'company', depth: 0, overrideAccess: true })
@@ -102,7 +127,10 @@ export const leadEndpoint: Endpoint = {
       `<b>Телефон:</b> ${esc(phone)}`,
       region && `<b>Регион:</b> ${esc(region.name)}`,
       interest && `<b>Хочет:</b> ${INTEREST[interest]}`,
+      house && `<b>Дом:</b> ${esc(`${house.title}, ${house.code}`)}`,
+      estateName && `<b>Посёлок:</b> ${esc(estateName)}`,
       context && `<b>Интерес:</b> ${esc(context)}`,
+      `<b>Источник:</b> ${esc(source)}`,
       page && `<b>Страница:</b> ${esc(page)}`,
       utmText && `<b>Реклама:</b> ${esc(utmText)}`,
       ref && `<b>Пришёл с:</b> ${esc(ref)}`,

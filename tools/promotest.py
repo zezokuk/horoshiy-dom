@@ -116,6 +116,9 @@ try:
     check("thank-you text promises promos, not a call", "акциях" in thanks, repr(thanks[:90]))
     row = db.execute("select interest, phone from leads where name = ?", (name,)).fetchone()
     check("lead saved with interest = future", row and row[0] == "future", str(row))
+    req(f"http://{H}/api/leads?where[name][equals]={urllib.parse.quote(name)}", None, "DELETE", token)
+    left = db.execute("select count(*) from leads where name = ?", (name,)).fetchone()[0]
+    check("test lead deleted", left == 0, str(left))
     ws.close()
 finally:
     proc.terminate()

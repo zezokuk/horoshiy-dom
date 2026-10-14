@@ -183,7 +183,10 @@ export interface Region {
  */
 export interface Media {
   id: number;
-  alt: string;
+  /**
+   * Можно не заполнять
+   */
+  alt?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -279,7 +282,7 @@ export interface Estate {
 export interface House {
   id: number;
   /**
-   * Например: yv-tip5
+   * Латиницей, без пробелов: di-tip5 → страница /houses/di-tip5
    */
   code: string;
   estate: number | Estate;
@@ -287,6 +290,9 @@ export interface House {
    * Берётся из посёлка
    */
   region?: (number | null) | Region;
+  /**
+   * Спальни, санузлы, мансарда и особенности подставятся из проекта, если их не заполнить. Без фото и планировки покажем картинки проекта
+   */
   project?: (number | null) | Project;
   /**
    * «Тип 5 (В2)»
@@ -355,7 +361,7 @@ export interface Project {
   photo?: (number | null) | Media;
   plan?: (number | null) | Media;
   /**
-   * Кружки на планировке: посетитель нажимает — открывается видео. Положение — в процентах от левого верхнего угла картинки плана. Видео — вертикальное, до 1 минуты
+   * Кружки на планировке: посетитель нажимает — открывается видео. Положение — в процентах от левого верхнего угла картинки плана. Видео — вертикальное, до 1 минуты. Пока видео нет — кружок покажет обложку (или карточку «видео этой комнаты скоро»)
    */
   tour?:
     | {
@@ -365,7 +371,7 @@ export interface Project {
         label: string;
         x: number;
         y: number;
-        video: number | Media;
+        video?: (number | null) | Media;
         poster?: (number | null) | Media;
         id?: string | null;
       }[]
@@ -399,6 +405,12 @@ export interface Lead {
    * «На будущее» — база для рассылки акций и новых посёлков
    */
   interest?: ('buy' | 'build' | 'future' | 'mortgage') | null;
+  house?: (number | null) | House;
+  estate?: (number | null) | Estate;
+  /**
+   * Реклама (по UTM), переход с сайта (по referrer) или прямой заход — определяется сам
+   */
+  source?: string | null;
   context?: string | null;
   page?: string | null;
   utm?:
@@ -714,6 +726,9 @@ export interface LeadsSelect<T extends boolean = true> {
   phone?: T;
   region?: T;
   interest?: T;
+  house?: T;
+  estate?: T;
+  source?: T;
   context?: T;
   page?: T;
   utm?: T;

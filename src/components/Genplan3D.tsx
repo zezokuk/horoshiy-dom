@@ -183,8 +183,11 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
       const b = hh * S
       const hxC = X(hx + hw / 2)
       const hzC = Z(hy + hh / 2)
-      const storeys = (p.unit?.area ?? 0) >= 140 ? 2 : 1
-      const house = buildHouse(a, b, storeys, p.status === 'na' ? mDim : mLive)
+      // three shapes, as the client asked («вроде они одинаковые, а дома разные»): one storey, an attic floor
+      // under a steep roof (most types), two full storeys (Тип 9, 10). Without a project — by area, as before
+      const storeys = p.unit?.storeys ?? ((p.unit?.area ?? 0) >= 140 ? 2 : 1)
+      const attic = storeys === 1 && !!p.unit?.mansard
+      const house = buildHouse(a, b, storeys, p.status === 'na' ? mDim : mLive, attic)
       house.group.position.set(hxC, 0.48, hzC)
       house.group.rotation.y = p.flip ? 0 : Math.PI // front door faces the street
       add(tag(house.group))

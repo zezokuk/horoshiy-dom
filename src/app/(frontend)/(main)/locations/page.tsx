@@ -6,7 +6,7 @@ import { Regions, type RegionStats } from '@/components/Regions'
 import { Words } from '@/components/Words'
 import { getCompany, getEstates, getHouses, getPromos, getRegions } from '@/lib/data'
 import { mainHref } from '@/lib/site'
-import { estateView, promoView, regionView } from '@/lib/view'
+import { byEstateStatus, estateView, promoView, regionView } from '@/lib/view'
 
 export const revalidate = 60
 
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 export default async function LocationsPage() {
   const [company, regions, estates, houses, promos] = await Promise.all([getCompany(), getRegions(), getEstates(), getHouses(), getPromos()])
   const views = regions.map(regionView)
-  const estateViews = estates.map((e) => estateView(e, houses))
+  const estateViews = byEstateStatus(estates.map((e) => estateView(e, houses)))
   const stats: Record<string, RegionStats> = {}
   for (const r of views) {
     const mine = estateViews.filter((e) => e.regionSlug === r.slug)

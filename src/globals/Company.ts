@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
 import { adminOnly, anyone } from '../collections/access'
+import { revalidateGlobal } from '../collections/revalidate'
 
 /** Company-wide facts used on every page: brand, contacts, legal details, values, FAQ, mortgage programs. */
 export const Company: GlobalConfig = {
@@ -7,6 +8,7 @@ export const Company: GlobalConfig = {
   label: 'Компания',
   admin: { group: 'Настройки' },
   access: { read: anyone, update: adminOnly },
+  hooks: { afterChange: [revalidateGlobal] },
   fields: [
     {
       type: 'tabs',

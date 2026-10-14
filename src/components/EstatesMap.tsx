@@ -2,15 +2,15 @@
 
 import 'leaflet/dist/leaflet.css'
 import { useEffect, useRef, useState } from 'react'
-import { formatMillions, plural } from '@/lib/format'
+import { formatMillions } from '@/lib/format'
 import { HINT, bindTouch, bindWheel, useHint } from '@/lib/gestures'
-import type { EstateView } from '@/lib/view'
+import { estateSale, type EstateView } from '@/lib/view'
 
 // names and places come from the admin: never put them into popup HTML unescaped
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
 
 function popup(e: EstateView) {
-  const sale = e.free ? `${e.free} ${plural(e.free, 'дом', 'дома', 'домов')} в продаже${e.priceFrom ? ` · от ${formatMillions(e.priceFrom)}` : ''}` : 'Продажи завершены'
+  const sale = `${estateSale(e)}${e.priceFrom ? ` · от ${formatMillions(e.priceFrom)}` : ''}`
   return `<div class="map-pop">${e.coverCard ? `<img src="${esc(e.coverCard)}" alt="">` : ''}<div><b>${esc(e.name)}</b><span>${esc(e.place)}</span><span>${sale}</span><a href="${esc(
     e.href,
   )}">Смотреть посёлок →</a></div></div>`
@@ -68,6 +68,10 @@ export function EstatesMap({ estates, zoom }: { estates: EstateView[]; zoom?: nu
       )
       if (list.length === 1) map.setView([list[0].lat!, list[0].lng!], zoom ?? 14)
       else map.fitBounds(L.featureGroup(markers).getBounds(), { padding: [70, 70] })
+      // the map stays around our estates: zooming out stops at the region, never the whole world
+      const area = list.length === 1 ? L.latLng(list[0].lat!, list[0].lng!).toBounds(40000) : L.featureGroup(markers).getBounds()
+      map.setMaxBounds(area.pad(1.5))
+      map.setMinZoom(Math.max(5, Math.floor(map.getZoom()) - 2))
 
       const m = map
       cleanups.push(

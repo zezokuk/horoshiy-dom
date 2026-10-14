@@ -11,6 +11,7 @@ export function EstatesView({ estates, showRegion = false }: { estates: EstateVi
   const mappable = estates.some((e) => e.lat !== null && e.lng !== null)
   const [view, setView] = useState<'map' | 'list'>(mappable ? 'map' : 'list')
   const free = estates.reduce((s, e) => s + e.free, 0)
+  const selling = estates.filter((e) => e.free > 0).length
   return (
     <div style={{ display: 'grid', gap: 20 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
@@ -26,7 +27,7 @@ export function EstatesView({ estates, showRegion = false }: { estates: EstateVi
         )}
         <span className="counter">
           <i />
-          Доступно {free} {plural(free, 'дом', 'дома', 'домов')} в {estates.length} {plural(estates.length, 'посёлке', 'посёлках', 'посёлках')}
+          Доступно {free} {plural(free, 'дом', 'дома', 'домов')} в {selling} {plural(selling, 'посёлке', 'посёлках', 'посёлках')}
         </span>
       </div>
       {view === 'map' && <EstatesMap estates={estates} />}

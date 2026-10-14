@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { anyone, inMyRegions } from './access'
+import { revalidateAfterChange, revalidateAfterDelete } from './revalidate'
 
 /**
  * Promotions («Акции»): shown on the home page, the «Локации» page and the region pages while active.
@@ -11,6 +12,7 @@ export const Promos: CollectionConfig = {
   admin: { useAsTitle: 'title', defaultColumns: ['title', 'region', 'active', 'until'], group: 'Продажи' },
   defaultSort: 'order',
   access: { read: anyone, create: inMyRegions('region'), update: inMyRegions('region'), delete: inMyRegions('region') },
+  hooks: { afterChange: [revalidateAfterChange], afterDelete: [revalidateAfterDelete] },
   fields: [
     { name: 'title', label: 'Заголовок', type: 'text', required: true, admin: { description: '«Скидка 300 000 ₽ на дома в Динской»' } },
     { name: 'text', label: 'Условия коротко', type: 'textarea' },

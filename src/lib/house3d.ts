@@ -92,9 +92,10 @@ function windowAt(parent: THREE.Object3D, mats: HouseMaterials, w: number, h: nu
 /**
  * @param a width along X (m), @param b depth along Z (m), front faces +Z.
  */
-export function buildHouse(a: number, b: number, storeys: 1 | 2, mats: HouseMaterials): HouseParts {
+export function buildHouse(a: number, b: number, storeys: 1 | 2, mats: HouseMaterials, attic = false): HouseParts {
   const group = new THREE.Group()
-  const wallH = storeys === 2 ? 5.8 : 3.0
+  // attic (mansard) floor: a knee wall over the ground floor, a steeper roof and a dormer window on the front slope
+  const wallH = storeys === 2 ? 5.8 : attic ? 3.9 : 3.0
   const base = 0.4
 
   const foundation = new THREE.Mesh(box(a + 0.5, base, b + 0.5), mats.slab)
@@ -114,7 +115,7 @@ export function buildHouse(a: number, b: number, storeys: 1 | 2, mats: HouseMate
     walls.add(band)
   }
 
-  const roofH = Math.min(a, b) * 0.36
+  const roofH = Math.min(a, b) * (attic ? 0.6 : 0.36) // 0.36 also matches blueprintPoints of the build scene
   const roof = new THREE.Group()
   roof.name = 'roof'
   const roofMesh = new THREE.Mesh(roofGeo(a + 0.9, b + 0.9, roofH), mats.roof)
@@ -122,6 +123,21 @@ export function buildHouse(a: number, b: number, storeys: 1 | 2, mats: HouseMate
   const eave = new THREE.Mesh(box(a + 0.95, 0.12, b + 0.95), mats.frame)
   eave.position.y = base + wallH + 0.02
   roof.add(eave, roofMesh)
+  if (attic) {
+    const dw = Math.min(2.4, a * 0.3)
+    const dh = Math.min(1.6, roofH * 0.45)
+    const dd = 1.8
+    // on both slopes: the 3D plan is turned around, so a house is often seen from the back
+    for (const side of [1, -1]) {
+      const z = side * (b / 2 - dd / 2 + 0.3)
+      const dormer = new THREE.Mesh(box(dw, dh, dd), mats.wall)
+      dormer.position.set(0, base + wallH + dh / 2, z)
+      const cap = new THREE.Mesh(roofGeo(dw + 0.4, dd + 0.4, 0.7), mats.roof)
+      cap.position.set(0, base + wallH + dh, z)
+      roof.add(dormer, cap)
+      windowAt(roof, mats, dw * 0.5, dh * 0.6, 0, base + wallH + dh / 2, z + side * (dd / 2 + 0.02), side === 1 ? 0 : Math.PI)
+    }
+  }
 
   const openings = new THREE.Group()
   openings.name = 'openings'

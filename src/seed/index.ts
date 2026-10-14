@@ -30,7 +30,6 @@ import {
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const SLIDES = path.resolve(dirname, '../../../исходники-презентации')
-const TOURS = path.resolve(dirname, '../../../медиамои/web') // room videos cut by ffmpeg from медиамои/*.MP4
 const POSTERS = path.resolve(dirname, '../../../site/public/img/genplan') // 3D posters rendered by site/tools/posters.py
 const ENV = path.resolve(dirname, '../../.env')
 
@@ -44,6 +43,10 @@ const CROP = {
 } satisfies Record<string, Box>
 const COVERS: Record<string, string> = { 'yuzhnyy-veter': '14950302', kalina: '14950306', 'krasnaya-39': '14950315', 'druzhby-43': '14950321', dinskaya: '16420344' }
 const SCHEMES: Record<string, string> = { 'yuzhnyy-veter': '15573469', kalina: '15573473', 'krasnaya-39': '15625352', 'druzhby-43': '12050714', dinskaya: '16420345' }
+
+// Sold out since the demo data was taken (the client at the meeting 14.10: «Южный Ветер уже закрылся, там уже нет домов»).
+// Shown as the company's scale — built and sold — never as an offer.
+const SOLD_OUT = new Set(['yuzhnyy-veter'])
 
 const media = new Map<string, number>() // "kind:slide" → media id, so shared photos are uploaded once
 
@@ -176,19 +179,14 @@ async function run() {
     projects.set(t, doc.id as number)
   }
 
-  // Room videos on the «Тип 12» plan, points where the client marked them (медиамои/photo_…550: 1 — кладовая, 2 — детская).
-  // The videos are PLACEHOLDERS: screen recordings of other people's reels, cropped. Replace with the client's own before launch.
+  // Room points on the «Тип 12» plan where the client marked them (медиамои/photo_…550: 1 — кладовая, 2 — детская).
+  // Without videos: the old placeholders were other people's reels and must never reach the site. The client adds
+  // their own videos in the admin (Проекты → «Точки на плане»); until then a point opens a «video coming» card.
   const tour = [
-    { label: 'Кладовая: прачечная на 1 м²', x: 32.3, y: 61, file: 'tour-laundry' },
-    { label: 'Детская 9,2 м²', x: 26.5, y: 37, file: 'tour-bedroom' },
+    { label: 'Кладовая: прачечная на 1 м²', x: 32.3, y: 61 },
+    { label: 'Детская 9,2 м²', x: 26.5, y: 37 },
   ]
-  const tourItems = []
-  for (const s of tour) {
-    const video = await fileUpload(payload, path.join(TOURS, `${s.file}.mp4`), `Видео: ${s.label} (заглушка)`, 'video/mp4')
-    const poster = await fileUpload(payload, path.join(TOURS, `${s.file}.jpg`), `Обложка видео: ${s.label}`, 'image/jpeg')
-    if (video) tourItems.push({ label: s.label, x: s.x, y: s.y, video, poster })
-  }
-  if (tourItems.length) await payload.update({ collection: 'projects', id: projects.get('Тип 12')!, data: { tour: tourItems } })
+  await payload.update({ collection: 'projects', id: projects.get('Тип 12')!, data: { tour } })
 
   // Estates
   const estates = new Map<string, number>()
@@ -199,7 +197,7 @@ async function run() {
         name: e.name,
         slug: e.slug,
         region: krd.id,
-        status: UNITS.some((u) => u.estate === e.slug && u.status === 'free') ? 'selling' : 'soldOut',
+        status: !SOLD_OUT.has(e.slug) && UNITS.some((u) => u.estate === e.slug && u.status === 'free') ? 'selling' : 'soldOut',
         order: i + 1,
         place: e.place,
         address: e.address,
@@ -224,6 +222,23 @@ async function run() {
     estates.set(e.slug, doc.id as number)
   }
 
+  // The new project from the meeting (14.10): sales start later, so only the place — no houses, prices or numbers.
+  // Coordinates are the stanitsa centre; the exact plot goes in when the client sends it.
+  await payload.create({
+    collection: 'estates',
+    data: {
+      name: 'Нововеличковская',
+      slug: 'novovelichkovskaya',
+      region: krd.id,
+      status: 'planned',
+      order: ESTATES.length + 1,
+      place: 'ст. Нововеличковская',
+      kind: 'Новый посёлок',
+      lat: 45.2774,
+      lng: 38.8378,
+    },
+  })
+
   // Plots on the 3D plan: the demo spread each estate's houses over the plots in price-grid order.
   // Saving the result as «Участок на генплане» keeps every house where the demo (and its 3D posters) put it.
   const plotNo = new Map<string, number>()
@@ -243,7 +258,7 @@ async function run() {
         estate: estates.get(u.estate)!,
         project: projects.get(baseType(u.type)),
         title: u.type,
-        status: u.status,
+        status: SOLD_OUT.has(u.estate) ? 'sold' : u.status,
         price: u.price,
         plotNo: plotNo.get(u.id),
         area: u.area,

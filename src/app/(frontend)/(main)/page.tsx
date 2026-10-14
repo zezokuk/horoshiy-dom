@@ -17,7 +17,7 @@ import {
 import { formatMillions, plural } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
 import { JsonLd, faqLd, organizationLd } from '@/lib/seo'
-import { estateView, houseView, promoView } from '@/lib/view'
+import { byEstateStatus, estateSale, estateView, houseView, promoView } from '@/lib/view'
 
 export const revalidate = 60 // statuses and prices change in the admin; the page refreshes within a minute
 
@@ -41,6 +41,7 @@ export default async function Home() {
   const priceFrom = free.length ? Math.min(...free.map((h) => h.price)) : null
   const years = company.since ? new Date().getFullYear() - company.since : null
   const estateViews = estates.map((e) => estateView(e, houses))
+  const built = estateViews.filter((e) => e.status !== 'planned').length // a coming estate is not one of «our estates» yet
   const active = regions.filter((r) => r.status === 'active')
   const soon = regions.filter((r) => r.status === 'soon')
   const hero = company.heroPhoto
@@ -132,8 +133,8 @@ export default async function Home() {
               </div>
             )}
             <div>
-              <b>{estates.length}</b>
-              <span>{plural(estates.length, 'посёлок', 'посёлка', 'посёлков')}</span>
+              <b>{built}</b>
+              <span>{plural(built, 'посёлок', 'посёлка', 'посёлков')}</span>
             </div>
             <div>
               <b>6 мес.</b>
@@ -211,11 +212,11 @@ export default async function Home() {
               </p>
             </div>
             <ul className="places__list">
-              {estateViews.map((e) => (
-                <li key={e.slug}>
+              {byEstateStatus(estateViews).map((e) => (
+                <li key={e.slug} className={e.status === 'planned' ? 'is-soon' : e.free ? '' : 'is-sold'}>
                   <a href={e.href}>
                     <b>{e.name}</b>
-                    <span>{e.free ? `${e.free} ${plural(e.free, 'дом', 'дома', 'домов')} в продаже` : 'всё продано'}</span>
+                    <span>{estateSale(e).toLowerCase()}</span>
                   </a>
                 </li>
               ))}

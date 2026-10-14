@@ -12,7 +12,7 @@ EDGE = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".shots")
 os.makedirs(OUT, exist_ok=True)
 args = [a for a in sys.argv[1:] if not a.startswith("--")]
-url = args[0] if args else "http://krd.horoshiy.localhost:3000/objects/yuzhnyy-veter"
+url = args[0] if args else "http://krd.horoshiy.localhost:3000/objects/dinskaya"  # «Южный ветер» is sold out since 14.10
 FRAMES = "--frames" in sys.argv
 
 proc = subprocess.Popen([EDGE, "--headless=new", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--remote-debugging-port=9336",

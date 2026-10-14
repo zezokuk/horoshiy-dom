@@ -1,5 +1,5 @@
 import type { Estate, House, Media, Project, Promo, Region } from '@/payload-types'
-import type { HouseStatus } from './format'
+import { plural, type HouseStatus } from './format'
 import { genplanConfig, type GenplanEstate } from './genplan'
 import { regionHref } from './site'
 
@@ -12,6 +12,8 @@ export type HouseView = {
   title: string
   area: number
   mansard: number | null
+  /** from the project (Тип 9, 10 — two storeys); the 3D plan draws one-storey, attic (mansard) and two-storey houses differently */
+  storeys?: 1 | 2
   plot: string | null
   price: number
   status: HouseStatus
@@ -41,7 +43,24 @@ export type EstateView = {
   free: number
   priceFrom: number | null
   href: string
+  /** selling · soldOut (built and sold: shown as the company's scale, not for sale) · planned (sales start soon) */
+  status: EstateStatus
+  homes: number | null
 }
+
+export type EstateStatus = 'selling' | 'soldOut' | 'planned'
+
+/** One line about an estate's sales for cards, map popups and lists — no «0 домов». */
+export function estateSale(e: Pick<EstateView, 'status' | 'free' | 'homes'>) {
+  if (e.status === 'planned') return 'Старт продаж скоро'
+  if (e.status === 'soldOut' || !e.free) return e.homes ? `Продан · ${e.homes} ${plural(e.homes, 'дом', 'дома', 'домов')}` : 'Все дома проданы'
+  return `${e.free} ${plural(e.free, 'дом', 'дома', 'домов')} в продаже`
+}
+
+/** Lists put what can be bought first, then what is coming, then the sold-out estates (they show scale, not offers). */
+const estateRank = (e: { status: EstateStatus; free: number }) => (e.status === 'planned' ? 1 : e.free ? 0 : 2)
+export const byEstateStatus = <T extends { status: EstateStatus; free: number }>(list: T[]) =>
+  [...list].sort((a, b) => estateRank(a) - estateRank(b)) // stable: the admin's order inside each group
 
 export type RegionView = {
   slug: string
@@ -79,20 +98,23 @@ export function houseView(h: House): HouseView {
   const estate = obj<Estate>(h.estate)
   const region = obj<Region>(estate?.region) ?? obj<Region>(h.region)
   const regionSlug = region?.slug ?? ''
+  // a house just added in the admin may have no pictures yet: its project's photo and plan stand in
+  const project = obj<Project>(h.project)
   return {
     code: h.code,
     title: h.title,
     area: h.area,
     mansard: h.mansard ?? null,
+    storeys: project?.storeys === 2 ? 2 : project ? 1 : undefined,
     plot: h.plot ?? null,
     price: h.price,
     status: h.status,
     bedrooms: h.bedrooms ?? null,
     bathrooms: h.bathrooms ?? null,
     features: h.features ?? [],
-    photo: url(h.photo, 'wide'),
-    photoCard: url(h.photo, 'card'),
-    plan: url(h.plan, 'wide'),
+    photo: url(h.photo, 'wide') ?? url(project?.photo, 'wide'),
+    photoCard: url(h.photo, 'card') ?? url(project?.photo, 'card'),
+    plan: url(h.plan, 'wide') ?? url(project?.plan, 'wide'),
     estateSlug: estate?.slug ?? '',
     estateName: estate?.name ?? '',
     regionSlug,
@@ -104,8 +126,11 @@ export function houseView(h: House): HouseView {
 export function estateView(e: Estate, houses: House[]): EstateView {
   const region = obj<Region>(e.region)
   const mine = houses.filter((h) => (typeof h.estate === 'object' ? h.estate?.id : h.estate) === e.id)
+  const status: EstateStatus = e.status ?? 'selling'
   const free = mine.filter((h) => h.status === 'free')
   return {
+    status,
+    homes: e.homes ?? null,
     slug: e.slug,
     name: e.name,
     place: e.place ?? '',
@@ -121,13 +146,12 @@ export function estateView(e: Estate, houses: House[]): EstateView {
   }
 }
 
-/** A point on the house plan that opens a room video. x, y — percent of the plan picture. */
-export type TourPoint = { n: number; label: string; x: number; y: number; video: string; poster?: string }
+/** A point on the house plan that opens a room video. x, y — percent of the plan picture.
+ *  No video yet (the client films the rooms later): the point opens its cover or a «video coming» card. */
+export type TourPoint = { n: number; label: string; x: number; y: number; video?: string; poster?: string }
 
 export function tourView(p: Project | null | undefined): TourPoint[] {
-  return (p?.tour ?? [])
-    .map((t, i) => ({ n: i + 1, label: t.label, x: t.x, y: t.y, video: url(t.video) ?? '', poster: url(t.poster, 'card') }))
-    .filter((t) => t.video)
+  return (p?.tour ?? []).map((t, i) => ({ n: i + 1, label: t.label, x: t.x, y: t.y, video: url(t.video), poster: url(t.poster, 'card') }))
 }
 
 export type PromoView = { id: number; title: string; text: string | null; image?: string; regionName: string | null; href: string; cta: string }

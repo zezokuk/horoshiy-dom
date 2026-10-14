@@ -21,7 +21,16 @@ function formatPhone(raw: string) {
 }
 
 export type Interest = 'buy' | 'build' | 'future' | 'mortgage'
-export type LeadTarget = { region?: string; context?: string; phone?: string | null; hours?: string | null; interest?: Interest }
+/** `house` — house code, `estate` — estate slug: the lead in the admin links to them */
+export type LeadTarget = {
+  region?: string
+  context?: string
+  phone?: string | null
+  hours?: string | null
+  interest?: Interest
+  house?: string
+  estate?: string
+}
 
 // the ways in (home page: build / buy, or just looking at the places): the manager sees in the lead what the person came for
 const ASK: { value: Interest; label: string }[] = [
@@ -58,7 +67,18 @@ export function LeadForm({
       const res = await fetch(ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, phone, region: target.region, context: target.context, interest, page: window.location.href, utm, ref }),
+        body: JSON.stringify({
+          ...data,
+          phone,
+          region: target.region,
+          house: target.house,
+          estate: target.estate,
+          context: target.context,
+          interest,
+          page: window.location.href,
+          utm,
+          ref,
+        }),
       })
       if (!res.ok) throw new Error(String(res.status))
       goal('lead_submit', { region: target.region, context: target.context })

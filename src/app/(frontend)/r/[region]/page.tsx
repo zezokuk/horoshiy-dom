@@ -9,7 +9,7 @@ import { PromoCards } from '@/components/PromoCards'
 import { getEstates, getHouses, getProjects, getPromos, getRegion, img } from '@/lib/data'
 import { formatMillions, plural, telHref } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
-import { estateView, genplanEstate, houseView, promoView } from '@/lib/view'
+import { byEstateStatus, estateView, genplanEstate, houseView, promoView } from '@/lib/view'
 
 export const revalidate = 60
 
@@ -72,7 +72,8 @@ export default async function RegionPage({ params }: Props) {
   }
 
   const [estates, houses, promos] = await Promise.all([getEstates(region.id), getHouses({ region: region.id }), getPromos(region.id)])
-  const views = estates.map((e) => estateView(e, houses))
+  const views = byEstateStatus(estates.map((e) => estateView(e, houses)))
+  const built = views.filter((v) => v.status !== 'planned').length
   const free = houses.filter((h) => h.status === 'free').map(houseView)
   const priceFrom = free.length ? Math.min(...free.map((h) => h.price)) : null
   // a real house, not an estate cover: covers carry the estate's name printed on them («ЮЖНЫЙ ВЕТЕР»)
@@ -100,8 +101,8 @@ export default async function RegionPage({ params }: Props) {
             {region.intro && <p>{region.intro}</p>}
             <div className="facts">
               <div className="fact">
-                <b>{views.length}</b>
-                <span>{plural(views.length, 'посёлок', 'посёлка', 'посёлков')}</span>
+                <b>{built}</b>
+                <span>{plural(built, 'посёлок', 'посёлка', 'посёлков')}</span>
               </div>
               <div className="fact">
                 <b>{free.length}</b>

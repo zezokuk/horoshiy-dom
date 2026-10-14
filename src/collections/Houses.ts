@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { anyone, inMyRegions, staffField } from './access'
+import { revalidateAfterChange, revalidateAfterDelete } from './revalidate'
 
 /**
  * A concrete house for sale (one row of the developer's price grid). Managers change status and price here from a phone.
@@ -12,22 +13,53 @@ export const Houses: CollectionConfig = {
   defaultSort: 'price',
   access: { read: anyone, create: inMyRegions('region'), update: inMyRegions('region'), delete: inMyRegions('region') },
   hooks: {
+    afterChange: [revalidateAfterChange],
+    afterDelete: [revalidateAfterDelete],
     beforeChange: [
-      async ({ data, req }) => {
+      async ({ data, req, operation }) => {
         if (data.estate) {
           const id = typeof data.estate === 'object' ? data.estate.id : data.estate
           const estate = await req.payload.findByID({ collection: 'estates', id, depth: 0, req })
           data.region = typeof estate.region === 'object' ? estate.region.id : estate.region
+        }
+        // a new house of a known project: what the manager left empty comes from the project (bedrooms, mansard, features…),
+        // so adding a house is «посёлок, проект, тип, площадь, цена» — a minute from a phone
+        if (operation === 'create' && data.project) {
+          const id = typeof data.project === 'object' ? data.project.id : data.project
+          const p = await req.payload.findByID({ collection: 'projects', id, depth: 0, req })
+          for (const k of ['mansard', 'bedrooms', 'bathrooms'] as const) if (data[k] == null && p[k] != null) data[k] = p[k]
+          if (!data.features?.length && p.features?.length) data.features = p.features
         }
         return data
       },
     ],
   },
   fields: [
-    { name: 'code', label: 'Адрес страницы', type: 'text', required: true, unique: true, index: true, admin: { description: 'Например: yv-tip5' } },
+    {
+      name: 'code',
+      label: 'Адрес страницы',
+      type: 'text',
+      required: true,
+      unique: true,
+      index: true,
+      admin: { description: 'Латиницей, без пробелов: di-tip5 → страница /houses/di-tip5' },
+    },
     { name: 'estate', label: 'Посёлок', type: 'relationship', relationTo: 'estates', required: true, index: true },
-    { name: 'region', type: 'relationship', relationTo: 'regions', index: true, admin: { readOnly: true, position: 'sidebar', description: 'Берётся из посёлка' } },
-    { name: 'project', label: 'Проект', type: 'relationship', relationTo: 'projects' },
+    {
+      name: 'region',
+      label: 'Регион',
+      type: 'relationship',
+      relationTo: 'regions',
+      index: true,
+      admin: { readOnly: true, position: 'sidebar', description: 'Берётся из посёлка' },
+    },
+    {
+      name: 'project',
+      label: 'Проект',
+      type: 'relationship',
+      relationTo: 'projects',
+      admin: { description: 'Спальни, санузлы, мансарда и особенности подставятся из проекта, если их не заполнить. Без фото и планировки покажем картинки проекта' },
+    },
     { name: 'title', label: 'Тип (как в шахматке)', type: 'text', required: true, admin: { description: '«Тип 5 (В2)»' } },
     {
       name: 'status',

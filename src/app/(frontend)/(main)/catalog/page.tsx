@@ -29,7 +29,7 @@ export default async function CatalogPage() {
         <Catalog
           houses={houses.map(houseView)}
           regions={active.map((r) => ({ value: r.slug, label: r.name }))}
-          estates={estates.map((e) => ({ value: e.slug, label: e.name, region: slugOf(e.region) }))}
+          estates={estates.filter((e) => e.status !== 'planned').map((e) => ({ value: e.slug, label: e.name, region: slugOf(e.region) }))}
         />
       </div>
     </>

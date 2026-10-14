@@ -60,7 +60,9 @@ export function PlanTour({
       </div>
       {points.length > 0 && (
         <div className="tour__list">
-          <span className="tour__hint">Нажмите на кружок — покажем комнату на видео</span>
+          <span className="tour__hint">
+            {points.some((p) => p.video) ? 'Нажмите на кружок — покажем комнату на видео' : 'Нажмите на кружок — расскажем о комнате'}
+          </span>
           {points.map((p) => (
             <button key={p.n} type="button" className="chip tour__chip" onClick={() => show(p.n)}>
               <b>{p.n}</b> {p.label}
@@ -82,17 +84,27 @@ export function PlanTour({
       >
         {current && (
           <div className="tour__box">
-            <video
-              ref={video}
-              key={current.video}
-              src={current.video}
-              poster={current.poster}
-              controls
-              playsInline
-              muted
-              autoPlay
-              preload="none"
-            />
+            {current.video ? (
+              <video
+                ref={video}
+                key={current.video}
+                src={current.video}
+                poster={current.poster}
+                controls
+                playsInline
+                muted
+                autoPlay
+                preload="none"
+              />
+            ) : (
+              <div className="tour__soon" key={current.n}>
+                {current.poster && <img src={current.poster} alt="" />}
+                <p>
+                  <b>Здесь будет видео этой комнаты</b>
+                  <span>А пока покажем её вживую: запишитесь на показ или попросите менеджера прислать видео.</span>
+                </p>
+              </div>
+            )}
             <div className="tour__bar">
               <b>
                 {current.n}. {current.label}

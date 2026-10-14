@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { anyone, inMyRegions } from './access'
+import { revalidateAfterChange, revalidateAfterDelete } from './revalidate'
 
 /** A village / project inside a region (Южный ветер, Калина…). Its page shows the 3D master plan and the houses. */
 export const Estates: CollectionConfig = {
@@ -8,6 +9,7 @@ export const Estates: CollectionConfig = {
   admin: { useAsTitle: 'name', defaultColumns: ['name', 'region', 'status', 'homes'], group: 'Каталог' },
   defaultSort: 'order',
   access: { read: anyone, create: inMyRegions('region'), update: inMyRegions('region'), delete: inMyRegions('region') },
+  hooks: { afterChange: [revalidateAfterChange], afterDelete: [revalidateAfterDelete] },
   fields: [
     { name: 'name', label: 'Название', type: 'text', required: true },
     { name: 'slug', label: 'Адрес страницы', type: 'text', required: true, unique: true, index: true },
