@@ -2,6 +2,8 @@
 
 export const formatPrice = (n: number) => `${n.toLocaleString('ru-RU')} ₽`
 export const formatMillions = (n: number) => `${(n / 1_000_000).toLocaleString('ru-RU', { maximumFractionDigits: 2 })} млн ₽`
+/** Area as Russians write it: 90,8 (not 90.8). */
+export const formatArea = (n: number) => n.toLocaleString('ru-RU')
 export const telHref = (phone?: string | null) => (phone ? `tel:+${phone.replace(/\D/g, '').replace(/^8/, '7')}` : undefined)
 
 export function plural(n: number, one: string, few: string, many: string) {

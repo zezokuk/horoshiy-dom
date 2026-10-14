@@ -7,6 +7,7 @@ import { LeadInline } from '@/components/LeadForm'
 import { getEstate, getHouses, getRegion, img } from '@/lib/data'
 import { formatMillions, plural } from '@/lib/format'
 import { regionHref } from '@/lib/site'
+import { JsonLd, breadcrumbsLd, estateLd } from '@/lib/seo'
 import { estateView, genplanEstate, houseView } from '@/lib/view'
 import type { Region } from '@/payload-types'
 
@@ -51,6 +52,13 @@ export default async function EstatePage({ params }: Props) {
 
   return (
     <>
+      <JsonLd data={estateLd(e, region, houses)} />
+      <JsonLd
+        data={breadcrumbsLd([
+          { name: region.name, url: regionHref(region.slug) },
+          { name: e.name, url: regionHref(region.slug, `/objects/${e.slug}`) },
+        ])}
+      />
       <div className="container intro">
         <nav className="crumbs" aria-label="Навигация">
           <a href={regionHref(region.slug)}>{region.name}</a>

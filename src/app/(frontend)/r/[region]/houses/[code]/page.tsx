@@ -6,8 +6,9 @@ import { HouseReady } from '@/components/HouseReady'
 import { MortgageCalc } from '@/components/MortgageCalc'
 import { PlanTour } from '@/components/PlanTour'
 import { getCompany, getHouse, getHouses, getRegion, img } from '@/lib/data'
-import { STATUS_LABEL, formatPrice, plural, telHref } from '@/lib/format'
+import { STATUS_LABEL, formatArea, formatPrice, plural, telHref } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
+import { JsonLd, breadcrumbsLd, houseLd } from '@/lib/seo'
 import { houseTitle, houseView, tourView } from '@/lib/view'
 import type { Estate, Project, Region } from '@/payload-types'
 
@@ -28,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!d) return {}
   const { house: h, estate: e, region } = d
   return {
-    title: `Дом ${h.area} м² в посёлке «${e.name}» — ${formatPrice(h.price)}`,
+    title: `Дом ${formatArea(h.area)} м² в посёлке «${e.name}» — ${formatPrice(h.price)}`,
     description: [houseTitle(h), h.plot && `участок ${h.plot}`, e.place].filter(Boolean).join(', ') + `. ${STATUS_LABEL[h.status]}.`,
     alternates: { canonical: regionHref(region.slug, `/houses/${h.code}`) },
   }
@@ -61,6 +62,14 @@ export default async function HousePage({ params }: Props) {
 
   return (
     <>
+      <JsonLd data={houseLd(h, e, region, company.legalName || company.name)} />
+      <JsonLd
+        data={breadcrumbsLd([
+          { name: region.name, url: regionHref(region.slug) },
+          { name: e.name, url: regionHref(region.slug, `/objects/${e.slug}`) },
+          { name: h.title, url: h.href },
+        ])}
+      />
       <div className="container intro">
         <nav className="crumbs" aria-label="Навигация">
           <a href={regionHref(region.slug)}>{region.name}</a>

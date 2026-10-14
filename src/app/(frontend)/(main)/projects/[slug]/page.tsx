@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { HouseCard } from '@/components/HouseCard'
 import { LeadInline } from '@/components/LeadForm'
 import { getCompany, getHouses, getProject, img } from '@/lib/data'
-import { formatMillions, plural } from '@/lib/format'
+import { formatArea, formatMillions, plural } from '@/lib/format'
 import { mainHref } from '@/lib/site'
 import { houseView } from '@/lib/view'
 
@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const p = await getProject((await params).slug)
   if (!p) return {}
   return {
-    title: `Проект «${p.name}»${p.area ? `, ${p.area} м²` : ''}`,
-    description: `Проект дома «${p.name}»: ${p.area ?? '—'} м²${p.mansard ? ` + ${p.mansard} м² мансарда` : ''}, ${p.bedrooms ? `${p.bedrooms} ${plural(p.bedrooms, 'спальня', 'спальни', 'спален')}` : 'спальни по проекту'}. Строим под ключ за 6 месяцев.`,
+    title: `Проект «${p.name}»${p.area ? `, ${formatArea(p.area)} м²` : ''}`,
+    description: `Проект дома «${p.name}»: ${p.area ? `${formatArea(p.area)} м²` : 'площадь по проекту'}${p.mansard ? ` + ${formatArea(p.mansard)} м² мансарда` : ''}, ${p.bedrooms ? `${p.bedrooms} ${plural(p.bedrooms, 'спальня', 'спальни', 'спален')}` : 'спальни по проекту'}. Строим под ключ за 6 месяцев.`,
     alternates: { canonical: `/projects/${p.slug}` },
   }
 }

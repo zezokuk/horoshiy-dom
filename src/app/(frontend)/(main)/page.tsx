@@ -16,6 +16,7 @@ import {
 } from '@/lib/data'
 import { formatMillions, plural } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
+import { JsonLd, faqLd, organizationLd } from '@/lib/seo'
 import { estateView, houseView, promoView } from '@/lib/view'
 
 export const revalidate = 60 // statuses and prices change in the admin; the page refreshes within a minute
@@ -89,8 +90,11 @@ export default async function Home() {
     },
   ]
 
+  const faq = faqLd(company.faq)
   return (
     <>
+      <JsonLd data={organizationLd(company, regions)} />
+      {faq && <JsonLd data={faq} />}
       <section className="hero2">
         <div className="hero2__panel">
           <p className="eyebrow" style={{ color: 'var(--gold-soft)' }}>

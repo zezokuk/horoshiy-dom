@@ -1,4 +1,4 @@
-import { STATUS_LABEL, formatPrice, plural } from '@/lib/format'
+import { STATUS_LABEL, formatArea, formatPrice, plural } from '@/lib/format'
 import type { HouseView } from '@/lib/view'
 
 function tagsFor(h: HouseView) {
@@ -22,7 +22,7 @@ export function HouseCard({ h, showEstate = true }: { h: HouseView; showEstate?:
             sizes="(min-width: 1024px) 400px, (min-width: 700px) 50vw, 100vw"
             width={640}
             height={348}
-            alt={`${h.title}, ${h.area} м²`}
+            alt={`${h.title}, ${formatArea(h.area)} м²`}
             loading="lazy"
             decoding="async"
           />
