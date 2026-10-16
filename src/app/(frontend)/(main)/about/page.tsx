@@ -5,7 +5,7 @@ import { plural } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
 import { regionView } from '@/lib/view'
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic' // shows statuses and counts: always fresh (see collections/revalidate.ts)
 
 export const metadata: Metadata = {
   title: 'О компании',

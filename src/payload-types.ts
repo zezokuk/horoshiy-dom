@@ -226,6 +226,9 @@ export interface Estate {
   name: string;
   slug: string;
   region: number | Region;
+  /**
+   * «Продажи завершены» — все дома посёлка станут «Продан», на сайте посёлок покажется как построенный и проданный. «Скоро» — без цифр и генплана, с формой «Узнать о старте продаж»
+   */
   status?: ('selling' | 'soldOut' | 'planned') | null;
   order?: number | null;
   /**

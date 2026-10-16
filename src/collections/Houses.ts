@@ -74,7 +74,13 @@ export const Houses: CollectionConfig = {
       ],
       admin: { position: 'sidebar' },
     },
-    { name: 'price', label: 'Цена, ₽', type: 'number', required: true, admin: { position: 'sidebar' } },
+    {
+      name: 'price',
+      label: 'Цена, ₽',
+      type: 'number',
+      required: true,
+      admin: { position: 'sidebar', components: { Cell: '/components/admin/PriceCell#PriceCell' } },
+    },
     {
       name: 'plotNo',
       label: 'Участок на генплане, №',

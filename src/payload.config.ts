@@ -26,6 +26,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
     meta: { titleSuffix: ' · Хороший дом' },
+    components: { beforeDashboard: ['/components/admin/Guide#Guide'] }, // «Как вести сайт» for the client's team
   },
   i18n: { supportedLanguages: { ru }, fallbackLanguage: 'ru' },
   collections: [Regions, Estates, Houses, Projects, Leads, Promos, Media, Users],

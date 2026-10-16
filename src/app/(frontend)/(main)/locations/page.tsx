@@ -8,7 +8,7 @@ import { getCompany, getEstates, getHouses, getPromos, getRegions } from '@/lib/
 import { mainHref } from '@/lib/site'
 import { byEstateStatus, estateView, promoView, regionView } from '@/lib/view'
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic' // shows statuses and counts: always fresh (see collections/revalidate.ts)
 
 export const metadata: Metadata = {
   title: 'Где мы строим: регионы и посёлки',

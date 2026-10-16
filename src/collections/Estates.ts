@@ -9,7 +9,24 @@ export const Estates: CollectionConfig = {
   admin: { useAsTitle: 'name', defaultColumns: ['name', 'region', 'status', 'homes'], group: 'Каталог' },
   defaultSort: 'order',
   access: { read: anyone, create: inMyRegions('region'), update: inMyRegions('region'), delete: inMyRegions('region') },
-  hooks: { afterChange: [revalidateAfterChange], afterDelete: [revalidateAfterDelete] },
+  hooks: {
+    afterChange: [
+      // «Продажи завершены» closes the whole estate: its houses become «Продан», so none stays on sale by mistake
+      async ({ doc, previousDoc, operation, req }) => {
+        if (operation === 'update' && doc.status === 'soldOut' && previousDoc?.status !== 'soldOut') {
+          await req.payload.update({
+            collection: 'houses',
+            where: { and: [{ estate: { equals: doc.id } }, { status: { not_equals: 'sold' } }] },
+            data: { status: 'sold' },
+            req,
+          })
+        }
+        return doc
+      },
+      revalidateAfterChange,
+    ],
+    afterDelete: [revalidateAfterDelete],
+  },
   fields: [
     { name: 'name', label: 'Название', type: 'text', required: true },
     { name: 'slug', label: 'Адрес страницы', type: 'text', required: true, unique: true, index: true },
@@ -24,6 +41,10 @@ export const Estates: CollectionConfig = {
         { label: 'Продажи завершены', value: 'soldOut' },
         { label: 'Скоро', value: 'planned' },
       ],
+      admin: {
+        description:
+          '«Продажи завершены» — все дома посёлка станут «Продан», на сайте посёлок покажется как построенный и проданный. «Скоро» — без цифр и генплана, с формой «Узнать о старте продаж»',
+      },
     },
     { name: 'order', label: 'Порядок', type: 'number', defaultValue: 10 },
     { name: 'place', label: 'Где (коротко)', type: 'text', admin: { description: 'Например: аул Козет' } },

@@ -119,7 +119,8 @@ try:
             if row:
                 return row
             time.sleep(0.5)
-        return None
+        # not saved: say what the visitor saw (e.g. «Не получилось отправить» on a 429 from the rate limit)
+        return "form: " + (js(f"document.querySelector('{form_sel}')?.closest('section,div')?.innerText.slice(0, 120)") or "?")
 
     cmd("Page.enable")
     house = db.execute("select id, estate_id from houses where code = 'di-tip1'").fetchone()
@@ -156,10 +157,16 @@ try:
     s, est = req(f"http://krd.{H}/objects/dinskaya")
     now = re.search(pat, est)
     check("status «Продан» in the admin → the estate page shows it on the next load", now and now.group(1) == "sold", now and now.group(1))
-    time.sleep(1)
-    req(f"http://{H}/")  # a static page may answer once from the old cache while it rebuilds
-    after = home_count(req(f"http://{H}/")[1])
-    check("…and the home page counts one free house less", before and after and int(after) == int(before) - 1, f"{before} → {after}")
+    # the home page renders on every request (a cached copy once got stuck on the old count — see
+    # collections/revalidate.ts), so the new count must be there on the next load; the loop only measures it
+    t0, after = time.time(), None
+    while time.time() - t0 < 15:
+        after = home_count(req(f"http://{H}/")[1])
+        if before and after and int(after) == int(before) - 1:
+            break
+        time.sleep(1)
+    check("…and the home page counts one free house less", before and after and int(after) == int(before) - 1,
+          f"{before} → {after} in {time.time() - t0:.1f} s")
 finally:
     req(f"http://{H}/api/houses/{hid}", {"status": "free"}, "PATCH", token)
 s, est = req(f"http://krd.{H}/objects/dinskaya")

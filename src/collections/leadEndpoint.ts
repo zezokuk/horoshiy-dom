@@ -17,8 +17,12 @@ const clean = (v: unknown, max: number) =>
   typeof v === 'string' || typeof v === 'number' ? String(v).replace(/[\u0000-\u001f\u007f]+/g, ' ').trim().slice(0, max) : ''
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
+// the same machine (tests, a manager on the server itself) is not a bot. Behind a proxy the visitor's own IP comes in
+// x-forwarded-for, so this never exempts internet traffic; without that header there is no IP to limit anyway
+const LOOPBACK = /^(127\.\d+\.\d+\.\d+|::1|::ffff:127\.\d+\.\d+\.\d+)$/
+
 function rateOk(ip: string) {
-  if (!ip) return true
+  if (!ip || LOOPBACK.test(ip)) return true
   const now = Date.now()
   const list = (hits.get(ip) || []).filter((t) => t > now - WINDOW)
   if (list.length >= LIMIT) return false

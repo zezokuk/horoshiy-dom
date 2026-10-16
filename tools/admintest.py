@@ -6,7 +6,7 @@ Times the form and fails on console errors. The test house and its pictures are 
 
     python tools/admintest.py [--shots]        (npm run dev or npm start first)
 """
-import json, os, subprocess, sys, time, urllib.parse, urllib.request
+import json, os, re, subprocess, sys, time, urllib.error, urllib.parse, urllib.request
 from cdp import Browser, OUT
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -70,6 +70,16 @@ try:
             fill(b, "password", ENV["SEED_ADMIN_PASSWORD"])
             b.click("button[type=submit]")
             b.wait("!location.pathname.includes('/login')", 60)
+        # the dashboard opens with «Как вести сайт»: five links straight to the right forms
+        b.go(f"http://{H}/admin", 5)
+        guide = b.js("[...document.querySelectorAll('h2')].some(h=>h.textContent.trim()==='Как вести сайт') && document.querySelectorAll('a[href=\"/admin/collections/houses/create\"]').length")
+        check("admin dashboard: «Как вести сайт» with a link to «Добавить дом»", guide)
+        if SHOTS:
+            b.shot("admintest-dashboard.png")
+        # prices in the list are readable: «8 800 000 ₽», not «8800000»
+        b.go(f"http://{H}/admin/collections/houses?sort=price", 5)
+        cell = b.js("[...document.querySelectorAll('td')].map(t=>t.textContent).find(t=>/₽/.test(t)) || ''")
+        check("admin houses list: price as «8 800 000 ₽»", bool(re.fullmatch(r"\d{1,3}(\s\d{3})+\s₽", cell.strip().replace(" ", " "))), repr(cell))
         b.go(f"http://{H}/admin/collections/houses/create", 6)
         b.errors()
         t0 = time.time()
@@ -120,7 +130,19 @@ try:
     check("it is in the estate's houses and its 3D plan data", s == 200 and f"houses/{CODE}" in est, str(s))
     s, cat = api("/catalog", host=f"krd.{H}")
     check("it is in the catalog", s == 200 and f"houses/{CODE}" in cat, str(s))
+
+    # an estate set to «Продажи завершены» closes its houses (none left «free» by mistake) — on a temporary estate
+    krd = json.loads(api("/api/regions?where[slug][equals]=krd&depth=0", token=token)[1])["docs"][0]["id"]
+    est = json.loads(api("/api/estates", {"name": "Тест распродан", "slug": "tst-soldout", "region": krd, "status": "selling"}, "POST", token)[1])["doc"]
+    for i, st in enumerate(["free", "reserved", "sold"]):
+        api("/api/houses", {"code": f"tst-so-{i}", "estate": est["id"], "title": "Тип 5", "area": 100, "price": 9000000, "status": st}, "POST", token)
+    api(f"/api/estates/{est['id']}", {"status": "soldOut"}, "PATCH", token)
+    left = [h["status"] for h in json.loads(api(f"/api/houses?where[estate][equals]={est['id']}&depth=0", token=token)[1])["docs"]]
+    check("«Продажи завершены» → every house of the estate is «Продан»", left == ["sold"] * 3, str(left))
 finally:
+    for i in range(3):
+        api(f"/api/houses?where[code][equals]=tst-so-{i}", None, "DELETE", token)
+    api("/api/estates?where[slug][equals]=tst-soldout", None, "DELETE", token)
     s, body = api(f"/api/houses?where[code][equals]={CODE}&depth=0", token=token)
     for d in json.loads(body).get("docs", []):
         for m in [d.get("photo"), d.get("plan")]:

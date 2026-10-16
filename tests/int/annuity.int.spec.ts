@@ -1,5 +1,18 @@
 import { describe, expect, it } from 'vitest'
-import { annuity } from '@/lib/format'
+import { annuity, softHyphens } from '@/lib/format'
+
+describe('softHyphens', () => {
+  const show = (s: string) => softHyphens(s).replace(/­/g, '-')
+  it('long words get break points by syllables, never before й/ь/ъ', () => {
+    expect(show('Нововеличковская')).toBe('Но-во-ве-лич-ков-ская')
+    expect(show('Краснодарский')).toBe('Крас-но-дар-ский')
+    expect(show('Строительство')).toBe('Стро-и-тель-ство'.replace('о-и', 'ои'))
+  })
+  it('short words and spaces stay as they are', () => {
+    expect(softHyphens('Южный ветер')).toBe('Южный ветер')
+    expect(softHyphens('Москва и область')).toBe('Москва и область')
+  })
+})
 
 // Numbers from the client's house slide (медиамои/photo_…658): «Тип 12», 8 900 000 ₽, семейная ипотека 6 %, 30 лет.
 describe('annuity', () => {

@@ -151,7 +151,9 @@ export function estateView(e: Estate, houses: House[]): EstateView {
 export type TourPoint = { n: number; label: string; x: number; y: number; video?: string; poster?: string }
 
 export function tourView(p: Project | null | undefined): TourPoint[] {
-  return (p?.tour ?? []).map((t, i) => ({ n: i + 1, label: t.label, x: t.x, y: t.y, video: url(t.video), poster: url(t.poster, 'card') }))
+  // «1 м²» never breaks between the number and the unit
+  const label = (s: string) => s.replace(/(\d)\s+(?=м²|м2|см\b)/g, '$1 ')
+  return (p?.tour ?? []).map((t, i) => ({ n: i + 1, label: label(t.label), x: t.x, y: t.y, video: url(t.video), poster: url(t.poster, 'card') }))
 }
 
 export type PromoView = { id: number; title: string; text: string | null; image?: string; regionName: string | null; href: string; cta: string }

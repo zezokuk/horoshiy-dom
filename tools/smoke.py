@@ -74,7 +74,7 @@ features = [
     ("locations page: regions, all estates on a map, «на будущее» form", f"http://{HOST}/locations", ["Где мы строим", "Все посёлки", "На карте", "Подписаться"]),
     ("build page: 3D house behind reasons to trust, then proof", f"http://{HOST}/build",
      ["story__bg", "Строим с 2014 года", "Материалы с документами", "Гарантия на дом", "Дом готов", "Это построили мы", "built__item", "Выберите"]),
-    ("house with a tour: plan circles + videos", f"http://krd.{HOST}/houses/di-tip12", ["tour__dot", "Кладовая: прачечная на 1 м²", "Детская 9,2 м²"]),
+    ("house with a tour: plan circles + videos", f"http://krd.{HOST}/houses/di-tip12", ["tour__dot", "Кладовая: прачечная на 1", "Детская 9,2"]),  # a no-break space before «м²»
     ("house: slide-like facts + family mortgage", f"http://krd.{HOST}/houses/di-tip12", ["Площадь дома", "Стоимость дома", "Расчёт по семейной ипотеке", "fm__card"]),
     ("house without a tour: plain plan, mortgage", f"http://krd.{HOST}/houses/yv-tip9", ["Расчёт по семейной ипотеке"]),
 ]

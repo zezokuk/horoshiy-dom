@@ -14,12 +14,13 @@ import {
   img,
   srcSet,
 } from '@/lib/data'
-import { formatMillions, plural } from '@/lib/format'
+import { formatMillions, plural, softHyphens } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
 import { JsonLd, faqLd, organizationLd } from '@/lib/seo'
 import { byEstateStatus, estateSale, estateView, houseView, promoView } from '@/lib/view'
 
-export const revalidate = 60 // statuses and prices change in the admin; the page refreshes within a minute
+// statuses and counts change in the admin and must show on the next load: no page cache here (see collections/revalidate.ts)
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = { alternates: { canonical: '/' } }
 
@@ -215,7 +216,7 @@ export default async function Home() {
               {byEstateStatus(estateViews).map((e) => (
                 <li key={e.slug} className={e.status === 'planned' ? 'is-soon' : e.free ? '' : 'is-sold'}>
                   <a href={e.href}>
-                    <b>{e.name}</b>
+                    <b>{softHyphens(e.name)}</b>
                     <span>{estateSale(e).toLowerCase()}</span>
                   </a>
                 </li>
@@ -223,7 +224,7 @@ export default async function Home() {
               {soon.map((r) => (
                 <li key={r.slug} className="is-soon">
                   <a href={regionHref(r.slug)}>
-                    <b>{r.name}</b>
+                    <b>{softHyphens(r.name)}</b>
                     <span>скоро</span>
                   </a>
                 </li>
