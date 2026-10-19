@@ -8,6 +8,7 @@ import { STATUS_LABEL, formatPrice } from '@/lib/format'
 import { EDGE, FILL, PAD, STREET, W, footprint, layout, type GenplanEstate, type Plot } from '@/lib/genplan'
 import { morph } from '@/lib/morph'
 import { houseTitle, type HouseView } from '@/lib/view'
+import { Filters, Ribbon, isFiltered, passes, useFilter } from './GenplanFilters'
 
 // three.js is heavy — load it only when the 3D view is on screen.
 const Genplan3D = dynamic(() => import('./Genplan3D'), {
@@ -231,8 +232,19 @@ function Scheme({
   )
 }
 
-export function Genplan({ estate, houses }: { estate: GenplanEstate; houses: HouseView[] }) {
+/**
+ * stage: the 3D plan as the main scene (reference «HAVN»): filter tiles beside it, a ribbon of free houses over its
+ * bottom edge; houses that do not pass the filter go grey in 3D.
+ */
+export function Genplan({ estate, houses, stage = false }: { estate: GenplanEstate; houses: HouseView[]; stage?: boolean }) {
   const plan = useMemo(() => layout(estate.config, houses), [estate.config, houses])
+  const [f, setF] = useFilter()
+  const freeUnits = useMemo(
+    () => plan.plots.flatMap((p) => (p.unit?.status === 'free' ? [{ n: p.n, u: p.unit }] : [])).sort((a, b) => a.u.price - b.u.price),
+    [plan],
+  )
+  const shown = useMemo(() => freeUnits.filter((x) => passes(x.u, f)), [freeUnits, f])
+  const match = useMemo(() => (stage && isFiltered(f) ? shown.map((x) => x.n) : null), [stage, f, shown])
   const [view, setView] = useState<'3d' | '2d'>('3d')
   const [active, setActive] = useState<number | null>(() => plan.plots.find((p) => p.status === 'free')?.n ?? null)
   const onFail = useCallback(() => setView('2d'), [])
@@ -317,7 +329,7 @@ export function Genplan({ estate, houses }: { estate: GenplanEstate; houses: Hou
   )
 
   return (
-    <div className="genplan">
+    <div className={`genplan ${stage ? 'genplan--stage' : ''}`}>
       <div className="genplan__toolbar">
         <div className="tabs" role="tablist" aria-label="Вид генплана">
           <button role="tab" aria-selected={view === '3d'} className={view === '3d' ? 'is-on' : ''} onClick={() => setView('3d')}>
@@ -347,6 +359,8 @@ export function Genplan({ estate, houses }: { estate: GenplanEstate; houses: Hou
         </div>
       </div>
 
+      <div className="genplan__body">
+        {stage && <Filters free={freeUnits.map((x) => x.u)} f={f} setF={setF} found={shown.length} />}
       <div className="genplan__view" ref={viewRef} onMouseLeave={() => !touch && setHover(null)}>
         {view === '3d' && !live ? (
           estate.poster ? (
@@ -360,13 +374,25 @@ export function Genplan({ estate, houses }: { estate: GenplanEstate; houses: Hou
             </button>
           )
         ) : view === '3d' ? (
-          <Genplan3D layout={plan} activeN={active} onSelect={onSelect} onHover={onHover} onFail={onFail} flyRef={flyRef} />
+          <Genplan3D layout={plan} activeN={active} onSelect={onSelect} onHover={onHover} onFail={onFail} flyRef={flyRef} match={match} />
         ) : (
           <Scheme estate={estate} plan={plan} active={active} onSelect={onSelect} onHover={onHover} />
         )}
         <HoverCard hover={hover} plots={plan.plots} touch={touch} />
+        {stage && (
+          <Ribbon
+            units={shown}
+            active={active}
+            onPick={(n) => {
+              setLive(true)
+              setActive(n)
+            }}
+          />
+        )}
+      </div>
       </div>
 
+      {!stage && (
       <div className="genplan__tip" aria-live="polite">
         {plot?.unit ? (
           <>
@@ -392,6 +418,7 @@ export function Genplan({ estate, houses }: { estate: GenplanEstate; houses: Hou
           </p>
         )}
       </div>
+      )}
       <p className="genplan__note">Визуализация условная: показывает актуальные предложения и статусы. Точное расположение участков — по генплану застройщика.</p>
     </div>
   )

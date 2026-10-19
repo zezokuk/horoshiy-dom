@@ -129,7 +129,7 @@ export default async function EstatePage({ params }: Props) {
             </div>
             <p className="lead">Покрутите посёлок и нажмите на дом. Свободные подсвечены зелёным и подписаны ценой — увидите фото, площадь и участок.</p>
           </div>
-          <Genplan estate={genplanEstate(e, houses.length)} houses={houses} />
+          <Genplan estate={genplanEstate(e, houses.length)} houses={houses} stage />
           {scheme && (
             <details className="scheme-src">
               <summary>Генплан застройщика</summary>

@@ -1,4 +1,5 @@
 import { HeroDepth } from '@/components/heroes/HeroDepth'
+import { HeroGenplan } from '@/components/heroes/HeroGenplan'
 import { HeroMinimal } from '@/components/heroes/HeroMinimal'
 import { Thread } from '@/components/Thread'
 import type { HeroFacts } from '@/components/heroes/facts'
@@ -19,12 +20,18 @@ import {
 import { formatMillions, plural, softHyphens } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
 import { JsonLd, faqLd, organizationLd } from '@/lib/seo'
-import { byEstateStatus, estateSale, estateView, houseView, promoView } from '@/lib/view'
+import {
+  byEstateStatus,
+  estateSale,
+  estateView,
+  genplanEstate,
+  houseView,
+  promoView,
+} from '@/lib/view'
 
 /** The first screen: the live one, or a variant from the 20.10 references shown at /preview/hero-N for choosing. */
 export type HeroKind = 'current' | 'hero-1' | 'hero-2' | 'hero-3'
-export const HERO_VARIANTS: Exclude<HeroKind, 'current'>[] = ['hero-1', 'hero-3']
-// (hero-2 joins the list when it is built)
+export const HERO_VARIANTS: Exclude<HeroKind, 'current'>[] = ['hero-1', 'hero-2', 'hero-3']
 
 /**
  * The brand home: the company first (who we are, values, trust), then two ways in — build a house or buy a ready
@@ -114,6 +121,21 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
       .join(', '),
   }
 
+  // variant 2: the 3D plan of the estate with the most free houses (as the region page's showcase)
+  const showcase =
+    variant === 'hero-2'
+      ? [...estates].sort(
+          (a, b) =>
+            (estateViews.find((v) => v.slug === b.slug)?.free ?? 0) -
+            (estateViews.find((v) => v.slug === a.slug)?.free ?? 0),
+        )[0]
+      : null
+  const showcaseHouses = showcase
+    ? houses
+        .filter((h) => (typeof h.estate === 'object' ? h.estate?.id : h.estate) === showcase.id)
+        .map(houseView)
+    : []
+
   const faq = faqLd(company.faq)
   return (
     <>
@@ -121,6 +143,13 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
       {faq && <JsonLd data={faq} />}
       {variant === 'hero-1' ? (
         <HeroDepth f={facts} />
+      ) : variant === 'hero-2' && showcase ? (
+        <HeroGenplan
+          f={facts}
+          estate={genplanEstate(showcase, showcaseHouses.length)}
+          houses={showcaseHouses}
+          current={showcase.name}
+        />
       ) : variant === 'hero-3' ? (
         <HeroMinimal
           f={facts}

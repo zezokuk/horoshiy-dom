@@ -18,6 +18,8 @@ type Props = {
   onFail: () => void
   /** Filled by the scene: flies the camera to a house, resolves when it arrives. */
   flyRef?: { current: ((n: number) => Promise<void>) | null }
+  /** Plots that pass the visitor's filter (GenplanFilters); the others go grey. null — no filter. */
+  match?: number[] | null
 }
 
 function rand(seed: number) {
@@ -25,9 +27,16 @@ function rand(seed: number) {
   return x - Math.floor(x)
 }
 
-export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, flyRef }: Props) {
+export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, flyRef, match = null }: Props) {
   const box = useRef<HTMLDivElement>(null) // canvas host, never gets React children
-  const api = useRef<{ highlight: (n: number | null) => void; zoom: (k: number) => void; rotate: (a: number) => void; reset: () => void } | null>(null)
+  const api = useRef<{
+    highlight: (n: number | null) => void
+    filter: (m: number[] | null) => void
+    zoom: (k: number) => void
+    rotate: (a: number) => void
+    reset: () => void
+  } | null>(null)
+  const matchRef = useRef(match) // the filter to apply when the scene is (re)built
   // latest callbacks for the scene's event handlers, which are created once per layout
   const select = useRef(onSelect)
   const hover = useRef(onHover)
@@ -145,6 +154,8 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     const housesAt = new Map<number, { pos: THREE.Vector3; front: number; h: number }>()
     const curbMats = new Map<number, THREE.MeshStandardMaterial>()
     const lawnMats = new Map<number, THREE.MeshStandardMaterial>()
+    const statusAt = new Map<number, Plot['status']>()
+    const priceTags = new Map<number, HTMLDivElement>()
     const mLive = houseMaterials(false)
     const mDim = houseMaterials(true)
     const paving = mat(PALETTE.paving)
@@ -165,6 +176,7 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
       // status curb: four thin raised borders
       const curb = mat(EDGE[p.status], { roughness: 0.6 })
       curbMats.set(p.n, curb)
+      statusAt.set(p.n, p.status)
       const cw = p.w * S
       const ch = p.h * S
       for (const [w, d, ox, oz] of [
@@ -229,6 +241,7 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
         const div = document.createElement('div')
         div.className = 'g3-label'
         div.textContent = `${(p.unit.price / 1_000_000).toLocaleString('ru-RU', { maximumFractionDigits: 2 })} млн`
+        priceTags.set(p.n, div)
         const label = new CSS2DObject(div)
         label.position.set(hxC, 0.48 + house.height + 1.8, hzC)
         add(label)
@@ -378,8 +391,12 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     const ndc = new THREE.Vector2()
     let hovered: number | null = null
     let active: number | null = null
+    let matched: Set<number> | null = matchRef.current ? new Set(matchRef.current) : null
     const paintSel = () => {
       curbMats.forEach((m, n) => {
+        const off = !!matched && !matched.has(n)
+        m.color.set(EDGE[off ? 'na' : (statusAt.get(n) ?? 'na')])
+        priceTags.get(n)?.classList.toggle('is-off', off)
         const on = n === active || n === hovered
         m.emissive.set(on ? (n === active ? '#4f8a5b' : '#c9a86a') : '#000000')
         m.emissiveIntensity = on ? 0.8 : 0
@@ -437,6 +454,10 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     api.current = {
       highlight: (n) => {
         active = n
+        paintSel()
+      },
+      filter: (m) => {
+        matched = m ? new Set(m) : null
         paintSel()
       },
       zoom: dolly,
@@ -544,6 +565,11 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
   useEffect(() => {
     api.current?.highlight(activeN)
   }, [activeN])
+
+  useEffect(() => {
+    matchRef.current = match
+    api.current?.filter(match)
+  }, [match])
 
   return (
     <div className="g3" role="img" aria-label="3D-генплан посёлка. Двигайте двумя пальцами, нажмите на дом.">
