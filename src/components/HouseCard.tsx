@@ -19,7 +19,8 @@ export function HouseCard({ h, showEstate = true }: { h: HouseView; showEstate?:
           <img
             src={h.photoCard}
             srcSet={h.photo ? `${h.photoCard} 640w, ${h.photo} 1600w` : undefined}
-            sizes="(min-width: 1024px) 400px, (min-width: 700px) 50vw, 100vw"
+            // phones: 320 → the 640 px copy on a 2× screen (≈50 KB); «100vw» made them pick the 1600 px one (≈300 KB) per card
+            sizes="(min-width: 1024px) 400px, (min-width: 700px) 50vw, 320px"
             width={640}
             height={348}
             alt={`${h.title}, ${formatArea(h.area)} м²`}

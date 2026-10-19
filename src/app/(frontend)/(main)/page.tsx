@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
-import { preload } from 'react-dom'
 import { MortgageCalc } from '@/components/MortgageCalc'
-import { CountUp, HeroAura } from '@/components/Motion'
+import { CountUp } from '@/components/Motion'
+import { Pic } from '@/components/Pic'
 import { PromoCards } from '@/components/PromoCards'
 import { Words } from '@/components/Words'
 import {
@@ -12,7 +12,6 @@ import {
   getPromos,
   getRegions,
   img,
-  srcSet,
 } from '@/lib/data'
 import { formatMillions, plural, softHyphens } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
@@ -48,13 +47,9 @@ export default async function Home() {
   const soon = regions.filter((r) => r.status === 'soon')
   const hero = company.heroPhoto
   const heroSrc = img(hero, 'wide')
-  if (heroSrc)
-    preload(heroSrc, {
-      as: 'image',
-      fetchPriority: 'high',
-      imageSrcSet: srcSet(hero),
-      imageSizes: '(min-width: 960px) 1600px, 660px',
-    })
+  // phones: the photo sits below the first screen, so it gets the 640 px copy (≈50 KB, not 314) and no preload
+  // that would take the network from fonts and scripts (measured with tools/perfcheck.py, 19.10)
+  const heroPhone = img(hero, 'card')
 
   // three different pictures: the «dream» project render (build), a real house on sale (buy; not the type already
   // shown in the hero), and an estate seen from above for the places band (its 3D poster — covers have the name printed on them)
@@ -150,16 +145,8 @@ export default async function Home() {
         </div>
         <div className="hero2__photo">
           {heroSrc && (
-            <img
-              src={heroSrc}
-              srcSet={srcSet(hero)}
-              sizes="(min-width: 960px) 1600px, 660px"
-              alt={typeof hero === 'object' ? (hero?.alt ?? '') : ''}
-              fetchPriority="high"
-              decoding="async"
-            />
+            <Pic src={heroSrc} phone={heroPhone} alt={typeof hero === 'object' ? (hero?.alt ?? '') : ''} priority />
           )}
-          <HeroAura />
           <div className="hero2__chips">
             <span>Готовые дома</span>
             <span>Стройка под ключ</span>

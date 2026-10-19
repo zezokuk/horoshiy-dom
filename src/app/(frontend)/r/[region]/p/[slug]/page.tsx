@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { HouseCard } from '@/components/HouseCard'
 import { LeadForm } from '@/components/LeadForm'
 import { Nearby } from '@/components/Nearby'
+import { Pic } from '@/components/Pic'
 import { getCompany, getHouses, getLanding, getRegion, img } from '@/lib/data'
 import { formatMillions, plural } from '@/lib/format'
 import { regionHref } from '@/lib/site'
@@ -47,6 +48,7 @@ export default async function LandingPage({ params }: Props) {
   const priceFrom = free.length ? free[0].price : null
   const coming = estate?.status === 'planned'
   const photo = img(l.cover, 'wide') ?? free[0]?.photo ?? img(estate?.poster, 'wide') ?? img(estate?.cover, 'wide')
+  const photoPhone = img(l.cover, 'card') ?? free[0]?.photoCard ?? img(estate?.poster, 'card') ?? img(estate?.cover, 'card')
   const years = company.since ? new Date().getFullYear() - company.since : null
 
   // facts from the admin, or the estate's own numbers
@@ -98,7 +100,7 @@ export default async function LandingPage({ params }: Props) {
         {photo && (
           <div className="container">
             <div className="lp-hero__photo">
-              <img src={photo} alt={estate ? `Дом в посёлке ${estate.name}` : l.title} fetchPriority="high" />
+              <Pic src={photo} phone={photoPhone} alt={estate ? `Дом в посёлке ${estate.name}` : l.title} priority />
             </div>
           </div>
         )}

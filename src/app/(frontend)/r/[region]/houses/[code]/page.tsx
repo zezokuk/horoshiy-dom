@@ -4,6 +4,7 @@ import { FamilyMortgage } from '@/components/FamilyMortgage'
 import { HouseCard } from '@/components/HouseCard'
 import { HouseReady } from '@/components/HouseReady'
 import { MortgageCalc } from '@/components/MortgageCalc'
+import { Pic } from '@/components/Pic'
 import { PlanTour } from '@/components/PlanTour'
 import { getCompany, getHouse, getHouses, getRegion, img } from '@/lib/data'
 import { STATUS_LABEL, formatArea, formatPrice, plural, telHref } from '@/lib/format'
@@ -59,6 +60,7 @@ export default async function HousePage({ params }: Props) {
   const plot = h.plot?.replace(/\s*сот\.?$/, '')
   // a house just added in the admin may have no photo yet: the project's picture, else a slim band with the facts
   const photo = h.photo ?? img(project?.photo, 'wide')
+  const photoPhone = h.photoCard ?? img(project?.photo, 'card')
 
   return (
     <>
@@ -81,7 +83,7 @@ export default async function HousePage({ params }: Props) {
       <div className="container hs">
         <div className={`house__photo hs__photo ${photo ? '' : 'hs__photo--none'}`}>
           <HouseReady />
-          {photo && <img src={photo} alt={`${h.title} в посёлке ${e.name}`} fetchPriority="high" />}
+          {photo && <Pic src={photo} phone={photoPhone} alt={`${h.title} в посёлке ${e.name}`} priority />}
           <span className={`badge badge--${h.status}`}>{STATUS_LABEL[h.status]}</span>
           <div className="hs__facts">
             <div>

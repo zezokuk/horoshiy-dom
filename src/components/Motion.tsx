@@ -68,20 +68,3 @@ export function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
     </span>
   );
 }
-
-/** Soft glow following the cursor over the hero (desktop only). */
-export function HeroAura() {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const host = ref.current?.parentElement;
-    if (!host || !window.matchMedia("(pointer: fine)").matches) return;
-    const move = (e: PointerEvent) => {
-      const r = host.getBoundingClientRect();
-      ref.current?.style.setProperty("--mx", `${e.clientX - r.left}px`);
-      ref.current?.style.setProperty("--my", `${e.clientY - r.top}px`);
-    };
-    host.addEventListener("pointermove", move);
-    return () => host.removeEventListener("pointermove", move);
-  }, []);
-  return <div ref={ref} className="hero__aura" aria-hidden />;
-}

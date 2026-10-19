@@ -21,7 +21,7 @@ export function ProjectCard({ p }: { p: ProjectCardData }) {
           <img
             src={p.photoCard}
             srcSet={p.photo ? `${p.photoCard} 640w, ${p.photo} 1600w` : undefined}
-            sizes="(min-width: 1024px) 400px, (min-width: 700px) 50vw, 100vw"
+            sizes="(min-width: 1024px) 400px, (min-width: 700px) 50vw, 320px" // phones: the 640 px copy (see HouseCard)
             alt={`Проект ${p.name}`}
             loading="lazy"
             decoding="async"

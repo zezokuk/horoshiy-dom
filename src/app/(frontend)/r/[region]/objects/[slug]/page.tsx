@@ -5,6 +5,7 @@ import { Genplan } from '@/components/Genplan'
 import { HouseCard } from '@/components/HouseCard'
 import { LeadInline } from '@/components/LeadForm'
 import { Nearby } from '@/components/Nearby'
+import { Pic } from '@/components/Pic'
 import { getEstate, getHouses, getRegion, img } from '@/lib/data'
 import { formatMillions, plural } from '@/lib/format'
 import { regionHref } from '@/lib/site'
@@ -52,6 +53,7 @@ export default async function EstatePage({ params }: Props) {
   const sorted = [...houses].sort((a, b) => (a.status === b.status ? a.price - b.price : a.status === 'free' ? -1 : 1))
   // a fresh estate may have no houses or pictures yet: fall back to its 3D poster or cover, else no picture column
   const photo = free[0]?.photo ?? houses.find((h) => h.photo)?.photo ?? img(e.poster, 'wide') ?? img(e.cover, 'wide')
+  const photoPhone = free[0]?.photoCard ?? houses.find((h) => h.photoCard)?.photoCard ?? img(e.poster, 'card') ?? img(e.cover, 'card')
   const priceFrom = free.length ? Math.min(...free.map((h) => h.price)) : null
   const plot = houses.find((h) => h.plot)?.plot?.replace(/\s*сот\.?$/, '')
   const eyebrow = [e.kind, e.place].filter(Boolean).join(' · ')
@@ -74,7 +76,7 @@ export default async function EstatePage({ params }: Props) {
         <div className={`obj-hero ${photo ? '' : 'obj-hero--solo'}`}>
           {photo && (
             <div className="obj-hero__img">
-              <img src={photo} alt={`Дом в посёлке ${e.name}`} fetchPriority="high" />
+              <Pic src={photo} phone={photoPhone} alt={`Дом в посёлке ${e.name}`} priority />
             </div>
           )}
           <div style={{ display: 'grid', gap: 20, alignContent: 'start' }}>
@@ -205,6 +207,7 @@ export default async function EstatePage({ params }: Props) {
  */
 function ComingEstate({ region, e }: { region: Region; e: Estate }) {
   const photo = img(e.poster, 'wide') ?? img(e.cover, 'wide')
+  const photoPhone = img(e.poster, 'card') ?? img(e.cover, 'card')
   const target = {
     region: region.slug,
     estate: e.slug,
@@ -229,7 +232,7 @@ function ComingEstate({ region, e }: { region: Region; e: Estate }) {
         <div className={`obj-hero ${photo ? '' : 'obj-hero--solo'}`}>
           {photo && (
             <div className="obj-hero__img">
-              <img src={photo} alt={`Посёлок ${e.name}`} fetchPriority="high" />
+              <Pic src={photo} phone={photoPhone} alt={`Посёлок ${e.name}`} priority />
             </div>
           )}
           <div style={{ display: 'grid', gap: 20, alignContent: 'start' }}>

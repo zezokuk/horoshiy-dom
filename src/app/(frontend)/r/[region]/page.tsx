@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { EstatesView } from '@/components/EstatesView'
 import { Genplan } from '@/components/Genplan'
 import { HouseCard } from '@/components/HouseCard'
+import { Pic } from '@/components/Pic'
 import { LeadInline } from '@/components/LeadForm'
 import { Words } from '@/components/Words'
 import { PromoCards } from '@/components/PromoCards'
@@ -78,6 +79,8 @@ export default async function RegionPage({ params }: Props) {
   const priceFrom = free.length ? Math.min(...free.map((h) => h.price)) : null
   // a real house, not an estate cover: covers carry the estate's name printed on them («ЮЖНЫЙ ВЕТЕР»)
   const cover = img(region.cover, 'wide') || free[0]?.photo || houses.map(houseView).find((h) => h.photo)?.photo || views.find((v) => v.cover)?.cover
+  const coverPhone =
+    img(region.cover, 'card') || free[0]?.photoCard || houses.map(houseView).find((h) => h.photoCard)?.photoCard || views.find((v) => v.coverCard)?.coverCard
   // 3D showcase: the estate with the most free houses (ties: the first in the admin's order)
   const top = [...estates].sort((a, b) => (views.find((v) => v.slug === b.slug)?.free ?? 0) - (views.find((v) => v.slug === a.slug)?.free ?? 0))[0]
   const showcase = top && {
@@ -91,7 +94,7 @@ export default async function RegionPage({ params }: Props) {
         <div className={`obj-hero ${cover ? '' : 'obj-hero--solo'}`}>
           {cover && (
             <div className="obj-hero__img">
-              <img src={cover} alt={region.name} fetchPriority="high" />
+              <Pic src={cover} phone={coverPhone} alt={region.name} priority />
             </div>
           )}
           <div style={{ display: 'grid', gap: 20, alignContent: 'start' }}>

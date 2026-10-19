@@ -8,7 +8,7 @@ export function EstateCard({ e, showRegion = false }: { e: EstateView; showRegio
         <img
           src={e.coverCard}
           srcSet={e.cover ? `${e.coverCard} 640w, ${e.cover} 1600w` : undefined}
-          sizes="(min-width: 1024px) 400px, (min-width: 700px) 50vw, 100vw"
+          sizes="(min-width: 1024px) 400px, (min-width: 700px) 50vw, 320px" // phones: the 640 px copy (see HouseCard)
           alt={e.name}
           loading="lazy"
           decoding="async"

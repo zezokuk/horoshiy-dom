@@ -41,6 +41,8 @@
 }
 
 * { box-sizing: border-box; }
+/* <picture> (components/Pic) is layout-transparent: the CSS for an <img> inside a frame keeps working */
+picture { display: contents; }
 /* lining figures everywhere: Cormorant's old-style digits made «12» read as «I2» in prices, areas and counters */
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; font-variant-numeric: lining-nums; }
 body {
