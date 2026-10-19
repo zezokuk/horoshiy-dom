@@ -89,10 +89,18 @@ export function LeadForm({
     }
   }
 
+  // how much of the number is typed (10 digits after +7): the line under the field fills, a tick when complete
+  const digits = Math.max(0, phone.replace(/\D/g, '').length - 1)
+
   if (state === 'done') {
     return (
       <div className={`form ${light ? 'form--light' : ''}`}>
         <div className="form__ok">
+          {/* the brand's house draws itself and a light goes on in its window */}
+          <svg className="form__house" viewBox="0 0 48 44" aria-hidden>
+            <path d="M3 21 24 4l21 17M9 17v24h30V17" pathLength={1} />
+            <rect x="20" y="26" width="8" height="9" rx="1" />
+          </svg>
           <b>Спасибо! Заявка принята.</b>
           <p>
             {interest === 'future'
@@ -105,7 +113,10 @@ export function LeadForm({
   }
 
   return (
-    <form className={`form ${light ? 'form--light' : ''} ${row ? 'form--row' : ''}`} onSubmit={submit}>
+    <form
+      className={`form ${light ? 'form--light' : ''} ${row ? 'form--row' : ''}`}
+      onSubmit={submit}
+    >
       {/* Trap for bots: hidden from people, bots fill every field — the server silently drops such leads. */}
       <div className="form__hp" aria-hidden="true">
         <input type="text" name="website" tabIndex={-1} autoComplete="off" />
@@ -113,33 +124,53 @@ export function LeadForm({
       {ask && (
         <div className="form__ask" role="radiogroup" aria-label="Что вас интересует">
           {ASK.map((a) => (
-            <button key={a.value} type="button" role="radio" aria-checked={interest === a.value} className={interest === a.value ? 'is-on' : ''} onClick={() => setInterest(a.value)}>
+            <button
+              key={a.value}
+              type="button"
+              role="radio"
+              aria-checked={interest === a.value}
+              className={interest === a.value ? 'is-on' : ''}
+              onClick={() => setInterest(a.value)}
+            >
               {a.label}
             </button>
           ))}
         </div>
       )}
       <input type="text" name="name" placeholder="Ваше имя" autoComplete="name" required />
-      <input
-        type="tel"
-        name="phone"
-        placeholder="+7 (___) ___-__-__"
-        autoComplete="tel"
-        inputMode="tel"
-        value={phone}
-        onChange={(e) => setPhone(formatPhone(e.target.value))}
-        pattern="\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}"
-        title="Номер в формате +7 (999) 123-45-67"
-        required
-      />
+      <span
+        className={`form__phone ${digits === 10 ? 'is-full' : ''}`}
+        style={{ ['--fill' as string]: digits / 10 }}
+      >
+        <input
+          type="tel"
+          name="phone"
+          placeholder="+7 (___) ___-__-__"
+          autoComplete="tel"
+          inputMode="tel"
+          value={phone}
+          onChange={(e) => setPhone(formatPhone(e.target.value))}
+          pattern="\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}"
+          title="Номер в формате +7 (999) 123-45-67"
+          required
+        />
+        <i className="form__fill" aria-hidden />
+        <i className="form__tick" aria-hidden>
+          ✓
+        </i>
+      </span>
       <label className="form__consent">
         <input type="checkbox" name="consent" required />
         <span>
-          Даю <a href={mainHref('/consent')}>согласие на обработку персональных данных</a> и ознакомлен с{' '}
-          <a href={mainHref('/privacy')}>политикой</a>
+          Даю <a href={mainHref('/consent')}>согласие на обработку персональных данных</a> и
+          ознакомлен с <a href={mainHref('/privacy')}>политикой</a>
         </span>
       </label>
-      <button className="btn btn--gold" type="submit" disabled={state === 'sending'}>
+      <button
+        className={`btn btn--gold ${state === 'sending' ? 'is-sending' : ''}`}
+        type="submit"
+        disabled={state === 'sending'}
+      >
         {state === 'sending' ? 'Отправляем…' : cta}
       </button>
       {state === 'error' && (
@@ -159,7 +190,17 @@ export function LeadForm({
 }
 
 /** Compact lead strip placed between sections, so the form is always close (not only at the bottom). */
-export function LeadInline({ title, text, cta, target }: { title: string; text: string; cta: string; target?: LeadTarget }) {
+export function LeadInline({
+  title,
+  text,
+  cta,
+  target,
+}: {
+  title: string
+  text: string
+  cta: string
+  target?: LeadTarget
+}) {
   return (
     <div className="lead-inline" data-reveal>
       <div className="lead-inline__text">
@@ -181,7 +222,11 @@ export function FloatingCall() {
     return () => window.removeEventListener('scroll', on)
   }, [])
   return (
-    <a href="#lead" className={`float-call ${shown ? 'is-shown' : ''}`} aria-label="Заказать обратный звонок">
+    <a
+      href="#lead"
+      className={`float-call ${shown ? 'is-shown' : ''}`}
+      aria-label="Заказать обратный звонок"
+    >
       <span className="float-call__dot" />
       Заказать звонок
     </a>
