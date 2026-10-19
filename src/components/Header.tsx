@@ -31,6 +31,8 @@ export function Header({
   slogan?: string | null
 }) {
   const path = usePathname()
+  // menu links are absolute in subdomain mode (http://домен/catalog): compare their path with the page's
+  const here = (href: string) => href.replace(/^https?:\/\/[^/]+/, '') === path
   // the menu remembers the page it was opened on, so it is closed on any other page without an effect
   const [openOn, setOpenOn] = useState<string | null>(null)
   const open = openOn === path
@@ -66,7 +68,7 @@ export function Header({
         {switcher}
         <nav className="nav" aria-label="Основное меню">
           {nav.map((n) => (
-            <Link key={n.href} href={n.href} aria-current={path === n.href ? 'page' : undefined}>
+            <Link key={n.href} href={n.href} aria-current={here(n.href) ? 'page' : undefined}>
               {n.label}
             </Link>
           ))}
@@ -95,7 +97,7 @@ export function Header({
         // any link closes the menu: «Посёлки» (/#estates) on the same page does not change the path
         <nav className="mobile-nav" aria-label="Мобильное меню" onClick={(e) => (e.target as HTMLElement).closest('a') && setOpen(false)}>
           {nav.map((n) => (
-            <Link key={n.href} href={n.href}>
+            <Link key={n.href} href={n.href} aria-current={here(n.href) ? 'page' : undefined}>
               {n.label}
             </Link>
           ))}

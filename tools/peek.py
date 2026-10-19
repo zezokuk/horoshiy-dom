@@ -19,4 +19,4 @@ for w, h, mob, dev, port in [(1440, 900, False, "d", 9390), (390, 844, True, "m"
         else:  # a selector: its top under the header
             b.js(f"(() => {{ const e = document.querySelector({json.dumps(to)}); if (e) scrollTo(0, e.getBoundingClientRect().top + scrollY - 84) }})()")
         time.sleep(wait)  # entry animations, 3D
-        print(dev, b.shot(f"peek_{name}_{dev}.png"), b.errors()[:2])
+        print(dev, b.shot(f"peek_{name}_{dev}.png"), b.errors()[:2], "SIDEWAYS SCROLL" if b.js("document.documentElement.scrollWidth > innerWidth") else "")
