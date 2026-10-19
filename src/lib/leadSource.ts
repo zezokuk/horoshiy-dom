@@ -1,3 +1,6 @@
+/** Ad parameters kept with a lead: UTM tags and click ids of Yandex Direct (yclid), Google (gclid), VK Ads (rb_clickid, vkclid). */
+export const AD_PARAM = /^(utm_\w+|yclid|gclid|rb_clickid|vkclid)$/
+
 /**
  * One line for the manager (and later for the CRM): where the lead came from.
  * Ads by their UTM tags or click ids, then search engines and other sites by the referrer, else a direct visit.
@@ -10,6 +13,7 @@ export function leadSource(utm: Record<string, string>, ref: string, ownHost: st
   }
   if (utm.yclid) return 'Реклама: Яндекс Директ'
   if (utm.gclid) return 'Реклама: Google Ads'
+  if (utm.rb_clickid || utm.vkclid) return 'Реклама: VK'
   let host = ''
   try {
     host = ref ? new URL(ref).host.toLowerCase() : ''

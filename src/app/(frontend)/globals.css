@@ -321,6 +321,12 @@ ul { margin: 0; padding: 0; list-style: none; }
 .note { font-size: 13px; color: var(--muted); }
 .prose { max-width: 760px; display: grid; gap: 14px; }
 .prose h2 { font-family: var(--font-serif); font-size: 28px; margin-top: 18px; }
+/* cookie notice: above the phone's sticky bar, a small card bottom-left on a computer */
+.cookie { position: fixed; z-index: 41; left: 12px; right: 12px; bottom: 80px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: #fff; color: var(--ink, #1f2a22); box-shadow: 0 12px 32px -12px rgba(0,0,0,.35); border: 1px solid rgba(31,61,43,.1); }
+.cookie p { margin: 0; font-size: 13px; line-height: 1.4; }
+.cookie a { text-decoration: underline; }
+.cookie .btn { flex: none; padding: 10px 16px; min-height: 44px; }
+@media (min-width: 960px) { .cookie { left: 24px; right: auto; bottom: 24px; max-width: 440px; } }
 .sticky-cta { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 40; display: flex; gap: 8px; }
 .sticky-cta .btn { flex: 1; box-shadow: 0 10px 30px -10px rgba(0,0,0,.5); }
 @media (min-width: 960px) { .sticky-cta { display: none; } }

@@ -63,7 +63,7 @@ export function LeadForm({
     if (phone.replace(/\D/g, '').length < 11) return
     setState('sending')
     try {
-      const { utm, ref } = readAttribution()
+      const { utm, ref, landing } = readAttribution()
       const res = await fetch(ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -76,6 +76,7 @@ export function LeadForm({
           context: target.context,
           interest,
           page: window.location.href,
+          landing,
           utm,
           ref,
         }),

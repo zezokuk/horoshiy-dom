@@ -1,11 +1,14 @@
+import { after } from 'next/server'
 import type { Endpoint, PayloadRequest } from 'payload'
-import { leadSource } from '../lib/leadSource'
-import { ROOT_DOMAIN } from '../lib/site'
+import { AD_PARAM, leadSource } from '../lib/leadSource'
+import { MAIN_URL, ROOT_DOMAIN } from '../lib/site'
+import { deliverToAmo, retryQueued } from './amocrm'
 
 /**
  * POST /api/leads/submit — every form on every (sub)domain posts here.
  * Same rules as the demo's lead.php, tested there: honeypot, phone check, consent, rate limit per IP.
- * The lead is SAVED FIRST (admin → «Заявки»), then the manager of its region is notified in Telegram.
+ * The lead is SAVED FIRST (admin → «Заявки»), then the manager of its region is notified in Telegram, then it goes
+ * to amoCRM (collections/amocrm.ts — with a retry queue).
  * Bot token: TELEGRAM_BOT_TOKEN in .env; chat ids: region «Telegram для заявок» or, if empty, the company setting.
  */
 const INTEREST = { buy: 'купить готовый дом', build: 'построить дом', future: 'присматривается, на будущее', mortgage: 'ипотека' } as const
@@ -78,7 +81,7 @@ export const leadEndpoint: Endpoint = {
     const utm: Record<string, string> = {}
     if (json.utm && typeof json.utm === 'object') {
       for (const [k, v] of Object.entries(json.utm as Record<string, unknown>)) {
-        if (/^(utm_\w+|yclid|gclid)$/.test(k)) utm[k] = clean(v, 150)
+        if (AD_PARAM.test(k)) utm[k] = clean(v, 150)
       }
     }
     const regionSlug = clean(json.region, 40)
@@ -91,6 +94,7 @@ export const leadEndpoint: Endpoint = {
     const interest = (['buy', 'build', 'future', 'mortgage'] as const).find((v) => v === interestRaw)
     const page = clean(json.page, 300)
     const ref = clean(json.ref, 300)
+    const landing = clean(json.landing, 300)
     const source = leadSource(utm, ref, ROOT_DOMAIN)
 
     // the lead links to the house / estate it was sent from (the manager sees exactly which house): a form may name them,
@@ -118,17 +122,20 @@ export const leadEndpoint: Endpoint = {
     const lead = await req.payload.create({
       collection: 'leads',
       overrideAccess: true,
-      data: { name, phone, region: region?.id, interest, house: house?.id, estate: estateId, source, context, page, ref, utm, status: 'new' },
+      data: { name, phone, region: region?.id, interest, house: house?.id, estate: estateId, source, context, page, landing, ref, utm, status: 'new' },
     })
 
     const company = await req.payload.findGlobal({ slug: 'company', depth: 0, overrideAccess: true })
     const chats = (region?.leadChatIds?.length ? region.leadChatIds : company.leadChatIds) || []
     const utmText = Object.entries(utm).map(([k, v]) => `${k}=${v}`).join(' ')
+    // Telegram is a foreign service: sending a name and a phone there may count as cross-border transfer (152-ФЗ).
+    // TELEGRAM_PERSONAL_DATA=0 sends the lead without them, with a link to the admin — the client's lawyer decides
+    const withContacts = process.env.TELEGRAM_PERSONAL_DATA !== '0'
     const lines = [
-      '🏠 <b>Новая заявка с сайта</b>',
+      `🏠 <b>Новая заявка с сайта</b> №${lead.id}`,
       '',
-      `<b>Имя:</b> ${esc(name)}`,
-      `<b>Телефон:</b> ${esc(phone)}`,
+      withContacts ? `<b>Имя:</b> ${esc(name)}` : `<b>Открыть:</b> ${MAIN_URL}/admin/collections/leads/${lead.id}`,
+      withContacts && `<b>Телефон:</b> ${esc(phone)}`,
       region && `<b>Регион:</b> ${esc(region.name)}`,
       interest && `<b>Хочет:</b> ${INTEREST[interest]}`,
       house && `<b>Дом:</b> ${esc(`${house.title}, ${house.code}`)}`,
@@ -142,7 +149,20 @@ export const leadEndpoint: Endpoint = {
     const delivery = await telegram(chats as string[], lines.join('\n'))
     await req.payload.update({ collection: 'leads', id: lead.id, overrideAccess: true, data: { delivery } })
 
-    // the lead is stored and visible in the admin even if Telegram is down, so the visitor gets «thank you»
+    // amoCRM after the answer: the visitor never waits for it. This lead first; if amoCRM took it, it is up again,
+    // so whatever waited in the queue goes too (no point retrying the queue right after a failure)
+    const payload = req.payload
+    const toCrm = async () => {
+      const r = await deliverToAmo(payload, lead.id as number).catch(() => null)
+      if (r === 'sent') await retryQueued(payload).catch(() => null)
+    }
+    try {
+      after(toCrm)
+    } catch {
+      void toCrm() // outside a Next request (tests calling the handler directly)
+    }
+
+    // the lead is stored and visible in the admin even if Telegram or amoCRM are down, so the visitor gets «thank you»
     return Response.json({ ok: true })
   },
 }

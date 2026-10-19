@@ -426,7 +426,15 @@ export interface Lead {
     | boolean
     | null;
   ref?: string | null;
+  /**
+   * ok — менеджеру пришло сообщение; off — бот не настроен
+   */
   delivery?: string | null;
+  crm?: ('sent' | 'queued' | 'error' | 'off') | null;
+  crmId?: string | null;
+  crmTries?: number | null;
+  crmError?: string | null;
+  landing?: string | null;
   managerNote?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -737,6 +745,11 @@ export interface LeadsSelect<T extends boolean = true> {
   utm?: T;
   ref?: T;
   delivery?: T;
+  crm?: T;
+  crmId?: T;
+  crmTries?: T;
+  crmError?: T;
+  landing?: T;
   managerNote?: T;
   updatedAt?: T;
   createdAt?: T;
