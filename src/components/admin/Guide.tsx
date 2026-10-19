@@ -28,6 +28,12 @@ const STEPS: { title: string; text: string; href: string; go: string }[] = [
     go: 'Проекты домов',
   },
   {
+    title: 'Страница под рекламу',
+    text: 'Промо-страницы → создать: заголовок как в объявлении, посёлок, оффер. Свободные дома и «что рядом» подтянутся сами. Ссылку — в Директ и VK.',
+    href: '/admin/collections/landings/create',
+    go: 'Создать промо-страницу',
+  },
+  {
     title: 'Заявки',
     text: 'В каждой видно, с какого дома и посёлка она пришла и откуда человек: реклама, поиск или напрямую. Меняйте статус по ходу работы.',
     href: '/admin/collections/leads',
@@ -43,7 +49,7 @@ export function Guide() {
         style={{
           display: 'grid',
           gap: 'calc(var(--base) * 0.75)',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 210px), 1fr))', // five in a row on a laptop
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', // six: three in a row on a laptop
         }}
       >
         {STEPS.map((s, i) => (

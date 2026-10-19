@@ -1,7 +1,7 @@
 import { cache } from 'react'
 import { getPayload, type Where } from 'payload'
 import config from '@payload-config'
-import type { Company, Estate, House, Media, Project, Promo, Region } from '@/payload-types'
+import type { Company, Estate, House, Landing, Media, Project, Promo, Region } from '@/payload-types'
 
 /**
  * All reads go through Payload's Local API (no HTTP): fast, typed, and the same access rules as the admin.
@@ -78,6 +78,24 @@ export const getProject = cache(async (slug: string): Promise<Project | null> =>
   const p = await payloadClient()
   const { docs } = await p.find({ collection: 'projects', where: { slug: { equals: slug } }, depth: 1, limit: 1 })
   return docs[0] ?? null
+})
+
+/** A promo page of a region (ads landing); only active ones. */
+export const getLanding = cache(async (regionId: number, slug: string): Promise<Landing | null> => {
+  const p = await payloadClient()
+  const { docs } = await p.find({
+    collection: 'landings',
+    where: { and: [{ slug: { equals: slug } }, { region: { equals: regionId } }, { active: { equals: true } }] },
+    depth: 2,
+    limit: 1,
+  })
+  return docs[0] ?? null
+})
+
+export const getLandings = cache(async (regionId: number): Promise<Landing[]> => {
+  const p = await payloadClient()
+  const { docs } = await p.find({ collection: 'landings', where: { and: [{ region: { equals: regionId } }, { active: { equals: true } }] }, depth: 0, limit: 100 })
+  return docs
 })
 
 /** Active promos. Brand pages (no region): all of them, regional ones carry their region. A region: company-wide + its own.

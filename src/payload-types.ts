@@ -73,6 +73,7 @@ export interface Config {
     projects: Project;
     leads: Lead;
     promos: Promo;
+    landings: Landing;
     media: Media;
     users: User;
     'payload-kv': PayloadKv;
@@ -88,6 +89,7 @@ export interface Config {
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     promos: PromosSelect<false> | PromosSelect<true>;
+    landings: LandingsSelect<false> | LandingsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -470,6 +472,54 @@ export interface Promo {
   createdAt: string;
 }
 /**
+ * Страница под объявление: адрес на сайте — поддомен региона /p/<адрес>. Цифры — только проверенные: их увидит покупатель
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "landings".
+ */
+export interface Landing {
+  id: number;
+  /**
+   * Как в объявлении: «Дома в Динской от 8,8 млн»
+   */
+  title: string;
+  /**
+   * Латиницей: dinskaya-ipoteka → krd.домен.ru/p/dinskaya-ipoteka
+   */
+  slug: string;
+  /**
+   * Выключили — страница отвечает 404
+   */
+  active?: boolean | null;
+  region: number | Region;
+  /**
+   * Свободные дома, цены, «что рядом» и коммуникации подтянутся сами
+   */
+  estate?: (number | null) | Estate;
+  /**
+   * Одно-два предложения фактами: что, где, почём, на каких условиях
+   */
+  offer?: string | null;
+  /**
+   * До 4: «6 мес.» — «стройка под ключ», «20 мин» — «до Краснодара». Пусто — возьмём из посёлка
+   */
+  facts?:
+    | {
+        value: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Пусто — фото свободного дома или обложка посёлка
+   */
+  cover?: (number | null) | Media;
+  cta?: string | null;
+  formNote?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -545,6 +595,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'promos';
         value: number | Promo;
+      } | null)
+    | ({
+        relationTo: 'landings';
+        value: number | Landing;
       } | null)
     | ({
         relationTo: 'media';
@@ -768,6 +822,30 @@ export interface PromosSelect<T extends boolean = true> {
   active?: T;
   until?: T;
   order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "landings_select".
+ */
+export interface LandingsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  active?: T;
+  region?: T;
+  estate?: T;
+  offer?: T;
+  facts?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
+  cover?: T;
+  cta?: T;
+  formNote?: T;
   updatedAt?: T;
   createdAt?: T;
 }

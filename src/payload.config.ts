@@ -14,6 +14,7 @@ import { Projects } from './collections/Projects'
 import { Houses } from './collections/Houses'
 import { Leads } from './collections/Leads'
 import { Promos } from './collections/Promos'
+import { Landings } from './collections/Landings'
 import { Company } from './globals/Company'
 
 const filename = fileURLToPath(import.meta.url)
@@ -29,7 +30,7 @@ export default buildConfig({
     components: { beforeDashboard: ['/components/admin/Guide#Guide'] }, // «Как вести сайт» for the client's team
   },
   i18n: { supportedLanguages: { ru }, fallbackLanguage: 'ru' },
-  collections: [Regions, Estates, Houses, Projects, Leads, Promos, Media, Users],
+  collections: [Regions, Estates, Houses, Projects, Leads, Promos, Landings, Media, Users],
   globals: [Company],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

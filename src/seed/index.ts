@@ -91,9 +91,42 @@ async function ensureAdmin(payload: Payload) {
 }
 
 async function wipe(payload: Payload) {
-  for (const collection of ['promos', 'houses', 'projects', 'estates', 'regions', 'media'] as const) {
+  for (const collection of ['landings', 'promos', 'houses', 'projects', 'estates', 'regions', 'media'] as const) {
     await payload.delete({ collection, where: { id: { exists: true } }, overrideAccess: true })
   }
+}
+
+/** Two promo pages for ads (the 150 package): the estate with the most free houses and the new one. Facts — from the
+ *  estates themselves (the page fills the numbers), the texts only say what the client's materials say. */
+async function seedLandings(payload: Payload, region: number, dinskaya: number, novo: number) {
+  await payload.create({
+    collection: 'landings',
+    data: {
+      title: 'Дома в Динской от 8,8 млн',
+      slug: 'dinskaya',
+      region,
+      estate: dinskaya,
+      offer: 'Кирпичные дома с участком 4–4,5 сотки на севере станицы Динской, у реки. Предчистовая отделка, газ и вода подключены, семейная ипотека.',
+      cta: 'Получить подборку домов',
+    },
+  })
+  await payload.create({
+    collection: 'landings',
+    data: {
+      title: 'Новый посёлок в Нововеличковской',
+      slug: 'novovelichkovskaya',
+      region,
+      estate: novo,
+      offer: 'Старт продаж скоро. Оставьте телефон — сообщим первыми и пришлём проекты домов с ценами.',
+      facts: [
+        { value: '6 мес.', label: 'дом под ключ' },
+        { value: '5 лет', label: 'гарантия на дом' },
+        { value: '12', label: 'проектов домов' },
+      ],
+      cta: 'Узнать о старте продаж',
+      formNote: 'Без навязчивых звонков: только старт продаж, цены и первые дома.',
+    },
+  })
 }
 
 async function run() {
@@ -224,7 +257,7 @@ async function run() {
 
   // The new project from the meeting (14.10): sales start later, so only the place — no houses, prices or numbers.
   // Coordinates are the stanitsa centre; the exact plot goes in when the client sends it.
-  await payload.create({
+  const novo = await payload.create({
     collection: 'estates',
     data: {
       name: 'Нововеличковская',
@@ -238,6 +271,7 @@ async function run() {
       lng: 38.8378,
     },
   })
+  await seedLandings(payload, krd.id, estates.get('dinskaya')!, novo.id as number)
 
   // Plots on the 3D plan: the demo spread each estate's houses over the plots in price-grid order.
   // Saving the result as «Участок на генплане» keeps every house where the demo (and its 3D posters) put it.

@@ -1,4 +1,4 @@
-import { getEstates, getHouses, getProjects, getRegion } from '@/lib/data'
+import { getEstates, getHouses, getLandings, getProjects, getRegion } from '@/lib/data'
 import { GLOBAL_PATHS, mainHref, regionFromHost, regionHref } from '@/lib/site'
 
 /**
@@ -16,8 +16,9 @@ export async function GET(req: Request) {
     if (!region) return new Response('Not found', { status: 404 })
     urls = [{ loc: regionHref(slug), lastmod: region.updatedAt, priority: 1 }]
     if (region.status === 'active') {
-      const [estates, houses] = await Promise.all([getEstates(region.id), getHouses({ region: region.id })])
+      const [estates, houses, landings] = await Promise.all([getEstates(region.id), getHouses({ region: region.id }), getLandings(region.id)])
       urls.push({ loc: regionHref(slug, '/catalog'), priority: 0.9 })
+      urls.push(...landings.map((l) => ({ loc: regionHref(slug, `/p/${l.slug}`), lastmod: l.updatedAt, priority: 0.8 })))
       urls.push(...estates.map((e) => ({ loc: regionHref(slug, `/objects/${e.slug}`), lastmod: e.updatedAt, priority: 0.8 })))
       urls.push(...houses.map((h) => ({ loc: regionHref(slug, `/houses/${h.code}`), lastmod: h.updatedAt, priority: h.status === 'free' ? 0.7 : 0.4 })))
     }

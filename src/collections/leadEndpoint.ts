@@ -94,7 +94,7 @@ export const leadEndpoint: Endpoint = {
     const interest = (['buy', 'build', 'future', 'mortgage'] as const).find((v) => v === interestRaw)
     const page = clean(json.page, 300)
     const ref = clean(json.ref, 300)
-    const landing = clean(json.landing, 300)
+    const landingPage = clean(json.landing, 300) // the first page of the visit (not a promo page)
     const source = leadSource(utm, ref, ROOT_DOMAIN)
 
     // the lead links to the house / estate it was sent from (the manager sees exactly which house): a form may name them,
@@ -107,7 +107,19 @@ export const leadEndpoint: Endpoint = {
       }
     })()
     const houseCode = clean(json.house, 60) || (path.match(/\/houses\/([\w-]+)\/?$/)?.[1] ?? '')
-    const estateSlug = clean(json.estate, 60) || (path.match(/\/objects\/([\w-]+)\/?$/)?.[1] ?? '')
+    // a promo page (/p/<slug>): the lead carries its estate and «Промо «…»», whichever form on the page was used
+    const landingSlug = path.match(/\/p\/([\w-]+)\/?$/)?.[1] ?? ''
+    const landing = landingSlug
+      ? (await req.payload.find({ collection: 'landings', where: { slug: { equals: landingSlug } }, limit: 1, depth: 0, overrideAccess: true })).docs[0]
+      : undefined
+    const landingEstate = landing?.estate ? (typeof landing.estate === 'object' ? landing.estate.slug : undefined) : undefined
+    const estateSlug =
+      clean(json.estate, 60) ||
+      (path.match(/\/objects\/([\w-]+)\/?$/)?.[1] ?? '') ||
+      landingEstate ||
+      (landing?.estate && typeof landing.estate === 'number'
+        ? (await req.payload.findByID({ collection: 'estates', id: landing.estate, depth: 0, overrideAccess: true })).slug
+        : '')
     const [house, estateDoc] = await Promise.all([
       houseCode
         ? req.payload.find({ collection: 'houses', where: { code: { equals: houseCode } }, limit: 1, depth: 0, overrideAccess: true }).then((r) => r.docs[0])
@@ -116,13 +128,28 @@ export const leadEndpoint: Endpoint = {
         ? req.payload.find({ collection: 'estates', where: { slug: { equals: estateSlug } }, limit: 1, depth: 0, overrideAccess: true }).then((r) => r.docs[0])
         : undefined,
     ])
+    const leadContext = context || (landing ? `Промо «${landing.title}»` : '')
     const estateId = estateDoc?.id ?? (house ? (typeof house.estate === 'object' ? house.estate.id : house.estate) : undefined)
     const estateName = estateDoc?.name ?? (estateId ? (await req.payload.findByID({ collection: 'estates', id: estateId, depth: 0, overrideAccess: true })).name : '')
 
     const lead = await req.payload.create({
       collection: 'leads',
       overrideAccess: true,
-      data: { name, phone, region: region?.id, interest, house: house?.id, estate: estateId, source, context, page, landing, ref, utm, status: 'new' },
+      data: {
+        name,
+        phone,
+        region: region?.id,
+        interest,
+        house: house?.id,
+        estate: estateId,
+        source,
+        context: leadContext,
+        page,
+        landing: landingPage,
+        ref,
+        utm,
+        status: 'new',
+      },
     })
 
     const company = await req.payload.findGlobal({ slug: 'company', depth: 0, overrideAccess: true })
@@ -140,7 +167,7 @@ export const leadEndpoint: Endpoint = {
       interest && `<b>Хочет:</b> ${INTEREST[interest]}`,
       house && `<b>Дом:</b> ${esc(`${house.title}, ${house.code}`)}`,
       estateName && `<b>Посёлок:</b> ${esc(estateName)}`,
-      context && `<b>Интерес:</b> ${esc(context)}`,
+      leadContext && `<b>Интерес:</b> ${esc(leadContext)}`,
       `<b>Источник:</b> ${esc(source)}`,
       page && `<b>Страница:</b> ${esc(page)}`,
       utmText && `<b>Реклама:</b> ${esc(utmText)}`,
