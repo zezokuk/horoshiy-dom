@@ -4,6 +4,7 @@ import { EstatesMap } from '@/components/EstatesMap'
 import { Genplan } from '@/components/Genplan'
 import { HouseCard } from '@/components/HouseCard'
 import { LeadInline } from '@/components/LeadForm'
+import { Nearby } from '@/components/Nearby'
 import { getEstate, getHouses, getRegion, img } from '@/lib/data'
 import { formatMillions, plural } from '@/lib/format'
 import { regionHref } from '@/lib/site'
@@ -157,16 +158,7 @@ export default async function EstatePage({ params }: Props) {
           <div style={{ display: 'grid', gap: 18 }}>
             <p className="eyebrow">Расположение</p>
             <h2 className="title title--md">{e.address || e.place}</h2>
-            {!!e.nearby?.length && (
-              <ul className="nearby">
-                {e.nearby.map((n) => (
-                  <li key={n.id ?? n.label}>
-                    <span>{n.label}</span>
-                    <b>{n.value}</b>
-                  </li>
-                ))}
-              </ul>
-            )}
+            {!!e.nearby?.length && <Nearby items={e.nearby} />}
             {!!e.infrastructure?.length && (
               <>
                 <h3 className="title" style={{ fontSize: 24, marginTop: 10 }}>

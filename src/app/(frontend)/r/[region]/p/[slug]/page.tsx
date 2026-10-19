@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { HouseCard } from '@/components/HouseCard'
 import { LeadForm } from '@/components/LeadForm'
+import { Nearby } from '@/components/Nearby'
 import { getCompany, getHouses, getLanding, getRegion, img } from '@/lib/data'
 import { formatMillions, plural } from '@/lib/format'
 import { regionHref } from '@/lib/site'
@@ -29,12 +30,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: d.landing.offer || undefined,
     alternates: { canonical: regionHref(d.region.slug, `/p/${d.landing.slug}`) },
   }
-}
-
-/** «20 мин» → big «20» + small «мин», as in the reference («15 minute walk»): the number is what people read. */
-function splitTime(v: string) {
-  const m = v.match(/^\s*([\d,.–-]+)\s*(.*)$/)
-  return m ? { n: m[1], unit: m[2] } : { n: v, unit: '' }
 }
 
 /**
@@ -139,18 +134,7 @@ export default async function LandingPage({ params }: Props) {
               <p className="eyebrow">Что рядом</p>
               <h2 className="title title--lg">{estate.address || estate.place}</h2>
             </div>
-            <ul className="lp-near">
-              {estate.nearby.map((n) => {
-                const t = splitTime(n.value)
-                return (
-                  <li key={n.id ?? n.label}>
-                    <b>{t.n}</b>
-                    <span className="lp-near__unit">{t.unit}</span>
-                    <span className="lp-near__what">{n.label}</span>
-                  </li>
-                )
-              })}
-            </ul>
+            <Nearby items={estate.nearby} />
             {!!estate.utilities?.length && (
               <div className="chips" style={{ marginTop: 28 }}>
                 {estate.utilities.map((u) => (

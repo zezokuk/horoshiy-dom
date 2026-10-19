@@ -43,6 +43,7 @@ export default async function Home() {
   const years = company.since ? new Date().getFullYear() - company.since : null
   const estateViews = estates.map((e) => estateView(e, houses))
   const built = estateViews.filter((e) => e.status !== 'planned').length // a coming estate is not one of «our estates» yet
+  const homesCount = company.homesBuilt || estates.reduce((s, e) => s + (e.homes || 0), 0)
   const active = regions.filter((r) => r.status === 'active')
   const soon = regions.filter((r) => r.status === 'soon')
   const hero = company.heroPhoto
@@ -243,9 +244,10 @@ export default async function Home() {
             <div style={{ display: 'grid', gap: 14 }} data-reveal>
               <span className="idx">Почему «хороший»</span>
               <Words text="Дом, в котором растут дети и собирается *семья*" />
+              {/* facts, not slogans (19.10): all from the client's materials — the FAQ, the estates and the values */}
               <p className="lead">
-                Мы строим не квадратные метры, а место, куда хочется возвращаться: свой двор вместо
-                подъезда, тишина вместо трассы, школа рядом вместо пробок.
+                Свой участок с замощённым двором и парковкой на 2 машины, газ и вода уже подключены, до
+                школы — 2–5 минут.
               </p>
             </div>
             <div className="values">
@@ -286,11 +288,14 @@ export default async function Home() {
             )}
             <div data-reveal style={{ ['--d' as string]: '80ms' }}>
               <b>
-                <CountUp
-                  to={company.homesBuilt || estates.reduce((s, e) => s + (e.homes || 0), 0)}
-                />
+                <CountUp to={homesCount} />
               </b>
-              <span>{company.homesBuilt ? 'домов построено' : 'домов в наших посёлках'}</span>
+              {/* «71 дом», not «71 домов» */}
+              <span>
+                {company.homesBuilt
+                  ? plural(homesCount, 'дом построен', 'дома построено', 'домов построено')
+                  : `${plural(homesCount, 'дом', 'дома', 'домов')} в наших посёлках`}
+              </span>
             </div>
             <div data-reveal style={{ ['--d' as string]: '160ms' }}>
               <b>
