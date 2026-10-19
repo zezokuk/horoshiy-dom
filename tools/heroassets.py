@@ -3,7 +3,7 @@
 The same photo twice: the whole photo at the back, the title over it, and on top the photo again with the sky cut out,
 so the roof covers the lower part of the letters. The layers come from one file, so they always line up.
 
-    python tools/heroassets.py [media/photo-14427948.webp]   → public/preview/hero1-photo.webp, hero1-house.webp (+ 900 px copies)
+    python tools/heroassets.py [media/photo-14427948.webp]   → public/design/: hero1-photo, hero1-house, sketch-tip5, plan-tip5 (+ 900 px copies)
 
 The sky is found by colour (bright and not warmer than blue: sky and clouds) AND smoothness: the metal roof's highlights
 are as white as the clouds, but the tile rows make the roof «ripple» (high local contrast) while sky and clouds are
@@ -28,7 +28,7 @@ def local_std(lum, radius):
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "media", "photo-14427948.webp")
-OUT = os.path.join(ROOT, "public", "preview")
+OUT = os.path.join(ROOT, "public", "design")
 CROP_BOTTOM = 13  # the slide's dark green frame under the photo
 
 im = Image.open(SRC).convert("RGB")
@@ -75,6 +75,37 @@ cut.save(os.path.join(OUT, "hero1-house.webp"), quality=88, method=6)
 for name, src in (("hero1-photo-900.webp", im), ("hero1-house-900.webp", cut)):
     small = src.resize((900, round(900 * src.height / src.width)), Image.LANCZOS)
     small.save(os.path.join(OUT, name), quality=82 if src.mode == "RGB" else 86, method=6)
+
+# the same house as a white line sketch (references 5–6, «каркас → дом», and the 404): edges of the real photo, so the
+# geometry is the client's, nothing drawn by hand. A strong blur drops the brick and grass texture, the gradient is
+# thinned to one-pixel lines (non-maximum suppression), and the silhouette comes from the sky mask (a clean roof line).
+SKETCH_BLUR, SKETCH_T = 2.6, 13
+gray = np.asarray(im.convert("L").filter(ImageFilter.GaussianBlur(SKETCH_BLUR))).astype(float)
+gx = np.zeros_like(gray)
+gy = np.zeros_like(gray)
+gx[:, 1:-1] = gray[:, 2:] - gray[:, :-2]
+gy[1:-1, :] = gray[2:, :] - gray[:-2, :]
+mag = np.hypot(gx, gy)
+vert = np.abs(gx) >= np.abs(gy)
+left, right = np.roll(mag, 1, 1), np.roll(mag, -1, 1)
+up, down = np.roll(mag, 1, 0), np.roll(mag, -1, 0)
+peak = np.where(vert, (mag >= left) & (mag >= right), (mag >= up) & (mag >= down))
+lines = peak & (mag > SKETCH_T) & ~sky
+lines[int(im.height * 0.9) :, :] = False  # the grass strip at the bottom is all texture
+house_mask = Image.fromarray(np.where(sky, 0, 255).astype("uint8"), "L")
+outline = (np.asarray(house_mask) > 0) & (np.asarray(house_mask.filter(ImageFilter.MinFilter(3))) == 0)
+lines |= outline
+alpha = Image.fromarray(np.where(lines, 255, 0).astype("uint8"), "L").filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.GaussianBlur(0.6))
+sketch = Image.new("RGBA", im.size, (255, 255, 255, 0))
+sketch.putalpha(alpha)
+sketch.save(os.path.join(OUT, "sketch-tip5.webp"), quality=90, method=6)
+sketch.resize((900, round(900 * im.height / im.width)), Image.LANCZOS).save(os.path.join(OUT, "sketch-tip5-900.webp"), quality=90, method=6)
+# the client's plan of «Тип 5» without the slide's text column (the «чертёж» stage)
+plan = Image.open(os.path.join(ROOT, "media", "plan-14427948.webp")).convert("RGB").crop((110, 50, 880, 880))
+plan.save(os.path.join(OUT, "plan-tip5.webp"), quality=86, method=6)
+blue = Image.new("RGB", im.size, (38, 53, 44))
+blue.paste(sketch, (0, 0), sketch)
+blue.save(os.path.join(ROOT, "tools", ".shots", "heroassets_sketch.png"))
 
 check = Image.new("RGB", im.size, (255, 0, 255))
 check.paste(cut, (0, 0), cut)

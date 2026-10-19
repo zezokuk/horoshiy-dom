@@ -6,7 +6,8 @@ import { HouseCard } from '@/components/HouseCard'
 import { LeadInline } from '@/components/LeadForm'
 import { Nearby } from '@/components/Nearby'
 import { Pic } from '@/components/Pic'
-import { getEstate, getHouses, getRegion, img } from '@/lib/data'
+import { SketchToHouse } from '@/components/SketchToHouse'
+import { getEstate, getHouses, getProjects, getRegion, img } from '@/lib/data'
 import { formatMillions, plural } from '@/lib/format'
 import { regionHref } from '@/lib/site'
 import { JsonLd, breadcrumbsLd, estateLd } from '@/lib/seo'
@@ -205,7 +206,9 @@ export default async function EstatePage({ params }: Props) {
  * «tell me when sales start». The lead is marked «на будущее» and linked to the estate: a waitlist that collects demand
  * before the first house is built.
  */
-function ComingEstate({ region, e }: { region: Region; e: Estate }) {
+async function ComingEstate({ region, e }: { region: Region; e: Estate }) {
+  const projects = await getProjects()
+  const areas = projects.map((p) => p.area).filter((a): a is number => !!a)
   const photo = img(e.poster, 'wide') ?? img(e.cover, 'wide')
   const photoPhone = img(e.poster, 'card') ?? img(e.cover, 'card')
   const target = {
@@ -262,6 +265,22 @@ function ComingEstate({ region, e }: { region: Region; e: Estate }) {
           {e.lat && e.lng ? <EstatesMap estates={[estateView(e, [])]} zoom={12} /> : null}
         </div>
       </section>
+
+      {/* references 5–6: there is no house here yet, only projects — so show how a project becomes a house
+          (an example of one built project; which projects go here is announced with the sales, not promised now) */}
+      {projects.length > 0 && (
+        <SketchToHouse
+          steps={[
+            {
+              title: 'Дома ещё нет',
+              text: `Есть проекты: строим по ${projects.length} своим${areas.length ? `, от ${Math.min(...areas)} до ${Math.max(...areas)} м²` : ''}. Какие встанут в «${e.name}», покажем со стартом продаж.`,
+            },
+            { title: 'Каркас', text: 'Фундамент, кирпичные стены, кровля — материалы только с документами.' },
+            { title: 'Дом', text: 'Капитальный дом под ключ за 6 месяцев, гарантия 5 лет.' },
+          ]}
+          caption="Пример: построенный дом по проекту «Тип 5», 105 м²"
+        />
+      )}
     </>
   )
 }

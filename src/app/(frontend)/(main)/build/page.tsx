@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { BuildStory, type TrustPoint } from '@/components/BuildStory'
 import { LeadInline } from '@/components/LeadForm'
 import { ProjectCard } from '@/components/ProjectCard'
+import { SketchToHouse } from '@/components/SketchToHouse'
 import { Words } from '@/components/Words'
 import { getCompany, getEstates, getHouses, getProjects } from '@/lib/data'
 import { plural } from '@/lib/format'
@@ -136,6 +137,16 @@ export default async function BuildPage() {
           </div>
         </section>
       )}
+
+      {/* references 5–6: how one of the projects became a real house (its plan, a sketch from its photo, the photo) */}
+      <SketchToHouse
+        steps={[
+          { title: 'Проект', text: '«Тип 5»: 3 спальни, 2 санузла, кухня-гостиная 27,2 м², терраса 19 м². Один из 12 наших проектов.' },
+          { title: 'Каркас', text: 'Фундамент, кирпичные стены, кровля — материалы только с документами, бригады работают с нами годами.' },
+          { title: 'Дом', text: 'Капитальный дом под ключ за 6 месяцев. Гарантия 5 лет.' },
+        ]}
+        caption="Построенный дом по проекту «Тип 5», 105 м²"
+      />
 
       <section className="section" id="projects">
         <div className="container">

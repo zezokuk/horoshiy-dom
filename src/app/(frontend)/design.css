@@ -168,6 +168,38 @@ a.hd__card:hover { background: rgba(28, 38, 32, .62); }
   .hg__lead { justify-self: end; padding-bottom: 8px; }
 }
 
+/* ── Plan → sketch → house (references 5–6, components/SketchToHouse) ─────────────────────────────────────────── */
+.s2h { --plan: 1; --sk: 0; --ph: 0; position: relative; height: 200vh; background: var(--green-deep); color: var(--cream); }
+.s2h__sticky { position: sticky; top: var(--header-h); height: calc(100svh - var(--header-h)); display: grid; align-items: center; overflow: hidden; }
+.s2h__in { display: grid; gap: 16px; }
+.s2h__steps { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.s2h__steps li { display: none; gap: 4px; }
+.s2h__steps span { font-family: var(--font-serif); font-size: 15px; color: var(--gold-soft); letter-spacing: .08em; }
+.s2h__steps b { font-family: var(--font-serif); font-size: clamp(26px, 3vw, 40px); line-height: 1.05; font-weight: 600; }
+.s2h__steps p { color: #cfd6cd; font-size: 15px; max-width: 420px; }
+.s2h[data-step="0"] li[data-i="0"], .s2h[data-step="1"] li[data-i="1"], .s2h[data-step="2"] li[data-i="2"] { display: grid; }
+.s2h__stage { position: relative; margin: 0; aspect-ratio: 4 / 5; max-height: calc(100svh - var(--header-h) - 190px); justify-self: center; width: 100%; border-radius: 20px; overflow: hidden; background: #2b3c32; }
+.s2h__plan { position: absolute; left: 50%; top: 50%; width: 86%; height: auto; border-radius: 10px; background: #fff; box-shadow: var(--shadow); opacity: var(--plan); transform-origin: 50% 85%; transform: translate(-50%, -50%) perspective(1400px) rotateX(calc((1 - var(--plan)) * 58deg)) scale(calc(.8 + var(--plan) * .2)); }
+.s2h__sketch, .s2h__photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 58% 60%; }
+/* the sketch rises from the ground up; the real photo sweeps over it from the left, a gold line at its edge */
+.s2h__sketch { clip-path: inset(calc((1 - var(--sk)) * 100%) 0 0 0); }
+.s2h__photo { clip-path: inset(0 calc((1 - var(--ph)) * 100%) 0 0); }
+.s2h__edge { position: absolute; top: 0; bottom: 0; left: calc(var(--ph) * 100%); width: 2px; margin-left: -1px; background: var(--gold); opacity: min(1, calc(var(--ph) * 12), calc((1 - var(--ph)) * 12)); }
+.s2h__stage figcaption { position: absolute; right: 12px; bottom: 12px; padding: 6px 12px; border-radius: 999px; background: rgba(28, 38, 32, .66); color: #fff; font-size: 12.5px; opacity: var(--ph); }
+@media (min-width: 960px) {
+  .s2h { height: 230vh; }
+  .s2h__in { grid-template-columns: minmax(0, .62fr) minmax(0, 1.38fr); gap: 48px; align-items: center; }
+  .s2h__steps { gap: 26px; }
+  .s2h__steps li { display: grid; opacity: .32; transition: opacity .4s ease; }
+  .s2h[data-step="0"] li[data-i="0"], .s2h[data-step="1"] li[data-i="1"], .s2h[data-step="2"] li[data-i="2"] { opacity: 1; }
+  .s2h__stage { aspect-ratio: 1673 / 897; max-height: none; }
+  .s2h__plan { width: auto; height: 90%; }
+  .s2h__stage figcaption { font-size: 13.5px; right: 16px; bottom: 16px; }
+}
+.s2h.is-still { --plan: 0; --sk: 1; --ph: 1; height: auto; }
+.s2h.is-still .s2h__sticky { position: static; height: auto; padding: 72px 0; }
+.s2h.is-still .s2h__steps li { display: grid; opacity: 1; }
+
 /* the switcher on /preview/hero-N */
 .preview-switch { position: fixed; z-index: 60; left: 50%; bottom: 84px; transform: translateX(-50%); display: flex; gap: 4px; align-items: center; width: max-content; max-width: calc(100vw - 24px); padding: 6px; border-radius: 14px; background: var(--green-ink); color: #fff; font-size: 12px; box-shadow: var(--shadow); }
 .preview-switch > span { padding: 0 6px; opacity: .7; }

@@ -28,8 +28,8 @@ export function HeroDepth({ f }: { f: HeroFacts }) {
         <div className="hd__stage">
           <div className="hd__frame" aria-hidden>
             <Pic
-              src="/preview/hero1-photo.webp"
-              phone="/preview/hero1-photo-900.webp"
+              src="/design/hero1-photo.webp"
+              phone="/design/hero1-photo-900.webp"
               alt=""
               priority
             />
@@ -47,8 +47,8 @@ export function HeroDepth({ f }: { f: HeroFacts }) {
 
           <div className="hd__frame hd__frame--front">
             <Pic
-              src="/preview/hero1-house.webp"
-              phone="/preview/hero1-house-900.webp"
+              src="/design/hero1-house.webp"
+              phone="/design/hero1-house-900.webp"
               alt="Кирпичный дом «Хорошего дома», проект «Тип 5»"
             />
             <svg
