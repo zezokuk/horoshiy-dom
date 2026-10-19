@@ -11,7 +11,7 @@ export const Leads: CollectionConfig = {
   labels: { singular: 'Заявка', plural: 'Заявки' },
   admin: { useAsTitle: 'name', defaultColumns: ['createdAt', 'name', 'phone', 'house', 'estate', 'source', 'interest', 'status'], group: 'Продажи' },
   defaultSort: '-createdAt',
-  access: { read: inMyRegions('region'), create: () => false, update: inMyRegions('region'), delete: adminOnly },
+  access: { read: inMyRegions('region', 'sales'), create: () => false, update: inMyRegions('region', 'sales'), delete: adminOnly },
   endpoints: [leadEndpoint],
   fields: [
     {

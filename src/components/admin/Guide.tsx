@@ -1,47 +1,58 @@
 /**
- * «Как вести сайт» on top of the admin dashboard: the five things the client's team does every month,
- * each a link straight to the right form. Agreed at the meeting 14.10: their content maker runs the site without us.
+ * «Как вести сайт» on top of the admin dashboard: what the client's team does every month, each a link straight to the
+ * right form — only the jobs of the signed-in person's role. Agreed at the meeting 14.10: their content maker runs the site.
  */
-const STEPS: { title: string; text: string; href: string; go: string }[] = [
+type Who = 'content' | 'sales' | 'manager'
+const STEPS: { title: string; text: string; href: string; go: string; for: Who[] }[] = [
   {
     title: 'Новый дом — за минуту',
     text: 'Посёлок, проект, тип, площадь, цена. Спальни и особенности подставятся из проекта. Фото и планировку можно добавить сразу или потом.',
     href: '/admin/collections/houses/create',
     go: 'Добавить дом',
+    for: ['content', 'manager'],
   },
   {
     title: 'Продан или бронь',
     text: 'Откройте дом → «Статус» → «Сохранить». На сайте и в 3D-генплане цвет поменяется сразу.',
     href: '/admin/collections/houses',
     go: 'Все дома',
+    for: ['content', 'sales', 'manager'],
   },
   {
     title: 'Новый посёлок',
     text: 'Пока домов нет — статус «Скоро»: на сайте появится страница с формой «Узнать о старте продаж». Когда начнутся продажи — «Идут продажи».',
     href: '/admin/collections/estates/create',
     go: 'Добавить посёлок',
+    for: ['content', 'manager'],
   },
   {
     title: 'Видео комнат на плане',
     text: 'Проекты домов → нужный тип → «Точки на плане» → у кружка поле «Видео». Вертикальное, до минуты, в MP4.',
     href: '/admin/collections/projects',
     go: 'Проекты домов',
+    for: ['content'],
   },
   {
     title: 'Страница под рекламу',
     text: 'Промо-страницы → создать: заголовок как в объявлении, посёлок, оффер. Свободные дома и «что рядом» подтянутся сами. Ссылку — в Директ и VK.',
     href: '/admin/collections/landings/create',
     go: 'Создать промо-страницу',
+    for: ['content', 'manager'],
   },
   {
     title: 'Заявки',
     text: 'В каждой видно, с какого дома и посёлка она пришла и откуда человек: реклама, поиск или напрямую. Меняйте статус по ходу работы.',
     href: '/admin/collections/leads',
     go: 'Открыть заявки',
+    for: ['sales', 'manager'],
   },
 ]
 
-export function Guide() {
+export function Guide({ user }: { user?: { role?: string | null } | null }) {
+  const role = user?.role
+  // admins (and an unknown role) see every card
+  const steps = STEPS.filter((s) => !role || role === 'admin' || s.for.includes(role as Who))
+  if (!steps.length) return null
   return (
     <section style={{ marginBottom: 'calc(var(--base) * 2)' }}>
       <h2 style={{ margin: '0 0 calc(var(--base) * 0.75)' }}>Как вести сайт</h2>
@@ -52,7 +63,7 @@ export function Guide() {
           gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', // six: three in a row on a laptop
         }}
       >
-        {STEPS.map((s, i) => (
+        {steps.map((s, i) => (
           <a
             key={s.title}
             href={s.href}

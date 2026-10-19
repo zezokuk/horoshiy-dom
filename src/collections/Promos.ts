@@ -11,7 +11,7 @@ export const Promos: CollectionConfig = {
   labels: { singular: 'Акция', plural: 'Акции' },
   admin: { useAsTitle: 'title', defaultColumns: ['title', 'region', 'active', 'until'], group: 'Продажи' },
   defaultSort: 'order',
-  access: { read: anyone, create: inMyRegions('region'), update: inMyRegions('region'), delete: inMyRegions('region') },
+  access: { read: anyone, create: inMyRegions('region', 'content'), update: inMyRegions('region', 'content'), delete: inMyRegions('region', 'content') },
   hooks: { afterChange: [revalidateAfterChange], afterDelete: [revalidateAfterDelete] },
   fields: [
     { name: 'title', label: 'Заголовок', type: 'text', required: true, admin: { description: '«Скидка 300 000 ₽ на дома в Динской»' } },

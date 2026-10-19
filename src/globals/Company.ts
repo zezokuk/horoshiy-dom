@@ -1,12 +1,12 @@
 import type { GlobalConfig } from 'payload'
-import { adminOnly, anyone } from '../collections/access'
+import { adminOnly, adminOnlyInMenu, anyone } from '../collections/access'
 import { revalidateGlobal } from '../collections/revalidate'
 
 /** Company-wide facts used on every page: brand, contacts, legal details, values, FAQ, mortgage programs. */
 export const Company: GlobalConfig = {
   slug: 'company',
   label: 'Компания',
-  admin: { group: 'Настройки' },
+  admin: { group: 'Настройки', hidden: adminOnlyInMenu },
   access: { read: anyone, update: adminOnly },
   hooks: { afterChange: [revalidateGlobal] },
   fields: [

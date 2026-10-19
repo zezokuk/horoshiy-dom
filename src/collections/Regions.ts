@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { adminOnly, anyone, staffField } from './access'
+import { adminOnly, adminOnlyInMenu, anyone, staffField } from './access'
 import { revalidateAfterChange, revalidateAfterDelete } from './revalidate'
 
 /**
@@ -10,7 +10,7 @@ import { revalidateAfterChange, revalidateAfterDelete } from './revalidate'
 export const Regions: CollectionConfig = {
   slug: 'regions',
   labels: { singular: 'Регион', plural: 'Регионы' },
-  admin: { useAsTitle: 'name', defaultColumns: ['name', 'slug', 'status', 'order'], group: 'Каталог' },
+  admin: { useAsTitle: 'name', defaultColumns: ['name', 'slug', 'status', 'order'], group: 'Каталог', hidden: adminOnlyInMenu },
   defaultSort: 'order',
   access: { read: anyone, create: adminOnly, update: adminOnly, delete: adminOnly },
   hooks: { afterChange: [revalidateAfterChange], afterDelete: [revalidateAfterDelete] },

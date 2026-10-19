@@ -1,11 +1,11 @@
 import type { CollectionConfig } from 'payload'
-import { adminOnly, isAdmin } from './access'
+import { adminOnly, adminOnlyInMenu, isAdmin } from './access'
 
 /** Staff accounts for the admin panel. Managers are tied to regions and see only their houses and leads. */
 export const Users: CollectionConfig = {
   slug: 'users',
   labels: { singular: 'Сотрудник', plural: 'Сотрудники' },
-  admin: { useAsTitle: 'email', defaultColumns: ['email', 'name', 'role'], group: 'Настройки' },
+  admin: { useAsTitle: 'email', defaultColumns: ['email', 'name', 'role'], group: 'Настройки', hidden: adminOnlyInMenu },
   auth: true,
   hooks: {
     beforeChange: [
@@ -36,6 +36,8 @@ export const Users: CollectionConfig = {
       options: [
         { label: 'Администратор', value: 'admin' },
         { label: 'Менеджер региона', value: 'manager' },
+        { label: 'Контент-менеджер: дома, посёлки, фото, промо', value: 'content' },
+        { label: 'Отдел продаж (РОП): заявки и статусы', value: 'sales' },
       ],
       // nobody can raise their own role; only admins assign roles and regions
       access: { update: ({ req }) => isAdmin(req.user) },

@@ -8,7 +8,7 @@ export const Estates: CollectionConfig = {
   labels: { singular: 'Посёлок', plural: 'Посёлки' },
   admin: { useAsTitle: 'name', defaultColumns: ['name', 'region', 'status', 'homes'], group: 'Каталог' },
   defaultSort: 'order',
-  access: { read: anyone, create: inMyRegions('region'), update: inMyRegions('region'), delete: inMyRegions('region') },
+  access: { read: anyone, create: inMyRegions('region', 'content'), update: inMyRegions('region', 'content'), delete: inMyRegions('region', 'content') },
   hooks: {
     afterChange: [
       // «Продажи завершены» closes the whole estate: its houses become «Продан», so none stays on sale by mistake

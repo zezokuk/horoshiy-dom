@@ -526,7 +526,7 @@ export interface Landing {
 export interface User {
   id: number;
   name?: string | null;
-  role: 'admin' | 'manager';
+  role: 'admin' | 'manager' | 'content' | 'sales';
   regions?: (number | Region)[] | null;
   updatedAt: string;
   createdAt: string;

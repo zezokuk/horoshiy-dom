@@ -11,7 +11,7 @@ export const Houses: CollectionConfig = {
   labels: { singular: 'Дом', plural: 'Дома' },
   admin: { useAsTitle: 'code', defaultColumns: ['code', 'estate', 'status', 'price', 'area'], group: 'Каталог', listSearchableFields: ['code'] },
   defaultSort: 'price',
-  access: { read: anyone, create: inMyRegions('region'), update: inMyRegions('region'), delete: inMyRegions('region') },
+  access: { read: anyone, create: inMyRegions('region', 'content'), update: inMyRegions('region', 'content', 'sales'), delete: inMyRegions('region', 'content') },
   hooks: {
     afterChange: [revalidateAfterChange],
     afterDelete: [revalidateAfterDelete],

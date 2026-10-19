@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { adminOnly, anyone } from './access'
+import { anyone, roles } from './access'
 import { revalidateAfterChange, revalidateAfterDelete } from './revalidate'
 
 /** A house design (Тип 1 … Тип 12) — shared by all regions: sold as a ready house or built on order. */
@@ -8,7 +8,7 @@ export const Projects: CollectionConfig = {
   labels: { singular: 'Проект дома', plural: 'Проекты домов' },
   admin: { useAsTitle: 'name', defaultColumns: ['name', 'area', 'storeys', 'bedrooms'], group: 'Каталог' },
   defaultSort: 'order',
-  access: { read: anyone, create: adminOnly, update: adminOnly, delete: adminOnly },
+  access: { read: anyone, create: roles('content'), update: roles('content'), delete: roles('content') },
   hooks: { afterChange: [revalidateAfterChange], afterDelete: [revalidateAfterDelete] },
   fields: [
     { name: 'name', label: 'Название', type: 'text', required: true, admin: { description: 'Как в шахматке: «Тип 5»' } },

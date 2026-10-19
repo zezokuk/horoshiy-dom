@@ -1,12 +1,12 @@
 import type { CollectionConfig } from 'payload'
-import { anyone, staffOnly } from './access'
+import { anyone, roles, staffOnly } from './access'
 
 /** Photos, plans, covers. Sharp makes WebP sizes on upload, so editors can upload phone photos as they are. */
 export const Media: CollectionConfig = {
   slug: 'media',
   labels: { singular: 'Файл', plural: 'Фото и файлы' },
   admin: { group: 'Настройки' },
-  access: { read: anyone, create: staffOnly, update: staffOnly, delete: staffOnly },
+  access: { read: anyone, create: staffOnly, update: staffOnly, delete: roles('content', 'manager') }, // sales may attach a photo, not delete
   // the description is optional: a manager adding a house from a phone just picks a photo. Empty → made from the file name;
   // the site's own pages describe house pictures themselves («Тип 5 в посёлке Динская»)
   hooks: {

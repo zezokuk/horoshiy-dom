@@ -16,7 +16,7 @@ export const Landings: CollectionConfig = {
     group: 'Реклама',
     description: 'Страница под объявление: адрес на сайте — поддомен региона /p/<адрес>. Цифры — только проверенные: их увидит покупатель',
   },
-  access: { read: anyone, create: inMyRegions('region'), update: inMyRegions('region'), delete: inMyRegions('region') },
+  access: { read: anyone, create: inMyRegions('region', 'content'), update: inMyRegions('region', 'content'), delete: inMyRegions('region', 'content') },
   hooks: { afterChange: [revalidateAfterChange], afterDelete: [revalidateAfterDelete] },
   fields: [
     { name: 'title', label: 'Заголовок', type: 'text', required: true, admin: { description: 'Как в объявлении: «Дома в Динской от 8,8 млн»' } },
