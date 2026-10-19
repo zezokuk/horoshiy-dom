@@ -6,6 +6,7 @@ import { MorphLayer } from '@/components/MorphLayer'
 import { Reveal, ScrollProgress } from '@/components/Motion'
 import { INDEXABLE, MAIN_URL } from '@/lib/site'
 import './globals.css'
+import './design.css'
 
 const manrope = Manrope({ variable: '--font-manrope', subsets: ['latin', 'cyrillic'] })
 const cormorant = Cormorant_Garamond({

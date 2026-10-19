@@ -1,0 +1,68 @@
+/* Techniques from Ilya's references (20.10, ../ещереференсы): ideas, not their colours or pictures.
+   The 19.10 rules still hold: no decorative gradients or glows, facts from the client. */
+
+/* ── Variant 1 of the first screen («Vintara»): the house in front of the brand name ───────────────────────── */
+.hd { padding: 12px var(--gutter) 0; max-width: 1600px; margin: 0 auto; }
+.hd__wrap { position: relative; container-type: inline-size; }
+/* phones: the photo sits lower than the title (the roof covers only the bottom of «дом») and is cropped around the roof */
+.hd__stage { position: relative; overflow: hidden; border-radius: 24px; height: 121cqi; background: var(--green-deep); color: var(--cream); }
+.hd__frame { position: absolute; top: 21cqi; height: 100cqi; aspect-ratio: 1673 / 897; left: 50%; transform: translateX(-60%); }
+/* the top edge of the lowered photo melts into the stage colour instead of a hard seam (blending, not decoration) */
+.hd__frame:not(.hd__frame--front) { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%); mask-image: linear-gradient(to bottom, transparent, #000 14%); }
+.hd__frame img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hd__frame--front { z-index: 2; pointer-events: none; }
+.hd__frame--front a { pointer-events: auto; }
+/* the sky in the brand's green: a flat tint over the back photo only; the cut-out house on top keeps its real colours */
+.hd__tint { position: absolute; inset: 0; background: var(--green-deep); opacity: .84; }
+.hd__arc { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: var(--gold-soft); stroke-width: 1px; opacity: .45; }
+.hd__lines { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: var(--gold-soft); stroke-width: 1px; opacity: .8; }
+.hd__dot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--cream); box-shadow: 0 0 0 5px rgba(243, 236, 224, .28); }
+.hd__label { position: absolute; display: none; gap: 1px; font-size: 14px; line-height: 1.25; color: var(--cream); }
+.hd__label i { font-style: italic; opacity: .85; }
+.hd__label b { font-weight: 600; }
+
+.hd__eyebrow { position: absolute; z-index: 3; left: 0; right: 0; top: 5cqi; text-align: center; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-soft); }
+.hd__title { position: absolute; z-index: 1; left: 0; right: 0; top: 10cqi; display: grid; justify-items: center; font-family: var(--font-serif); font-weight: 600; font-size: 24cqi; line-height: .84; letter-spacing: -.02em; color: var(--cream); }
+.hd__title span { display: block; animation: hd-rise 1.3s cubic-bezier(.2, .7, .2, 1) both; animation-delay: var(--d, 0ms); }
+/* the letters come up from behind the roof */
+@keyframes hd-rise { from { transform: translateY(30%); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* glass cards: frosted dark glass over the photo, live numbers (phones: plain green cards under the photo) */
+.hd__cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 54px; }
+.hd__card { display: grid; align-content: start; gap: 6px; padding: 14px; border-radius: 18px; background: var(--green-deep); color: #fff; }
+.hd__card-k { font-size: 13px; line-height: 1.25; }
+.hd__card-k b { display: block; font-family: var(--font-serif); font-size: 40px; line-height: .95; color: var(--gold-soft); }
+.hd__card-k em { font-style: normal; opacity: .8; }
+.hd__card-list { font-size: 11.5px; line-height: 1.35; color: #d9ddd3; }
+a.hd__card:hover { background: rgba(28, 38, 32, .62); }
+
+/* the round action button, half over the photo */
+.hd__go { position: absolute; z-index: 4; left: 50%; top: calc(121cqi - 46px); transform: translateX(-50%); width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; text-align: center; font-weight: 700; font-size: 14px; line-height: 1.1; background: var(--cream); color: var(--green-deep); box-shadow: 0 0 0 6px rgba(243, 236, 224, .3); transition: transform .25s ease, box-shadow .25s ease; }
+.hd__go:hover { transform: translateX(-50%) scale(1.05); box-shadow: 0 0 0 9px rgba(243, 236, 224, .3); }
+.hd__lead { max-width: 760px; margin: 22px auto 0; text-align: center; font-size: clamp(16px, 1.5vw, 19px); color: var(--muted); }
+
+@media (min-width: 960px) {
+  .hd__stage { height: auto; aspect-ratio: 1673 / 897; border-radius: 28px; }
+  .hd__frame { inset: 0; height: auto; transform: none; }
+  .hd__frame:not(.hd__frame--front) { -webkit-mask-image: none; mask-image: none; }
+  .hd__eyebrow { top: 3.2cqi; font-size: 13px; }
+  .hd__title { top: 7.6cqi; display: flex; justify-content: center; gap: .22em; font-size: 15.4cqi; }
+  .hd__label { display: grid; }
+  .hd__cards { position: absolute; z-index: 3; left: 28px; right: 28px; bottom: 28px; margin: 0; display: flex; justify-content: space-between; pointer-events: none; }
+  .hd__card { pointer-events: auto; width: min(300px, 24cqi); padding: 18px 20px; gap: 10px; background: rgba(28, 38, 32, .64); border: 1px solid rgba(255, 255, 255, .22); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  .hd__card-k { font-size: 14px; }
+  .hd__card-k b { font-size: 54px; }
+  .hd__card-list { font-size: 13px; }
+  .hd__go { top: auto; bottom: 32px; width: 112px; height: 112px; font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .hd__title span { animation: none; } }
+
+/* the switcher on /preview/hero-N */
+.preview-switch { position: fixed; z-index: 60; left: 50%; bottom: 84px; transform: translateX(-50%); display: flex; gap: 4px; align-items: center; width: max-content; max-width: calc(100vw - 24px); padding: 6px; border-radius: 14px; background: var(--green-ink); color: #fff; font-size: 12px; box-shadow: var(--shadow); }
+.preview-switch > span { padding: 0 6px; opacity: .7; }
+.preview-switch i { font-style: normal; display: none; }
+@media (min-width: 960px) { .preview-switch { font-size: 13px; gap: 6px; padding: 8px; } .preview-switch i { display: inline; } }
+.preview-switch a { padding: 6px 10px; border-radius: 10px; }
+.preview-switch a:hover { background: rgba(255, 255, 255, .1); }
+.preview-switch a[aria-current] { background: var(--gold-soft); color: var(--green-deep); font-weight: 600; }
+@media (min-width: 960px) { .preview-switch { bottom: 20px; } }
