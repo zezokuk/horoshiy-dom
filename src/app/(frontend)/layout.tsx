@@ -4,6 +4,7 @@ import { CookieNotice } from '@/components/CookieNotice'
 import { Metrika } from '@/components/Metrika'
 import { MorphLayer } from '@/components/MorphLayer'
 import { Reveal, ScrollProgress } from '@/components/Motion'
+import { PageMotion } from '@/components/PageMotion'
 import { INDEXABLE, MAIN_URL } from '@/lib/site'
 import './globals.css'
 import './design.css'
@@ -40,6 +41,7 @@ export default function FrontendLayout({ children }: { children: React.ReactNode
         {children}
         {/* here, above the page layouts: the «3D → house» transition must survive the route change */}
         <MorphLayer />
+        <PageMotion />
         <Metrika />
         <CookieNotice />
       </body>

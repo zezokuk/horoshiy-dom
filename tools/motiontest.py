@@ -1,0 +1,81 @@
+"""Motion between and on pages (reference «Bikeville», components/PageMotion + Catalog): it must really run, not just exist.
+
+    python tools/motiontest.py     (dev server on :3000)
+
+1. Catalog filter: a change runs a view transition (React calls document.startViewTransition), the list re-sorts, no
+   console errors (two cards with one transition name would raise one).
+2. Estate → house page on a region subdomain: the browser starts a cross-document view transition, and the clicked
+   card's photo carries the name «house-photo» that the house page's main photo has too (the photo flies into place).
+3. Hover on a computer: the card gets a green edge, leans to the pointer; a gold button fills with green.
+4. Phone: no lean (nothing «stuck» after a tap).
+"""
+import json, sys, time
+from cdp import Browser
+
+H = "horoshiy.localhost:3000"
+results = []
+
+
+def check(name, ok, info=""):
+    results.append(bool(ok))
+    print(f"{'PASS' if ok else 'FAIL'}  {name}  {info}")
+
+
+SET_SELECT = """((sel, v) => { const s = document.querySelectorAll('.filters select')[sel];
+  Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(s, v);
+  s.dispatchEvent(new Event('change', { bubbles: true })) })"""
+
+with Browser(9411, "prof-motion-d", 1440, 900) as b:
+    b.go(f"http://{H}/catalog", 3)
+    b.js("document.querySelector('.cookie button')?.click()")
+    b.errors()
+    b.js("(() => { window.__vt = 0; const o = document.startViewTransition?.bind(document); if (o) document.startViewTransition = (...a) => { window.__vt++; return o(...a) } })()")
+    first = b.js("document.querySelector('.grid .house-card__price')?.textContent")
+    n = b.js("document.querySelectorAll('.filters select').length")
+    b.js(f"{SET_SELECT}({n - 1}, 'price-desc')")
+    time.sleep(1.2)
+    after = b.js("document.querySelector('.grid .house-card__price')?.textContent")
+    check("catalog: sorting runs a view transition", (b.js("window.__vt") or 0) >= 1, f"transitions: {b.js('window.__vt')}")
+    check("…and the list re-sorts (first card changes)", first and after and first != after, f"{first} → {after}")
+    check("…with no console errors", not b.errors())
+
+    # hover: green edge, lean, gold button fill
+    r = json.loads(b.js("JSON.stringify(document.querySelector('.grid .house-card').getBoundingClientRect())"))
+    b.cmd("Input.dispatchMouseEvent", type="mouseMoved", x=r["x"] + r["width"] * 0.85, y=r["y"] + r["height"] * 0.3)
+    time.sleep(0.6)
+    st = b.js("(() => { const c = document.querySelector('.grid .house-card'); return [getComputedStyle(c).borderTopColor, c.style.getPropertyValue('--ry'), getComputedStyle(c.querySelector('.house-card__img'), '::after').transform] })()")
+    check("hover: the card's edge turns green", st[0] == "rgb(69, 89, 74)", st[0])
+    check("hover: the card leans towards the pointer", st[1] and float(st[1].replace("deg", "")) > 1, st[1])
+    check("hover: the «Смотреть дом →» bar slides up", st[2] in ("none", "matrix(1, 0, 0, 1, 0, 0)"), st[2])
+    g = json.loads(b.js("(() => { const e = document.querySelector('.btn--gold'); if (!e) return 'null'; e.scrollIntoView({block: 'center', behavior: 'instant'}); return JSON.stringify(e.getBoundingClientRect()) })()") or "null")
+    check("there is a gold button to hover", g)
+    if g:
+        b.cmd("Input.dispatchMouseEvent", type="mouseMoved", x=g["x"] + g["width"] / 2, y=g["y"] + g["height"] / 2)
+        time.sleep(0.7)
+        size = b.js("getComputedStyle(document.querySelector('.btn--gold')).backgroundSize")
+        check("hover: a gold button fills with green", size.startswith("100%"), size)
+
+    # estate → house: cross-document view transition with the card photo named
+    b.go(f"http://krd.{H}/objects/dinskaya", 3)
+    b.js("""addEventListener('pageswap', (e) => { sessionStorage.vt = e.viewTransition ? 'yes' : 'no';
+      sessionStorage.vtName = document.querySelector('[data-vt-named]')?.style.viewTransitionName || '' })""")
+    href = b.js("(() => { const a = document.querySelector('a.house-card'); a.scrollIntoView({block: 'center', behavior: 'instant'}); return a.href })()")
+    time.sleep(0.4)
+    b.click("a.house-card")
+    b.wait(f"location.href === {json.dumps(href)} && document.readyState === 'complete'", 60)
+    time.sleep(1)
+    check("estate → house: a cross-document view transition ran", b.js("sessionStorage.vt") == "yes", str(b.js("sessionStorage.vt")))
+    check("…the clicked card's photo was named «house-photo»", b.js("sessionStorage.vtName") == "house-photo", str(b.js("sessionStorage.vtName")))
+    check("…and the house page's main photo has that name", b.js("getComputedStyle(document.querySelector('.hs__photo img')).viewTransitionName") == "house-photo")
+    check("house page: no console errors", not b.errors())
+
+with Browser(9412, "prof-motion-m", 390, 844, mobile=True) as b:
+    b.go(f"http://{H}/catalog", 3)
+    r = json.loads(b.js("(() => { const c = document.querySelector('.grid .house-card'); c.scrollIntoView({block: 'center', behavior: 'instant'}); return JSON.stringify(c.getBoundingClientRect()) })()"))
+    b.cmd("Input.dispatchTouchEvent", type="touchStart", touchPoints=[{"x": r["x"] + 40, "y": r["y"] + 40}])
+    b.cmd("Input.dispatchTouchEvent", type="touchEnd", touchPoints=[])
+    time.sleep(0.4)
+    check("phone: no lean after a touch", not b.js("document.querySelector('.grid .house-card').style.getPropertyValue('--ry')"))
+
+print(f"{sum(results)}/{len(results)} passed")
+sys.exit(0 if all(results) else 1)

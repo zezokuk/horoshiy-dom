@@ -349,3 +349,58 @@ a.hd__card:hover { background: rgba(28, 38, 32, .62); }
 .preview-switch a:hover { background: rgba(255, 255, 255, .1); }
 .preview-switch a[aria-current] { background: var(--gold-soft); color: var(--green-deep); font-weight: 600; }
 @media (min-width: 960px) { .preview-switch { bottom: 20px; } }
+
+/* ── Motion and hover (reference «Bikeville», 20.10, components/PageMotion) ─────────────────────────────────────
+   Page to page: a cross-document view transition — the header stays, the page fades up, and the clicked card's photo
+   flies into the house (or project) page's main photo. Hover: green is the «you can press this» colour — gold buttons
+   fill with green from the left, cards get a green edge and a «Смотреть →» bar; on a mouse cards lean to the pointer. */
+@view-transition { navigation: auto; types: page; }
+.header { view-transition-name: site-header; }
+::view-transition { pointer-events: none; }
+::view-transition-group(site-header) { animation: none; z-index: 100; }
+::view-transition-old(site-header) { display: none; }
+::view-transition-new(site-header) { animation: none; }
+/* only page-to-page (type «page»): in-page transitions such as the catalog filter keep the page still */
+html:active-view-transition-type(page)::view-transition-old(root) { animation: 160ms ease-in both vt-out; }
+html:active-view-transition-type(page)::view-transition-new(root) { animation: 360ms cubic-bezier(.2, .7, .2, 1) 60ms both vt-in; }
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(14px); } }
+.hs__photo > picture > img, .house__photo > img { view-transition-name: house-photo; }
+::view-transition-group(house-photo) { z-index: 60; animation-duration: 520ms; animation-timing-function: cubic-bezier(.2, .7, .2, 1); }
+::view-transition-image-pair(house-photo) { animation: vt-blur 520ms ease; }
+@keyframes vt-blur { 35% { filter: blur(3px); } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*), ::view-transition-image-pair(*) { animation: none !important; }
+}
+
+/* buttons: a green fill sweeps in from the left (the gold stays as the resting colour) */
+.btn--gold, .btn--green { background-image: linear-gradient(var(--btn-fill, var(--green-deep)), var(--btn-fill, var(--green-deep))); background-repeat: no-repeat; background-size: 0% 100%; transition: background-size .45s cubic-bezier(.2, .7, .2, 1), transform .2s ease, box-shadow .3s ease, color .2s ease; }
+.btn--green { --btn-fill: var(--green); }
+.btn--gold:hover, .btn--green:hover, .btn--gold:focus-visible, .btn--green:focus-visible { background-size: 100% 100%; filter: none; }
+.btn--gold:hover { box-shadow: 0 12px 26px -14px rgba(38, 53, 44, .9); }
+.btn--ghost { transition: background-color .25s ease, border-color .25s ease, color .25s ease, transform .2s ease; }
+.btn--ghost:hover { background-color: var(--green); border-color: var(--green); color: #fff !important; }
+.hd__go { transition: transform .25s ease, box-shadow .25s ease, background-color .25s ease, color .25s ease, translate .3s cubic-bezier(.2, .7, .2, 1); translate: var(--mx, 0) var(--my, 0); }
+.hd__go:hover { background: var(--green); color: var(--cream); }
+.float-call { translate: var(--mx, 0) var(--my, 0); }
+/* header links: a green line grows under the one you point at */
+.nav a { background: linear-gradient(var(--green), var(--green)) no-repeat 0 100% / 0 1.5px; padding-bottom: 3px; transition: opacity .2s, color .2s, background-size .3s cubic-bezier(.2, .7, .2, 1); }
+.nav a:hover, .nav a[aria-current="page"] { background-size: 100% 1.5px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .house-card, .way, .estate-card { transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .3s cubic-bezier(.2, .7, .2, 1), box-shadow .3s ease, border-color .3s ease; }
+  .house-card:hover { border-color: var(--green); transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-3px); }
+  .way:hover { transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-4px); }
+  .house-card__price { transition: color .25s ease; }
+  .house-card:hover .house-card__price { color: var(--green); }
+  .house-card__img[data-go]::after { content: attr(data-go); position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 10px 16px; background: var(--green-deep); color: var(--cream); font-size: 14px; font-weight: 600; transform: translateY(101%); transition: transform .35s cubic-bezier(.2, .7, .2, 1); }
+  .house-card:hover .house-card__img[data-go]::after { transform: none; }
+}
+
+/* catalog filter (components/Catalog, React <ViewTransition>): cards glide to their new places, the ones that drop out
+   leave to the left, new ones come in from the right — the «Bikeville» list in motion */
+::view-transition-group(.hc-move) { animation-duration: 450ms; animation-timing-function: cubic-bezier(.2, .7, .2, 1); }
+::view-transition-new(.hc-in) { animation: 420ms cubic-bezier(.2, .7, .2, 1) 80ms both hc-in; }
+::view-transition-old(.hc-out) { animation: 220ms ease-in both hc-out; }
+@keyframes hc-in { from { opacity: 0; transform: translateX(48px); filter: blur(6px); } }
+@keyframes hc-out { to { opacity: 0; transform: translateX(-48px); filter: blur(6px); } }

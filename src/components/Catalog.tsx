@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { startTransition, useEffect, useMemo, useState, ViewTransition } from 'react'
 import { plural } from '@/lib/format'
 import type { HouseView } from '@/lib/view'
 import { HouseCard } from './HouseCard'
@@ -31,6 +31,9 @@ export function Catalog({ houses, regions, estates }: { houses: HouseView[]; reg
     if (q.get('area')) setMinArea(Number(q.get('area')))
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [])
+
+  // a filter change is a transition, so the list animates (React <ViewTransition> below)
+  const move = <T,>(set: (v: T) => void, v: T) => startTransition(() => set(v))
 
   const estateOptions = estates.filter((e) => region === 'all' || e.region === region)
   const list = useMemo(() => {
@@ -67,8 +70,11 @@ export function Catalog({ houses, regions, estates }: { houses: HouseView[]; reg
             <select
               value={region}
               onChange={(e) => {
-                setRegion(e.target.value)
-                setEstate('all')
+                const v = e.target.value
+                startTransition(() => {
+                  setRegion(v)
+                  setEstate('all')
+                })
               }}
             >
               <option value="all">Все регионы</option>
@@ -82,7 +88,7 @@ export function Catalog({ houses, regions, estates }: { houses: HouseView[]; reg
         )}
         <label className="field">
           Посёлок
-          <select value={estate} onChange={(e) => setEstate(e.target.value)}>
+          <select value={estate} onChange={(e) => move(setEstate, e.target.value)}>
             <option value="all">Все посёлки</option>
             {estateOptions.map((e) => (
               <option key={e.value} value={e.value}>
@@ -93,7 +99,7 @@ export function Catalog({ houses, regions, estates }: { houses: HouseView[]; reg
         </label>
         <label className="field">
           Бюджет до
-          <select value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))}>
+          <select value={maxPrice} onChange={(e) => move(setMaxPrice, Number(e.target.value))}>
             <option value={0}>Любой</option>
             {steps.map((p) => (
               <option key={p} value={p}>
@@ -104,7 +110,7 @@ export function Catalog({ houses, regions, estates }: { houses: HouseView[]; reg
         </label>
         <label className="field">
           Площадь дома от
-          <select value={minArea} onChange={(e) => setMinArea(Number(e.target.value))}>
+          <select value={minArea} onChange={(e) => move(setMinArea, Number(e.target.value))}>
             <option value={0}>Любая</option>
             {[90, 100, 110, 140].map((a) => (
               <option key={a} value={a}>
@@ -115,14 +121,14 @@ export function Catalog({ houses, regions, estates }: { houses: HouseView[]; reg
         </label>
         <label className="field">
           Сортировка
-          <select value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
+          <select value={sort} onChange={(e) => move(setSort, e.target.value as Sort)}>
             <option value="price-asc">Сначала дешевле</option>
             <option value="price-desc">Сначала дороже</option>
             <option value="area-desc">Сначала больше</option>
           </select>
         </label>
         <label className="check">
-          <input type="checkbox" checked={onlyFree} onChange={(e) => setOnlyFree(e.target.checked)} />
+          <input type="checkbox" checked={onlyFree} onChange={(e) => move(setOnlyFree, e.target.checked)} />
           Только свободные
         </label>
       </div>
@@ -133,7 +139,10 @@ export function Catalog({ houses, regions, estates }: { houses: HouseView[]; reg
       </p>
       <div className="grid grid--3">
         {list.map((h) => (
-          <HouseCard key={h.code} h={h} />
+          // the filter runs as a transition: cards glide to new places, leave left, come in from the right (design.css)
+          <ViewTransition key={h.code} name={`hc-${h.code}`} share="hc-move" update="hc-move" enter="hc-in" exit="hc-out" default="none">
+            <HouseCard h={h} />
+          </ViewTransition>
         ))}
       </div>
     </>

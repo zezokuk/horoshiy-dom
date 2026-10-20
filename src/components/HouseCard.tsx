@@ -14,7 +14,7 @@ function tagsFor(h: HouseView) {
 export function HouseCard({ h, showEstate = true }: { h: HouseView; showEstate?: boolean }) {
   return (
     <a href={h.href} className={`house-card ${h.status === 'sold' ? 'is-sold' : ''}`}>
-      <div className="house-card__img">
+      <div className="house-card__img" data-go="Смотреть дом →">
         {h.photoCard && (
           <img
             src={h.photoCard}

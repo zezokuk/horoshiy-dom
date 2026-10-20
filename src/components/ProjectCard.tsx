@@ -16,7 +16,7 @@ export type ProjectCardData = {
 export function ProjectCard({ p }: { p: ProjectCardData }) {
   return (
     <a href={mainHref(`/projects/${p.slug}`)} className="house-card">
-      <div className="house-card__img">
+      <div className="house-card__img" data-go="Смотреть проект →">
         {p.photoCard && (
           <img
             src={p.photoCard}
