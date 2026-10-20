@@ -117,9 +117,12 @@ export function RegionStage({
                   clipPath={`url(#rs-w-${s.e.slug})`}
                 />
               ) : (
-                <text className="rs__soon" x={f1(s.cx)} y={f1(s.cy)} textAnchor="middle" dominantBaseline="middle">
-                  скоро
-                </text>
+                // no photo yet: the gold grid; «скоро» only on an estate whose sales have not started
+                s.e.status === 'planned' && (
+                  <text className="rs__soon" x={f1(s.cx)} y={f1(s.cy)} textAnchor="middle" dominantBaseline="middle">
+                    скоро
+                  </text>
+                )
               )}
               <path className="rs__edge" d={s.path} />
               <text className="rs__label" x={f1(s.lx)} y={f1(s.ly + (s.side === 'middle' ? 14 : 0))} textAnchor={s.side}>
