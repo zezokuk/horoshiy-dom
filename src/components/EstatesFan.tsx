@@ -23,7 +23,7 @@ const GAP = 1.4
 export function EstatesFan({ estates }: { estates: FanEstate[] }) {
   const n = estates.length
   if (!n) return null
-  const free = estates.reduce((s, e) => s + e.free, 0)
+  const built = estates.filter((e) => e.status !== 'planned').length
   const selling = estates.filter((e) => e.free > 0).length
   const step = (TO - FROM) / n
   // left to right in the given order (the caller sorts: on sale first)
@@ -89,16 +89,17 @@ export function EstatesFan({ estates }: { estates: FanEstate[] }) {
           </a>
         ))}
 
-        {/* the disc in the middle: what is on sale across the region (the same numbers as the counter above) */}
+        {/* the disc in the middle: our estates, counted as on the first screen — a coming one is not «ours» yet
+            (it has its own «скоро» slice); the counter above the map already says how many houses are free */}
         <circle className="ef__hub" cx={RING.cx} cy={RING.cy} r={RING.r1 - 10} />
         <text className="ef__hub-n" x={RING.cx} y={RING.cy + 16} textAnchor="middle">
-          {free}
+          {built}
         </text>
         <text className="ef__hub-t" x={RING.cx} y={RING.cy + 52} textAnchor="middle">
-          {plural(free, 'дом', 'дома', 'домов')} в продаже
+          {plural(built, 'посёлок', 'посёлка', 'посёлков')}
         </text>
         <text className="ef__hub-t ef__hub-t--sub" x={RING.cx} y={RING.cy + 78} textAnchor="middle">
-          в {selling} {plural(selling, 'посёлке', 'посёлках', 'посёлках')}
+          {selling ? `в ${selling} — дома в продаже` : 'все дома проданы'}
         </text>
       </svg>
 

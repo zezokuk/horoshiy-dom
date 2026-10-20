@@ -53,7 +53,12 @@ export function RegionHero({
             {/* the first screen's main picture: loaded at once, not lazily */}
             <img src={scenes.src} alt={scenes.alt} fetchPriority="high" decoding="async" />
             {scenes.labels.map((l) => (
-              <span key={l.title} className="rh__label" style={{ left: `${l.x}%`, top: `${l.y}%` }}>
+              // centred on its point, but near an edge it leans inwards so a long label stays inside the picture on a phone
+              <span
+                key={l.title}
+                className="rh__label"
+                style={{ left: `${l.x}%`, top: `${l.y}%`, ['--ax' as string]: l.x < 25 ? '-25%' : l.x > 75 ? '-75%' : '-50%' }}
+              >
                 <b>{l.title}</b>
                 {l.text && <i>{l.text}</i>}
               </span>
