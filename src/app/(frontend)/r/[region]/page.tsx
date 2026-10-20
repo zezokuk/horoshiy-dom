@@ -3,11 +3,11 @@ import { notFound } from 'next/navigation'
 import { EstatesView } from '@/components/EstatesView'
 import { Genplan } from '@/components/Genplan'
 import { HouseCard } from '@/components/HouseCard'
-import { Pic } from '@/components/Pic'
 import { LeadInline } from '@/components/LeadForm'
+import { RegionStage } from '@/components/RegionStage'
 import { Words } from '@/components/Words'
 import { PromoCards } from '@/components/PromoCards'
-import { getEstates, getHouses, getProjects, getPromos, getRegion, img } from '@/lib/data'
+import { getEstates, getHouses, getProjects, getPromos, getRegion } from '@/lib/data'
 import { formatMillions, plural, telHref } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
 import { byEstateStatus, estateView, genplanEstate, houseView, promoView } from '@/lib/view'
@@ -77,10 +77,13 @@ export default async function RegionPage({ params }: Props) {
   const built = views.filter((v) => v.status !== 'planned').length
   const free = houses.filter((h) => h.status === 'free').map(houseView)
   const priceFrom = free.length ? Math.min(...free.map((h) => h.price)) : null
-  // a real house, not an estate cover: covers carry the estate's name printed on them («ЮЖНЫЙ ВЕТЕР»)
-  const cover = img(region.cover, 'wide') || free[0]?.photo || houses.map(houseView).find((h) => h.photo)?.photo || views.find((v) => v.cover)?.cover
-  const coverPhone =
-    img(region.cover, 'card') || free[0]?.photoCard || houses.map(houseView).find((h) => h.photoCard)?.photoCard || views.find((v) => v.coverCard)?.coverCard
+  // each estate's slice on the first screen: a real house standing there (a free one first), not the estate cover —
+  // covers carry the estate's name printed on them («ЮЖНЫЙ ВЕТЕР»); Тип 12's picture is a render, not a house
+  const all = houses.map(houseView).filter((h) => h.photoCard && !h.title.startsWith('Тип 12'))
+  const stage = views.map((v) => {
+    const mine = all.filter((h) => h.estateSlug === v.slug)
+    return { ...v, photo: (mine.find((h) => h.status === 'free') ?? mine[0])?.photoCard }
+  })
   // 3D showcase: the estate with the most free houses (ties: the first in the admin's order)
   const top = [...estates].sort((a, b) => (views.find((v) => v.slug === b.slug)?.free ?? 0) - (views.find((v) => v.slug === a.slug)?.free ?? 0))[0]
   const showcase = top && {
@@ -91,45 +94,28 @@ export default async function RegionPage({ params }: Props) {
   return (
     <>
       <div className="container intro">
-        <div className={`obj-hero ${cover ? '' : 'obj-hero--solo'}`}>
-          {cover && (
-            <div className="obj-hero__img">
-              <Pic src={cover} phone={coverPhone} alt={region.name} priority />
-            </div>
-          )}
-          <div style={{ display: 'grid', gap: 20, alignContent: 'start' }}>
-            <p className="eyebrow">Регион</p>
-            <h1 className="title title--xl">{region.name}</h1>
-            {region.tagline && <p className="lead">{region.tagline}</p>}
-            {region.intro && <p>{region.intro}</p>}
-            <div className="facts">
-              <div className="fact">
-                <b>{built}</b>
-                <span>{plural(built, 'посёлок', 'посёлка', 'посёлков')}</span>
-              </div>
-              <div className="fact">
-                <b>{free.length}</b>
-                <span>{plural(free.length, 'дом', 'дома', 'домов')} в продаже</span>
-              </div>
-              <div className="fact">
-                <b>{priceFrom ? formatMillions(priceFrom) : '—'}</b>
-                <span>цена от</span>
-              </div>
-              <div className="fact">
-                <b>5 лет</b>
-                <span>гарантия на дом</span>
-              </div>
-            </div>
-            <div className="btns">
-              <a href="#estates" className="btn btn--green">
+        <RegionStage
+          name={region.name}
+          tagline={region.tagline}
+          note={region.intro}
+          estates={stage}
+          facts={[
+            { value: String(built), label: plural(built, 'посёлок', 'посёлка', 'посёлков') },
+            { value: String(free.length), label: `${plural(free.length, 'дом', 'дома', 'домов')} в продаже` },
+            { value: priceFrom ? formatMillions(priceFrom) : '—', label: 'цена от' },
+            { value: '5 лет', label: 'гарантия на дом' },
+          ]}
+          actions={
+            <>
+              <a href="#estates" className="btn btn--gold">
                 Посёлки
               </a>
-              <a href={regionHref(region.slug, '/catalog')} className="btn btn--ghost" style={{ color: 'var(--green-deep)' }}>
+              <a href={regionHref(region.slug, '/catalog')} className="btn btn--ghost">
                 Все дома с фильтрами
               </a>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+        />
       </div>
 
       <section className="section" id="estates">

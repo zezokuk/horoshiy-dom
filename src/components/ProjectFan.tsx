@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import { f1, ringPoint, ringSlice, type Ring } from '@/lib/fan'
 import { formatArea, plural } from '@/lib/format'
 import type { ProjectCardData } from './ProjectCard'
 
@@ -17,27 +18,11 @@ const FROM = 192 // degrees; 270 is straight up (SVG y goes down)
 const TO = 348
 const GAP = 1.6
 
+const RING: Ring = { cx: CX, cy: CY, r1: R1, r2: R2 }
 const rad = (a: number) => (a * Math.PI) / 180
-const pt = (r: number, a: number) => [CX + r * Math.cos(rad(a)), CY + r * Math.sin(rad(a))] as const
-const f = (n: number) => n.toFixed(1)
-
-function wedge(a0: number, a1: number) {
-  const [x0, y0] = pt(R2, a0)
-  const [x1, y1] = pt(R2, a1)
-  const [x2, y2] = pt(R1, a1)
-  const [x3, y3] = pt(R1, a0)
-  const path = `M${f(x0)} ${f(y0)} A${R2} ${R2} 0 0 1 ${f(x1)} ${f(y1)} L${f(x2)} ${f(y2)} A${R1} ${R1} 0 0 0 ${f(x3)} ${f(y3)} Z`
-  // the photo covers the slice's bounding box (sampled along the outer arc, which may pass the top)
-  const xs = [x0, x1, x2, x3]
-  const ys = [y0, y1, y2, y3]
-  for (let a = a0; a <= a1; a += 2) {
-    const [x, y] = pt(R2, a)
-    xs.push(x)
-    ys.push(y)
-  }
-  const box = { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) }
-  return { path, box }
-}
+const pt = (r: number, a: number) => ringPoint(RING, r, a)
+const f = f1
+const wedge = (a0: number, a1: number) => ringSlice(RING, a0, a1)
 
 const facts = (p: ProjectCardData) =>
   [
