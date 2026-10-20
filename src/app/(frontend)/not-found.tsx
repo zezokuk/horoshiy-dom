@@ -1,25 +1,23 @@
 import type { Metadata } from 'next'
-import { headers } from 'next/headers'
 import { Shell } from '@/components/Shell'
-import { getHouses, getProjects, getRegions } from '@/lib/data'
+import { getHouses, getProjects } from '@/lib/data'
 import { plural } from '@/lib/format'
-import { mainHref, regionFromHost, regionHref } from '@/lib/site'
+import { mainHref } from '@/lib/site'
 
 export const metadata: Metadata = { title: 'Страница не найдена' }
 
 /**
  * The site's own 404: for notFound() in any page and, through (main)/[...rest], for every unknown address.
- * On a region subdomain — that region's header and its catalog. The house sketch draws itself in: «здесь дом только
- * на чертеже» — the real ones are a click away, with live counts.
+ * The house sketch draws itself in: «здесь дом только на чертеже» — the real ones are a click away, with live counts.
+ * No headers() here (no region header on a subdomain's 404): Next renders not-found into every page, and a dynamic
+ * API in it turned every static page dynamic (/privacy, /projects, /build… — seen in the 20.10 build).
  */
 export default async function NotFound() {
-  const slug = regionFromHost((await headers()).get('host'))
-  const [regions, houses, projects] = await Promise.all([getRegions(), getHouses(), getProjects()])
-  const region = regions.find((r) => r.slug === slug && r.status === 'active')
+  const [houses, projects] = await Promise.all([getHouses(), getProjects()])
   const free = houses.filter((h) => h.status === 'free').length
   const links = [
     {
-      href: region ? regionHref(region.slug, '/catalog') : mainHref('/catalog'),
+      href: mainHref('/catalog'),
       label: 'Готовые дома',
       note: free ? `${free} ${plural(free, 'свободен', 'свободно', 'свободно')}` : '',
     },
@@ -31,10 +29,10 @@ export default async function NotFound() {
         : '',
     },
     { href: mainHref('/locations'), label: 'Посёлки на карте', note: '' },
-    { href: region ? regionHref(region.slug) : mainHref('/'), label: 'На главную', note: '' },
+    { href: mainHref('/'), label: 'На главную', note: '' },
   ]
   return (
-    <Shell region={region}>
+    <Shell>
       <section className="nf">
         <div className="container nf__in">
           <div className="nf__text">
