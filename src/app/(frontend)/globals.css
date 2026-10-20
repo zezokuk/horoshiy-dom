@@ -640,23 +640,48 @@ button.g3--loading { width: 100%; border: 0; font: inherit; cursor: pointer; }
 /* home: «Что вас интересует» — build / buy / look */
 /* two ways in (build / buy), «или» between them, and the places band under both that ties them together */
 .ways { position: relative; display: grid; gap: 18px; }
-@media (min-width: 900px) { .ways { grid-template-columns: repeat(2, 1fr); } .ways .way { min-height: 480px; } }
+@media (min-width: 900px) { .ways { grid-template-columns: repeat(2, 1fr); } }
 .ways__or { position: absolute; left: 50%; top: 50%; z-index: 2; transform: translate(-50%, -50%); width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50%; background: var(--paper); border: 1.5px solid var(--gold); color: var(--gold-ink); font-family: var(--font-serif); font-size: 22px; font-style: italic; box-shadow: 0 14px 30px -16px rgba(20,28,22,.6); pointer-events: none; }
-.places { position: relative; isolation: isolate; overflow: hidden; margin-top: 18px; display: grid; gap: 22px; padding: 28px; border-radius: var(--radius); background: var(--green-deep); color: #fff; box-shadow: 0 24px 50px -34px rgba(20,28,22,.7); }
-@media (min-width: 900px) { .places { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); align-items: center; padding: 34px 38px; } .places__go { grid-column: 1; justify-self: start; } .places__list { grid-column: 2; grid-row: 1 / span 2; } }
-.places > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; opacity: .5; }
-.places::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(20,28,22,.95) 0%, rgba(20,28,22,.82) 55%, rgba(20,28,22,.7) 100%); }
+/* 20.10: light instead of a darkened estate photo — the text and the list on the left, the scheme of the estates
+   around the city on the right (components/PlacesMap) */
+.places { position: relative; margin-top: 18px; display: grid; gap: 22px; padding: 26px; border-radius: var(--radius); background: var(--cream); color: var(--ink); border: 1px solid var(--line); }
+@media (min-width: 900px) {
+  .places { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); column-gap: 40px; align-items: center; padding: 34px 38px; }
+  .places > .pmap { grid-column: 2; grid-row: 1 / span 3; }
+  .places__go { justify-self: start; }
+}
 .places__text { display: grid; gap: 10px; }
 .places h3 { font-family: var(--font-serif); font-size: clamp(30px, 3vw, 38px); line-height: 1.05; font-weight: 600; }
-.places p { color: #e3e6df; font-size: 15px; max-width: 46ch; }
+.places p { color: var(--muted); font-size: 15px; max-width: 46ch; }
 .places__list { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 136px), 1fr)); }
-@media (min-width: 900px) { .places__list { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
-.places__list a { display: grid; gap: 2px; padding: 12px 14px; border-radius: 14px; background: rgba(251,248,242,.1); border: 1px solid rgba(234,223,201,.22); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); transition: background .2s, border-color .2s; }
-.places__list a:hover { background: rgba(251,248,242,.18); border-color: var(--gold-soft); }
+@media (min-width: 900px) { .places__list { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
+.places__list a { display: grid; gap: 2px; padding: 11px 14px; border-radius: 14px; background: #fffdf8; border: 1px solid var(--line); transition: background .2s, border-color .2s; }
+.places__list a:hover { border-color: var(--green); }
 .places__list b { font-weight: 600; overflow-wrap: anywhere; } /* names carry soft hyphens (lib/format softHyphens); this is the last resort */
-.places__list span { font-size: 13px; color: var(--gold-soft); }
-.places__list .is-soon a { border-style: dashed; }
-.places__list .is-sold span { color: rgba(251,248,242,.7); }
+.places__list span { font-size: 13px; color: var(--gold-ink); }
+.places__list .is-soon a { border-style: dashed; background: transparent; }
+.places__list .is-sold span { color: var(--muted); }
+/* the scheme: SVG units, so the text sizes grow on phones where the whole picture is small */
+.pmap { display: block; width: 100%; height: auto; border-radius: 18px; background: #fffdf8; border: 1px solid var(--line); }
+.pmap__grid { fill: none; stroke: rgba(38,53,44,.06); }
+.pmap__ray { stroke: var(--gold); stroke-width: 1.2; stroke-dasharray: 4 5; opacity: .75; }
+.pmap__city circle:first-child { fill: rgba(176,145,95,.12); stroke: var(--gold); stroke-dasharray: 3 4; }
+.pmap__city circle:last-child { fill: var(--gold-ink); }
+.pmap__city text { font-family: var(--font-serif); font-size: 19px; font-weight: 600; fill: var(--gold-ink); }
+.pmap__spot circle { fill: var(--green-deep); stroke: #fffdf8; stroke-width: 3; transition: fill .2s; }
+.pmap__spot.is-sold circle { fill: #b8b2a4; }
+.pmap__spot.is-soon circle { fill: #fffdf8; stroke: var(--green-deep); stroke-width: 2; stroke-dasharray: 3 2; }
+.pmap__spot text { font-size: 14px; font-weight: 600; fill: var(--green-deep); paint-order: stroke; stroke: #fffdf8; stroke-width: 5px; stroke-linejoin: round; }
+.pmap__spot.is-sold text { fill: var(--muted); }
+.pmap__spot:hover circle { fill: var(--green); }
+.pmap__spot:hover text { text-decoration: underline; }
+.pmap__scale path { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+.pmap__scale text, .pmap__north { font-size: 12px; fill: var(--muted); }
+@media (max-width: 600px) {
+  .pmap__spot text { font-size: 21px; }
+  .pmap__city text { font-size: 24px; }
+  .pmap__scale text, .pmap__north { font-size: 18px; }
+}
 .sold-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); }
 .sold-list a { display: grid; gap: 4px; padding: 18px 20px; border-radius: 16px; background: var(--paper, #f6f1e7); border: 1px solid rgba(31,61,43,.12); color: inherit; text-decoration: none; transition: border-color .2s; }
 .sold-list a:hover { border-color: var(--gold-soft); }
@@ -672,16 +697,22 @@ button.g3--loading { width: 100%; border: 0; font: inherit; cursor: pointer; }
     var(--green-deep);
 }
 .estate-card__soon { position: absolute; top: 22px; left: 22px; padding: 6px 12px; border: 1px dashed rgba(234,223,201,.6); border-radius: 999px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold-soft); }
-.way { position: relative; display: grid; align-content: end; min-height: 420px; border-radius: var(--radius); overflow: hidden; color: #fff; background: var(--green-deep); isolation: isolate; box-shadow: 0 24px 50px -34px rgba(20,28,22,.7); transition: transform .35s ease, box-shadow .35s ease; }
-.way img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform .8s ease; }
-.way::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(20,28,22,0) 25%, rgba(20,28,22,.82) 72%, rgba(20,28,22,.94) 100%); }
-.way:hover { transform: translateY(-4px); box-shadow: 0 34px 60px -34px rgba(20,28,22,.8); }
-.way:hover img { transform: scale(1.05); }
-.way__body { display: grid; gap: 10px; padding: 26px; }
-.way__num { font-family: var(--font-serif); color: var(--gold-soft); font-size: 22px; }
+/* 20.10: light cards — a bright picture on top, the words under it (were white words on a darkened photo) */
+.way { position: relative; display: grid; grid-template-rows: auto 1fr; border-radius: var(--radius); overflow: hidden; color: var(--ink); background: #fffdf8; border: 1px solid var(--line); box-shadow: 0 24px 50px -38px rgba(20,28,22,.55); transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease; }
+.way__pic { position: relative; display: block; aspect-ratio: 16 / 10; overflow: hidden; background: var(--cream); }
+.way__pic img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s ease; }
+/* the plan seen from above lies on white: the whole house, not a crop */
+.way__pic--plan { background: #fff; }
+.way__pic--plan img { object-fit: contain; padding: 14px 14px 30px; }
+.way__pic small { position: absolute; left: 16px; bottom: 9px; font-size: 12px; color: var(--muted); }
+.way:hover { transform: translateY(-4px); border-color: var(--green); box-shadow: 0 34px 60px -34px rgba(20,28,22,.6); }
+.way:hover .way__pic img { transform: scale(1.04); }
+.way__body { display: grid; gap: 10px; align-content: start; padding: 22px 26px 26px; }
+.way__num { font-family: var(--font-serif); color: var(--gold-ink); font-size: 22px; }
 .way h3 { font-family: var(--font-serif); font-size: clamp(30px, 3vw, 38px); line-height: 1.05; font-weight: 600; }
-.way p { color: #e3e6df; font-size: 15px; }
-.way__go { margin-top: 6px; font-weight: 600; color: var(--gold-soft); }
+.way p { color: var(--muted); font-size: 15px; }
+.way__go { margin-top: 6px; font-weight: 600; color: var(--green-deep); }
+.way:hover .way__go { color: var(--green); }
 
 /* promos */
 .promos { display: grid; gap: 18px; }
@@ -725,6 +756,20 @@ button.g3--loading { width: 100%; border: 0; font: inherit; cursor: pointer; }
 .story__card--end { gap: 12px; }
 .story__card--end .btns { margin-top: 4px; }
 .story__note { font-size: 13px; }
+.story__stage { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); }
+@media (min-width: 900px) {
+  /* 20.10: beside the house the text column looked empty — now the house is centred in the upper part and the reasons
+     pass under it like subtitles: one wide strip of frosted glass at a time (number on the left, words on the right) */
+  .story__flow { justify-items: center; gap: 34vh; padding-top: 52vh; padding-bottom: 30vh; }
+  .story__card { width: 100%; max-width: 720px; padding: 22px 30px; background: rgba(251,248,242,.6); backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3); border-color: rgba(255,255,255,.75); }
+  .story__card.is-on { transform: none; border-color: var(--gold-soft); }
+  .story__card:has(.story__big) { grid-template-columns: minmax(150px, auto) minmax(0, 1fr); column-gap: 30px; row-gap: 6px; align-items: center; }
+  .story__card:has(.story__big) > * { grid-column: 2; }
+  .story__card:has(.story__big) > .story__stage { grid-column: 1 / -1; }
+  .story__card:has(.story__big) > .story__big { grid-column: 1; grid-row: 2 / span 2; font-size: 56px; padding-right: 30px; border-right: 1px solid var(--line); }
+  .story__card--intro, .story__card--end { max-width: 640px; justify-items: center; text-align: center; }
+  .story__card--intro .crumbs { justify-content: center; }
+}
 @media (max-width: 899px) {
   /* phone: the house in the upper part, cards in the lower part of the screen, one at a time */
   .story__flow { gap: 30vh; padding-top: 50vh; }

@@ -3,7 +3,7 @@ import { mainHref } from '@/lib/site'
 import type { HeroFacts } from './facts'
 
 /**
- * The «Vintara» furniture shared by variants 1 and 4: two glass cards with live numbers, the round «Выбрать дом»
+ * The «Vintara» furniture shared by variants 1 and 4: two glass cards with live numbers (both are links)
  * and the line under the screen. Positioned by the .hd__* styles in design.css.
  */
 export function FactCards({ f }: { f: HeroFacts }) {
@@ -18,23 +18,18 @@ export function FactCards({ f }: { f: HeroFacts }) {
           </span>
           <span className="hd__card-list">{f.selling.map((e) => e.name).join(' · ')}</span>
         </a>
-        <div className="hd__card hd__card--right">
+        {/* 20.10: people wanted to press this card, so it leads on (to «Два пути») and the round «Выбрать дом» went */}
+        <a className="hd__card hd__card--right" href="#choose">
           <span className="hd__card-k">
-            <b>{f.homes}</b> {f.homesLabel}
+            <b>{f.homes}</b> {f.homesLabel} <em aria-hidden>↓</em>
           </span>
           <span className="hd__card-list">
             {[f.since ? `с ${f.since} года` : '', `${f.projects} ${plural(f.projects, 'проект', 'проекта', 'проектов')} домов`]
               .filter(Boolean)
               .join(' · ')}
           </span>
-        </div>
+        </a>
       </div>
-
-      <a className="hd__go" href="#choose">
-        Выбрать
-        <br />
-        дом
-      </a>
     </>
   )
 }

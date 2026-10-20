@@ -32,13 +32,13 @@
 .hd__card { display: grid; align-content: start; gap: 6px; padding: 14px; border-radius: 18px; background: var(--green-deep); color: #fff; }
 .hd__card-k { font-size: 13px; line-height: 1.25; }
 .hd__card-k b { display: block; font-family: var(--font-serif); font-size: 40px; line-height: .95; color: var(--gold-soft); }
-.hd__card-k em { font-style: normal; opacity: .8; }
+.hd__card-k em { display: inline-block; font-style: normal; opacity: .8; transition: transform .3s cubic-bezier(.2, .7, .2, 1), opacity .3s; }
 .hd__card-list { font-size: 11.5px; line-height: 1.35; color: #d9ddd3; }
-a.hd__card:hover { background: rgba(28, 38, 32, .62); }
-
-/* the round action button, half over the photo */
-.hd__go { position: absolute; z-index: 4; left: 50%; top: calc(121cqi - 46px); transform: translateX(-50%); width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; text-align: center; font-weight: 700; font-size: 14px; line-height: 1.1; background: var(--cream); color: var(--green-deep); box-shadow: 0 0 0 6px rgba(243, 236, 224, .3); transition: transform .25s ease, box-shadow .25s ease; }
-.hd__go:hover { transform: translateX(-50%) scale(1.05); box-shadow: 0 0 0 9px rgba(243, 236, 224, .3); }
+/* both cards are links: on pointing the edge turns gold and the arrow goes where the link leads (the card stays put) */
+a.hd__card { transition: background-color .3s, border-color .3s; }
+a.hd__card:hover, a.hd__card:focus-visible { background: rgba(28, 38, 32, .62); border-color: var(--gold-soft); }
+a.hd__card:hover em { opacity: 1; transform: translate(2px, -2px); }
+a.hd__card--right:hover em { transform: translateY(3px); }
 .hd__lead { max-width: 760px; margin: 22px auto 0; text-align: center; font-size: clamp(16px, 1.5vw, 19px); color: var(--muted); }
 
 @media (min-width: 960px) {
@@ -53,7 +53,6 @@ a.hd__card:hover { background: rgba(28, 38, 32, .62); }
   .hd__card-k { font-size: 14px; }
   .hd__card-k b { font-size: 54px; }
   .hd__card-list { font-size: 13px; }
-  .hd__go { top: auto; bottom: 32px; width: 112px; height: 112px; font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .hd__title span { animation: none; } }
 
@@ -315,30 +314,39 @@ a.hd__card:hover { background: rgba(28, 38, 32, .62); }
 @keyframes menu-in { from { opacity: 0; transform: translateY(14px); } }
 @media (prefers-reduced-motion: reduce) { .mobile-nav > a { animation: none; } }
 
-/* ── The key («Skylon»): a ready house as a door hanger on a gold handle, on «Готовые дома» ─────────────────────── */
+/* ── «Готовые дома», first screen: facts and the cheapest free houses as a fan of photos (components/HouseStack) ── */
 .keyban { display: grid; gap: 14px; }
-.keyban__row { display: grid; grid-template-columns: minmax(0, 1fr) 84px; gap: 14px; align-items: center; padding-right: 22px; } /* room for the lever */
+.keyban__row { display: grid; grid-template-columns: minmax(0, 1fr) 118px; gap: 22px; align-items: center; padding-right: 14px; } /* room for the fan's side cards */
 .keyban__text { display: grid; gap: 14px; align-content: start; }
 .keyban__facts { display: grid; gap: 8px; margin-top: 6px; }
 .keyban__facts li { display: grid; gap: 2px; padding-top: 8px; border-top: 1px solid var(--line); color: var(--muted); }
 .keyban__facts b { font-family: var(--font-serif); font-size: 24px; line-height: 1; color: var(--green-deep); }
-.key { position: relative; margin: 0; width: 100%; filter: drop-shadow(0 18px 26px rgba(31, 42, 34, .22)); }
-.key__card { aspect-ratio: 3 / 5; clip-path: url(#key-shape); background: var(--cream); }
-.key__card img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; }
-/* the rosette's centre (60 of 320) sits on the hole's centre (50% across, 17% down) */
-.key__handle { position: absolute; left: 50%; top: 17%; width: 92%; transform: translate(-18.75%, -50%); overflow: visible; }
-.key__lever { fill: #a5844f; }
-.key__shine { fill: none; stroke: #e3c99a; stroke-width: 3; stroke-linecap: round; opacity: .8; }
-.key__rose { fill: #8a6b3e; }
-.key__rose-in { fill: #b0915f; }
+.hstack { position: relative; width: 100%; aspect-ratio: 4 / 5; }
+.hstack__card { position: absolute; inset: 0; overflow: hidden; border-radius: 14px; border: 3px solid #fff; background: var(--cream); box-shadow: 0 18px 34px -20px rgba(31, 42, 34, .55); transform-origin: 50% 115%; transform: translateX(var(--x, 0)) rotate(var(--r, 0deg)); transition: transform .5s cubic-bezier(.2, .7, .2, 1), box-shadow .3s ease; }
+.hstack__card[data-i="1"] { --r: -7deg; --x: -6%; }
+.hstack__card[data-i="2"] { --r: 7deg; --x: 6%; }
+.hstack--2 .hstack__card[data-i="1"] { --r: 6deg; --x: 5%; }
+.hstack__card img { width: 100%; height: 100%; object-fit: cover; }
+.hstack__tag { position: absolute; left: 0; right: 0; bottom: 0; display: grid; gap: 2px; padding: 26px 10px 9px; background: linear-gradient(transparent, rgba(20, 28, 22, .82)); color: #fff; }
+.hstack__tag b { font-family: var(--font-serif); font-size: 17px; font-weight: 500; line-height: 1; }
+.hstack__tag span { display: none; font-size: 12px; color: #e3e6df; }
+.hstack:hover .hstack__card[data-i="1"] { --r: -13deg; --x: -16%; }
+.hstack:hover .hstack__card[data-i="2"] { --r: 13deg; --x: 16%; }
+.hstack--2:hover .hstack__card[data-i="1"] { --r: 11deg; --x: 14%; }
+.hstack__card:hover { box-shadow: 0 26px 44px -20px rgba(31, 42, 34, .7); border-color: var(--gold-soft); }
+.hstack__card:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 @media (min-width: 960px) {
   .keyban { grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); column-gap: 56px; row-gap: 6px; align-items: start; }
   .keyban__row { display: contents; }
   .keyban__facts { grid-column: 1; }
-  .key { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+  .hstack { grid-column: 2; grid-row: 1 / span 2; align-self: center; width: 250px; margin: 0 auto; }
   .keyban__facts { grid-template-columns: repeat(3, auto); justify-content: start; column-gap: 28px; }
-  .key { width: 230px; margin: 0 auto 0 30px; }
+  .hstack__card { border-radius: 20px; border-width: 5px; }
+  .hstack__tag { padding: 40px 16px 14px; }
+  .hstack__tag b { font-size: 26px; }
+  .hstack__tag span { display: block; }
 }
+@media (prefers-reduced-motion: reduce) { .hstack__card { transition: none; } }
 
 /* the switcher on /preview/hero-N */
 .preview-switch { position: fixed; z-index: 60; left: 50%; bottom: 84px; transform: translateX(-50%); display: flex; gap: 4px; align-items: center; width: max-content; max-width: calc(100vw - 24px); padding: 6px; border-radius: 14px; background: var(--green-ink); color: #fff; font-size: 12px; box-shadow: var(--shadow); }
@@ -380,9 +388,12 @@ html:active-view-transition-type(page)::view-transition-new(root) { animation: 3
 .btn--gold:hover { box-shadow: 0 12px 26px -14px rgba(38, 53, 44, .9); }
 .btn--ghost { transition: background-color .25s ease, border-color .25s ease, color .25s ease, transform .2s ease; }
 .btn--ghost:hover { background-color: var(--green); border-color: var(--green); color: #fff !important; }
-.hd__go { transition: transform .25s ease, box-shadow .25s ease, background-color .25s ease, color .25s ease, translate .3s cubic-bezier(.2, .7, .2, 1); translate: var(--mx, 0) var(--my, 0); }
-.hd__go:hover { background: var(--green); color: var(--cream); }
-.float-call { translate: var(--mx, 0) var(--my, 0); }
+/* on a green background the green fill made the button vanish into it (20.10): there it gets a gold ring instead */
+:is(.section--green, .lead-box, .hero2__panel, .footer, .hd__stage, .s2h, .region-card, .tour__soon) .btn--gold:is(:hover, :focus-visible) { background-size: 0% 100%; color: #fff; box-shadow: 0 0 0 2px var(--gold-soft), 0 12px 26px -14px rgba(0, 0, 0, .6); }
+/* «magnetic» (20.10: only «Заказать звонок» — every other button stays still): it leans to the pointer from a little
+   way off and holds on to it when the pointer tries to leave (components/PageMotion) */
+.magnet { translate: var(--mx, 0) var(--my, 0); }
+.float-call.magnet { transition: opacity .3s, transform .3s, translate .4s cubic-bezier(.2, .7, .2, 1); }
 /* header links: a green line grows under the one you point at */
 .nav a { background: linear-gradient(var(--green), var(--green)) no-repeat 0 100% / 0 1.5px; padding-bottom: 3px; transition: opacity .2s, color .2s, background-size .3s cubic-bezier(.2, .7, .2, 1); }
 .nav a:hover, .nav a[aria-current="page"] { background-size: 100% 1.5px; }

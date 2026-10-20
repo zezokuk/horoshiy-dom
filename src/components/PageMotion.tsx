@@ -6,7 +6,8 @@ import { useEffect } from 'react'
  * - page to page: the browser's cross-document view transition (CSS @view-transition in design.css). The card the user
  *   clicked gets the name «house-photo» just before leaving, and the house or project page names its main photo the same,
  *   so the photo flies from the card into its place. Named on click only: two cards with one name would cancel it.
- * - on a computer with a mouse: cards lean a little towards the pointer, round buttons are pulled to it («magnetic»).
+ * - on a computer with a mouse: cards lean a little towards the pointer; «Заказать звонок» (.magnet, the only moving
+ *   button) is pulled to it from a little way off and follows it as it tries to leave.
  * Phones and reduced motion: only the plain page fade (or nothing).
  */
 export function PageMotion() {
@@ -42,7 +43,8 @@ export function PageMotion() {
     }
 
     let tilted: HTMLElement | null = null
-    let pulled: HTMLElement | null = null
+    const pulled = new Map<HTMLElement, readonly [number, number]>()
+    const REACH = 56
     let raf = 0
     let last: PointerEvent | null = null
     const frame = () => {
@@ -70,17 +72,22 @@ export function PageMotion() {
         hero.style.setProperty('--px', ((e.clientX - r.left) / r.width - 0.5).toFixed(3))
         hero.style.setProperty('--py', ((e.clientY - r.top) / r.height - 0.5).toFixed(3))
       }
-      const round = t.closest<HTMLElement>('.hd__go, .float-call')
-      if (pulled && pulled !== round) {
-        pulled.style.removeProperty('--mx')
-        pulled.style.removeProperty('--my')
-      }
-      pulled = round
-      if (round) {
-        const r = round.getBoundingClientRect()
-        round.style.setProperty('--mx', `${((e.clientX - r.left - r.width / 2) * 0.25).toFixed(1)}px`)
-        round.style.setProperty('--my', `${((e.clientY - r.top - r.height / 2) * 0.25).toFixed(1)}px`)
-      }
+      // magnets: measured without their own pull (the rect moves with it), caught from REACH px around the edge
+      document.querySelectorAll<HTMLElement>('.magnet').forEach((m) => {
+        const [ox, oy] = pulled.get(m) ?? [0, 0]
+        const r = m.getBoundingClientRect()
+        const dx = e.clientX - (r.left - ox + r.width / 2)
+        const dy = e.clientY - (r.top - oy + r.height / 2)
+        if (Math.abs(dx) < r.width / 2 + REACH && Math.abs(dy) < r.height / 2 + REACH) {
+          const k = [dx * 0.3, dy * 0.4] as const
+          pulled.set(m, k)
+          m.style.setProperty('--mx', `${k[0].toFixed(1)}px`)
+          m.style.setProperty('--my', `${k[1].toFixed(1)}px`)
+        } else if (pulled.delete(m)) {
+          m.style.removeProperty('--mx')
+          m.style.removeProperty('--my')
+        }
+      })
     }
     const onMove = (e: PointerEvent) => {
       if (e.pointerType !== 'mouse') return

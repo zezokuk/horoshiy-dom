@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Catalog } from '@/components/Catalog'
-import { KeyHanger } from '@/components/KeyHanger'
+import { HouseStack } from '@/components/HouseStack'
 import { getDesign, getEstates, getHouses, getRegions } from '@/lib/data'
 import { formatMillions, plural } from '@/lib/format'
 import { houseView } from '@/lib/view'
@@ -21,7 +21,6 @@ export default async function CatalogPage() {
   const active = regions.filter((r) => r.status === 'active')
   const slugOf = (id: unknown) => regions.find((r) => r.id === (typeof id === 'object' && id ? (id as { id: number }).id : id))?.slug ?? ''
   const free = houses.filter((h) => h.status === 'free').map(houseView).sort((a, b) => a.price - b.price)
-  const keyHouse = free.find((h) => h.photoCard)
   return (
     <>
       <div className="container intro keyban">
@@ -33,8 +32,8 @@ export default async function CatalogPage() {
           <h1 className="title title--lg">Готовые дома в продаже</h1>
           <p className="lead">Кирпичные дома с участком и предчистовой отделкой. Статусы и цены обновляются по мере продаж.</p>
         </div>
-        {/* reference «Skylon»: the key — facts only (free houses from the admin, the company's advantages).
-            Phones: a small key beside the facts, so the list of houses stays near the top */}
+        {/* facts only (free houses from the admin, the company's advantages) and the cheapest free houses as a fan
+            of photos. Phones: a small fan beside the facts, so the list of houses stays near the top */}
         <div className="keyban__row">
           <ul className="keyban__facts">
             {free.length > 0 && (
@@ -49,7 +48,7 @@ export default async function CatalogPage() {
               <b>Ключи</b> — после сделки
             </li>
           </ul>
-          {keyHouse && effectOn(design, 'key') && <KeyHanger photo={keyHouse.photoCard} alt={`Свободный дом: ${keyHouse.title.split(' · ')[0]}`} />}
+          {effectOn(design, 'key') && <HouseStack houses={free} />}
         </div>
       </div>
       <div className="container" style={{ paddingBottom: 40 }}>

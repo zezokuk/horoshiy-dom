@@ -224,7 +224,7 @@ export function FloatingCall() {
   return (
     <a
       href="#lead"
-      className={`float-call ${shown ? 'is-shown' : ''}`}
+      className={`float-call magnet ${shown ? 'is-shown' : ''}`}
       aria-label="Заказать обратный звонок"
     >
       <span className="float-call__dot" />

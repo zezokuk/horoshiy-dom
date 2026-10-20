@@ -70,7 +70,7 @@ try:
     check("«Построить»: a grid of projects instead of the fan", "pf__svg" not in build and "/projects/tip-" in build)
     check("«Построить»: no plan → frame → house block", "s2h__stage" not in build)
     catalog = page("/catalog")
-    check("«Готовые дома»: no key", 'class="key"' not in catalog and "key__handle" not in catalog)
+    check("«Готовые дома»: no fan of free houses", "hstack__card" not in catalog)
     soon = page("/objects/novovelichkovskaya", host=f"krd.{H}")
     check("estate «скоро»: no sketch block, the form stays", "s2h__stage" not in soon and "Узнать о старте" in soon)
 

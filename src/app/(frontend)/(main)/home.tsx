@@ -9,6 +9,7 @@ import type { HeroFacts } from '@/components/heroes/facts'
 import { MortgageCalc } from '@/components/MortgageCalc'
 import { CountUp } from '@/components/Motion'
 import { Pic } from '@/components/Pic'
+import { PlacesMap } from '@/components/PlacesMap'
 import { PromoCards } from '@/components/PromoCards'
 import { Words } from '@/components/Words'
 import {
@@ -67,20 +68,23 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
   // that would take the network from fonts and scripts (measured with tools/perfcheck.py, 19.10)
   const heroPhone = img(hero, 'card')
 
-  // three different pictures: the «dream» project render (build), a real house on sale (buy; not the type already
-  // shown in the hero), and an estate seen from above for the places band (its 3D poster — covers have the name printed on them)
-  const buildProject = projects.find((p) => p.slug === 'tip-12') ?? projects[0]
-  const buildPhoto = img(buildProject?.photo, 'card')
+  // two different pictures (20.10: light cards instead of dark photos): build — a project's plan seen from above with
+  // furniture (its «3D-вид», else the «dream» render), buy — a real house on sale (not the type already shown in the hero).
+  // The places band under them is a scheme from the estates' coordinates (PlacesMap)
+  const planned = projects.find((p) => p.render && typeof p.render === 'object')
+  const buildProject = planned ?? projects.find((p) => p.slug === 'tip-12') ?? projects[0]
+  const buildPhoto = img(planned ? planned.render : buildProject?.photo, 'card')
   const heroType = (company.heroCaption || '').match(/Тип \d+/)?.[0]
+  // (Тип 12's photo is a render with a pool: not for «готовый», where the picture must be a real house)
   const buyPhoto = (
     free.find(
       (h) =>
         h.photoCard &&
+        !h.title.startsWith('Тип 12') &&
         h.title.split(' (')[0] !== heroType &&
         h.title.split(' (')[0] !== buildProject?.name,
     ) ?? free[0]
   )?.photoCard
-  const lookPhoto = img(estates.find((e) => e.poster)?.poster, 'card') ?? estateViews[0]?.coverCard
   const minArea = Math.min(...projects.map((p) => p.area || 999))
 
   const ways = [
@@ -88,6 +92,7 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
       n: '01',
       href: mainHref('/build'),
       photo: buildPhoto,
+      caption: planned ? `Проект «${planned.name}» — планировка, мебель для примера` : undefined,
       title: 'Построить дом',
       text: `${projects.length} проверенных проектов от ${minArea} м². Капитальный кирпичный дом под ключ за 6 месяцев.`,
       go: 'Как мы строим →',
@@ -96,6 +101,7 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
       n: '02',
       href: mainHref('/catalog'),
       photo: buyPhoto,
+      caption: undefined,
       title: 'Купить готовый',
       text: `Дома с отделкой, участком и подключёнными коммуникациями. Можно заезжать после сделки.`,
       go: free.length
@@ -267,7 +273,10 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
                   data-reveal
                   style={{ ['--d' as string]: `${i * 90}ms` }}
                 >
-                  {w.photo && <img src={w.photo} alt="" loading="lazy" decoding="async" />}
+                  <span className={`way__pic ${w.caption ? 'way__pic--plan' : ''}`}>
+                    {w.photo && <img src={w.photo} alt="" loading="lazy" decoding="async" />}
+                    {w.caption && <small>{w.caption}</small>}
+                  </span>
                   <div className="way__body">
                     <span className="way__num">{w.n}</span>
                     <h3>{w.title}</h3>
@@ -280,7 +289,7 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
 
             {/* the places tie both ways together: where the ready houses stand and where we build */}
             <div className="places" data-reveal>
-              {lookPhoto && <img src={lookPhoto} alt="" loading="lazy" decoding="async" />}
+              <PlacesMap estates={estateViews} />
               <div className="places__text">
                 <span className="way__num">Где это всё</span>
                 <h3>Посмотреть локации</h3>

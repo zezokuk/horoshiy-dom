@@ -14,7 +14,7 @@ const lerp = (a: number, b: number, k: number) => a + (b - a) * Math.min(1, Math
 export type TrustPoint = { big?: string; title: string; text: string }
 
 /**
- * «Построить дом»: the 3D house is the background, over it a short run of reasons to trust us.
+ * «Построить дом»: the 3D house is the background, under it a short run of reasons to trust us on frosted glass.
  * The house is built while they are read — one stage per reason — so a couple of screens of scrolling
  * and it stands finished. Without JS (or with reduced motion) the cards are plain text and the house is shown finished.
  */
@@ -34,14 +34,16 @@ export function BuildStory({ intro, points, end }: { intro: ReactNode; points: T
     const io = new IntersectionObserver(([e]) => e.isIntersecting && setNear(true), { rootMargin: '400px 0px' })
     io.observe(el)
     const onScroll = () => {
-      // the reading line: mid-screen on a desktop (text beside the house), low on a phone (text under the house)
+      // the reading line is low on the screen: the house stands in the upper part, the text goes under it like subtitles
+      // (20.10: the text column beside the house looked empty on a desktop)
       const h = window.innerHeight
-      const phone = window.innerWidth < 900
-      const line = h * (phone ? 0.74 : 0.55)
-      // phone: the house is in the upper half — a card that has been read fades out on its way up instead of covering it
+      const line = h * 0.74
+      // a card that has been read fades out on its way up instead of covering the house (desktop: quickly, the strip is
+      // wide and would lie across the house)
+      const [from, span] = window.innerWidth >= 900 ? [0.6, 0.1] : [0.5, 0.15]
       el.querySelectorAll<HTMLElement>('.story__card').forEach((c) => {
         const bottom = c.getBoundingClientRect().bottom
-        c.style.opacity = phone ? String(Math.min(1, Math.max(0, (bottom - h * 0.5) / (h * 0.15)))) : ''
+        c.style.opacity = String(Math.min(1, Math.max(0, (bottom - h * from) / (h * span))))
       })
       const centers = cards.current.slice(0, n).map((c) => (c ? c.getBoundingClientRect().top + c.offsetHeight / 2 : Infinity))
       // fractional index of the card on the reading line; -1..0 while the first one is on its way
@@ -80,8 +82,8 @@ export function BuildStory({ intro, points, end }: { intro: ReactNode; points: T
   return (
     <section className="story" ref={section} id="build">
       <div className="story__bg" aria-hidden>
-        {/* desktop: the house to the right of the text column; phone: above the cards */}
-        {near && <BuildHouse3D progress={progress} shift={wide ? { x: 0.16, y: 0 } : { x: 0, y: 0.24 }} />}
+        {/* the house above the cards: centred on a desktop, as on a phone */}
+        {near && <BuildHouse3D progress={progress} shift={wide ? { x: 0, y: 0.17 } : { x: 0, y: 0.24 }} />}
         <div className="story__badge">
           <b>{stage < 0 ? 'Ваш участок' : stage >= n ? 'Дом готов' : `Этап ${stage + 1} из ${n}`}</b>
           <span>{stage < 0 ? 'Листайте — построим дом' : stage >= n ? 'Можно заезжать' : STAGES[stage]}</span>
@@ -95,6 +97,9 @@ export function BuildStory({ intro, points, end }: { intro: ReactNode; points: T
         <div className="story__card story__card--intro">{intro}</div>
         {points.slice(0, n).map((s, i) => (
           <article key={s.title} ref={(c) => void (cards.current[i] = c)} className={`story__card ${i === Math.min(stage, n - 1) ? 'is-on' : ''}`}>
+            <span className="story__stage">
+              {String(i + 1).padStart(2, '0')} · {STAGES[i]}
+            </span>
             {s.big && <b className="story__big">{s.big}</b>}
             <h3>{s.title}</h3>
             <p>{s.text}</p>
