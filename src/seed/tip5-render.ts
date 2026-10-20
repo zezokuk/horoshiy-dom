@@ -28,7 +28,8 @@ export const TIP5_ROOMS = [
 export async function addTip5Render(payload: Payload) {
   const found = await payload.find({ collection: 'projects', where: { slug: { equals: 'tip-5' } }, limit: 1, depth: 0 })
   const project = found.docs[0]
-  if (!project || !fs.existsSync(TIP5_RENDER)) return false
+  // already there (a second run) or nothing to add: no duplicate pictures in the media library
+  if (!project || project.render || !fs.existsSync(TIP5_RENDER)) return false
   const data = fs.readFileSync(TIP5_RENDER)
   const media = await payload.create({
     collection: 'media',

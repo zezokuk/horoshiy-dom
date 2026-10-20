@@ -4,5 +4,5 @@ import config from '../payload.config'
 import { addTip5Render } from './tip5-render'
 
 const payload = await getPayload({ config })
-console.log((await addTip5Render(payload)) ? 'Тип 5: render and rooms added' : 'Тип 5: project or render file missing')
+console.log((await addTip5Render(payload)) ? 'Тип 5: render and rooms added' : 'Тип 5: nothing added (already has a render, or the project / render file is missing)')
 process.exit(0)
