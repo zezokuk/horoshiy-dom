@@ -3,7 +3,8 @@
 The same photo twice: the whole photo at the back, the title over it, and on top the photo again with the sky cut out,
 so the roof covers the lower part of the letters. The layers come from one file, so they always line up.
 
-    python tools/heroassets.py [media/photo-14427948.webp]   → public/design/: hero1-photo, hero1-house, sketch-tip5, plan-tip5 (+ 900 px copies)
+    python tools/heroassets.py [media/photo-14427948.webp]   → public/design/: hero1-photo, hero1-house (+ 900 px copies),
+                                                               plan-tip5-lines, house-lines.svg
 
 The sky is found by colour (bright and not warmer than blue: sky and clouds) AND smoothness: the metal roof's highlights
 are as white as the clouds, but the tile rows make the roof «ripple» (high local contrast) while sky and clouds are
@@ -76,36 +77,23 @@ for name, src in (("hero1-photo-900.webp", im), ("hero1-house-900.webp", cut)):
     small = src.resize((900, round(900 * src.height / src.width)), Image.LANCZOS)
     small.save(os.path.join(OUT, name), quality=82 if src.mode == "RGB" else 86, method=6)
 
-# the same house as a white line sketch (references 5–6, «каркас → дом», and the 404): edges of the real photo, so the
-# geometry is the client's, nothing drawn by hand. A strong blur drops the brick and grass texture, the gradient is
-# thinned to one-pixel lines (non-maximum suppression), and the silhouette comes from the sky mask (a clean roof line).
-SKETCH_BLUR, SKETCH_T = 2.6, 13
-gray = np.asarray(im.convert("L").filter(ImageFilter.GaussianBlur(SKETCH_BLUR))).astype(float)
-gx = np.zeros_like(gray)
-gy = np.zeros_like(gray)
-gx[:, 1:-1] = gray[:, 2:] - gray[:, :-2]
-gy[1:-1, :] = gray[2:, :] - gray[:-2, :]
-mag = np.hypot(gx, gy)
-vert = np.abs(gx) >= np.abs(gy)
-left, right = np.roll(mag, 1, 1), np.roll(mag, -1, 1)
-up, down = np.roll(mag, 1, 0), np.roll(mag, -1, 0)
-peak = np.where(vert, (mag >= left) & (mag >= right), (mag >= up) & (mag >= down))
-lines = peak & (mag > SKETCH_T) & ~sky
-lines[int(im.height * 0.9) :, :] = False  # the grass strip at the bottom is all texture
-house_mask = Image.fromarray(np.where(sky, 0, 255).astype("uint8"), "L")
-outline = (np.asarray(house_mask) > 0) & (np.asarray(house_mask.filter(ImageFilter.MinFilter(3))) == 0)
-lines |= outline
-alpha = Image.fromarray(np.where(lines, 255, 0).astype("uint8"), "L").filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.GaussianBlur(0.6))
-sketch = Image.new("RGBA", im.size, (255, 255, 255, 0))
-sketch.putalpha(alpha)
-sketch.save(os.path.join(OUT, "sketch-tip5.webp"), quality=90, method=6)
-sketch.resize((900, round(900 * im.height / im.width)), Image.LANCZOS).save(os.path.join(OUT, "sketch-tip5-900.webp"), quality=90, method=6)
-# the client's plan of «Тип 5» without the slide's text column (the «чертёж» stage)
-plan = Image.open(os.path.join(ROOT, "media", "plan-14427948.webp")).convert("RGB").crop((110, 50, 880, 880))
-plan.save(os.path.join(OUT, "plan-tip5.webp"), quality=86, method=6)
-blue = Image.new("RGB", im.size, (38, 53, 44))
-blue.paste(sketch, (0, 0), sketch)
-blue.save(os.path.join(ROOT, "tools", ".shots", "heroassets_sketch.png"))
+# The line drawing of the house (references 5–6: «Построить», the 404) is traced by hand along this photo's edges:
+# src/components/house-lines-data.ts, 1673×897. An edge detector gave brick and grass noise (20.10). The lines fit THIS shot:
+# the original of the same frame with a clean sky is fine; a different photo needs the lines traced again.
+# The client's plan of «Тип 5» without the slide's text column, as cream lines on transparent (the sheet in the hand).
+plan = np.asarray(Image.open(os.path.join(ROOT, "media", "plan-14427948.webp")).convert("L").crop((110, 50, 880, 880))).astype(float)
+plan_rgba = np.zeros(plan.shape + (4,), "uint8")
+plan_rgba[..., :3] = (243, 236, 224)
+plan_rgba[..., 3] = np.clip((255 - plan) * 1.5, 0, 255)
+plan_img = Image.fromarray(plan_rgba, "RGBA")
+plan_img.resize((620, round(620 * plan_img.height / plan_img.width)), Image.LANCZOS).save(os.path.join(OUT, "plan-tip5-lines.webp"), quality=80, alpha_quality=60, method=6)
+# the same lines as a static SVG for CSS backgrounds (the 404: an <svg> there would sit in every page's payload)
+import re
+src_ts = open(os.path.join(ROOT, "src", "components", "house-lines-data.ts"), encoding="utf-8").read()
+polys = re.findall(r"'([\d, ]+)'", src_ts)
+svg = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1673 897" fill="none" stroke="#eadfc9" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">']
+svg += [f'<polyline points="{p}"/>' for p in polys]
+open(os.path.join(OUT, "house-lines.svg"), "w", encoding="utf-8").write("".join(svg) + "</svg>")
 
 check = Image.new("RGB", im.size, (255, 0, 255))
 check.paste(cut, (0, 0), cut)

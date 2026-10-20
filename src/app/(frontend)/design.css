@@ -168,8 +168,11 @@ a.hd__card:hover { background: rgba(28, 38, 32, .62); }
   .hg__lead { justify-self: end; padding-bottom: 8px; }
 }
 
-/* ── Plan → sketch → house (references 5–6, components/SketchToHouse) ─────────────────────────────────────────── */
-.s2h { --plan: 1; --sk: 0; --ph: 0; position: relative; height: 200vh; background: var(--green-deep); color: var(--cream); }
+/* ── Plan → frame → house (references 5–6, components/SketchToHouse) ─────────────────────────────────────────────
+   A hand holds a see-through sheet with the plan of «Тип 5»; the frame of the house is drawn line by line in building
+   order (fence and plinth → walls → roof → tile courses); then the real house sweeps in from the right and the left
+   part stays a drawing on the sheet — reference 6's «drawing becomes the house». --plan, --sk, --ph: 0 → 1. */
+.s2h { --plan: 0; --sk: 0; --ph: 0; position: relative; height: 200vh; background: var(--green-deep); color: var(--cream); }
 .s2h__sticky { position: sticky; top: var(--header-h); height: calc(100svh - var(--header-h)); display: grid; align-items: center; overflow: hidden; }
 .s2h__in { display: grid; gap: 16px; }
 .s2h__steps { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
@@ -178,13 +181,31 @@ a.hd__card:hover { background: rgba(28, 38, 32, .62); }
 .s2h__steps b { font-family: var(--font-serif); font-size: clamp(26px, 3vw, 40px); line-height: 1.05; font-weight: 600; }
 .s2h__steps p { color: #cfd6cd; font-size: 15px; max-width: 420px; }
 .s2h[data-step="0"] li[data-i="0"], .s2h[data-step="1"] li[data-i="1"], .s2h[data-step="2"] li[data-i="2"] { display: grid; }
-.s2h__stage { position: relative; margin: 0; aspect-ratio: 4 / 5; max-height: calc(100svh - var(--header-h) - 190px); justify-self: center; width: 100%; border-radius: 20px; overflow: hidden; background: #2b3c32; }
-.s2h__plan { position: absolute; left: 50%; top: 50%; width: 86%; height: auto; border-radius: 10px; background: #fff; box-shadow: var(--shadow); opacity: var(--plan); transform-origin: 50% 85%; transform: translate(-50%, -50%) perspective(1400px) rotateX(calc((1 - var(--plan)) * 58deg)) scale(calc(.8 + var(--plan) * .2)); }
-.s2h__sketch, .s2h__photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 58% 60%; }
-/* the sketch rises from the ground up; the real photo sweeps over it from the left, a gold line at its edge */
-.s2h__sketch { clip-path: inset(calc((1 - var(--sk)) * 100%) 0 0 0); }
-.s2h__photo { clip-path: inset(0 calc((1 - var(--ph)) * 100%) 0 0); }
-.s2h__edge { position: absolute; top: 0; bottom: 0; left: calc(var(--ph) * 100%); width: 2px; margin-left: -1px; background: var(--gold); opacity: min(1, calc(var(--ph) * 12), calc((1 - var(--ph)) * 12)); }
+.s2h__stage { --line: #eadfc9; position: relative; margin: 0; width: 100%; aspect-ratio: 4 / 5; max-height: calc(100svh - var(--header-h) - 170px); justify-self: center; container-type: inline-size; overflow: hidden; border-radius: 20px;
+  /* graph paper of a drawing board, fading at the edges */
+  background: linear-gradient(rgba(234, 223, 201, .055) 1px, transparent 1px) 0 0 / 5cqi 5cqi, linear-gradient(90deg, rgba(234, 223, 201, .055) 1px, transparent 1px) 0 0 / 5cqi 5cqi;
+  -webkit-mask: radial-gradient(130% 100% at 50% 50%, #000 60%, transparent 100%); mask: radial-gradient(130% 100% at 50% 50%, #000 60%, transparent 100%); }
+.s2h__sheet { position: absolute; left: 18cqi; top: 6cqi; width: 52cqi; aspect-ratio: 770 / 830; border: 1px solid rgba(234, 223, 201, .5); border-radius: 3px; background: rgba(243, 236, 224, .07); box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .5);
+  transform-origin: 0 80%; transform: perspective(1600px) rotateY(calc(30deg - var(--plan) * 10deg)) rotateX(10deg) rotate(-6deg); }
+/* the plan as light lines on the glass sheet (plan-tip5-lines.webp: the black plan turned into cream on transparent), drawn from the top */
+.s2h__plan { position: absolute; inset: 5%; width: 90%; height: 90%; object-fit: contain; opacity: .9; clip-path: inset(0 0 calc((1 - var(--plan)) * 100%) 0); }
+.s2h__hand { position: absolute; left: -50%; top: 27%; width: 100%; overflow: visible; stroke: var(--line); stroke-width: 1.6px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.s2h__hand path { vector-effect: non-scaling-stroke; }
+.s2h__hand .hand__soft { opacity: .55; }
+.s2h__hand .hand__behind { opacity: .4; }
+.s2h__house { position: absolute; left: 2cqi; bottom: 12cqi; width: 96cqi; aspect-ratio: 1673 / 897; }
+.s2h__lines, .s2h__photo { position: absolute; inset: 0; width: 100%; height: 100%; }
+.s2h__lines { stroke: var(--line); stroke-linecap: round; stroke-linejoin: round; overflow: visible;
+  --g0: clamp(0, var(--sk) / .4, 1); --g1: clamp(0, (var(--sk) - .15) / .4, 1); --g2: clamp(0, (var(--sk) - .4) / .45, 1); --g3: clamp(0, (var(--sk) - .7) / .3, 1); }
+.s2h__lines polyline { stroke-width: 1.4px; vector-effect: non-scaling-stroke; stroke-dasharray: 1 1; }
+.s2h__lines .hl-fence { opacity: .45; } .s2h__lines .hl-fence polyline { stroke-dashoffset: calc(1 - var(--g0)); }
+.s2h__lines .hl-wall polyline { stroke-dashoffset: calc(1 - var(--g1)); }
+.s2h__lines .hl-roof polyline { stroke-dashoffset: calc(1 - var(--g2)); }
+.s2h__lines .hl-hatch { opacity: .4; } .s2h__lines .hl-hatch polyline { stroke-dashoffset: calc(1 - var(--g3)); }
+/* the real house comes in from the right over the drawing; its left part stays lines, the grass fades out */
+.s2h__photo { --edge: calc(116% - var(--ph) * 78%); object-fit: contain;
+  -webkit-mask: linear-gradient(90deg, transparent calc(var(--edge) - 16%), #000 var(--edge)), linear-gradient(#000 76%, transparent 97%); -webkit-mask-composite: source-in;
+  mask: linear-gradient(90deg, transparent calc(var(--edge) - 16%), #000 var(--edge)), linear-gradient(#000 76%, transparent 97%); mask-composite: intersect; }
 .s2h__stage figcaption { position: absolute; right: 12px; bottom: 12px; padding: 6px 12px; border-radius: 999px; background: rgba(28, 38, 32, .66); color: #fff; font-size: 12.5px; opacity: var(--ph); }
 @media (min-width: 960px) {
   .s2h { height: 230vh; }
@@ -192,11 +213,12 @@ a.hd__card:hover { background: rgba(28, 38, 32, .62); }
   .s2h__steps { gap: 26px; }
   .s2h__steps li { display: grid; opacity: .32; transition: opacity .4s ease; }
   .s2h[data-step="0"] li[data-i="0"], .s2h[data-step="1"] li[data-i="1"], .s2h[data-step="2"] li[data-i="2"] { opacity: 1; }
-  .s2h__stage { aspect-ratio: 1673 / 897; max-height: none; }
-  .s2h__plan { width: auto; height: 90%; }
+  .s2h__stage { aspect-ratio: 16 / 10; max-height: none; }
+  .s2h__sheet { left: 10cqi; top: 3cqi; width: 34cqi; }
+  .s2h__house { left: 25cqi; bottom: 4cqi; width: 74cqi; }
   .s2h__stage figcaption { font-size: 13.5px; right: 16px; bottom: 16px; }
 }
-.s2h.is-still { --plan: 0; --sk: 1; --ph: 1; height: auto; }
+.s2h.is-still { --plan: 1; --sk: 1; --ph: 1; height: auto; }
 .s2h.is-still .s2h__sticky { position: static; height: auto; padding: 72px 0; }
 .s2h.is-still .s2h__steps li { display: grid; opacity: 1; }
 
@@ -213,7 +235,7 @@ a.hd__card:hover { background: rgba(28, 38, 32, .62); }
 .nf__art { position: relative; margin: 0; aspect-ratio: 16 / 11; overflow: hidden; border-radius: 24px; background: var(--green-deep); display: grid; align-items: end; }
 .nf__code { position: absolute; top: 6%; left: 0; right: 0; text-align: center; font-family: var(--font-serif); font-weight: 600; font-size: clamp(110px, 30vw, 230px); line-height: 1; color: transparent; -webkit-text-stroke: 1.5px var(--gold-soft); }
 /* the house draws itself from the ground up, like on «Построить» */
-.nf__sketch { display: block; position: relative; width: 118%; margin-left: -9%; margin-bottom: -3%; aspect-ratio: 1673 / 897; background: url(/design/sketch-tip5-900.webp) center / contain no-repeat; animation: nf-draw 2.2s cubic-bezier(.3, .7, .2, 1) .2s both; }
+.nf__sketch { display: block; position: relative; width: 118%; margin-left: -9%; margin-bottom: -3%; aspect-ratio: 1673 / 897; background: url(/design/house-lines.svg) center / contain no-repeat; animation: nf-draw 2.2s cubic-bezier(.3, .7, .2, 1) .2s both; }
 @keyframes nf-draw { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
 .nf__art figcaption { position: absolute; left: 14px; bottom: 12px; padding: 5px 12px; border-radius: 999px; background: rgba(28, 38, 32, .82); font-size: 13px; color: var(--gold-soft); }
 @media (min-width: 960px) {
