@@ -48,6 +48,11 @@ SPY = """(()=>{window.__goals=[];const w=window;
     if(w._tmr && !w._tmr.__spy){const p=w._tmr.push.bind(w._tmr);w._tmr.push=e=>{__goals.push('vk:'+(e.goal||e.type));return p(e)};w._tmr.__spy=1} },50);
   setTimeout(()=>clearInterval(t),20000)})()"""
 
+# fresh browser profiles every run: a saved one remembers «Понятно» on the cookie notice and failed part 3 (20.10)
+import shutil
+for p in ("prof-analytics", "prof-analytics-blocked", "prof-analytics-phone"):
+    shutil.rmtree(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".shots", p), ignore_errors=True)
+
 try:
     # ---- 1. counters on
     with Browser(9370, "prof-analytics", 1440, 900) as b:
