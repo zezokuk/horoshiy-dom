@@ -93,6 +93,7 @@ export default async function BuildPage() {
           <>
             <h3>Дом готов — заезжайте</h3>
             <p>Ипотеку и регистрацию оформим за 2 недели: семейная, IT, военная.</p>
+            <p className="story__note">Мебель на макете — для примера: дом сдаём с предчистовой отделкой.</p>
             <div className="btns">
               <a href="#calc" className="btn btn--gold">
                 Рассчитать стройку

@@ -724,6 +724,7 @@ button.g3--loading { width: 100%; border: 0; font: inherit; cursor: pointer; }
 .story__card--intro h1 { overflow-wrap: anywhere; }
 .story__card--end { gap: 12px; }
 .story__card--end .btns { margin-top: 4px; }
+.story__note { font-size: 13px; }
 @media (max-width: 899px) {
   /* phone: the house in the upper part, cards in the lower part of the screen, one at a time */
   .story__flow { gap: 30vh; padding-top: 50vh; }
