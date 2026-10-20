@@ -18,11 +18,12 @@ const NAMES: Record<HeroKind, [string, string]> = {
   'hero-2': ['2', ' · Через генплан'],
   'hero-3': ['3', ' · Минимализм'],
   'hero-4': ['4', ' · Чертёж → дом'],
+  'hero-5': ['5', ' · Vintara: дом в тон бренда'],
 }
 
 type Props = { params: Promise<{ variant: string }> }
 
-/** /preview/current, /preview/hero-1…4: the whole home with another first screen and a switcher between the variants. */
+/** /preview/current, /preview/hero-1…5: the whole home with another first screen and a switcher between the variants. */
 export default async function HeroPreview({ params }: Props) {
   const { variant } = await params
   const all: HeroKind[] = ['current', ...HERO_VARIANTS]

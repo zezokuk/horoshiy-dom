@@ -1,20 +1,23 @@
 import type { Metadata } from 'next'
 import { Catalog } from '@/components/Catalog'
 import { KeyHanger } from '@/components/KeyHanger'
-import { getEstates, getHouses, getRegions } from '@/lib/data'
+import { getDesign, getEstates, getHouses, getRegions } from '@/lib/data'
 import { formatMillions, plural } from '@/lib/format'
 import { houseView } from '@/lib/view'
+import { effectOn, pageMeta } from '@/lib/look'
 
 export const dynamic = 'force-dynamic' // shows statuses and counts: always fresh (see collections/revalidate.ts)
 
-export const metadata: Metadata = {
+const META: Metadata = {
   title: 'Готовые дома в продаже',
   description: 'Все свободные дома «Хорошего дома» во всех регионах: фильтры по региону, посёлку, бюджету и площади.',
   alternates: { canonical: '/catalog' },
 }
+// title and description can be set in the admin: «SEO и поиск» → catalog
+export const generateMetadata = () => pageMeta('catalog', META)
 
 export default async function CatalogPage() {
-  const [regions, estates, houses] = await Promise.all([getRegions(), getEstates(), getHouses()])
+  const [regions, estates, houses, design] = await Promise.all([getRegions(), getEstates(), getHouses(), getDesign()])
   const active = regions.filter((r) => r.status === 'active')
   const slugOf = (id: unknown) => regions.find((r) => r.id === (typeof id === 'object' && id ? (id as { id: number }).id : id))?.slug ?? ''
   const free = houses.filter((h) => h.status === 'free').map(houseView).sort((a, b) => a.price - b.price)
@@ -46,7 +49,7 @@ export default async function CatalogPage() {
               <b>Ключи</b> — после сделки
             </li>
           </ul>
-          {keyHouse && <KeyHanger photo={keyHouse.photoCard} alt={`Свободный дом: ${keyHouse.title.split(' · ')[0]}`} />}
+          {keyHouse && effectOn(design, 'key') && <KeyHanger photo={keyHouse.photoCard} alt={`Свободный дом: ${keyHouse.title.split(' · ')[0]}`} />}
         </div>
       </div>
       <div className="container" style={{ paddingBottom: 40 }}>

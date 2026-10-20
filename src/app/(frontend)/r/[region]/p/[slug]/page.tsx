@@ -5,6 +5,7 @@ import { LeadForm } from '@/components/LeadForm'
 import { Nearby } from '@/components/Nearby'
 import { Pic } from '@/components/Pic'
 import { getCompany, getHouses, getLanding, getRegion, img } from '@/lib/data'
+import { withSeo } from '@/lib/look'
 import { formatMillions, plural } from '@/lib/format'
 import { regionHref } from '@/lib/site'
 import { houseView } from '@/lib/view'
@@ -26,11 +27,12 @@ async function load(params: Props['params']) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const d = await load(params)
   if (!d) return {}
-  return {
+  // «SEO» fields of the promo page in the admin win over its title and offer
+  return withSeo({
     title: d.landing.title,
     description: d.landing.offer || undefined,
     alternates: { canonical: regionHref(d.region.slug, `/p/${d.landing.slug}`) },
-  }
+  }, d.landing.seo)
 }
 
 /**

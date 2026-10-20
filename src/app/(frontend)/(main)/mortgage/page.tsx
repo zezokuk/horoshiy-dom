@@ -2,14 +2,17 @@ import type { Metadata } from 'next'
 import { MortgageCalc } from '@/components/MortgageCalc'
 import { getCompany } from '@/lib/data'
 import { mainHref } from '@/lib/site'
+import { pageMeta } from '@/lib/look'
 
 export const revalidate = 60
 
-export const metadata: Metadata = {
+const META: Metadata = {
   title: 'Ипотека и способы покупки',
   description: 'Ипотека на дома «Хорошего дома»: программы, калькулятор платежа, оформление сделки и регистрации за 2 недели.',
   alternates: { canonical: '/mortgage' },
 }
+// title and description can be set in the admin: «SEO и поиск» → mortgage
+export const generateMetadata = () => pageMeta('mortgage', META)
 
 export default async function MortgagePage() {
   const company = await getCompany()

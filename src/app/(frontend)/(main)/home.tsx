@@ -1,8 +1,10 @@
 import { HeroDepth } from '@/components/heroes/HeroDepth'
 import { HeroDraft } from '@/components/heroes/HeroDraft'
+import { HeroTonal } from '@/components/heroes/HeroTonal'
 import { HeroGenplan } from '@/components/heroes/HeroGenplan'
 import { HeroMinimal } from '@/components/heroes/HeroMinimal'
 import { Thread } from '@/components/Thread'
+import { effectOn } from '@/lib/look'
 import type { HeroFacts } from '@/components/heroes/facts'
 import { MortgageCalc } from '@/components/MortgageCalc'
 import { CountUp } from '@/components/Motion'
@@ -15,6 +17,7 @@ import {
   getHouses,
   getProjects,
   getPromos,
+  getDesign,
   getRegions,
   img,
 } from '@/lib/data'
@@ -31,8 +34,8 @@ import {
 } from '@/lib/view'
 
 /** The first screen: the live one, or a variant from the 20.10 references shown at /preview/hero-N for choosing. */
-export type HeroKind = 'current' | 'hero-1' | 'hero-2' | 'hero-3' | 'hero-4'
-export const HERO_VARIANTS: Exclude<HeroKind, 'current'>[] = ['hero-1', 'hero-2', 'hero-3', 'hero-4']
+export type HeroKind = 'current' | 'hero-1' | 'hero-2' | 'hero-3' | 'hero-4' | 'hero-5'
+export const HERO_VARIANTS: Exclude<HeroKind, 'current'>[] = ['hero-1', 'hero-2', 'hero-3', 'hero-4', 'hero-5']
 
 /**
  * The brand home: the company first (who we are, values, trust), then two ways in — build a house or buy a ready
@@ -41,13 +44,14 @@ export const HERO_VARIANTS: Exclude<HeroKind, 'current'>[] = ['hero-1', 'hero-2'
  * Rendered by the home page and by the first-screen previews (/preview/hero-N), so both always show the same data.
  */
 export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind }) {
-  const [company, regions, estates, houses, projects, promos] = await Promise.all([
+  const [company, regions, estates, houses, projects, promos, design] = await Promise.all([
     getCompany(),
     getRegions(),
     getEstates(),
     getHouses(),
     getProjects(),
     getPromos(),
+    getDesign(),
   ])
   const free = houses.filter((h) => h.status === 'free').map(houseView)
   const priceFrom = free.length ? Math.min(...free.map((h) => h.price)) : null
@@ -142,7 +146,9 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
     <>
       <JsonLd data={organizationLd(company, regions)} />
       {faq && <JsonLd data={faq} />}
-      {variant === 'hero-4' ? (
+      {variant === 'hero-5' ? (
+        <HeroTonal f={facts} />
+      ) : variant === 'hero-4' ? (
         <HeroDraft f={facts} />
       ) : variant === 'hero-1' ? (
         <HeroDepth f={facts} />
@@ -242,7 +248,7 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
         </section>
       )}
 
-      <Thread>
+      <Thread off={!effectOn(design, 'thread')}>
         <section className="section" id="choose">
           <div className="container">
             <div className="head" data-reveal>

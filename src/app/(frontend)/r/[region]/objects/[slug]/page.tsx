@@ -7,7 +7,8 @@ import { LeadInline } from '@/components/LeadForm'
 import { Nearby } from '@/components/Nearby'
 import { Pic } from '@/components/Pic'
 import { SketchToHouse } from '@/components/SketchToHouse'
-import { getEstate, getHouses, getProjects, getRegion, img } from '@/lib/data'
+import { getDesign, getEstate, getHouses, getProjects, getRegion, img } from '@/lib/data'
+import { effectOn, withSeo } from '@/lib/look'
 import { formatMillions, plural } from '@/lib/format'
 import { regionHref } from '@/lib/site'
 import { JsonLd, breadcrumbsLd, estateLd } from '@/lib/seo'
@@ -30,7 +31,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const d = await load(params)
   if (!d) return {}
   const { estate: e, region } = d
-  return {
+  // «SEO» fields of the estate in the admin win over the text built here
+  return withSeo({
     title: `${e.kind || 'Посёлок'} «${e.name}», ${e.place}`,
     // a fresh estate may have no texts yet: a plain line instead of an empty description
     description:
@@ -39,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         ? `${e.kind || 'Посёлок'} «${e.name}»${e.place ? `, ${e.place}` : ''}. Старт продаж скоро — оставьте телефон, чтобы узнать первыми.`
         : `${e.kind || 'Посёлок'} «${e.name}»${e.place ? `, ${e.place}` : ''}: дома с участком, генплан и цены.`),
     alternates: { canonical: regionHref(region.slug, `/objects/${e.slug}`) },
-  }
+  }, e.seo)
 }
 
 export default async function EstatePage({ params }: Props) {
@@ -207,7 +209,7 @@ export default async function EstatePage({ params }: Props) {
  * before the first house is built.
  */
 async function ComingEstate({ region, e }: { region: Region; e: Estate }) {
-  const projects = await getProjects()
+  const [projects, design] = await Promise.all([getProjects(), getDesign()])
   const areas = projects.map((p) => p.area).filter((a): a is number => !!a)
   const photo = img(e.poster, 'wide') ?? img(e.cover, 'wide')
   const photoPhone = img(e.poster, 'card') ?? img(e.cover, 'card')
@@ -268,7 +270,7 @@ async function ComingEstate({ region, e }: { region: Region; e: Estate }) {
 
       {/* references 5–6: there is no house here yet, only projects — so show how a project becomes a house
           (an example of one built project; which projects go here is announced with the sales, not promised now) */}
-      {projects.length > 0 && (
+      {projects.length > 0 && effectOn(design, 'sketch') && (
         <SketchToHouse
           steps={[
             {

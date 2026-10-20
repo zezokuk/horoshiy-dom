@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { anyone, roles } from './access'
 import { revalidateAfterChange, revalidateAfterDelete } from './revalidate'
+import { seoFields } from '../globals/Seo'
 
 /** A house design (Тип 1 … Тип 12) — shared by all regions: sold as a ready house or built on order. */
 export const Projects: CollectionConfig = {
@@ -60,5 +61,6 @@ export const Projects: CollectionConfig = {
       type: 'json',
       admin: { description: 'Из 3D-задания (3D-задание/README.md). Проверка: site/tools/check3d.py' },
     },
+    { name: 'seo', label: 'SEO: как страница выглядит в поиске', type: 'group', admin: { description: 'Пусто — заголовок и описание соберутся из полей выше' }, fields: seoFields },
   ],
 }

@@ -2,13 +2,16 @@ import type { Metadata } from 'next'
 import { getCompany, getRegions } from '@/lib/data'
 import { telHref } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
+import { pageMeta } from '@/lib/look'
 
 export const revalidate = 60
 
-export const metadata: Metadata = {
+const META: Metadata = {
   title: 'Контакты и офисы продаж',
   alternates: { canonical: '/contacts' },
 }
+// title and description can be set in the admin: «SEO и поиск» → contacts
+export const generateMetadata = () => pageMeta('contacts', META)
 
 export default async function ContactsPage() {
   const [company, regions] = await Promise.all([getCompany(), getRegions()])

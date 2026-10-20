@@ -46,6 +46,21 @@ const STEPS: { title: string; text: string; href: string; go: string; for: Who[]
     go: 'Открыть заявки',
     for: ['sales', 'manager'],
   },
+  // settings: admins only (for: [] — the cards above go to their roles, these to nobody else)
+  {
+    title: 'Как выглядит сайт',
+    text: 'Первый экран главной (5 вариантов), цвета — фирменные или свои, приёмы: нить, веер проектов, переходы. Выключенный приём заменяется простым вариантом.',
+    href: '/admin/globals/design',
+    go: 'Внешний вид',
+    for: [],
+  },
+  {
+    title: 'Как сайт выглядит в поиске',
+    text: 'Заголовки и описания страниц для Яндекса и Google, код подтверждения Вебмастера, картинка для ссылок в мессенджерах. У посёлков, проектов и промо-страниц — свои поля «SEO».',
+    href: '/admin/globals/seo',
+    go: 'SEO и поиск',
+    for: [],
+  },
 ]
 
 export function Guide({ user }: { user?: { role?: string | null } | null }) {

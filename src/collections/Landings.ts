@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { anyone, inMyRegions } from './access'
 import { revalidateAfterChange, revalidateAfterDelete } from './revalidate'
+import { seoFields } from '../globals/Seo'
 
 /**
  * Promo pages of districts — landing pages for Yandex Direct and VK Ads ads (the 150 package): one district or estate,
@@ -64,5 +65,6 @@ export const Landings: CollectionConfig = {
       type: 'text',
       defaultValue: 'Пришлём свободные дома с ценами и расчёт семейной ипотеки по каждому.',
     },
+    { name: 'seo', label: 'SEO: как страница выглядит в поиске', type: 'group', admin: { description: 'Пусто — заголовок и описание соберутся из полей выше' }, fields: seoFields },
   ],
 }

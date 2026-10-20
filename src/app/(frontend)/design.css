@@ -49,7 +49,7 @@ a.hd__card:hover { background: rgba(28, 38, 32, .62); }
   .hd__title { top: 7.6cqi; display: flex; justify-content: center; gap: .22em; font-size: 15.4cqi; }
   .hd__label { display: grid; }
   .hd__cards { position: absolute; z-index: 3; left: 28px; right: 28px; bottom: 28px; margin: 0; display: flex; justify-content: space-between; pointer-events: none; }
-  .hd__card { pointer-events: auto; width: min(300px, 24cqi); padding: 18px 20px; gap: 10px; background: rgba(28, 38, 32, .64); border: 1px solid rgba(255, 255, 255, .22); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  .hd__card { pointer-events: auto; width: min(300px, 24cqi); padding: 18px 20px; gap: 10px; background: color-mix(in srgb, var(--green-ink) 64%, transparent); border: 1px solid rgba(255, 255, 255, .22); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
   .hd__card-k { font-size: 14px; }
   .hd__card-k b { font-size: 54px; }
   .hd__card-list { font-size: 13px; }
@@ -81,7 +81,7 @@ a.hd__card:hover { background: rgba(28, 38, 32, .62); }
 .hx__handle b { position: absolute; top: 56%; left: -21px; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--cream); color: var(--green-deep); box-shadow: 0 0 0 6px rgba(243, 236, 224, .22); transition: transform .2s ease, background-color .2s ease; }
 .hx__handle:hover b, .hx__handle:focus-visible b { transform: scale(1.08); background: #fff; }
 .hx__handle:focus-visible b { outline: 2px solid var(--gold); outline-offset: 4px; }
-.hx__handle i { position: absolute; top: calc(56% + 10px); padding: 3px 7px; border-radius: 5px; background: rgba(28, 38, 32, .82); font-style: normal; font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-soft); white-space: nowrap; }
+.hx__handle i { position: absolute; top: calc(56% + 10px); padding: 3px 7px; border-radius: 5px; background: color-mix(in srgb, var(--green-ink) 82%, transparent); font-style: normal; font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-soft); white-space: nowrap; }
 .hx__handle i:first-child { right: 30px; }
 .hx__handle i:last-child { left: 30px; }
 @media (min-width: 960px) {
@@ -239,7 +239,7 @@ a.hd__card:hover { background: rgba(28, 38, 32, .62); }
 .s2h__photo { --edge: calc(116% - var(--ph) * 78%); object-fit: contain;
   -webkit-mask: linear-gradient(90deg, transparent calc(var(--edge) - 16%), #000 var(--edge)), linear-gradient(#000 76%, transparent 97%); -webkit-mask-composite: source-in;
   mask: linear-gradient(90deg, transparent calc(var(--edge) - 16%), #000 var(--edge)), linear-gradient(#000 76%, transparent 97%); mask-composite: intersect; }
-.s2h__stage figcaption { position: absolute; right: 12px; bottom: 12px; padding: 6px 12px; border-radius: 999px; background: rgba(28, 38, 32, .66); color: #fff; font-size: 12.5px; opacity: var(--ph); }
+.s2h__stage figcaption { position: absolute; right: 12px; bottom: 12px; padding: 6px 12px; border-radius: 999px; background: color-mix(in srgb, var(--green-ink) 66%, transparent); color: #fff; font-size: 12.5px; opacity: var(--ph); }
 @media (min-width: 960px) {
   .s2h { height: 230vh; }
   .s2h__in { grid-template-columns: minmax(0, .62fr) minmax(0, 1.38fr); gap: 48px; align-items: center; }
@@ -270,7 +270,7 @@ a.hd__card:hover { background: rgba(28, 38, 32, .62); }
 /* the house draws itself from the ground up, like on «Построить» */
 .nf__sketch { display: block; position: relative; width: 118%; margin-left: -9%; margin-bottom: -3%; aspect-ratio: 1673 / 897; background: url(/design/house-lines.svg) center / contain no-repeat; animation: nf-draw 2.2s cubic-bezier(.3, .7, .2, 1) .2s both; }
 @keyframes nf-draw { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
-.nf__art figcaption { position: absolute; left: 14px; bottom: 12px; padding: 5px 12px; border-radius: 999px; background: rgba(28, 38, 32, .82); font-size: 13px; color: var(--gold-soft); }
+.nf__art figcaption { position: absolute; left: 14px; bottom: 12px; padding: 5px 12px; border-radius: 999px; background: color-mix(in srgb, var(--green-ink) 82%, transparent); font-size: 13px; color: var(--gold-soft); }
 @media (min-width: 960px) {
   .nf { padding: 56px 0 96px; }
   .nf__in { grid-template-columns: 1fr 1.1fr; gap: 64px; }
@@ -432,3 +432,31 @@ html:active-view-transition-type(page)::view-transition-new(root) { animation: 3
 /* narrower screens hide the labels, so the fan takes their room: the slices reach the edges */
 @media (max-width: 899px) { .pf__stage { overflow: hidden; } .pf__svg { width: 128%; margin-inline: -14%; } }
 @media (prefers-reduced-motion: reduce) { .pf.is-ready .pf__w, .pf.is-ready .pf__hub image { animation: none; } }
+
+/* ── «Внешний вид» in the admin (globals/Design, app/(frontend)/layout): colour sets and motion off ────────────────
+   Each set swaps the brand tokens of globals.css; the client's own two colours (lib/look.ts → inline style) win over it. */
+html[data-palette="graphite"] { --green: #565c63; --green-deep: #2a2e33; --green-ink: #1d2024; --grad-forest: #2a2e33; --grad-green-btn: #353a40; --gold: #b8935a; --gold-soft: #ece3d2; --gold-ink: #6b4e24; --grad-gold: #8c6838; }
+html[data-palette="navy"] { --green: #4a6080; --green-deep: #1f2f45; --green-ink: #152236; --grad-forest: #1f2f45; --grad-green-btn: #2a3d57; --gold: #c9a66b; --gold-soft: #efe6d3; --gold-ink: #6e5024; --grad-gold: #93703e; }
+html[data-palette="terracotta"] { --green: #6d4d3d; --green-deep: #3b2a22; --green-ink: #2a1d17; --grad-forest: #3b2a22; --grad-green-btn: #4a352b; --gold: #c0714f; --gold-soft: #f2ded1; --gold-ink: #87452a; --grad-gold: #a05a3a; }
+/* motion switched off: page changes and in-page transitions become instant (PageMotion is not mounted either) */
+html.no-motion::view-transition-group(*), html.no-motion::view-transition-old(*), html.no-motion::view-transition-new(*), html.no-motion::view-transition-image-pair(*) { animation: none !important; }
+
+/* ── Variant 5 «Vintara» (reference 1, components/heroes/HeroTonal): one tone, the house as an object ───────────────
+   The board of variant 4 without the grid; soft light from below; the house tinted into the dark brand colour by a
+   colour layer cut to its own shape (mix-blend-mode: color keeps the brick's light and shade, takes the hue). The mouse
+   moves the house and the title a little against each other (--px, --py from PageMotion). */
+.hv .hd__stage { background: radial-gradient(70% 60% at 62% 92%, color-mix(in srgb, var(--gold) 26%, var(--green-deep)) 0%, var(--green-deep) 70%); }
+.hv__house { translate: calc(var(--px, 0) * -16px) calc(var(--py, 0) * -8px); transition: translate .6s cubic-bezier(.2, .7, .2, 1); }
+.hv .hd__title { translate: calc(var(--px, 0) * 10px) calc(var(--py, 0) * 5px); transition: translate .6s cubic-bezier(.2, .7, .2, 1); }
+/* the neighbour's green roof and the white fence left of the house go: below our eave, left of our wall */
+.hv__house img, .hv__tone { clip-path: polygon(0 0, 100% 0, 100% 100%, 16.2% 100%, 16.2% 52%, 0 52%); }
+.hv__tone { position: absolute; inset: 0; z-index: 1; background: var(--green-deep); mix-blend-mode: color; opacity: .62; pointer-events: none;
+  -webkit-mask: url(/design/hero1-house-900.webp) 0 0 / 100% 100% no-repeat; mask: url(/design/hero1-house-900.webp) 0 0 / 100% 100% no-repeat; }
+.hv .hd__lines, .hv .hd__dot, .hv .hd__label { z-index: 3; }
+@media (prefers-reduced-motion: reduce) { .hv__house, .hv .hd__title { translate: none; } }
+
+/* «Чертёж ↔ дом» on /projects (components/DraftBoard): the variant 4 board, without the big title */
+.dr .hd__eyebrow { z-index: 5; }
+.dr .hd__stage { height: 74cqi; }
+.dr .hx__house { top: 12cqi; }
+@media (min-width: 960px) { .dr .hd__stage { height: auto; } .dr .hx__house { top: 3cqi; } }

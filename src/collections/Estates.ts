@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { anyone, inMyRegions } from './access'
 import { revalidateAfterChange, revalidateAfterDelete } from './revalidate'
+import { seoFields } from '../globals/Seo'
 
 /** A village / project inside a region (Южный ветер, Калина…). Its page shows the 3D master plan and the houses. */
 export const Estates: CollectionConfig = {
@@ -97,5 +98,6 @@ export const Estates: CollectionConfig = {
           'Ряды участков для 3D-генплана: {"rows":[6,6],"road":"between","commercial":3} — два ряда по 6, улица между ними, 3 коммерческих здания. Пусто — сетка по числу домов. Позже — участки по генплану застройщика',
       },
     },
+    { name: 'seo', label: 'SEO: как страница выглядит в поиске', type: 'group', admin: { description: 'Пусто — заголовок и описание соберутся из полей выше' }, fields: seoFields },
   ],
 }

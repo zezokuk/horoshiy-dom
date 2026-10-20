@@ -1,4 +1,4 @@
-"""The live first screen «Чертёж → дом» (variant 4, components/heroes/DraftSplit): the split line really follows the user.
+"""«Чертёж ↔ дом» (components/heroes/DraftSplit; on /projects since 20.10, also /preview/hero-4): the line really follows the user.
 
     python tools/herotest.py     (dev server on :3000)
 
@@ -9,7 +9,7 @@ no sideways scroll. Reduced motion: the rest position at once, no intro.
 import json, sys, time
 from cdp import Browser
 
-URL = "http://horoshiy.localhost:3000/"
+URL = "http://horoshiy.localhost:3000/projects"
 results = []
 
 
@@ -19,7 +19,7 @@ def check(name, ok, info=""):
 
 
 X = "parseFloat(document.querySelector('.hx__house').style.getPropertyValue('--x'))"
-BOX = "JSON.stringify(document.querySelector('.hx__house').getBoundingClientRect())"
+BOX = "(() => { const e = document.querySelector('.hx__house'); e.scrollIntoView({block: 'center', behavior: 'instant'}); return JSON.stringify(e.getBoundingClientRect()) })()"
 
 with Browser(9401, "prof-hero-d", 1440, 900) as b:
     b.go(URL, 1)

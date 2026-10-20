@@ -1,16 +1,20 @@
 import type { Metadata } from 'next'
+import { DraftBoard } from '@/components/DraftBoard'
 import { ProjectCard } from '@/components/ProjectCard'
 import { getHouses, getProjects } from '@/lib/data'
 import { projectCard } from '@/lib/projects'
 import { mainHref } from '@/lib/site'
+import { pageMeta } from '@/lib/look'
 
 export const revalidate = 60
 
-export const metadata: Metadata = {
+const META: Metadata = {
   title: 'Проекты домов',
   description: 'Проекты кирпичных домов «Хорошего дома»: площадь, спальни, планировки. Строим под ключ за 6 месяцев.',
   alternates: { canonical: '/projects' },
 }
+// title and description can be set in the admin: «SEO и поиск» → projects
+export const generateMetadata = () => pageMeta('projects', META)
 
 export default async function ProjectsPage() {
   const [projects, houses] = await Promise.all([getProjects(), getHouses()])
@@ -32,6 +36,10 @@ export default async function ProjectsPage() {
             Как мы строим
           </a>
         </div>
+      </div>
+      {/* every project starts as a drawing: move the line between the drawing and the built «Тип 5» */}
+      <div className="container" style={{ paddingTop: 32 }}>
+        <DraftBoard caption="«Тип 5»: чертёж и построенный дом · проведите мышью" />
       </div>
       <div className="container grid grid--3" style={{ paddingBlock: 40 }}>
         {projects.map((p) => (

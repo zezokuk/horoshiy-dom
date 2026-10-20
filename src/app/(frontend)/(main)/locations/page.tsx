@@ -7,14 +7,17 @@ import { Words } from '@/components/Words'
 import { getCompany, getEstates, getHouses, getPromos, getRegions } from '@/lib/data'
 import { mainHref } from '@/lib/site'
 import { byEstateStatus, estateView, promoView, regionView } from '@/lib/view'
+import { pageMeta } from '@/lib/look'
 
 export const dynamic = 'force-dynamic' // shows statuses and counts: always fresh (see collections/revalidate.ts)
 
-export const metadata: Metadata = {
+const META: Metadata = {
   title: 'Где мы строим: регионы и посёлки',
   description: 'Посёлки «Хорошего дома» на карте: где строим сейчас и куда приходим скоро. Подпишитесь — сообщим об акциях и новых посёлках.',
   alternates: { canonical: '/locations' },
 }
+// title and description can be set in the admin: «SEO и поиск» → locations
+export const generateMetadata = () => pageMeta('locations', META)
 
 /**
  * The third way in from the home page: «just looking». Regions, every estate on one map, promos —

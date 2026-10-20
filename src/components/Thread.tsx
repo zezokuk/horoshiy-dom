@@ -6,9 +6,9 @@ import { useEffect, useRef } from 'react'
  * line drawing recipe from Codrops: stroke-dasharray = the path length, stroke-dashoffset follows the scroll).
  * It keeps to the side margins and crosses the page only at the borders between sections, inside their padding,
  * so it never runs over text. Rebuilt when the page height changes (photos load, accordions open).
- * Reduced motion: the whole line is drawn at once.
+ * Reduced motion: the whole line is drawn at once. `off` («Внешний вид» in the admin): the sections without the line.
  */
-export function Thread({ children }: { children: React.ReactNode }) {
+export function Thread({ children, off = false }: { children: React.ReactNode; off?: boolean }) {
   const wrap = useRef<HTMLDivElement>(null)
   const svg = useRef<SVGSVGElement>(null)
   const path = useRef<SVGPathElement>(null)
@@ -17,7 +17,7 @@ export function Thread({ children }: { children: React.ReactNode }) {
     const w = wrap.current,
       s = svg.current,
       p = path.current
-    if (!w || !s || !p) return
+    if (off || !w || !s || !p) return
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches
     let len = 0
     let raf = 0
@@ -67,14 +67,16 @@ export function Thread({ children }: { children: React.ReactNode }) {
       removeEventListener('scroll', onScroll)
       cancelAnimationFrame(raf)
     }
-  }, [])
+  }, [off])
 
   return (
     <div className="thread" ref={wrap}>
       {children}
-      <svg className="thread__svg" ref={svg} aria-hidden preserveAspectRatio="none">
-        <path ref={path} />
-      </svg>
+      {!off && (
+        <svg className="thread__svg" ref={svg} aria-hidden preserveAspectRatio="none">
+          <path ref={path} />
+        </svg>
+      )}
     </div>
   )
 }

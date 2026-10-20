@@ -5,19 +5,23 @@ import { ProjectCard } from '@/components/ProjectCard'
 import { ProjectFan } from '@/components/ProjectFan'
 import { SketchToHouse } from '@/components/SketchToHouse'
 import { Words } from '@/components/Words'
-import { getCompany, getEstates, getHouses, getProjects } from '@/lib/data'
+import { getCompany, getDesign, getEstates, getHouses, getProjects } from '@/lib/data'
 import { plural } from '@/lib/format'
 import { projectCard } from '@/lib/projects'
 import { mainHref } from '@/lib/site'
 import { houseView } from '@/lib/view'
+import { effectOn, pageMeta } from '@/lib/look'
 
 export const revalidate = 60
 
-export const metadata: Metadata = {
+const META: Metadata = {
   title: 'Построить дом под ключ',
-  description: 'Капитальный кирпичный дом под ключ за 6 месяцев по одному из проверенных проектов «Хорошего дома». Гарантия 5 лет.',
+  description:
+    'Капитальный кирпичный дом под ключ за 6 месяцев по одному из проверенных проектов «Хорошего дома». Гарантия 5 лет.',
   alternates: { canonical: '/build' },
 }
+// title and description can be set in the admin: «SEO и поиск» → build
+export const generateMetadata = () => pageMeta('build', META)
 
 /**
  * «Построить дом». What we build is obvious — the page wins trust instead: a short run of reasons over the 3D house
@@ -25,7 +29,13 @@ export const metadata: Metadata = {
  * Every fact comes from the client's own materials or from the admin.
  */
 export default async function BuildPage() {
-  const [company, projects, houses, estates] = await Promise.all([getCompany(), getProjects(), getHouses(), getEstates()])
+  const [company, projects, houses, estates, design] = await Promise.all([
+    getCompany(),
+    getProjects(),
+    getHouses(),
+    getEstates(),
+    getDesign(),
+  ])
   const years = company.since ? new Date().getFullYear() - company.since : null
   const homes = company.homesBuilt || estates.reduce((s, e) => s + (e.homes || 0), 0)
 
@@ -109,8 +119,21 @@ export default async function BuildPage() {
             </div>
             <div className="built">
               {proof.map((h, i) => (
-                <a key={h.code} href={h.href} className="built__item" data-reveal style={{ ['--d' as string]: `${(i % 3) * 80}ms` }}>
-                  <img src={h.photoCard} alt={`${h.title}, посёлок «${h.estateName}»`} loading="lazy" decoding="async" width={640} height={348} />
+                <a
+                  key={h.code}
+                  href={h.href}
+                  className="built__item"
+                  data-reveal
+                  style={{ ['--d' as string]: `${(i % 3) * 80}ms` }}
+                >
+                  <img
+                    src={h.photoCard}
+                    alt={`${h.title}, посёлок «${h.estateName}»`}
+                    loading="lazy"
+                    decoding="async"
+                    width={640}
+                    height={348}
+                  />
                   <span>
                     <b>{h.estateName}</b> · {h.title.split(' (')[0]}
                   </span>
@@ -127,7 +150,10 @@ export default async function BuildPage() {
             <div style={{ display: 'grid', gap: 14 }} data-reveal>
               <span className="idx">Что получите</span>
               <Words text="Дом, в который можно *заезжать*" />
-              <p className="lead">Сдаём с предчистовой отделкой и подключёнными коммуникациями — останется выбрать обои и мебель.</p>
+              <p className="lead">
+                Сдаём с предчистовой отделкой и подключёнными коммуникациями — останется выбрать
+                обои и мебель.
+              </p>
             </div>
             <ul className="dots" data-reveal>
               {company.finishing.map((f) => (
@@ -140,14 +166,22 @@ export default async function BuildPage() {
       )}
 
       {/* references 5–6: how one of the projects became a real house (its plan, a sketch from its photo, the photo) */}
-      <SketchToHouse
-        steps={[
-          { title: 'Проект', text: '«Тип 5»: 3 спальни, 2 санузла, кухня-гостиная 27,2 м², терраса 19 м². Один из 12 наших проектов.' },
-          { title: 'Каркас', text: 'Фундамент, кирпичные стены, кровля — материалы только с документами, бригады работают с нами годами.' },
-          { title: 'Дом', text: 'Капитальный дом под ключ за 6 месяцев. Гарантия 5 лет.' },
-        ]}
-        caption="Построенный дом по проекту «Тип 5», 105 м²"
-      />
+      {effectOn(design, 'sketch') && (
+        <SketchToHouse
+          steps={[
+            {
+              title: 'Проект',
+              text: '«Тип 5»: 3 спальни, 2 санузла, кухня-гостиная 27,2 м², терраса 19 м². Один из 12 наших проектов.',
+            },
+            {
+              title: 'Каркас',
+              text: 'Фундамент, кирпичные стены, кровля — материалы только с документами, бригады работают с нами годами.',
+            },
+            { title: 'Дом', text: 'Капитальный дом под ключ за 6 месяцев. Гарантия 5 лет.' },
+          ]}
+          caption="Построенный дом по проекту «Тип 5», 105 м²"
+        />
+      )}
 
       <section className="section" id="projects">
         <div className="container">
@@ -160,15 +194,31 @@ export default async function BuildPage() {
               Все {projects.length} {plural(projects.length, 'проект', 'проекта', 'проектов')}
             </a>
           </div>
-          {/* reference 49d13…: the chosen project in the hub, the others as a fan of photos around it */}
-          <ProjectFan projects={projects.map((p) => ({ ...projectCard(p, houses), href: mainHref(`/projects/${p.slug}`) }))} first="tip-5" />
-          <noscript>
+          {/* reference 49d13…: the chosen project in the hub, the others as a fan of photos around it («Внешний вид»: or the grid) */}
+          {effectOn(design, 'fan') ? (
+            <>
+              <ProjectFan
+                projects={projects.map((p) => ({
+                  ...projectCard(p, houses),
+                  href: mainHref(`/projects/${p.slug}`),
+                }))}
+                first="tip-5"
+              />
+              <noscript>
+                <div className="grid grid--3">
+                  {projects.slice(0, 6).map((p) => (
+                    <ProjectCard key={p.slug} p={projectCard(p, houses)} />
+                  ))}
+                </div>
+              </noscript>
+            </>
+          ) : (
             <div className="grid grid--3">
               {projects.slice(0, 6).map((p) => (
                 <ProjectCard key={p.slug} p={projectCard(p, houses)} />
               ))}
             </div>
-          </noscript>
+          )}
         </div>
       </section>
 

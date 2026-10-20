@@ -1,7 +1,7 @@
 import { cache } from 'react'
 import { getPayload, type Where } from 'payload'
 import config from '@payload-config'
-import type { Company, Estate, House, Landing, Media, Project, Promo, Region } from '@/payload-types'
+import type { Company, Design, Estate, House, Landing, Media, Project, Promo, Region, Seo } from '@/payload-types'
 
 /**
  * All reads go through Payload's Local API (no HTTP): fast, typed, and the same access rules as the admin.
@@ -11,6 +11,12 @@ export const payloadClient = cache(async () => getPayload({ config }))
 
 // depth 1: uploads (hero photo) come as documents with URLs, not bare ids
 export const getCompany = cache(async (): Promise<Company> => (await payloadClient()).findGlobal({ slug: 'company', depth: 1 }))
+
+/** «Внешний вид»: first screen, colours, effects (globals/Design). Never saved yet — the defaults. */
+export const getDesign = cache(async (): Promise<Design> => (await payloadClient()).findGlobal({ slug: 'design', depth: 0 }))
+
+/** «SEO и поиск»: page titles, confirmation codes, the share picture (globals/Seo). */
+export const getSeo = cache(async (): Promise<Seo> => (await payloadClient()).findGlobal({ slug: 'seo', depth: 1 }))
 
 /** Public regions for menus and the map (hidden ones are drafts). */
 export const getRegions = cache(async (): Promise<Region[]> => {

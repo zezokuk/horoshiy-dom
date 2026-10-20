@@ -4,14 +4,17 @@ import { getCompany, getEstates, getProjects, getRegions } from '@/lib/data'
 import { plural } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
 import { regionView } from '@/lib/view'
+import { pageMeta } from '@/lib/look'
 
 export const dynamic = 'force-dynamic' // shows statuses and counts: always fresh (see collections/revalidate.ts)
 
-export const metadata: Metadata = {
+const META: Metadata = {
   title: 'О компании',
   description: 'Строительная компания «Хороший дом»: строим и продаём капитальные кирпичные дома с участком. Гарантия 5 лет.',
   alternates: { canonical: '/about' },
 }
+// title and description can be set in the admin: «SEO и поиск» → about
+export const generateMetadata = () => pageMeta('about', META)
 
 export default async function AboutPage() {
   const [company, regions, estates, projects] = await Promise.all([getCompany(), getRegions(), getEstates(), getProjects()])

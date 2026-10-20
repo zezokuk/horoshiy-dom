@@ -63,6 +63,13 @@ export function PageMotion() {
         card.style.setProperty('--rx', `${(-py * 4).toFixed(2)}deg`)
         card.style.setProperty('--ry', `${(px * 5).toFixed(2)}deg`)
       }
+      // the «Vintara» first screen: house and title shift a little against each other (design.css → .hv)
+      const hero = t.closest<HTMLElement>('.hv .hd__wrap')
+      if (hero) {
+        const r = hero.getBoundingClientRect()
+        hero.style.setProperty('--px', ((e.clientX - r.left) / r.width - 0.5).toFixed(3))
+        hero.style.setProperty('--py', ((e.clientY - r.top) / r.height - 0.5).toFixed(3))
+      }
       const round = t.closest<HTMLElement>('.hd__go, .float-call')
       if (pulled && pulled !== round) {
         pulled.style.removeProperty('--mx')

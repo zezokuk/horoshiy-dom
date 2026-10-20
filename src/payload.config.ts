@@ -16,6 +16,8 @@ import { Leads } from './collections/Leads'
 import { Promos } from './collections/Promos'
 import { Landings } from './collections/Landings'
 import { Company } from './globals/Company'
+import { Design } from './globals/Design'
+import { Seo } from './globals/Seo'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -31,7 +33,7 @@ export default buildConfig({
   },
   i18n: { supportedLanguages: { ru }, fallbackLanguage: 'ru' },
   collections: [Regions, Estates, Houses, Projects, Leads, Promos, Landings, Media, Users],
-  globals: [Company],
+  globals: [Company, Design, Seo],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

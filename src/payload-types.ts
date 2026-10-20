@@ -103,9 +103,13 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     company: Company;
+    design: Design;
+    seo: Seo;
   };
   globalsSelect: {
     company: CompanySelect<false> | CompanySelect<true>;
+    design: DesignSelect<false> | DesignSelect<true>;
+    seo: SeoSelect<false> | SeoSelect<true>;
   };
   locale: null;
   widgets: {
@@ -277,6 +281,19 @@ export interface Estate {
     | number
     | boolean
     | null;
+  /**
+   * Пусто — заголовок и описание соберутся из полей выше
+   */
+  seo?: {
+    /**
+     * До 60 знаков: что и где. Пусто — по умолчанию
+     */
+    title?: string | null;
+    /**
+     * 120–160 знаков: факты, цифры, без «лучший»
+     */
+    description?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -393,6 +410,19 @@ export interface Project {
     | number
     | boolean
     | null;
+  /**
+   * Пусто — заголовок и описание соберутся из полей выше
+   */
+  seo?: {
+    /**
+     * До 60 знаков: что и где. Пусто — по умолчанию
+     */
+    title?: string | null;
+    /**
+     * 120–160 знаков: факты, цифры, без «лучший»
+     */
+    description?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -516,6 +546,19 @@ export interface Landing {
   cover?: (number | null) | Media;
   cta?: string | null;
   formNote?: string | null;
+  /**
+   * Пусто — заголовок и описание соберутся из полей выше
+   */
+  seo?: {
+    /**
+     * До 60 знаков: что и где. Пусто — по умолчанию
+     */
+    title?: string | null;
+    /**
+     * 120–160 знаков: факты, цифры, без «лучший»
+     */
+    description?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -714,6 +757,12 @@ export interface EstatesSelect<T extends boolean = true> {
   infrastructure?: T;
   extras?: T;
   genplan?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -778,6 +827,12 @@ export interface ProjectsSelect<T extends boolean = true> {
         id?: T;
       };
   spec3d?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -846,6 +901,12 @@ export interface LandingsSelect<T extends boolean = true> {
   cover?: T;
   cta?: T;
   formNote?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1022,6 +1083,143 @@ export interface Company {
   createdAt?: string | null;
 }
 /**
+ * Первый экран, цвета и приёмы сайта. Сохраните — и обновите страницу сайта.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "design".
+ */
+export interface Design {
+  id: number;
+  /**
+   * Посмотреть любой вариант вживую: /preview/hero-1 … /preview/hero-5 и /preview/current
+   */
+  hero: 'hero-5' | 'hero-4' | 'hero-1' | 'hero-2' | 'hero-3' | 'current';
+  palette: 'forest' | 'graphite' | 'navy' | 'terracotta';
+  /**
+   * Фоны, кнопки. Пусто — из набора выше
+   */
+  colorDark?: string | null;
+  /**
+   * Золото: линии, цифры, главная кнопка
+   */
+  colorAccent?: string | null;
+  /**
+   * Выключенный приём заменяется простым вариантом, страница не ломается
+   */
+  effects?: {
+    thread?: boolean | null;
+    motion?: boolean | null;
+    fan?: boolean | null;
+    sketch?: boolean | null;
+    key?: boolean | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Как сайт выглядит в Яндексе, Google и в ссылках в мессенджерах. Пустое поле — текст, который сайт собирает сам.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seo".
+ */
+export interface Seo {
+  id: number;
+  home?: {
+    /**
+     * До 60 знаков: что и где. Пусто — по умолчанию
+     */
+    title?: string | null;
+    /**
+     * 120–160 знаков: факты, цифры, без «лучший»
+     */
+    description?: string | null;
+  };
+  build?: {
+    /**
+     * До 60 знаков: что и где. Пусто — по умолчанию
+     */
+    title?: string | null;
+    /**
+     * 120–160 знаков: факты, цифры, без «лучший»
+     */
+    description?: string | null;
+  };
+  catalog?: {
+    /**
+     * До 60 знаков: что и где. Пусто — по умолчанию
+     */
+    title?: string | null;
+    /**
+     * 120–160 знаков: факты, цифры, без «лучший»
+     */
+    description?: string | null;
+  };
+  projects?: {
+    /**
+     * До 60 знаков: что и где. Пусто — по умолчанию
+     */
+    title?: string | null;
+    /**
+     * 120–160 знаков: факты, цифры, без «лучший»
+     */
+    description?: string | null;
+  };
+  locations?: {
+    /**
+     * До 60 знаков: что и где. Пусто — по умолчанию
+     */
+    title?: string | null;
+    /**
+     * 120–160 знаков: факты, цифры, без «лучший»
+     */
+    description?: string | null;
+  };
+  mortgage?: {
+    /**
+     * До 60 знаков: что и где. Пусто — по умолчанию
+     */
+    title?: string | null;
+    /**
+     * 120–160 знаков: факты, цифры, без «лучший»
+     */
+    description?: string | null;
+  };
+  about?: {
+    /**
+     * До 60 знаков: что и где. Пусто — по умолчанию
+     */
+    title?: string | null;
+    /**
+     * 120–160 знаков: факты, цифры, без «лучший»
+     */
+    description?: string | null;
+  };
+  contacts?: {
+    /**
+     * До 60 знаков: что и где. Пусто — по умолчанию
+     */
+    title?: string | null;
+    /**
+     * 120–160 знаков: факты, цифры, без «лучший»
+     */
+    description?: string | null;
+  };
+  /**
+   * Из мета-тега <meta name="yandex-verification" content="…"> — только то, что в кавычках после content
+   */
+  yandexVerification?: string | null;
+  /**
+   * Из мета-тега google-site-verification — только значение content
+   */
+  googleVerification?: string | null;
+  /**
+   * Горизонтальная, 1200×630. Пусто — без картинки по умолчанию; у домов и посёлков — их фото
+   */
+  shareImage?: (number | null) | Media;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "company_select".
  */
@@ -1077,6 +1275,88 @@ export interface CompanySelect<T extends boolean = true> {
   inn?: T;
   ogrn?: T;
   legalAddress?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "design_select".
+ */
+export interface DesignSelect<T extends boolean = true> {
+  hero?: T;
+  palette?: T;
+  colorDark?: T;
+  colorAccent?: T;
+  effects?:
+    | T
+    | {
+        thread?: T;
+        motion?: T;
+        fan?: T;
+        sketch?: T;
+        key?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seo_select".
+ */
+export interface SeoSelect<T extends boolean = true> {
+  home?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  build?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  catalog?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  projects?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  locations?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  mortgage?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  about?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  contacts?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  yandexVerification?: T;
+  googleVerification?: T;
+  shareImage?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
