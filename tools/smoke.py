@@ -37,7 +37,7 @@ def check(name, cond, info=""):
 
 
 pages = [
-    ("brand home", f"http://{HOST}/", 200, "там, где"),
+    ("brand home", f"http://{HOST}/", 200, "hx__house"),  # 20.10: the live first screen is «Чертёж → дом»
     ("brand catalog", f"http://{HOST}/catalog", 200, "Готовые дома в продаже"),
     ("region home krd", f"http://krd.{HOST}/", 200, "Краснодар и Адыгея"),
     ("region soon msk", f"http://msk.{HOST}/", 200, "лист ожидания"),
@@ -69,7 +69,7 @@ features = [
     ("estate: 3D plan with scheme tab + poster", f"http://krd.{HOST}/objects/dinskaya", ["Выберите дом в 3D", "3D-вид", "Схема", "Открыть 3D"]),
     ("estate: developer's master plan kept", f"http://krd.{HOST}/objects/dinskaya", ["Генплан застройщика"]),
     ("home: company first, then two ways in + the places band under both", f"http://{HOST}/",
-     ["там, где", "Два пути", "Построить дом", "Купить готовый", "ways__or", "Посмотреть локации", "places__list", "/objects/kalina", "/locations"]),
+     ["hx__house", "Два пути", "Построить дом", "Купить готовый", "ways__or", "Посмотреть локации", "places__list", "/objects/kalina", "/locations"]),
     ("home: lead form asks what the visitor is after", f"http://{HOST}/", ["Пока присматриваюсь"]),
     ("locations page: regions, all estates on a map, «на будущее» form", f"http://{HOST}/locations", ["Где мы строим", "Все посёлки", "На карте", "Подписаться"]),
     ("build page: 3D house behind reasons to trust, then proof", f"http://{HOST}/build",

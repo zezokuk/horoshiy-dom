@@ -1,4 +1,5 @@
 import { HeroDepth } from '@/components/heroes/HeroDepth'
+import { HeroDraft } from '@/components/heroes/HeroDraft'
 import { HeroGenplan } from '@/components/heroes/HeroGenplan'
 import { HeroMinimal } from '@/components/heroes/HeroMinimal'
 import { Thread } from '@/components/Thread'
@@ -30,8 +31,8 @@ import {
 } from '@/lib/view'
 
 /** The first screen: the live one, or a variant from the 20.10 references shown at /preview/hero-N for choosing. */
-export type HeroKind = 'current' | 'hero-1' | 'hero-2' | 'hero-3'
-export const HERO_VARIANTS: Exclude<HeroKind, 'current'>[] = ['hero-1', 'hero-2', 'hero-3']
+export type HeroKind = 'current' | 'hero-1' | 'hero-2' | 'hero-3' | 'hero-4'
+export const HERO_VARIANTS: Exclude<HeroKind, 'current'>[] = ['hero-1', 'hero-2', 'hero-3', 'hero-4']
 
 /**
  * The brand home: the company first (who we are, values, trust), then two ways in — build a house or buy a ready
@@ -141,7 +142,9 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
     <>
       <JsonLd data={organizationLd(company, regions)} />
       {faq && <JsonLd data={faq} />}
-      {variant === 'hero-1' ? (
+      {variant === 'hero-4' ? (
+        <HeroDraft f={facts} />
+      ) : variant === 'hero-1' ? (
         <HeroDepth f={facts} />
       ) : variant === 'hero-2' && showcase ? (
         <HeroGenplan

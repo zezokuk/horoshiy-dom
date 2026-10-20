@@ -13,19 +13,21 @@ export const metadata: Metadata = {
 
 // [short for phones, the rest on computers]
 const NAMES: Record<HeroKind, [string, string]> = {
-  current: ['Сейчас', ' на сайте'],
+  current: ['0', ' · Прежний'],
   'hero-1': ['1', ' · Дом перед названием'],
   'hero-2': ['2', ' · Через генплан'],
   'hero-3': ['3', ' · Минимализм'],
+  'hero-4': ['4', ' · Чертёж → дом'],
 }
 
 type Props = { params: Promise<{ variant: string }> }
 
-/** /preview/hero-1…3: the whole home with another first screen and a switcher between the variants. */
+/** /preview/current, /preview/hero-1…4: the whole home with another first screen and a switcher between the variants. */
 export default async function HeroPreview({ params }: Props) {
   const { variant } = await params
-  if (!HERO_VARIANTS.includes(variant as (typeof HERO_VARIANTS)[number])) notFound()
-  const links: [string, HeroKind][] = [['/', 'current'], ...HERO_VARIANTS.map((v): [string, HeroKind] => [`/preview/${v}`, v])]
+  const all: HeroKind[] = ['current', ...HERO_VARIANTS]
+  if (!all.includes(variant as HeroKind)) notFound()
+  const links = all.map((v): [string, HeroKind] => [`/preview/${v}`, v])
   return (
     <>
       <HomeView hero={variant as HeroKind} />

@@ -7,5 +7,6 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { alternates: { canonical: '/' } }
 
 export default function Home() {
-  return <HomeView />
+  // 20.10: «Чертёж → дом» (variant 4) is live; the others stay at /preview/<variant> for comparison
+  return <HomeView hero="hero-4" />
 }
