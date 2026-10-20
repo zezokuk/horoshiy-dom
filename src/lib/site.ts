@@ -5,7 +5,20 @@
  * NEXT_PUBLIC_ROOT_DOMAIN is the bare host: "horoshiy-dom.ru" in production, "localhost:3000" in dev
  * (Chrome and Edge resolve krd.localhost to this machine, so subdomains work locally without any setup).
  */
-export const ROOT_DOMAIN = (process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'localhost:3000').toLowerCase()
+export const ROOT_DOMAIN = asciiHost(process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'localhost:3000')
+
+/**
+ * A Cyrillic domain (хорошийдом.рф) may be written in .env as is: browsers send the Host header and the referrer in
+ * punycode (xn--d1ahdngadl7b7a.xn--p1ai), so the site compares and builds every address in punycode.
+ * The URL parser does the conversion the same way in Node and in browsers (tests/int/idn.int.spec.ts).
+ */
+function asciiHost(host: string) {
+  try {
+    return new URL(`http://${host.trim()}`).host
+  } catch {
+    return host.trim().toLowerCase()
+  }
+}
 export const REGION_MODE: 'subdomain' | 'path' = process.env.NEXT_PUBLIC_REGION_MODE === 'path' ? 'path' : 'subdomain'
 // http only for local dev hosts (localhost, horoshiy.localhost:3000…); everything public is https
 export const PROTOCOL = /(^|\.)localhost(:\d+)?$/.test(ROOT_DOMAIN) ? 'http' : 'https'

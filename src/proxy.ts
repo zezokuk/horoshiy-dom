@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { GLOBAL_PATHS, MAIN_URL, REGION_MODE, ROOT_DOMAIN, regionFromHost } from './lib/site'
+import { GLOBAL_PATHS, MAIN_URL, PROTOCOL, REGION_MODE, ROOT_DOMAIN, regionFromHost } from './lib/site'
 
 /**
  * Region routing (Next 16 «proxy», formerly middleware).
@@ -21,7 +21,8 @@ export function proxy(req: NextRequest) {
 
   if (!region) {
     const m = pathname.match(/^\/r\/([a-z][a-z0-9-]*)(\/.*)?$/)
-    if (m) return redirect(`${req.nextUrl.protocol}//${m[1]}.${ROOT_DOMAIN}${m[2] || '/'}${search}`)
+    // the site's protocol, not the request's: behind nginx every request reaches Next over plain http (found 20.10)
+    if (m) return redirect(`${PROTOCOL}://${m[1]}.${ROOT_DOMAIN}${m[2] || '/'}${search}`)
     return NextResponse.next()
   }
 
