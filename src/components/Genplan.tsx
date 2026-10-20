@@ -236,13 +236,15 @@ function Scheme({
  * stage: the 3D plan as the main scene (reference «HAVN»): filter tiles beside it, a ribbon of free houses over its
  * bottom edge; houses that do not pass the filter go grey in 3D.
  */
-export function Genplan({ estate, houses, stage = false }: { estate: GenplanEstate; houses: HouseView[]; stage?: boolean }) {
+export function Genplan({ estate, houses, stage: wantStage = false }: { estate: GenplanEstate; houses: HouseView[]; stage?: boolean }) {
   const plan = useMemo(() => layout(estate.config, houses), [estate.config, houses])
   const [f, setF] = useFilter()
   const freeUnits = useMemo(
     () => plan.plots.flatMap((p) => (p.unit?.status === 'free' ? [{ n: p.n, u: p.unit }] : [])).sort((a, b) => a.u.price - b.u.price),
     [plan],
   )
+  // a sold-out estate has nothing to filter: the plain plan (otherwise the scene shrank into the filters' column)
+  const stage = wantStage && freeUnits.length > 0
   const shown = useMemo(() => freeUnits.filter((x) => passes(x.u, f)), [freeUnits, f])
   const match = useMemo(() => (stage && isFiltered(f) ? shown.map((x) => x.n) : null), [stage, f, shown])
   const [view, setView] = useState<'3d' | '2d'>('3d')

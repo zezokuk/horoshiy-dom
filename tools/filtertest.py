@@ -55,5 +55,11 @@ for w, h, mob, port in [(1440, 900, False, 9394), (390, 844, True, 9395)]:
         check(f"{dev}: «Сбросить» brings all back", s3["cards"] == free and s3["off"] == 0, s3)
         check(f"{dev}: no console errors", not b.errors(), "")
 
+        # a sold-out estate: nothing to filter — the plain plan at full width (20.10: the scene shrank into the
+        # empty filters' column), no ribbon saying «no houses for this filter»
+        b.go(f"http://krd.{H}/objects/yuzhnyy-veter", 3)
+        sold = json.loads(b.js("JSON.stringify({stage: !!document.querySelector('.genplan--stage'), ribbon: !!document.querySelector('.gr'), view: document.querySelector('.genplan__view').getBoundingClientRect().width, box: document.querySelector('.genplan').getBoundingClientRect().width})"))
+        check(f"{dev}: sold-out estate — plain plan at full width, no ribbon", not sold["stage"] and not sold["ribbon"] and sold["view"] > sold["box"] * 0.85, sold)
+
 print("ALL OK" if ok else "FAILED")
 sys.exit(0 if ok else 1)
