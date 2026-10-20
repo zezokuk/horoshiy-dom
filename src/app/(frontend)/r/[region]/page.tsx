@@ -4,10 +4,11 @@ import { EstatesView } from '@/components/EstatesView'
 import { Genplan } from '@/components/Genplan'
 import { HouseCard } from '@/components/HouseCard'
 import { LeadInline } from '@/components/LeadForm'
-import { RegionStage } from '@/components/RegionStage'
+import { EstatesFan } from '@/components/EstatesFan'
+import { RegionHero } from '@/components/RegionHero'
 import { Words } from '@/components/Words'
 import { PromoCards } from '@/components/PromoCards'
-import { getEstates, getHouses, getProjects, getPromos, getRegion } from '@/lib/data'
+import { getEstates, getHouses, getProjects, getPromos, getRegion, img } from '@/lib/data'
 import { formatMillions, plural, telHref } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
 import { byEstateStatus, estateView, genplanEstate, houseView, promoView } from '@/lib/view'
@@ -77,13 +78,24 @@ export default async function RegionPage({ params }: Props) {
   const built = views.filter((v) => v.status !== 'planned').length
   const free = houses.filter((h) => h.status === 'free').map(houseView)
   const priceFrom = free.length ? Math.min(...free.map((h) => h.price)) : null
-  // each estate's slice on the first screen: a real house standing there (a free one first), not the estate cover —
+  // each estate's slice in the fan: a real house standing there (a free one first), not the estate cover —
   // covers carry the estate's name printed on them («ЮЖНЫЙ ВЕТЕР»); Тип 12's picture is a render, not a house
   const all = houses.map(houseView).filter((h) => h.photoCard && !h.title.startsWith('Тип 12'))
-  const stage = views.map((v) => {
+  const fan = views.map((v) => {
     const mine = all.filter((h) => h.estateSlug === v.slug)
     return { ...v, photo: (mine.find((h) => h.status === 'free') ?? mine[0])?.photoCard }
   })
+  // the first screen: the admin's picture with the region's scenes, else the region cover or a real house
+  const scenesSrc = img(region.scenes, 'wide')
+  const scenes = scenesSrc
+    ? {
+        src: scenesSrc,
+        alt: (typeof region.scenes === 'object' && region.scenes?.alt) || region.name,
+        labels: (region.sceneLabels ?? []).map((l) => ({ title: l.title, text: l.text, x: l.x, y: l.y })),
+      }
+    : undefined
+  const photoSrc = img(region.cover, 'wide') || free[0]?.photo || all[0]?.photo
+  const photo = photoSrc ? { src: photoSrc, phone: img(region.cover, 'card') || free[0]?.photoCard || all[0]?.photoCard, alt: region.name } : undefined
   // 3D showcase: the estate with the most free houses (ties: the first in the admin's order)
   const top = [...estates].sort((a, b) => (views.find((v) => v.slug === b.slug)?.free ?? 0) - (views.find((v) => v.slug === a.slug)?.free ?? 0))[0]
   const showcase = top && {
@@ -94,11 +106,12 @@ export default async function RegionPage({ params }: Props) {
   return (
     <>
       <div className="container intro">
-        <RegionStage
+        <RegionHero
           name={region.name}
           tagline={region.tagline}
-          note={region.intro}
-          estates={stage}
+          intro={region.intro}
+          scenes={scenes}
+          photo={photo}
           facts={[
             { value: String(built), label: plural(built, 'посёлок', 'посёлка', 'посёлков') },
             { value: String(free.length), label: `${plural(free.length, 'дом', 'дома', 'домов')} в продаже` },
@@ -126,10 +139,10 @@ export default async function RegionPage({ params }: Props) {
               <Words text="Где можно *жить*" />
             </div>
             <p className="lead" data-reveal>
-              Выберите посёлок на карте — откроется его 3D-генплан со свободными домами и ценами.
+              Выберите посёлок на карте или в веере ниже — откроется его 3D-генплан со свободными домами и ценами.
             </p>
           </div>
-          <EstatesView estates={views} />
+          <EstatesView estates={views} cards={<EstatesFan estates={fan} />} />
           <LeadInline
             title="Не знаете, какой посёлок выбрать?"
             text="Расскажите о семье и бюджете — подберём 2–3 свободных дома и пришлём подборку."

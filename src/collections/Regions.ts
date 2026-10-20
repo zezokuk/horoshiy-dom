@@ -51,6 +51,42 @@ export const Regions: CollectionConfig = {
     },
     { name: 'cover', label: 'Обложка', type: 'upload', relationTo: 'media' },
     {
+      name: 'scenes',
+      label: 'Картинка первого экрана',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description:
+          'Квадратная картинка: дом в центре, вокруг веер сцен региона (горы, город, свой двор), сверху тёмное поле. Подписи к сценам — ниже, их ставит сайт. Пусто — на первом экране фото дома',
+      },
+    },
+    {
+      name: 'sceneLabels',
+      label: 'Подписи сцен на картинке',
+      type: 'array',
+      labels: { singular: 'Подпись', plural: 'Подписи' },
+      admin: {
+        description: 'Слева и Сверху — где подпись на картинке, в процентах от её ширины и высоты. Цифры — только из своих материалов',
+        condition: (data) => Boolean(data?.scenes),
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'title', label: 'Подпись', type: 'text', required: true },
+            { name: 'text', label: 'Строка под ней', type: 'text' },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            { name: 'x', label: 'Слева, %', type: 'number', required: true, min: 0, max: 100 },
+            { name: 'y', label: 'Сверху, %', type: 'number', required: true, min: 0, max: 100 },
+          ],
+        },
+      ],
+    },
+    {
       name: 'mapCodes',
       label: 'Субъекты РФ на карте',
       type: 'text',

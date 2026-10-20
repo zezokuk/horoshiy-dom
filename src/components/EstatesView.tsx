@@ -1,13 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { plural } from '@/lib/format'
 import type { EstateView } from '@/lib/view'
 import { EstateCard } from './EstateCard'
 import { EstatesMap } from './EstatesMap'
 
 /** «На карте / Списком» switch with a live counter of free houses (as on gk-osnova / gk-nvm). */
-export function EstatesView({ estates, showRegion = false }: { estates: EstateView[]; showRegion?: boolean }) {
+export function EstatesView({
+  estates,
+  showRegion = false,
+  cards,
+}: {
+  estates: EstateView[]
+  showRegion?: boolean
+  /** shown instead of the grid of estate cards (the region page: the fan of estate photos) */
+  cards?: ReactNode
+}) {
   const mappable = estates.some((e) => e.lat !== null && e.lng !== null)
   const [view, setView] = useState<'map' | 'list'>(mappable ? 'map' : 'list')
   const free = estates.reduce((s, e) => s + e.free, 0)
@@ -31,13 +40,15 @@ export function EstatesView({ estates, showRegion = false }: { estates: EstateVi
         </span>
       </div>
       {view === 'map' && <EstatesMap estates={estates} />}
-      <div className="grid grid--3">
-        {estates.map((e, i) => (
-          <div key={e.slug} data-reveal style={{ ['--d' as string]: `${i * 80}ms` }}>
-            <EstateCard e={e} showRegion={showRegion} />
-          </div>
-        ))}
-      </div>
+      {cards ?? (
+        <div className="grid grid--3">
+          {estates.map((e, i) => (
+            <div key={e.slug} data-reveal style={{ ['--d' as string]: `${i * 80}ms` }}>
+              <EstateCard e={e} showRegion={showRegion} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

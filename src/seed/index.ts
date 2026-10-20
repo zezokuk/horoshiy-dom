@@ -17,6 +17,7 @@ import config from '../payload.config'
 import { genplanConfig, layout } from '../lib/genplan'
 import type { HouseView } from '../lib/view'
 import { addTip5Render } from './tip5-render'
+import { addRegionScenes } from './region-scenes'
 import {
   ADVANTAGES,
   COMPANY,
@@ -223,6 +224,8 @@ async function run() {
   await payload.update({ collection: 'projects', id: projects.get('Тип 12')!, data: { tour } })
   // «Тип 5»: furnished render of its plan with the room areas (the project page shows it as «3D-вид»)
   await addTip5Render(payload)
+  // «Краснодар и Адыгея»: the first screen's picture with the region's scenes and their labels
+  await addRegionScenes(payload)
 
   // Estates
   const estates = new Map<string, number>()

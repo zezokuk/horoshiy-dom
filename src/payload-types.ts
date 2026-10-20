@@ -164,6 +164,22 @@ export interface Region {
   internalNote?: string | null;
   cover?: (number | null) | Media;
   /**
+   * Квадратная картинка: дом в центре, вокруг веер сцен региона (горы, город, свой двор), сверху тёмное поле. Подписи к сценам — ниже, их ставит сайт. Пусто — на первом экране фото дома
+   */
+  scenes?: (number | null) | Media;
+  /**
+   * Слева и Сверху — где подпись на картинке, в процентах от её ширины и высоты. Цифры — только из своих материалов
+   */
+  sceneLabels?:
+    | {
+        title: string;
+        text?: string | null;
+        x: number;
+        y: number;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * Коды ISO 3166-2:RU, например RU-KDA, RU-AD. Подсвечиваются на карте России
    */
   mapCodes?: string[] | null;
@@ -726,6 +742,16 @@ export interface RegionsSelect<T extends boolean = true> {
   intro?: T;
   internalNote?: T;
   cover?: T;
+  scenes?: T;
+  sceneLabels?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        x?: T;
+        y?: T;
+        id?: T;
+      };
   mapCodes?: T;
   lat?: T;
   lng?: T;

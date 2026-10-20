@@ -496,46 +496,76 @@ html.no-motion::view-transition-group(*), html.no-motion::view-transition-old(*)
 .pr__list button.is-on b, .pr__list button:hover b { color: #f0e2c4; }
 .pr__note { font-size: 13px; color: var(--muted); margin: 0; }
 
-/* ── Region first screen («The Gali», components/RegionStage): the house in the middle, the estates as a fan of photos ── */
-.rs { display: grid; justify-items: center; gap: 14px; padding: 34px 18px 26px; border-radius: 28px; text-align: center; color: var(--cream); background: radial-gradient(110% 70% at 50% 34%, #34493b 0%, var(--green-deep) 46%, #151d18 100%); overflow: hidden; }
-.rs__eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-soft); }
-.rs__title { font-family: var(--font-serif); font-weight: 500; font-size: clamp(40px, 6.4vw, 88px); line-height: .95; letter-spacing: -.01em; color: var(--cream); overflow-wrap: anywhere; }
-.rs__tag { max-width: 56ch; font-size: clamp(16px, 1.5vw, 19px); color: #d9ddd3; }
-.rs__svg { display: block; width: 100%; max-width: 1000px; height: auto; margin-top: -4px; }
-.rs__house { pointer-events: none; }
-.rs__hub { fill: #18211c; stroke: var(--gold); stroke-opacity: .6; stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
-.rs__bg { fill: #1f2b24; }
-.rs__w { outline: none; transform-box: view-box; transform-origin: 600px 235px; transition: transform .35s cubic-bezier(.2, .7, .2, 1); }
-.rs__edge { fill: none; stroke: var(--gold); stroke-opacity: .55; stroke-width: 1.5px; vector-effect: non-scaling-stroke; transition: stroke-opacity .25s, stroke-width .25s; }
-.rs__w.is-sold image { filter: grayscale(.55) brightness(.8); transition: filter .3s; }
-.rs__soon { font-family: var(--font-serif); font-style: italic; font-size: 30px; fill: var(--gold-soft); }
-.rs__label-name { font-family: var(--font-serif); font-size: 25px; font-weight: 600; fill: var(--cream); }
-.rs__label-sale { font-family: var(--font-sans); font-size: 16px; font-weight: 500; fill: var(--gold-soft); }
-.rs__w.is-sold .rs__label-sale { fill: #aab3a8; }
-.rs__w:hover, .rs__w:focus-visible { transform: translate(var(--dx), var(--dy)); }
-.rs__w:hover .rs__edge, .rs__w:focus-visible .rs__edge { stroke-opacity: 1; stroke-width: 3px; }
-.rs__w:hover.is-sold image { filter: none; }
-.rs__w:hover .rs__label-name, .rs__w:focus-visible .rs__label-name { text-decoration: underline; text-decoration-thickness: 1px; }
-.rs__w { animation: rs-deal .7s cubic-bezier(.2, .7, .2, 1) backwards; animation-delay: calc(200ms + var(--i) * 70ms); }
-@keyframes rs-deal { from { opacity: 0; transform: scale(.92); } }
-.rs__house { animation: rs-rise .9s cubic-bezier(.2, .7, .2, 1) backwards; }
-@keyframes rs-rise { from { opacity: 0; transform: translateY(24px); } }
-.rs__list { list-style: none; margin: 0; padding: 0; width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; text-align: left; }
-.rs__list a { display: grid; gap: 2px; padding: 10px 12px; border-radius: 14px; background: rgba(251, 248, 242, .08); border: 1px solid rgba(234, 223, 201, .22); }
-.rs__list b { font-weight: 600; font-size: 15px; overflow-wrap: anywhere; }
-.rs__list span { font-size: 12.5px; color: var(--gold-soft); }
-.rs__list .is-soon a { border-style: dashed; }
-.rs__list .is-sold span { color: #aab3a8; }
-.rs__facts { width: 100%; max-width: 860px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 6px; }
-.rs__facts div { display: grid; gap: 2px; padding: 12px 14px; border-radius: 16px; background: rgba(251, 248, 242, .07); border: 1px solid rgba(234, 223, 201, .18); }
-.rs__facts b { font-family: var(--font-serif); font-size: 28px; font-weight: 500; line-height: 1; color: var(--gold-soft); }
-.rs__facts span { font-size: 13px; color: #d9ddd3; }
-.rs__note { max-width: 60ch; font-size: 14px; color: #aab3a8; }
-.rs__btns { justify-content: center; }
-@media (min-width: 700px) {
-  .rs__list { display: none; }
-  .rs__facts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+/* ── Region first screen (components/RegionHero): words and numbers on the left, on the right Илья's picture — our
+   house with a fan of the region's scenes (20.10) — on a stage of its own dark green, the scene labels over it ───── */
+.rh { display: grid; gap: 14px; padding: 28px 18px 22px; border-radius: 28px; color: var(--cream); background: radial-gradient(90% 85% at 72% 50%, #1c2b21 0%, #111b14 55%, #0b120d 100%); overflow: hidden; }
+.rh__text { display: grid; gap: 14px; align-content: center; }
+.rh__eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-soft); }
+.rh__title { font-family: var(--font-serif); font-weight: 500; font-size: clamp(42px, 5.6vw, 84px); line-height: .95; letter-spacing: -.01em; color: var(--cream); overflow-wrap: anywhere; }
+.rh__tag { max-width: 40ch; font-size: clamp(16px, 1.4vw, 19px); color: #d9ddd3; }
+.rh__facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.rh__facts div { display: grid; gap: 2px; padding: 12px 14px; border-radius: 16px; background: rgba(251, 248, 242, .06); border: 1px solid rgba(234, 223, 201, .18); }
+.rh__facts b { font-family: var(--font-serif); font-size: 28px; font-weight: 500; line-height: 1; color: var(--gold-soft); }
+.rh__facts span { font-size: 13px; color: #d9ddd3; }
+.rh__intro { max-width: 46ch; font-size: 14px; color: #aab3a8; }
+/* the picture: square, its empty top 24% cut off; the labels are placed in percent of the whole square */
+.rh__pic { position: relative; margin: 0; width: 100%; aspect-ratio: 100 / 76; overflow: hidden; container-type: inline-size; }
+.rh__square { position: absolute; left: 0; right: 0; bottom: 0; aspect-ratio: 1; }
+/* the picture's own dark background is not quite the stage's: its edges melt into the stage instead of showing a box */
+.rh__square img { display: block; width: 100%; height: 100%; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%), linear-gradient(180deg, transparent 24%, #000 31%, #000 93%, transparent 100%); -webkit-mask-composite: source-in; mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%), linear-gradient(180deg, transparent 24%, #000 31%, #000 93%, transparent 100%); mask-composite: intersect; }
+.rh__label { position: absolute; transform: translate(-50%, -50%); display: grid; gap: 1px; padding: 5px 10px 6px; border-radius: 10px; text-align: center; white-space: nowrap; pointer-events: none; background: color-mix(in srgb, #0b120d 64%, transparent); border: 1px solid rgba(234, 223, 201, .3); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.rh__label b { font: 600 clamp(11px, 2.3cqi, 16px)/1.15 var(--font-serif); color: var(--cream); }
+.rh__label i { font: 500 clamp(9px, 1.7cqi, 12.5px)/1.2 var(--font-sans); font-style: normal; color: var(--gold-soft); }
+@container (max-width: 460px) { .rh__label { padding: 3px 7px; border-radius: 8px; } .rh__label i { display: none; } }
+.rh__pic figcaption { position: absolute; right: 10px; bottom: 6px; font-size: 11px; color: rgba(251, 248, 242, .45); }
+.rh__photo { overflow: hidden; border-radius: 20px; aspect-ratio: 4 / 3; }
+.rh__photo img { width: 100%; height: 100%; object-fit: cover; }
+/* phones: the title, then the picture, then the numbers and the buttons */
+@media (max-width: 959px) {
+  .rh__text { display: contents; }
+  .rh__eyebrow { order: 1; } .rh__title { order: 2; } .rh__tag { order: 3; } .rh__pic, .rh__photo { order: 4; }
+  .rh__facts { order: 5; } .rh__intro { order: 6; } .rh .btns { order: 7; }
+  .rh__pic { margin: 0 -18px; width: calc(100% + 36px); }
 }
-@media (max-width: 699px) { .rs__label { display: none; } .rs__svg { margin-top: 4px; } }
-@media (min-width: 960px) { .rs { padding: 46px 40px 36px; gap: 16px; } .rs__facts b { font-size: 34px; } }
-@media (prefers-reduced-motion: reduce) { .rs__w, .rs__house { animation: none; } .rs__w { transition: none; } }
+@media (min-width: 960px) {
+  .rh { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); align-items: center; gap: 20px; padding: 36px 10px 18px 48px; }
+  .rh__facts b { font-size: 32px; }
+}
+
+/* ── The region's estates as a fan of photos (components/EstatesFan), on «Где можно жить»: the disc in the middle
+   carries the numbers (20.10: «ниже, но не с домом») ─────────────────────────────────────────────────────────── */
+.ef { display: grid; gap: 14px; }
+.ef__svg { display: block; width: 100%; max-width: 1040px; height: auto; margin: 0 auto; }
+.ef__bg { fill: var(--cream); }
+.ef__w { outline: none; transform-box: view-box; transform-origin: 600px 200px; transition: transform .35s cubic-bezier(.2, .7, .2, 1); }
+.ef__edge { fill: none; stroke: #fff; stroke-width: 2px; vector-effect: non-scaling-stroke; transition: stroke .25s, stroke-width .25s; }
+.ef__w.is-sold image { filter: grayscale(.5); transition: filter .3s; }
+.ef__soon { font-family: var(--font-serif); font-style: italic; font-size: 30px; fill: var(--gold-ink); }
+.ef__label-name { font-family: var(--font-serif); font-size: 25px; font-weight: 600; fill: var(--ink); }
+.ef__label-sale { font-family: var(--font-sans); font-size: 16px; font-weight: 500; fill: var(--gold-ink); }
+.ef__w.is-sold .ef__label-sale { fill: var(--muted); }
+.ef__w:hover, .ef__w:focus-visible { transform: translate(var(--dx), var(--dy)); }
+.ef__w:hover .ef__edge, .ef__w:focus-visible .ef__edge { stroke: var(--green); stroke-width: 3px; }
+.ef__w:hover.is-sold image { filter: none; }
+.ef__w:hover .ef__label-name, .ef__w:focus-visible .ef__label-name { fill: var(--green); }
+.ef__hub { fill: var(--green-deep); stroke: var(--gold); stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
+.ef__hub-n { font-family: var(--font-serif); font-size: 84px; font-weight: 500; fill: var(--gold-soft); }
+.ef__hub-t { font-family: var(--font-sans); font-size: 19px; font-weight: 600; fill: var(--cream); }
+.ef__hub-t--sub { font-size: 16px; font-weight: 400; fill: #c9d0c7; }
+.ef__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.ef__list a { display: grid; gap: 2px; padding: 10px 12px; border-radius: 14px; background: #fffdf8; border: 1px solid var(--line); }
+.ef__list b { font-weight: 600; font-size: 15px; overflow-wrap: anywhere; }
+.ef__list span { font-size: 12.5px; color: var(--gold-ink); }
+.ef__list .is-soon a { border-style: dashed; background: transparent; }
+.ef__list .is-sold span { color: var(--muted); }
+@media (min-width: 700px) { .ef__list { display: none; } }
+/* phones: the labels would be 6 px — the list under the fan names the estates; the disc's words get bigger */
+@media (max-width: 699px) {
+  .ef__label { display: none; }
+  .ef__hub-t { font-size: 27px; }
+  .ef__hub-t--sub { display: none; }
+  /* without the labels the sides of the scheme are empty: the fan is drawn wider and the empty sides are cut off */
+  .ef { overflow: hidden; }
+  .ef__svg { width: 128%; max-width: none; margin: -2% 0 0 -14%; }
+}
+@media (prefers-reduced-motion: reduce) { .ef__w { transition: none; } }
