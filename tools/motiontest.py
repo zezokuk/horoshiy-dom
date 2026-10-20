@@ -69,6 +69,45 @@ with Browser(9411, "prof-motion-d", 1440, 900) as b:
     check("…and the house page's main photo has that name", b.js("getComputedStyle(document.querySelector('.hs__photo img')).viewTransitionName") == "house-photo")
     check("house page: no console errors", not b.errors())
 
+    # «Выберите проект» fan on /build (reference 49d13…): hover pulls a slice out green, a click or Enter puts it in the hub
+    b.go(f"http://{H}/build", 2)
+    b.js("document.querySelector('#projects .pf').scrollIntoView({block: 'center', behavior: 'instant'})")
+    b.wait("document.querySelectorAll('.pf__w image').length >= 11", 20)
+    time.sleep(1.5)
+    check("fan: 11 photo slices around the chosen project", b.js("document.querySelectorAll('.pf__w image').length") == 11)
+    hub0 = b.js("document.querySelector('.pf__info b').textContent")
+
+    def settled(expr, tries=30):
+        """The page above the fan (3D, sticky blocks) may still shift it: wait until the rect stops moving."""
+        prev = None
+        for _ in range(tries):
+            now = b.js(expr)
+            if now == prev:
+                return json.loads(now)
+            prev = now
+            time.sleep(0.3)
+        return json.loads(now)
+
+    w = settled("(() => { const r = document.querySelectorAll('.pf__w')[3].getBoundingClientRect(); return JSON.stringify([r.x, r.y, r.width, r.height].map(Math.round)) })()")
+    w = {"x": w[0], "y": w[1], "width": w[2], "height": w[3]}
+    b.cmd("Input.dispatchMouseEvent", type="mouseMoved", x=w["x"] + w["width"] / 2, y=w["y"] + w["height"] / 2)
+    time.sleep(0.6)
+    st = b.js("(() => { const g = document.querySelectorAll('.pf__w')[3]; return [getComputedStyle(g.querySelector('.pf__edge')).stroke, getComputedStyle(g).transform] })()")
+    check("fan: pointing at a slice turns its edge green and pulls it out", st[0] == "rgb(69, 89, 74)" and st[1] != "none", str(st))
+    name3 = b.js("document.querySelectorAll('.pf__w')[3].getAttribute('aria-label').split(',')[0]")
+    b.click(xy=(w["x"] + w["width"] / 2, w["y"] + w["height"] / 2))
+    time.sleep(0.8)
+    hub1 = b.js("document.querySelector('.pf__info b').textContent")
+    check("fan: a click puts that project into the hub", hub1 == name3 and hub1 != hub0, f"{hub0} → {hub1}")
+    b.js("document.querySelectorAll('.pf__w')[0].focus()")
+    name0 = b.js("document.querySelectorAll('.pf__w')[0].getAttribute('aria-label').split(',')[0]")
+    b.key("Enter", vk=13)
+    time.sleep(0.6)
+    check("fan: Enter on a focused slice works too", b.js("document.querySelector('.pf__info b').textContent") == name0, name0)
+    link = b.js("document.querySelector('.pf__info a').href")
+    check("fan: the hub link leads to that project", link.endswith(f"/projects/tip-{name0.split()[-1]}"), link)
+    check("fan: no console errors", not b.errors())
+
 with Browser(9412, "prof-motion-m", 390, 844, mobile=True) as b:
     b.go(f"http://{H}/catalog", 3)
     r = json.loads(b.js("(() => { const c = document.querySelector('.grid .house-card'); c.scrollIntoView({block: 'center', behavior: 'instant'}); return JSON.stringify(c.getBoundingClientRect()) })()"))

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { BuildStory, type TrustPoint } from '@/components/BuildStory'
 import { LeadInline } from '@/components/LeadForm'
 import { ProjectCard } from '@/components/ProjectCard'
+import { ProjectFan } from '@/components/ProjectFan'
 import { SketchToHouse } from '@/components/SketchToHouse'
 import { Words } from '@/components/Words'
 import { getCompany, getEstates, getHouses, getProjects } from '@/lib/data'
@@ -159,11 +160,15 @@ export default async function BuildPage() {
               Все {projects.length} {plural(projects.length, 'проект', 'проекта', 'проектов')}
             </a>
           </div>
-          <div className="grid grid--3">
-            {projects.slice(0, 6).map((p) => (
-              <ProjectCard key={p.slug} p={projectCard(p, houses)} />
-            ))}
-          </div>
+          {/* reference 49d13…: the chosen project in the hub, the others as a fan of photos around it */}
+          <ProjectFan projects={projects.map((p) => ({ ...projectCard(p, houses), href: mainHref(`/projects/${p.slug}`) }))} first="tip-5" />
+          <noscript>
+            <div className="grid grid--3">
+              {projects.slice(0, 6).map((p) => (
+                <ProjectCard key={p.slug} p={projectCard(p, houses)} />
+              ))}
+            </div>
+          </noscript>
         </div>
       </section>
 
