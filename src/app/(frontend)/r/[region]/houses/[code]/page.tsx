@@ -5,12 +5,13 @@ import { HouseCard } from '@/components/HouseCard'
 import { HouseReady } from '@/components/HouseReady'
 import { MortgageCalc } from '@/components/MortgageCalc'
 import { Pic } from '@/components/Pic'
+import { PlanRender } from '@/components/PlanRender'
 import { PlanTour } from '@/components/PlanTour'
 import { getCompany, getHouse, getHouses, getRegion, img } from '@/lib/data'
 import { STATUS_LABEL, formatArea, formatPrice, plural, telHref } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
 import { JsonLd, breadcrumbsLd, houseLd } from '@/lib/seo'
-import { houseTitle, houseView, tourView } from '@/lib/view'
+import { houseTitle, houseView, roomsView, tourView } from '@/lib/view'
 import type { Estate, Project, Region } from '@/payload-types'
 
 export const revalidate = 60
@@ -50,6 +51,11 @@ export default async function HousePage({ params }: Props) {
   const tour = tourView(project)
   // the circles are placed on the project's plan picture, so with a tour we show that plan
   const planSrc = tour.length ? img(project?.plan, 'wide') : h.plan
+  // no room videos but the project has a furnished render of its plan: that one first, with the room areas —
+  // only when this house has the project's own layout («Тип 5 (В2)», «(В3)» share the project but not the plan)
+  const mediaId = (m: unknown) => (m && typeof m === 'object' ? (m as { id?: unknown }).id : m)
+  const samePlan = !house.plan || mediaId(house.plan) === mediaId(project?.plan)
+  const render = tour.length || !samePlan ? null : img(project?.render, 'wide')
   const [company, regionHouses] = await Promise.all([getCompany(), getHouses({ region: region.id, status: 'free' })])
   const similar = regionHouses
     .filter((x) => x.code !== h.code)
@@ -103,11 +109,13 @@ export default async function HousePage({ params }: Props) {
           </div>
         </div>
 
-        <div className={`hs__grid ${planSrc ? '' : 'hs__grid--solo'}`}>
-          {planSrc && (
+        <div className={`hs__grid ${planSrc || render ? '' : 'hs__grid--solo'}`}>
+          {(planSrc || render) && (
             <div className="hs__plan">
-              {tour.length ? (
+              {tour.length && planSrc ? (
                 <PlanTour plan={planSrc} alt={`Планировка: ${h.title}`} points={tour} />
+              ) : render ? (
+                <PlanRender render={render} plan={planSrc} rooms={roomsView(project)} alt={`Планировка: ${h.title}`} />
               ) : (
                 <div className="plan">
                   <img src={planSrc} alt={`Планировка: ${h.title}`} loading="lazy" />

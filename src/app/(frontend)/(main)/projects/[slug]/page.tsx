@@ -2,11 +2,12 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { HouseCard } from '@/components/HouseCard'
 import { LeadInline } from '@/components/LeadForm'
+import { PlanRender } from '@/components/PlanRender'
 import { getCompany, getHouses, getProject, img } from '@/lib/data'
 import { withSeo } from '@/lib/look'
 import { formatArea, formatMillions, plural } from '@/lib/format'
 import { mainHref } from '@/lib/site'
-import { houseView } from '@/lib/view'
+import { houseView, roomsView } from '@/lib/view'
 
 export const revalidate = 60
 
@@ -31,6 +32,8 @@ export default async function ProjectPage({ params }: Props) {
   const free = mine.filter((h) => h.status === 'free')
   const photo = img(p.photo, 'wide')
   const plan = img(p.plan, 'wide')
+  // a furnished top-down render made from the plan: shown first, with the room areas on it
+  const render = img(p.render, 'wide')
 
   return (
     <>
@@ -44,10 +47,14 @@ export default async function ProjectPage({ params }: Props) {
       <div className="container house">
         <div style={{ display: 'grid', gap: 20 }}>
           <div className="house__photo">{photo && <img src={photo} alt={`Дом по проекту «${p.name}»`} fetchPriority="high" />}</div>
-          {plan && (
-            <div className="plan">
-              <img src={plan} alt={`Планировка проекта «${p.name}»`} loading="lazy" />
-            </div>
+          {render ? (
+            <PlanRender render={render} plan={plan} rooms={roomsView(p)} alt={`Планировка проекта «${p.name}»`} />
+          ) : (
+            plan && (
+              <div className="plan">
+                <img src={plan} alt={`Планировка проекта «${p.name}»`} loading="lazy" />
+              </div>
+            )
           )}
         </div>
         <aside className="house__side">

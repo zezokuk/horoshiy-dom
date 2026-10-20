@@ -16,6 +16,7 @@ import { getPayload, type Payload } from 'payload'
 import config from '../payload.config'
 import { genplanConfig, layout } from '../lib/genplan'
 import type { HouseView } from '../lib/view'
+import { addTip5Render } from './tip5-render'
 import {
   ADVANTAGES,
   COMPANY,
@@ -220,6 +221,8 @@ async function run() {
     { label: 'Детская 9,2 м²', x: 26.5, y: 37 },
   ]
   await payload.update({ collection: 'projects', id: projects.get('Тип 12')!, data: { tour } })
+  // «Тип 5»: furnished render of its plan with the room areas (the project page shows it as «3D-вид»)
+  await addTip5Render(payload)
 
   // Estates
   const estates = new Map<string, number>()

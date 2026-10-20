@@ -34,6 +34,42 @@ export const Projects: CollectionConfig = {
     { name: 'photo', label: 'Фото', type: 'upload', relationTo: 'media' },
     { name: 'plan', label: 'Планировка', type: 'upload', relationTo: 'media' },
     {
+      name: 'render',
+      label: 'Визуализация планировки',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description:
+          'Вид сверху с мебелью, сделанный по планировке (промпт: «Промты/lark/план-в-рендер.md»). На сайте — вкладка «3D-вид» с подписями комнат и пометкой «мебель для примера»; чертёж остаётся второй вкладкой',
+      },
+    },
+    {
+      name: 'rooms',
+      label: 'Комнаты на визуализации',
+      type: 'array',
+      labels: { singular: 'Комната', plural: 'Комнаты' },
+      admin: {
+        description: 'Подписи поверх визуализации: название и площадь по планировке. Положение — в процентах от левого верхнего угла картинки',
+        condition: (data) => Boolean(data?.render),
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'name', label: 'Комната', type: 'text', required: true, admin: { description: '«Кухня-гостиная»' } },
+            { name: 'area', label: 'Площадь, м²', type: 'number', required: true, min: 0 },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            { name: 'x', label: 'Слева, %', type: 'number', required: true, min: 0, max: 100 },
+            { name: 'y', label: 'Сверху, %', type: 'number', required: true, min: 0, max: 100 },
+          ],
+        },
+      ],
+    },
+    {
       name: 'tour',
       label: 'Точки на плане (видео комнат)',
       type: 'array',

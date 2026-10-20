@@ -156,7 +156,14 @@ export function tourView(p: Project | null | undefined): TourPoint[] {
   return (p?.tour ?? []).map((t, i) => ({ n: i + 1, label: label(t.label), x: t.x, y: t.y, video: url(t.video), poster: url(t.poster, 'card') }))
 }
 
-export type PromoView = { id: number; title: string; text: string | null; image?: string; regionName: string | null; href: string; cta: string }
+/** Room labels over the project's plan render (name and area from the plan, x/y — percent of the render). */
+export type RoomLabel = { name: string; area: number; x: number; y: number }
+
+export function roomsView(p: Project | null | undefined): RoomLabel[] {
+  return (p?.rooms ?? []).map((r) => ({ name: r.name, area: r.area, x: r.x, y: r.y }))
+}
+
+export type PromoView ={ id: number; title: string; text: string | null; image?: string; regionName: string | null; href: string; cta: string }
 
 export function promoView(p: Promo): PromoView {
   return {

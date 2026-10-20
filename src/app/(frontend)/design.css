@@ -460,3 +460,27 @@ html.no-motion::view-transition-group(*), html.no-motion::view-transition-old(*)
 .dr .hd__stage { height: 74cqi; }
 .dr .hx__house { top: 12cqi; }
 @media (min-width: 960px) { .dr .hd__stage { height: auto; } .dr .hx__house { top: 3cqi; } }
+
+/* Plan render with room areas (components/PlanRender): «3D-вид» / «Чертёж», glass labels, the room list lights them */
+.pr { display: grid; gap: 12px; container-type: inline-size; }
+.pr__tabs { display: inline-flex; justify-self: start; gap: 4px; padding: 4px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); }
+.pr__tabs button { border: 0; background: transparent; font: 600 14px/1 var(--font-sans); color: var(--muted); padding: 9px 16px; border-radius: 999px; cursor: pointer; transition: background .25s, color .25s; }
+.pr__tabs button[aria-selected="true"] { background: var(--green-deep); color: #fff; }
+.pr__tabs button:not([aria-selected="true"]):hover { color: var(--green-deep); }
+.pr__stage { position: relative; border-radius: var(--radius); overflow: hidden; background: #fff; border: 1px solid var(--line); }
+.pr__stage img { display: block; width: 100%; height: auto; }
+.pr__room { position: absolute; translate: -50% -50%; display: grid; justify-items: center; gap: 2px; padding: 6px 10px; border-radius: 12px; cursor: default;
+  background: color-mix(in srgb, var(--paper) 82%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 8px 18px -10px rgba(20,28,22,.55); transition: background .25s, color .25s, scale .25s; }
+.pr__room b { font: 600 clamp(13px, 2.6cqi, 18px)/1 var(--font-serif); color: var(--green-deep); white-space: nowrap; }
+.pr__room i { font: 500 11px/1.1 var(--font-sans); font-style: normal; color: var(--muted); white-space: nowrap; }
+.pr__room.is-on { background: var(--green-deep); scale: 1.08; z-index: 2; }
+.pr__room.is-on b, .pr__room.is-on i { color: #fff; }
+/* narrow: only the area on the picture, the names are in the list under it */
+@container (max-width: 520px) { .pr__room { padding: 4px 7px; border-radius: 9px; } .pr__room i { display: none; } }
+.pr__list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.pr__list button { border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 7px 12px; font: 500 14px/1 var(--font-sans); color: var(--ink, #23271f); cursor: pointer; transition: background .25s, color .25s, border-color .25s; }
+.pr__list button b { font-weight: 700; color: var(--green-deep); margin-left: 4px; }
+.pr__list button.is-on, .pr__list button:hover { background: var(--green-deep); border-color: var(--green-deep); color: #fff; }
+.pr__list button.is-on b, .pr__list button:hover b { color: #f0e2c4; }
+.pr__note { font-size: 13px; color: var(--muted); margin: 0; }
