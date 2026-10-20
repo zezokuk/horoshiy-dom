@@ -6,7 +6,7 @@ import { type ReactNode, useEffect, useRef, useState } from 'react'
 const BuildHouse3D = dynamic(() => import('./BuildHouse3D'), { ssr: false })
 
 /** What the 3D shows while a card is read: card i finishes stage i. */
-const STAGES = ['Фундамент', 'Стены', 'Кровля', 'Окна и коммуникации', 'Двор и парковка']
+const STAGES = ['Фундамент', 'Стены', 'Кровля', 'Окна и коммуникации', 'Двор и новоселье']
 // 3D timeline (BUILD_STEPS in BuildHouse3D): the end of each stage
 const ENDS = [0.16, 0.36, 0.52, 0.64, 0.8]
 const lerp = (a: number, b: number, k: number) => a + (b - a) * Math.min(1, Math.max(0, k))
@@ -81,7 +81,7 @@ export function BuildStory({ intro, points, end }: { intro: ReactNode; points: T
     <section className="story" ref={section} id="build">
       <div className="story__bg" aria-hidden>
         {/* desktop: the house to the right of the text column; phone: above the cards */}
-        {near && <BuildHouse3D progress={progress} shift={wide ? { x: 0.2, y: 0 } : { x: 0, y: 0.24 }} />}
+        {near && <BuildHouse3D progress={progress} shift={wide ? { x: 0.16, y: 0 } : { x: 0, y: 0.24 }} />}
         <div className="story__badge">
           <b>{stage < 0 ? 'Ваш участок' : stage >= n ? 'Дом готов' : `Этап ${stage + 1} из ${n}`}</b>
           <span>{stage < 0 ? 'Листайте — построим дом' : stage >= n ? 'Можно заезжать' : STAGES[stage]}</span>
