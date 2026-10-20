@@ -213,14 +213,14 @@ a.hd__card:hover { background: rgba(28, 38, 32, .62); }
 .nf__art { position: relative; margin: 0; aspect-ratio: 16 / 11; overflow: hidden; border-radius: 24px; background: var(--green-deep); display: grid; align-items: end; }
 .nf__code { position: absolute; top: 6%; left: 0; right: 0; text-align: center; font-family: var(--font-serif); font-weight: 600; font-size: clamp(110px, 30vw, 230px); line-height: 1; color: transparent; -webkit-text-stroke: 1.5px var(--gold-soft); }
 /* the house draws itself from the ground up, like on «Построить» */
-.nf__art img { position: relative; width: 118%; max-width: none; margin-left: -9%; margin-bottom: -3%; animation: nf-draw 2.2s cubic-bezier(.3, .7, .2, 1) .2s both; }
+.nf__sketch { display: block; position: relative; width: 118%; margin-left: -9%; margin-bottom: -3%; aspect-ratio: 1673 / 897; background: url(/design/sketch-tip5-900.webp) center / contain no-repeat; animation: nf-draw 2.2s cubic-bezier(.3, .7, .2, 1) .2s both; }
 @keyframes nf-draw { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
-.nf__art figcaption { position: absolute; left: 18px; bottom: 14px; font-size: 13px; color: var(--gold-soft); }
+.nf__art figcaption { position: absolute; left: 14px; bottom: 12px; padding: 5px 12px; border-radius: 999px; background: rgba(28, 38, 32, .82); font-size: 13px; color: var(--gold-soft); }
 @media (min-width: 960px) {
   .nf { padding: 56px 0 96px; }
   .nf__in { grid-template-columns: 1fr 1.1fr; gap: 64px; }
 }
-@media (prefers-reduced-motion: reduce) { .nf__art img { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .nf__sketch { animation: none; } }
 
 /* ── Lead form: small live details (feedback, not decoration) ────────────────────────────────────────────────── */
 /* the line under the phone fills as the number is typed; a tick when all 10 digits are in */

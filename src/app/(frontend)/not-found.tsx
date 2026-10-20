@@ -55,7 +55,8 @@ export default async function NotFound() {
           </div>
           <figure className="nf__art" aria-hidden>
             <span className="nf__code">404</span>
-            <img src="/design/sketch-tip5-900.webp" alt="" />
+            {/* a CSS background, not <img>: Next keeps this tree in every page, and an <img> was downloaded everywhere (+111 KB) */}
+            <i className="nf__sketch" />
             <figcaption>Здесь дом только на чертеже</figcaption>
           </figure>
         </div>
