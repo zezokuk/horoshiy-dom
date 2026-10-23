@@ -45,7 +45,7 @@ export default async function CatalogPage() {
               <b>2 недели</b> — ипотека и регистрация
             </li>
             <li>
-              <b>Ключи</b> — после сделки
+              <b>5 лет</b> — гарантия на дом
             </li>
           </ul>
           {effectOn(design, 'key') && <HouseStack houses={free} />}

@@ -20,7 +20,7 @@ export default async function AboutPage() {
   const [company, regions, estates, projects] = await Promise.all([getCompany(), getRegions(), getEstates(), getProjects()])
   const active = regions.filter((r) => r.status === 'active').map(regionView)
   const built = estates.filter((e) => e.status !== 'planned')
-  // sold-out estates are the company's track record: built, sold, people live there
+  // sold-out estates are the company's track record: built and sold («в них живут» is not the client's words — 23.10)
   const sold = built.filter((e) => e.status === 'soldOut')
   const soldHomes = sold.reduce((s, e) => s + (e.homes || 0), 0)
   return (
@@ -43,7 +43,7 @@ export default async function AboutPage() {
           <div className="container">
             <div className="head" data-reveal>
               <span className="idx">Уже построили и продали</span>
-              <Words text={soldHomes ? `${soldHomes} ${plural(soldHomes, 'дом', 'дома', 'домов')} — *в них уже живут*` : 'Посёлки, где *уже живут*'} />
+              <Words text={soldHomes ? `${soldHomes} ${plural(soldHomes, 'дом', 'дома', 'домов')} — *уже проданы*` : 'Посёлки, где всё *продано*'} />
             </div>
             <ul className="sold-list">
               {sold.map((e) => {

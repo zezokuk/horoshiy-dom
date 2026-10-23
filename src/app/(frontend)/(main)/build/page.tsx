@@ -38,13 +38,15 @@ export default async function BuildPage() {
   ])
   const years = company.since ? new Date().getFullYear() - company.since : null
   const homes = company.homesBuilt || estates.reduce((s, e) => s + (e.homes || 0), 0)
+  // a planned estate («Скоро») has no houses yet — it is not one the company has built
+  const built = estates.filter((e) => e.status !== 'planned')
 
   // the house is built under these, one stage per card: foundation, walls, roof, windows, yard
   const points: TrustPoint[] = [
     {
       big: years ? `${years} ${plural(years, 'год', 'года', 'лет')}` : undefined,
       title: company.since ? `Строим с ${company.since} года` : 'Строим давно',
-      text: `Начинали с одного таунхауса. Сегодня — ${estates.length} ${plural(estates.length, 'посёлок', 'посёлка', 'посёлков')}: ${estates.map((e) => e.name).join(', ')}.`,
+      text: `Начинали с одного таунхауса. Сегодня — ${built.length} ${plural(built.length, 'посёлок', 'посёлка', 'посёлков')}: ${built.map((e) => e.name).join(', ')}.`,
     },
     {
       big: `${homes} ${plural(homes, 'дом', 'дома', 'домов')}`,
@@ -53,7 +55,7 @@ export default async function BuildPage() {
     },
     {
       title: 'Материалы с документами',
-      text: 'Кирпич, кровля и инженерия — только сертифицированные. Никаких «аналогов подешевле». Бригады — одни и те же годами.',
+      text: 'Кирпич, кровля и инженерия — только сертифицированные. Никаких «аналогов подешевле».',
     },
     {
       big: '6 месяцев',
@@ -63,7 +65,7 @@ export default async function BuildPage() {
     {
       big: '5 лет',
       title: 'Гарантия на дом',
-      text: 'Устраним любые капитальные дефекты дома за свой счёт.',
+      text: 'Гарантия 5 лет на капитальные дефекты дома.',
     },
   ]
 
@@ -152,15 +154,15 @@ export default async function BuildPage() {
               <span className="idx">Что получите</span>
               <Words text="Дом, в который можно *заезжать*" />
               <p className="lead">
-                Сдаём с предчистовой отделкой и подключёнными коммуникациями — останется выбрать
-                обои и мебель.
+                Сдаём с предчистовой отделкой — останется выбрать обои и мебель.
               </p>
             </div>
             <ul className="dots" data-reveal>
               {company.finishing.map((f) => (
                 <li key={f}>{f}</li>
               ))}
-              <li>Газ, вода, электричество 15 кВт и септик</li>
+              {/* the client's own words: «вода, 15 кВт, септик, возможность подключить газ» */}
+              <li>Вода (центральная или скважина), электричество 15 кВт и септик, газ можно подключить</li>
             </ul>
           </div>
         </section>
@@ -176,7 +178,7 @@ export default async function BuildPage() {
             },
             {
               title: 'Каркас',
-              text: 'Фундамент, кирпичные стены, кровля — материалы только с документами, бригады работают с нами годами.',
+              text: 'Фундамент, кирпичные стены, кровля — материалы только с документами.',
             },
             { title: 'Дом', text: 'Капитальный дом под ключ за 6 месяцев. Гарантия 5 лет.' },
           ]}

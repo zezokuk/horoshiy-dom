@@ -217,7 +217,7 @@ export default async function HousePage({ params }: Props) {
           {!!e.utilities?.length && (
             <div style={{ display: 'grid', gap: 16 }}>
               <p className="eyebrow">Коммуникации</p>
-              <h2 className="title title--md">Всё подключено</h2>
+              <h2 className="title title--md">Что есть в посёлке</h2>
               <div className="chips">
                 {e.utilities.map((x) => (
                   <span key={x} className="chip">

@@ -103,7 +103,7 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
       photo: buyPhoto,
       caption: undefined,
       title: 'Купить готовый',
-      text: `Дома с отделкой, участком и подключёнными коммуникациями. Можно заезжать после сделки.`,
+      text: `Дома с предчистовой отделкой, двором и парковкой на 2 машины. Ипотеку и регистрацию оформим за 2 недели.`,
       go: free.length
         ? `${free.length} ${plural(free.length, 'дом', 'дома', 'домов')}${priceFrom ? ` от ${formatMillions(priceFrom)}` : ''} →`
         : 'Смотреть дома →',
@@ -243,7 +243,7 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
             <div className="hero2__chips">
               <span>Готовые дома</span>
               <span>Стройка под ключ</span>
-              <span>Газ и вода подключены</span>
+              <span>Гарантия 5 лет</span>
             </div>
             {company.heroCaption && (
               <span className="hero2__caption">
@@ -332,10 +332,11 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
               <div style={{ display: 'grid', gap: 14 }} data-reveal>
                 <span className="idx">Почему «хороший»</span>
                 <Words text="Дом, в котором растут дети и собирается *семья*" />
-                {/* facts, not slogans (19.10): all from the client's materials — the FAQ, the estates and the values */}
+                {/* facts, not slogans (19.10): all from the client's materials — the FAQ, the estates and the values.
+                    Gas: the client writes «возможность подключить газ», never «подключён» (23.10) */}
                 <p className="lead">
-                  Свой участок с замощённым двором и парковкой на 2 машины, газ и вода уже
-                  подключены, до школы — 2–5 минут.
+                  Свой участок с замощённым двором и парковкой на 2 машины, вода и 15 кВт в доме,
+                  газ можно подключить. В Козете и Новой Адыгее до школы — 2–5 минут.
                 </p>
               </div>
               <div className="values">
@@ -461,7 +462,7 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
             <div style={{ display: 'grid', gap: 14 }} data-reveal>
               <span className="idx">Вопросы</span>
               <Words text="Частые *вопросы*" />
-              <p className="lead">Не нашли ответ — позвоните, менеджер ответит за пару минут.</p>
+              <p className="lead">Не нашли ответ — позвоните или оставьте заявку, менеджер всё расскажет.</p>
             </div>
             <div className="faq" data-reveal>
               {(company.faq || []).map((f) => (
