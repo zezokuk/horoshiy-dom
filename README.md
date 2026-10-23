@@ -1,67 +1,60 @@
-# Payload Blank Template
+# «Хороший дом» — сайт-платформа застройщика
 
-This template comes configured with the bare minimum to get started on anything you need.
+Сайт строительной компании «Хороший дом» (Краснодар и Адыгея) с админкой: дома, посёлки, проекты, промо-страницы, заявки в amoCRM и Telegram, 3D-генплан, SEO. Делает агентство Lark: Илья — продукт и код, Игорь — договор и клиент.
 
-## Quick start
+**Новичку — по порядку:**
+1. Этот файл: как запустить.
+2. [РЕШЕНИЯ.md](РЕШЕНИЯ.md): почему сделано так, а не иначе, и что ещё открыто.
+3. [КАК-ПРАВИТЬ.md](КАК-ПРАВИТЬ.md): где что лежит в коде и какие тесты прогонять.
+4. [DEPLOY.md](DEPLOY.md): как выложить на сервер (пока не выложено).
+5. Работаешь с нейросетью (Kimi, Claude, ChatGPT) — дай ей [KIMI.md](KIMI.md).
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+## Запуск на своём компьютере (15 минут)
 
-## Quick Start - local setup
+Нужно: [Node.js 20 или 22 LTS](https://nodejs.org) и Git.
 
-To spin up this template locally, follow these steps:
+```bash
+git clone <адрес репозитория> horoshiy-dom
+cd horoshiy-dom
+npm install
+cp .env.example .env        # Windows: copy .env.example .env
+```
 
-### Clone
+В `.env` замени `PAYLOAD_SECRET` на любую длинную строку. Ключи Метрики, VK, Telegram и amoCRM оставь пустыми: локально они не нужны.
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+```bash
+npm run seed    # заполнит базу: 6 посёлков, 12 проектов, 29 домов, фото (≈1,5 минуты)
+npm run dev
+```
 
-### Development
+Seed напечатает логин и пароль админа и сохранит их в `.env`.
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+| Что | Адрес |
+|---|---|
+| Главная | http://horoshiy.localhost:3000 |
+| Регион Краснодар | http://krd.horoshiy.localhost:3000 |
+| Админка | http://horoshiy.localhost:3000/admin |
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+Адреса `*.localhost` работают в Chrome, Edge и Firefox без настройки. Первая загрузка страницы в режиме разработки идёт 10–30 секунд, потом быстрее.
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+## Как вносить правки без сломанного телефона
 
-#### Docker (Optional)
+- **Тексты, фото, цены, статусы** правятся в админке. Пока сайт не выложен, у каждого своя база на компьютере: правка в твоей админке до Ильи не дойдёт. Поэтому до запуска такие правки — через Issue (ниже).
+- **Хочешь что-то поменять, но не в коде** → GitHub → Issues → New issue: что, где (адрес страницы и скриншот), почему. Илья делает и закрывает issue ссылкой на коммит.
+- **Правишь код сам (или через нейросеть)** → своя ветка `igor/<что-делаю>` → Pull Request. В `main` напрямую не пушим. В описании PR: что поменял и как проверил.
+- **Новое решение** (договорились с клиентом, выбрали вариант) → строка в [РЕШЕНИЯ.md](РЕШЕНИЯ.md) с датой. Старые строки не стираем, а помечаем «заменено».
+- **Факты о клиенте** (цифры, сроки, «газ подключён») пишем только из материалов клиента. Нет подтверждения — ставим `___` и задаём вопрос.
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+## Где что
 
-To do so, follow these steps:
+| Папка | Что внутри |
+|---|---|
+| `src/app/(frontend)` | страницы сайта |
+| `src/components` | блоки страниц |
+| `src/collections`, `src/globals` | разделы админки |
+| `src/seed` | начальные данные (`demo-data.ts`) и загрузка фото |
+| `seed-assets` | слайды клиента, постеры генплана, картинки — из них seed делает фото |
+| `tools` | автотесты (Python и headless-браузер), бэкап |
+| `показ/`, `ПОКАЗ.md` | снимки к показу дизайна 20.10 (устарели: «ключа» на сайте уже нет) |
 
-- Modify the `MONGODB_URL` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
-
-## How it works
-
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
-
-### Collections
-
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
-
-- #### Users (Authentication)
-
-  Users are auth-enabled collections that have access to the admin panel.
-
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/3.x/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
-
-- #### Media
-
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
-
-### Docker
-
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
-
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
-
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
-
-## Questions
-
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+Чего нет в репозитории (так и надо): `.env` с ключами, база `platform.db`, папка `media` — всё это делает `npm run seed`.
