@@ -10,7 +10,7 @@ import { PlanTour } from '@/components/PlanTour'
 import { getCompany, getHouse, getHouses, getRegion, img } from '@/lib/data'
 import { STATUS_LABEL, formatArea, formatPrice, plural, telHref } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
-import { JsonLd, breadcrumbsLd, houseLd } from '@/lib/seo'
+import { JsonLd, breadcrumbsLd, houseLd, pageOg } from '@/lib/seo'
 import { houseTitle, houseView, roomsView, tourView } from '@/lib/view'
 import type { Estate, Project, Region } from '@/payload-types'
 
@@ -30,11 +30,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const d = await load(params)
   if (!d) return {}
   const { house: h, estate: e, region } = d
-  return {
-    title: `Дом ${formatArea(h.area)} м² в посёлке «${e.name}» — ${formatPrice(h.price)}`,
-    description: [houseTitle(h), h.plot && `участок ${h.plot}`, e.place].filter(Boolean).join(', ') + `. ${STATUS_LABEL[h.status]}.`,
-    alternates: { canonical: regionHref(region.slug, `/houses/${h.code}`) },
-  }
+  const url = regionHref(region.slug, `/houses/${h.code}`)
+  // the type in the title: houses of the same area in one estate had the same title
+  const title = `${h.title}, ${formatArea(h.area)} м² в посёлке «${e.name}» — ${formatPrice(h.price)}`
+  const description = [houseTitle(h), h.plot && `участок ${h.plot}`, e.place].filter(Boolean).join(', ') + `. ${STATUS_LABEL[h.status]}.`
+  const image = img(h.photo, 'wide') ?? img((h.project as Project | undefined)?.photo, 'wide')
+  return { title, description, alternates: { canonical: url }, openGraph: pageOg({ title, description, url, image }) }
 }
 
 /**

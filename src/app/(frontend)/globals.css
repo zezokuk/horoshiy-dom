@@ -192,7 +192,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 @media (min-width: 1024px) { .features { grid-template-columns: repeat(3, 1fr); } }
 .feature { background: var(--paper); padding: 28px; display: grid; gap: 10px; align-content: start; }
 .feature__num { font-family: var(--font-serif); font-size: 18px; color: var(--gold-ink); }
-.feature h3 { font-family: var(--font-serif); font-size: 26px; line-height: 1.1; }
+.feature :is(h2, h3) { font-family: var(--font-serif); font-size: 26px; line-height: 1.1; }
 .feature p { color: var(--muted); font-size: 15px; }
 
 /* steps */
@@ -750,7 +750,8 @@ button.g3--loading { width: 100%; border: 0; font: inherit; cursor: pointer; }
 .story__flow { position: relative; z-index: 3; margin-top: calc(-1 * (100svh - var(--header-h))); display: grid; grid-template-columns: minmax(0, 1fr); gap: 22vh; padding-top: 8vh; padding-bottom: 26vh; pointer-events: none; }
 .story__card { pointer-events: auto; max-width: 440px; display: grid; gap: 8px; padding: 22px 26px; border-radius: 20px; background: rgba(251,248,242,.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--line); box-shadow: 0 24px 50px -30px rgba(20,28,22,.45); transition: transform .4s ease, box-shadow .4s ease, border-color .4s ease; }
 .story__card.is-on { transform: translateX(6px); box-shadow: 0 28px 60px -28px rgba(20,28,22,.55); border-color: var(--gold); }
-.story__card h3 { font-family: var(--font-serif); font-size: 28px; line-height: 1.05; }
+/* h2 since 23.10: right after the page h1 (h3 skipped a level) */
+.story__card :is(h2, h3) { font-family: var(--font-serif); font-size: 28px; line-height: 1.05; }
 .story__card p { color: var(--muted); }
 .story__big { font-family: var(--font-serif); font-weight: 400; font-size: 46px; line-height: .95; color: var(--gold-ink); }
 .story__card--intro { max-width: 520px; gap: 14px; }
@@ -779,7 +780,7 @@ button.g3--loading { width: 100%; border: 0; font: inherit; cursor: pointer; }
   .story__flow { gap: 30vh; padding-top: 50vh; }
   .story__card { max-width: none; padding: 18px 20px; }
   .story__card.is-on { transform: none; }
-  .story__card h3 { font-size: 24px; }
+  .story__card :is(h2, h3) { font-size: 24px; }
   .story__big { font-size: 38px; }
   .story__badge { left: 12px; right: auto; top: 12px; padding: 10px 14px; }
 }

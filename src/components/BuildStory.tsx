@@ -101,7 +101,7 @@ export function BuildStory({ intro, points, end }: { intro: ReactNode; points: T
               {String(i + 1).padStart(2, '0')} · {STAGES[i]}
             </span>
             {s.big && <b className="story__big">{s.big}</b>}
-            <h3>{s.title}</h3>
+            <h2>{s.title}</h2>
             <p>{s.text}</p>
           </article>
         ))}

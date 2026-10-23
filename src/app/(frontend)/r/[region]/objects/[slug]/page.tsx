@@ -11,7 +11,7 @@ import { getDesign, getEstate, getHouses, getProjects, getRegion, img } from '@/
 import { effectOn, withSeo } from '@/lib/look'
 import { formatMillions, plural } from '@/lib/format'
 import { regionHref } from '@/lib/site'
-import { JsonLd, breadcrumbsLd, estateLd } from '@/lib/seo'
+import { JsonLd, breadcrumbsLd, estateLd, pageOg } from '@/lib/seo'
 import { estateView, genplanEstate, houseView } from '@/lib/view'
 import type { Estate, Region } from '@/payload-types'
 
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!d) return {}
   const { estate: e, region } = d
   // «SEO» fields of the estate in the admin win over the text built here
-  return withSeo({
+  const meta = withSeo({
     title: `${e.kind || 'Посёлок'} «${e.name}», ${e.place}`,
     // a fresh estate may have no texts yet: a plain line instead of an empty description
     description:
@@ -42,6 +42,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         : `${e.kind || 'Посёлок'} «${e.name}»${e.place ? `, ${e.place}` : ''}: дома с участком, генплан и цены.`),
     alternates: { canonical: regionHref(region.slug, `/objects/${e.slug}`) },
   }, e.seo)
+  const image = img(e.poster, 'wide') ?? img(e.cover, 'wide')
+  return {
+    ...meta,
+    openGraph: pageOg({ title: String(meta.title), description: meta.description ?? undefined, url: regionHref(region.slug, `/objects/${e.slug}`), image }),
+  }
 }
 
 export default async function EstatePage({ params }: Props) {

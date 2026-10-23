@@ -17,6 +17,20 @@ export function JsonLd({ data }: { data: object }) {
 /** Uploaded files are served at /api/media/… on every host; search engines need the full address. */
 export const absUrl = (u?: string | null) => (!u ? undefined : /^https?:/.test(u) ? u : `${MAIN_URL}${u}`)
 
+/** Open Graph of a page with its own picture (a house, an estate): the link in a messenger shows that picture. */
+export function pageOg(o: { title: string; description?: string; url: string; image?: string | null }) {
+  const image = absUrl(o.image)
+  return {
+    siteName: 'Хороший дом',
+    locale: 'ru_RU',
+    type: 'website' as const,
+    title: o.title,
+    description: o.description,
+    url: absUrl(o.url),
+    ...(image ? { images: [{ url: image }] } : {}),
+  }
+}
+
 const AVAILABILITY = {
   free: 'https://schema.org/InStock',
   reserved: 'https://schema.org/Reserved',

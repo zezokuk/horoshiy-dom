@@ -8,6 +8,7 @@ export const revalidate = 60
 
 const META: Metadata = {
   title: 'Контакты и офисы продаж',
+  description: 'Телефон, адрес офиса продаж и часы работы «Хорошего дома». Запишитесь на показ домов.',
   alternates: { canonical: '/contacts' },
 }
 // title and description can be set in the admin: «SEO и поиск» → contacts

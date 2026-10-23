@@ -5,7 +5,7 @@ import { Metrika } from '@/components/Metrika'
 import { MorphLayer } from '@/components/MorphLayer'
 import { Reveal, ScrollProgress } from '@/components/Motion'
 import { PageMotion } from '@/components/PageMotion'
-import { getDesign, getSeo, img } from '@/lib/data'
+import { getCompany, getDesign, getSeo, img } from '@/lib/data'
 import { effectOn, paletteStyle } from '@/lib/look'
 import { absUrl } from '@/lib/seo'
 import { INDEXABLE, MAIN_URL } from '@/lib/site'
@@ -30,12 +30,13 @@ const BASE: Metadata = {
 
 // «SEO и поиск» in the admin: Webmaster / Search Console codes and the picture for shared links
 export async function generateMetadata(): Promise<Metadata> {
-  const seo = await getSeo()
-  const share = absUrl(img(seo.shareImage, 'wide'))
+  const [seo, company] = await Promise.all([getSeo(), getCompany()])
+  // no picture set in «SEO и поиск» — the company's first-screen photo, so shared links never go without one
+  const share = absUrl(img(seo.shareImage, 'wide') ?? img(company.heroPhoto, 'wide'))
   return {
     ...BASE,
     verification: { yandex: seo.yandexVerification || undefined, google: seo.googleVerification || undefined },
-    openGraph: { ...BASE.openGraph, ...(share ? { images: [{ url: share, width: 1200, height: 630 }] } : {}) },
+    openGraph: { ...BASE.openGraph, ...(share ? { images: [{ url: share }] } : {}) },
   }
 }
 

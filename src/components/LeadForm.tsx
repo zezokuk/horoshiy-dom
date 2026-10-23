@@ -137,7 +137,8 @@ export function LeadForm({
           ))}
         </div>
       )}
-      <input type="text" name="name" placeholder="Ваше имя" autoComplete="name" required />
+      {/* no visible labels in the design: aria-label gives screen readers what the placeholder shows */}
+      <input type="text" name="name" placeholder="Ваше имя" aria-label="Ваше имя" autoComplete="name" required />
       <span
         className={`form__phone ${digits === 10 ? 'is-full' : ''}`}
         style={{ ['--fill' as string]: digits / 10 }}
@@ -146,6 +147,7 @@ export function LeadForm({
           type="tel"
           name="phone"
           placeholder="+7 (___) ___-__-__"
+          aria-label="Телефон"
           autoComplete="tel"
           inputMode="tel"
           value={phone}

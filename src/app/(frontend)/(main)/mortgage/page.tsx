@@ -32,7 +32,7 @@ export default async function MortgagePage() {
             {company.mortgage.map((m, i) => (
               <div key={m.id ?? m.title} className="feature">
                 <span className="feature__num">0{i + 1}</span>
-                <h3>{m.title}</h3>
+                <h2>{m.title}</h2>
                 <p>{m.text}</p>
               </div>
             ))}

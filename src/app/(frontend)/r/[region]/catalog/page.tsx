@@ -12,7 +12,11 @@ type Props = { params: Promise<{ region: string }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const r = await getRegion((await params).region)
   if (!r) return {}
-  return { title: `Дома в продаже: ${r.name}`, alternates: { canonical: regionHref(r.slug, '/catalog') } }
+  return {
+    title: `Дома в продаже: ${r.name}`,
+    description: `Свободные кирпичные дома с участком «Хорошего дома» — ${r.name}: цены, площади, планировки, фильтры по посёлку и бюджету.`,
+    alternates: { canonical: regionHref(r.slug, '/catalog') },
+  }
 }
 
 export default async function RegionCatalog({ params }: Props) {

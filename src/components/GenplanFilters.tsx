@@ -205,7 +205,7 @@ export function Ribbon({
               {u.plot ? <i>{u.plot}</i> : null}
             </span>
           </button>
-          <Link href={u.href} className="gr__open">
+          <Link href={u.href} className="gr__open" aria-label={`Открыть страницу дома: ${houseTitle(u)}`}>
             Открыть →
           </Link>
         </li>

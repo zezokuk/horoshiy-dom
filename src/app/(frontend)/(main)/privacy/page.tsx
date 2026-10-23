@@ -2,7 +2,11 @@ import type { Metadata } from 'next'
 import { getCompany } from '@/lib/data'
 
 export const revalidate = 60
-export const metadata: Metadata = { title: 'Политика обработки персональных данных', alternates: { canonical: '/privacy' } }
+export const metadata: Metadata = {
+  title: 'Политика обработки персональных данных',
+  description: 'Какие данные собирает сайт «Хорошего дома», зачем, кому передаёт и как их удалить.',
+  alternates: { canonical: '/privacy' },
+}
 
 // TEMPLATE: before launch the client fills legal details in the admin («Компания» → «Реквизиты»), a lawyer checks the text,
 // and the client notifies Roskomnadzor as a personal data operator.

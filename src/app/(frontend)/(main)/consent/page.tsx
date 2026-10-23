@@ -2,7 +2,11 @@ import type { Metadata } from 'next'
 import { getCompany } from '@/lib/data'
 
 export const revalidate = 60
-export const metadata: Metadata = { title: 'Согласие на обработку персональных данных', alternates: { canonical: '/consent' } }
+export const metadata: Metadata = {
+  title: 'Согласие на обработку персональных данных',
+  description: 'Текст согласия на обработку имени и телефона, которое вы даёте, отправляя заявку на сайте «Хорошего дома».',
+  alternates: { canonical: '/consent' },
+}
 
 // Since 01.09.2025 consent must be a separate document (152-FZ as amended by 156-FZ), hence its own page.
 export default async function ConsentPage() {
