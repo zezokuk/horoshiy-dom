@@ -11,7 +11,8 @@ import { fileURLToPath } from 'url'
 import type { Payload } from 'payload'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
-export const KRD_SCENES = path.resolve(dirname, '../../../первый-экран-регион/сцены-краснодар.png')
+// a copy of 04-Хороший-дом/первый-экран-регион/сцены-краснодар.png, so a fresh clone of the repo seeds on its own
+export const KRD_SCENES = path.resolve(dirname, '../../seed-assets/region-krd.png')
 
 // x, y — percent of the picture (square 1254 px), on the sky of each slice; numbers only from the client's materials:
 // «двор и парковка на 2 машины», «до школы 2–5 минут» (FAQ), «от 15 до 40 минут до Краснодара» (the region's tagline)

@@ -11,7 +11,8 @@ import { fileURLToPath } from 'url'
 import type { Payload } from 'payload'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
-export const TIP5_RENDER = path.resolve(dirname, '../../../рендер-по-плану/рендер-тип5.png')
+// a copy of 04-Хороший-дом/рендер-по-плану/рендер-тип5.png, so a fresh clone of the repo seeds on its own
+export const TIP5_RENDER = path.resolve(dirname, '../../seed-assets/render-tip5.png')
 
 // areas as printed on the plan; the terrace — from the project's features («Терраса 19 м²»)
 export const TIP5_ROOMS = [

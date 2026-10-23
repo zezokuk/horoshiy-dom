@@ -1,5 +1,6 @@
 /**
- * Fill the database from the demo site's data (site/lib/data.ts) and the client's original slides.
+ * Fill the database from the demo site's data (copied from site/lib/data.ts to ./demo-data.ts) and the client's
+ * original slides (the ones used, copied to seed-assets/ — so a fresh clone of the repo seeds on its own).
  *
  *   npm run seed            — only if the database is empty
  *   npm run seed:reset      — wipe catalog collections and fill again
@@ -28,11 +29,11 @@ import {
   HOUSE_TYPES,
   MORTGAGE_PROGRAMS,
   UNITS,
-} from '../../../site/lib/data'
+} from './demo-data'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
-const SLIDES = path.resolve(dirname, '../../../исходники-презентации')
-const POSTERS = path.resolve(dirname, '../../../site/public/img/genplan') // 3D posters rendered by site/tools/posters.py
+const SLIDES = path.resolve(dirname, '../../seed-assets/slides') // from 04-Хороший-дом/исходники-презентации
+const POSTERS = path.resolve(dirname, '../../seed-assets/genplan') // 3D posters rendered by site/tools/posters.py
 const ENV = path.resolve(dirname, '../../.env')
 
 type Box = { left: number; top: number; width: number; height: number }
