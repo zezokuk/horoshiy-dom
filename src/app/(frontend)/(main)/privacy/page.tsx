@@ -10,6 +10,8 @@ export default async function PrivacyPage() {
   const c = await getCompany()
   const operator = c.legalName || `Строительная компания «${c.name}»`
   const details = [c.inn && `ИНН ${c.inn}`, c.ogrn && `ОГРН ${c.ogrn}`, c.legalAddress].filter(Boolean).join(', ') || '[ИНН, ОГРН, юридический адрес]'
+  // the same switch as in leadEndpoint: with a bot and without TELEGRAM_PERSONAL_DATA=0 the name and phone go to Telegram
+  const telegramContacts = Boolean(process.env.TELEGRAM_BOT_TOKEN) && process.env.TELEGRAM_PERSONAL_DATA !== '0'
   return (
     <div className="container intro">
       <div className="prose">
@@ -28,8 +30,9 @@ export default async function PrivacyPage() {
         <p>Чтобы связаться с вами по заявке, подобрать дом, рассчитать ипотеку и организовать показ; чтобы понимать, какая реклама и какие страницы полезны.</p>
         <h2>4. Кому передаём</h2>
         <p>
-          Заявка попадает в систему учёта клиентов Оператора (amoCRM) и сотруднику отдела продаж. Обезличенные данные посещения обрабатывают Яндекс Метрика и VK
-          Реклама. Третьим лицам для других целей данные не передаются.
+          Заявка попадает в систему учёта клиентов Оператора (amoCRM) и сотруднику отдела продаж.
+          {telegramContacts && ' Уведомление о заявке с именем и телефоном сотрудник получает в мессенджере Telegram.'} Обезличенные данные посещения
+          обрабатывают Яндекс Метрика и VK Реклама. Третьим лицам для других целей данные не передаются.
         </p>
         <h2>5. Cookie</h2>
         <p>

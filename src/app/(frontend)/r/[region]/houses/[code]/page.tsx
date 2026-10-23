@@ -91,6 +91,8 @@ export default async function HousePage({ params }: Props) {
           <HouseReady />
           {photo && <Pic src={photo} phone={photoPhone} alt={`${h.title} в посёлке ${e.name}`} priority />}
           <span className={`badge badge--${h.status}`}>{STATUS_LABEL[h.status]}</span>
+          {/* «Тип 12»: the client's render, not a built house (as on its catalog card) */}
+          {photo && h.title.startsWith('Тип 12') && <span className="photo-note photo-note--big">Визуализация проекта</span>}
           <div className="hs__facts">
             <div>
               <span>Площадь дома</span>

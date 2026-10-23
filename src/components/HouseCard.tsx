@@ -29,6 +29,8 @@ export function HouseCard({ h, showEstate = true }: { h: HouseView; showEstate?:
           />
         )}
         <span className={`badge badge--${h.status}`}>{STATUS_LABEL[h.status]}</span>
+        {/* «Тип 12» has no photo of a built house: the client's render (with a pool) must not pass for one */}
+        {h.photoCard && h.title.startsWith('Тип 12') && <span className="photo-note">Визуализация проекта</span>}
       </div>
       <div className="house-card__body">
         <div className="house-card__price">{formatPrice(h.price)}</div>
