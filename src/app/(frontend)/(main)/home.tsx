@@ -11,6 +11,7 @@ import { CountUp } from '@/components/Motion'
 import { Pic } from '@/components/Pic'
 import { PlacesMap } from '@/components/PlacesMap'
 import { PromoCards } from '@/components/PromoCards'
+import { RealHomes } from '@/components/RealHomes'
 import { Words } from '@/components/Words'
 import {
   getCompany,
@@ -39,9 +40,9 @@ export type HeroKind = 'current' | 'hero-1' | 'hero-2' | 'hero-3' | 'hero-4' | '
 export const HERO_VARIANTS: Exclude<HeroKind, 'current'>[] = ['hero-1', 'hero-2', 'hero-3', 'hero-4', 'hero-5']
 
 /**
- * The brand home: the company first (who we are, values, trust), then two ways in — build a house or buy a ready
- * one — and under both the places band that ties them together: where the houses stand and where we build
- * (for those not ready yet: they leave a contact «на будущее» and get promos and new estates later).
+ * The brand home: the emotional first screen, real houses with prices, then two ways in — build or buy.
+ * The places band ties both ways together: where the houses stand and where we build (for those not ready yet:
+ * they leave a contact «на будущее» and get promos and new estates later).
  * Rendered by the home page and by the first-screen previews (/preview/hero-N), so both always show the same data.
  */
 export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind }) {
@@ -55,6 +56,15 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
     getDesign(),
   ])
   const free = houses.filter((h) => h.status === 'free').map(houseView)
+  const realHomePhotos = new Set<string>()
+  const realHomes = [...free]
+    .sort((a, b) => a.price - b.price)
+    .filter((h) => {
+      if (!h.photo || h.title.startsWith('Тип 12') || realHomePhotos.has(h.photo)) return false
+      realHomePhotos.add(h.photo)
+      return true
+    })
+    .slice(0, 3)
   const priceFrom = free.length ? Math.min(...free.map((h) => h.price)) : null
   const years = company.since ? new Date().getFullYear() - company.since : null
   const estateViews = estates.map((e) => estateView(e, houses))
@@ -153,7 +163,7 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
       <JsonLd data={organizationLd(company, regions)} />
       {faq && <JsonLd data={faq} />}
       {variant === 'hero-5' ? (
-        <HeroTonal f={facts} />
+        <HeroTonal f={facts} hasRealHomes={realHomes.length > 0} />
       ) : variant === 'hero-4' ? (
         <HeroDraft f={facts} />
       ) : variant === 'hero-1' ? (
@@ -253,6 +263,8 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
           </div>
         </section>
       )}
+
+      {realHomes.length > 0 && <RealHomes houses={realHomes} />}
 
       <Thread off={!effectOn(design, 'thread')}>
         <section className="section" id="choose">

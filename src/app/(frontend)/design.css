@@ -569,3 +569,80 @@ html.no-motion::view-transition-group(*), html.no-motion::view-transition-old(*)
   .ef__svg { width: 128%; max-width: none; margin: -2% 0 0 -14%; }
 }
 @media (prefers-reduced-motion: reduce) { .ef__w { transition: none; } }
+
+/* ── Real homes on the home page: one large photograph, one clear decision ───────────────────────────────────── */
+.hd__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 22px; }
+.hd__actions .btn--ghost { color: var(--green-deep); }
+.real-homes { overflow: hidden; }
+.real-homes__head { display: flex; align-items: end; justify-content: space-between; gap: 32px; margin-bottom: 38px; }
+.real-homes__head > div { display: grid; gap: 14px; }
+.real-homes__head .title { max-width: 850px; }
+.real-homes__all { flex: none; padding-bottom: 5px; border-bottom: 1px solid rgba(234, 223, 201, .5); color: var(--cream); font-weight: 600; }
+.real-homes__all span { display: inline-block; margin-left: 8px; color: var(--gold-soft); transition: transform .25s ease; }
+.real-homes__all:hover span { transform: translate(2px, -2px); }
+.real-homes__stage { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(310px, .75fr); overflow: hidden; border-radius: 28px; background: var(--paper); color: var(--ink); box-shadow: 0 34px 70px -42px rgba(0, 0, 0, .55); }
+.real-homes__media { position: relative; min-height: 570px; overflow: hidden; background: var(--green-deep); }
+.real-homes__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; animation: real-home-in .7s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes real-home-in { from { opacity: .3; clip-path: inset(0 0 0 14%); transform: scale(1.035); } to { opacity: 1; clip-path: inset(0); transform: none; } }
+.real-homes__counter { position: absolute; left: 22px; top: 22px; padding: 8px 12px; border: 1px solid rgba(234, 223, 201, .45); border-radius: 999px; background: rgba(28, 38, 32, .88); color: var(--gold-soft); font: 600 12px/1 var(--font-sans); letter-spacing: .12em; }
+.real-homes__panel { display: grid; align-content: center; gap: 20px; min-width: 0; padding: 38px 32px; }
+.real-homes__place { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; font-weight: 600; }
+.real-homes__status { width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--free); }
+.real-homes__panel h3 { color: var(--green-deep); font-family: var(--font-serif); font-size: clamp(40px, 3.6vw, 56px); font-weight: 600; line-height: .95; }
+.real-homes__price { color: var(--green-deep); font-family: var(--font-serif); font-size: clamp(30px, 2.6vw, 40px); font-weight: 600; line-height: 1; }
+.real-homes__facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 14px; margin: 0; padding: 20px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.real-homes__facts dt { color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.real-homes__facts dd { margin: 5px 0 0; color: var(--green-deep); font-family: var(--font-serif); font-size: 23px; font-weight: 600; line-height: 1.05; }
+.real-homes__panel .btn { width: 100%; padding-inline: 18px; }
+.real-homes__note { color: var(--muted); font-size: 12.5px; line-height: 1.45; text-align: center; }
+.real-homes__selector { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 18px; border-top: 1px solid rgba(234, 223, 201, .22); }
+.real-homes__selector button { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; min-width: 0; padding: 22px 18px; border: 0; border-top: 2px solid transparent; background: transparent; color: var(--cream); text-align: left; cursor: pointer; transition: background-color .25s ease, border-color .25s ease; }
+.real-homes__selector button:hover { background: rgba(251, 248, 242, .05); }
+.real-homes__selector button.is-on { border-color: var(--gold-soft); background: rgba(251, 248, 242, .07); }
+.real-homes__selector button:focus-visible { outline: 2px solid var(--gold-soft); outline-offset: -3px; }
+.real-homes__number { color: var(--gold-soft); font-family: var(--font-serif); font-size: 20px; }
+.real-homes__choice { display: grid; gap: 3px; min-width: 0; }
+.real-homes__choice b { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.real-homes__choice > span { overflow: hidden; color: #bdc6bb; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.real-homes__from { color: var(--gold-soft); font-family: var(--font-serif); font-size: 22px; font-weight: 600; white-space: nowrap; }
+@media (max-width: 1100px) and (min-width: 960px) {
+  .real-homes__stage { grid-template-columns: minmax(0, 1.35fr) minmax(290px, .8fr); }
+  .real-homes__panel { padding: 30px 26px; }
+  .real-homes__selector button { grid-template-columns: auto minmax(0, 1fr); }
+  .real-homes__from { grid-column: 2; }
+}
+@media (max-width: 959px) {
+  .real-homes__stage { grid-template-columns: 1fr; }
+  .real-homes__media { min-height: 0; aspect-ratio: 16 / 10; }
+  .real-homes__panel { padding: 30px; }
+  .real-homes__facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .real-homes__selector button { grid-template-columns: auto minmax(0, 1fr); }
+  .real-homes__from { grid-column: 2; font-size: 20px; }
+}
+@media (max-width: 640px) {
+  .hd__actions { gap: 10px; margin-top: 18px; }
+  .hd__actions .btn { height: 48px; padding-inline: 18px; font-size: 14px; }
+  .real-homes__head { display: grid; gap: 18px; margin-bottom: 26px; }
+  .real-homes__all { justify-self: start; }
+  .real-homes__stage { border-radius: 22px; }
+  .real-homes__media { aspect-ratio: 4 / 3; }
+  .real-homes__counter { left: 14px; top: 14px; }
+  .real-homes__panel { gap: 17px; padding: 25px 20px; }
+  .real-homes__panel h3 { font-size: 42px; }
+  .real-homes__price { font-size: 34px; }
+  .real-homes__facts { gap: 12px; padding: 17px 0; }
+  .real-homes__facts dt { font-size: 10px; letter-spacing: .04em; }
+  .real-homes__facts dd { font-size: 19px; }
+  .real-homes__selector { margin-top: 12px; }
+  .real-homes__selector button { display: grid; grid-template-columns: 1fr; gap: 4px; padding: 15px 8px; }
+  .real-homes__number { font-size: 15px; }
+  .real-homes__choice b { font-size: 13px; white-space: normal; }
+  .real-homes__choice > span { display: none; }
+  .real-homes__from { grid-column: auto; font-size: 17px; }
+}
+html.no-motion .real-homes__media img { animation: none; }
+html.no-motion .real-homes__selector button, html.no-motion .real-homes__all span { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .real-homes__media img { animation: none; }
+  .real-homes__selector button, .real-homes__all span { transition: none; }
+}

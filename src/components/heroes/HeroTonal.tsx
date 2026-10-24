@@ -1,4 +1,5 @@
 import { Pic } from '@/components/Pic'
+import { mainHref } from '@/lib/site'
 import type { HeroFacts } from './facts'
 import { FactCards, HeroLead } from './FactCards'
 import { H, HeroPoints, W, type HeroPoint } from './HeroDepth'
@@ -11,11 +12,11 @@ const POINTS: HeroPoint[] = [
 /**
  * Variant 5 «Vintara» (reference 1, as Ilya asked 20.10): one tone for everything. The brand name huge, the real
  * «Тип 5» big in front of it — the roof covers the letters — and the house tinted into the brand colour, so it reads as
- * an object on a calm board, not as a snapshot with a fence and a sky. Soft light from below, a thin arc, two glass
- * cards, a round button. The mouse moves the layers a little against each other (PageMotion → --px/--py).
+ * an object on a calm board, not as a snapshot with a fence and a sky. Soft light from below, a thin arc and two glass
+ * cards. The mouse moves the layers a little against each other (PageMotion → --px/--py).
  * The tint is a colour layer cut to the house's own shape (mask = the cut-out photo), so it follows «Внешний вид».
  */
-export function HeroTonal({ f }: { f: HeroFacts }) {
+export function HeroTonal({ f, hasRealHomes = false }: { f: HeroFacts; hasRealHomes?: boolean }) {
   return (
     <section className="hd hx hv">
       <div className="hd__wrap">
@@ -36,6 +37,14 @@ export function HeroTonal({ f }: { f: HeroFacts }) {
         <FactCards f={f} />
       </div>
       <HeroLead f={f} />
+      <div className="hd__actions">
+        <a className="btn btn--gold" href={hasRealHomes ? '#real-homes' : mainHref('/catalog')}>
+          {f.free > 0 ? 'Смотреть свободные дома' : 'Перейти в каталог'} <span aria-hidden>↓</span>
+        </a>
+        <a className="btn btn--ghost" href={mainHref('/build')}>
+          Построить дом
+        </a>
+      </div>
     </section>
   )
 }
