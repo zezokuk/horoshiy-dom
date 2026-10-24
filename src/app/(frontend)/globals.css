@@ -793,25 +793,50 @@ button.g3--loading { width: 100%; border: 0; font: inherit; cursor: pointer; }
 .built__item:hover img { transform: scale(1.04); }
 .built__item span { position: absolute; left: 12px; bottom: 12px; right: 12px; justify-self: start; width: fit-content; max-width: calc(100% - 24px); padding: 7px 12px; border-radius: 999px; background: rgba(28,38,32,.86); color: #fff; font-size: 14px; }
 
-/* house page — like the client's slide */
-.hs { display: grid; gap: 22px; }
-.hs__photo { aspect-ratio: 16 / 8; background: var(--gold-soft); }
-.hs__photo img { width: 100%; height: 100%; object-fit: cover; }
+/* house page — the photograph and the purchase decision together, the plan as its own scene below */
+.hs { display: grid; }
+.hs__hero { display: grid; overflow: hidden; border: 1px solid var(--line); border-radius: 28px; background: var(--paper); }
+.hs__photo { aspect-ratio: 16 / 10; border-radius: 0; background: var(--gold-soft); }
+.hs__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hs__side { position: relative; top: auto; align-content: center; gap: 14px; padding: 32px; border: 0; border-radius: 0; }
+.hs__side .btn { min-height: 48px; }
+.hs__side .chip { padding: 6px 10px; font-size: 13px; }
 .hs__facts { position: absolute; right: 16px; top: 16px; display: grid; grid-template-columns: auto auto; background: rgba(38,53,44,.92); color: #fff; border-radius: 14px; overflow: hidden; }
 .hs__facts div { display: grid; gap: 2px; padding: 12px 20px; text-align: center; }
 .hs__facts div + div { border-left: 1px solid rgba(234,223,201,.3); }
 .hs__facts span { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-soft); }
 .hs__facts b { font-family: var(--font-serif); font-size: 32px; line-height: 1; }
 .hs__facts small { font-size: 15px; }
+.hs__photo--none { aspect-ratio: auto !important; min-height: 132px; background: var(--grad-forest); }
+.hs__details { display: grid; gap: 30px; }
+.hs__details-head { display: grid; gap: 16px; }
+.hs__details-head > div { display: grid; gap: 14px; }
+.hs__details-head .note { max-width: 440px; font-size: 14px; }
+.hs__plan { width: min(100%, 1000px); margin: 0 auto; }
+.hs__plan .plan img { width: 100%; height: auto; }
+@media (min-width: 760px) {
+  .hs__details-head { grid-template-columns: 1fr 1fr; align-items: end; }
+  .hs__details-head .note { justify-self: end; }
+}
+@media (min-width: 1100px) {
+  .hs__hero { grid-template-columns: minmax(0, 1.55fr) minmax(350px, .75fr); }
+  .hs__hero--empty { grid-template-columns: 1fr; }
+  .hs__photo { min-height: 580px; aspect-ratio: auto; }
+  .hs__photo--none { min-height: 132px; }
+}
+@media (min-width: 1100px) and (max-width: 1279px) {
+  .hs__side { padding: 26px; }
+  .hs__hero { grid-template-columns: minmax(0, 1.35fr) minmax(340px, .75fr); }
+}
 @media (max-width: 640px) {
+  .hs__hero { border-radius: 22px; }
   .hs__photo { aspect-ratio: 4 / 3; }
+  .hs__side { padding: 26px 20px; }
   .hs__facts { right: 10px; top: auto; bottom: 10px; }
   .hs__facts div { padding: 8px 12px; }
   .hs__facts b { font-size: 24px; }
+  .hs__details-section { padding: 56px 0; }
 }
-.hs__photo--none { aspect-ratio: auto !important; min-height: 132px; background: var(--grad-forest); }
-.hs__grid { display: grid; gap: 24px; }
-@media (min-width: 1024px) { .hs__grid { grid-template-columns: 1.3fr .7fr; align-items: start; } .hs__grid--solo { grid-template-columns: minmax(0, 560px); } }
 .hs__price span { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 .hs__mortgage { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-radius: 16px; background: var(--grad-forest); color: #fff; }
 .hs__mortgage span { display: grid; gap: 2px; font-size: 14px; }
