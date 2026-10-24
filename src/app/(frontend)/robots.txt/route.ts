@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   const slug = regionFromHost(host)
   if (slug && !(await getRegion(slug))) return new Response('Not found', { status: 404 })
   const lines = INDEXABLE
-    ? ['User-agent: *', 'Disallow: /admin', 'Disallow: /api/', 'Allow: /api/media/', '']
+    ? ['User-agent: *', 'Disallow: /admin', 'Disallow: /preview', 'Disallow: /api/', 'Allow: /api/media/', '']
     : ['# Сайт закрыт от поиска до запуска. Открыть: NEXT_PUBLIC_INDEX=1', 'User-agent: *', 'Disallow: /', '']
   lines.push(`Sitemap: ${PROTOCOL}://${host}/sitemap.xml`)
   return new Response(lines.join('\n') + '\n', { headers: { 'Content-Type': 'text/plain; charset=utf-8' } })

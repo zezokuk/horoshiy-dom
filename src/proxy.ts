@@ -13,8 +13,16 @@ import { GLOBAL_PATHS, MAIN_URL, PROTOCOL, REGION_MODE, ROOT_DOMAIN, regionFromH
 // and in dev nextUrl is localhost:3000 for every subdomain — krd.localhost would then redirect to itself forever.
 const redirect = (location: string) => new NextResponse(null, { status: 308, headers: { Location: location } })
 
+const withPreviewNoindex = (req: NextRequest, res: NextResponse) => {
+  const { pathname } = req.nextUrl
+  if (pathname === '/preview' || pathname.startsWith('/preview/')) {
+    res.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  }
+  return res
+}
+
 export function proxy(req: NextRequest) {
-  if (REGION_MODE !== 'subdomain') return NextResponse.next()
+  if (REGION_MODE !== 'subdomain') return withPreviewNoindex(req, NextResponse.next())
   const { pathname, search } = req.nextUrl
   const host = req.headers.get('host')
   const region = regionFromHost(host)
@@ -23,7 +31,7 @@ export function proxy(req: NextRequest) {
     const m = pathname.match(/^\/r\/([a-z][a-z0-9-]*)(\/.*)?$/)
     // the site's protocol, not the request's: behind nginx every request reaches Next over plain http (found 20.10)
     if (m) return redirect(`${PROTOCOL}://${m[1]}.${ROOT_DOMAIN}${m[2] || '/'}${search}`)
-    return NextResponse.next()
+    return withPreviewNoindex(req, NextResponse.next())
   }
 
   if (pathname.startsWith('/admin') || GLOBAL_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))) {
@@ -31,7 +39,7 @@ export function proxy(req: NextRequest) {
   }
   const url = req.nextUrl.clone()
   url.pathname = `/r/${region}${pathname}`
-  return NextResponse.rewrite(url)
+  return withPreviewNoindex(req, NextResponse.rewrite(url))
 }
 
 export const config = {
