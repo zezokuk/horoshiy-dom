@@ -39,9 +39,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
- * The house page, laid out like the client's house slide: the photo with «площадь дома / участок»,
- * then the plan — with circles that open room videos when the project has them — next to the price,
- * then the family-mortgage calculation in cards.
+ * The house page: the photograph and the purchase panel share the first screen. The plan gets its own section
+ * below, with circles that open room videos when the project has them, then the family-mortgage calculation.
  */
 export default async function HousePage({ params }: Props) {
   const d = await load(params)
@@ -88,44 +87,30 @@ export default async function HousePage({ params }: Props) {
       </div>
 
       <div className="container hs">
-        <div className={`house__photo hs__photo ${photo ? '' : 'hs__photo--none'}`}>
-          <HouseReady />
-          {photo && <Pic src={photo} phone={photoPhone} alt={`${h.title} в посёлке ${e.name}`} priority />}
-          <span className={`badge badge--${h.status}`}>{STATUS_LABEL[h.status]}</span>
-          {/* «Тип 12»: the client's render, not a built house (as on its catalog card) */}
-          {photo && h.title.startsWith('Тип 12') && <span className="photo-note photo-note--big">Визуализация проекта</span>}
-          <div className="hs__facts">
-            <div>
-              <span>Площадь дома</span>
-              <b>
-                {h.area.toLocaleString('ru-RU')} м²{h.mansard ? <small> + {h.mansard} мансарда</small> : null}
-              </b>
-            </div>
-            {plot && (
+        <div className={`hs__hero ${photo ? '' : 'hs__hero--empty'}`}>
+          <div className={`house__photo hs__photo ${photo ? '' : 'hs__photo--none'}`}>
+            <HouseReady />
+            {photo && <Pic src={photo} phone={photoPhone} alt={`${h.title} в посёлке ${e.name}`} priority />}
+            <span className={`badge badge--${h.status}`}>{STATUS_LABEL[h.status]}</span>
+            {/* «Тип 12»: the client's render, not a built house (as on its catalog card) */}
+            {photo && h.title.startsWith('Тип 12') && <span className="photo-note photo-note--big">Визуализация проекта</span>}
+            <div className="hs__facts">
               <div>
-                <span>Участок</span>
+                <span>Площадь дома</span>
                 <b>
-                  {plot} <small>сот.</small>
+                  {h.area.toLocaleString('ru-RU')} м²{h.mansard ? <small> + {h.mansard} мансарда</small> : null}
                 </b>
               </div>
-            )}
-          </div>
-        </div>
-
-        <div className={`hs__grid ${planSrc || render ? '' : 'hs__grid--solo'}`}>
-          {(planSrc || render) && (
-            <div className="hs__plan">
-              {tour.length && planSrc ? (
-                <PlanTour plan={planSrc} alt={`Планировка: ${h.title}`} points={tour} />
-              ) : render ? (
-                <PlanRender render={render} plan={planSrc} rooms={roomsView(project)} alt={`Планировка: ${h.title}`} />
-              ) : (
-                <div className="plan">
-                  <img src={planSrc} alt={`Планировка: ${h.title}`} loading="lazy" />
+              {plot && (
+                <div>
+                  <span>Участок</span>
+                  <b>
+                    {plot} <small>сот.</small>
+                  </b>
                 </div>
               )}
             </div>
-          )}
+          </div>
 
           <aside className="house__side hs__side">
             <p className="eyebrow">{[e.name, e.place].filter(Boolean).join(' · ')}</p>
@@ -161,7 +146,7 @@ export default async function HousePage({ params }: Props) {
             )}
             {h.status === 'free' ? (
               <a href="#lead" className="btn btn--gold">
-                Записаться на показ
+                Записаться на показ <span aria-hidden>↗</span>
               </a>
             ) : (
               <>
@@ -174,9 +159,9 @@ export default async function HousePage({ params }: Props) {
             <a href="#mortgage" className="hs__mortgage">
               <span>
                 Расчёт по семейной ипотеке
-                <b>{company.family?.rate ?? 6} % · {company.family?.years ?? 30} лет</b>
+                <b>Первый взнос и платёж</b>
               </span>
-              <i aria-hidden>→</i>
+              <i aria-hidden>↓</i>
             </a>
             {phone && (
               <a href={telHref(phone)} className="btn btn--ghost" style={{ color: 'var(--green-deep)' }}>
@@ -186,6 +171,37 @@ export default async function HousePage({ params }: Props) {
           </aside>
         </div>
       </div>
+
+      {(planSrc || render) && (
+        <section className="section hs__details-section" aria-labelledby="house-plan-title">
+          <div className="container hs__details">
+            <div className="hs__details-head">
+              <div>
+                <p className="eyebrow">Пространство</p>
+                <h2 className="title title--md" id="house-plan-title">Планировка дома</h2>
+              </div>
+              <p className="note">
+                {tour.length
+                  ? 'Номера на плане открывают материалы по комнатам.'
+                  : render
+                    ? 'Переключайтесь между видом с мебелью и исходным чертежом.'
+                    : 'Планировка и размеры — по проекту дома.'}
+              </p>
+            </div>
+            <div className="hs__plan">
+              {tour.length && planSrc ? (
+                <PlanTour plan={planSrc} alt={`Планировка: ${h.title}`} points={tour} />
+              ) : render ? (
+                <PlanRender render={render} plan={planSrc} rooms={roomsView(project)} alt={`Планировка: ${h.title}`} />
+              ) : (
+                <div className="plan">
+                  <img src={planSrc} alt={`Планировка: ${h.title}`} loading="lazy" />
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="section section--paper" id="mortgage">
         <div className="container" style={{ display: 'grid', gap: 28 }}>

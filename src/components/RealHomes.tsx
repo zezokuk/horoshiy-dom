@@ -67,7 +67,7 @@ export function RealHomes({ houses }: { houses: HouseView[] }) {
                 </div>
               )}
             </dl>
-            <a className="btn btn--green" href={house.href}>
+            <a className="btn btn--green" href={house.href} data-house-photo>
               Смотреть дом и планировку <span aria-hidden>↗</span>
             </a>
             <p className="real-homes__note">Комплектация и расчёт ипотеки — на странице дома.</p>

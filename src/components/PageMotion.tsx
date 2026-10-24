@@ -3,9 +3,9 @@ import { useEffect } from 'react'
 
 /**
  * Motion between and on pages (reference «Bikeville», 20.10), one listener each, for the whole site:
- * - page to page: the browser's cross-document view transition (CSS @view-transition in design.css). The card the user
- *   clicked gets the name «house-photo» just before leaving, and the house or project page names its main photo the same,
- *   so the photo flies from the card into its place. Named on click only: two cards with one name would cancel it.
+ * - page to page: the browser's cross-document view transition (CSS @view-transition in design.css). The clicked catalog
+ *   card or real-homes stage gets the name «house-photo» just before leaving, and the house or project page names its main
+ *   photo the same, so the photo flies into its place. Named on click only: two images with one name would cancel it.
  * - on a computer with a mouse: cards lean a little towards the pointer; «Заказать звонок» (.magnet, the only moving
  *   button) is pulled to it from a little way off and follows it as it tries to leave.
  * Phones and reduced motion: only the plain page fade (or nothing).
@@ -14,9 +14,12 @@ export function PageMotion() {
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return
-      const card = (e.target as HTMLElement).closest<HTMLAnchorElement>('a.house-card')
-      const img = card?.querySelector<HTMLImageElement>('img')
-      if (!card || !img) return
+      const target = e.target as HTMLElement
+      const card = target.closest<HTMLAnchorElement>('a.house-card')
+      const showcase = target.closest<HTMLAnchorElement>('a[data-house-photo]')
+      const origin = card ?? showcase?.closest<HTMLElement>('.real-homes__stage')
+      const img = origin?.querySelector<HTMLImageElement>('img')
+      if (!img) return
       document.querySelectorAll<HTMLElement>('[data-vt-named]').forEach((el) => {
         el.style.viewTransitionName = ''
         delete el.dataset.vtNamed
