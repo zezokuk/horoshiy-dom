@@ -10,7 +10,7 @@ import { MortgageCalc } from '@/components/MortgageCalc'
 import { CountUp } from '@/components/Motion'
 import { Pic } from '@/components/Pic'
 import { HomeWays, type HomeWay } from '@/components/HomeWays'
-import { PlacesMap } from '@/components/PlacesMap'
+import { PlacesExplorer } from '@/components/PlacesExplorer'
 import { PromoCards } from '@/components/PromoCards'
 import { RealHomes } from '@/components/RealHomes'
 import { Words } from '@/components/Words'
@@ -24,12 +24,11 @@ import {
   getRegions,
   img,
 } from '@/lib/data'
-import { formatMillions, plural, softHyphens } from '@/lib/format'
-import { mainHref, regionHref } from '@/lib/site'
+import { formatMillions, plural } from '@/lib/format'
+import { mainHref } from '@/lib/site'
 import { JsonLd, faqLd, organizationLd } from '@/lib/seo'
 import {
   byEstateStatus,
-  estateSale,
   estateView,
   genplanEstate,
   houseView,
@@ -41,9 +40,7 @@ export type HeroKind = 'current' | 'hero-1' | 'hero-2' | 'hero-3' | 'hero-4' | '
 export const HERO_VARIANTS: Exclude<HeroKind, 'current'>[] = ['hero-1', 'hero-2', 'hero-3', 'hero-4', 'hero-5']
 
 /**
- * The brand home: the emotional first screen, real houses with prices, then two ways in — build or buy.
- * The places band ties both ways together: where the houses stand and where we build (for those not ready yet:
- * they leave a contact «на будущее» and get promos and new estates later).
+ * The brand home: the emotional first screen, two visual ways, real houses with prices, then interactive places.
  * Rendered by the home page and by the first-screen previews (/preview/hero-N), so both always show the same data.
  */
 export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind }) {
@@ -132,6 +129,15 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
       meta: `${projects.length} ${plural(projects.length, 'проект', 'проекта', 'проектов')}`,
     },
   ]
+
+  const placeViews = byEstateStatus(estateViews).map((e) => {
+    const real = free.find((h) => h.estateSlug === e.slug && h.photo && !h.title.startsWith('Тип 12'))
+    return {
+      ...e,
+      photo: real?.photo ?? e.cover,
+      photoCard: real?.photoCard ?? e.coverCard,
+    }
+  })
 
   // one set of numbers for every first-screen variant: all from the admin, nothing typed into the design
   const facts: HeroFacts = {
@@ -282,46 +288,7 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
       <Thread off={!effectOn(design, 'thread')}>
         {realHomes.length > 0 && <RealHomes houses={realHomes} />}
 
-        <section className="section" aria-label="Локации">
-          <div className="container">
-            {/* the places tie both ways together: where the ready houses stand and where we build */}
-            <div className="places" data-reveal>
-              <PlacesMap estates={estateViews} />
-              <div className="places__text">
-                <span className="way__num">Где это всё</span>
-                <h3>Посмотреть локации</h3>
-                <p>
-                  Готовые дома стоят в наших посёлках, а построить можем и на вашем участке. Пока
-                  присматриваетесь — посмотрите места, сообщим об акциях и новых посёлках первыми.
-                </p>
-              </div>
-              <ul className="places__list">
-                {byEstateStatus(estateViews).map((e) => (
-                  <li
-                    key={e.slug}
-                    className={e.status === 'planned' ? 'is-soon' : e.free ? '' : 'is-sold'}
-                  >
-                    <a href={e.href}>
-                      <b>{softHyphens(e.name)}</b>
-                      <span>{estateSale(e).toLowerCase()}</span>
-                    </a>
-                  </li>
-                ))}
-                {soon.map((r) => (
-                  <li key={r.slug} className="is-soon">
-                    <a href={regionHref(r.slug)}>
-                      <b>{softHyphens(r.name)}</b>
-                      <span>скоро</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-              <a href={mainHref('/locations')} className="btn btn--gold places__go">
-                Все локации на карте →
-              </a>
-            </div>
-          </div>
-        </section>
+        <PlacesExplorer estates={placeViews} />
 
         <section className="section section--paper">
           <div className="container family">

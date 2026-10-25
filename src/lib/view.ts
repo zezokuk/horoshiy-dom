@@ -57,8 +57,8 @@ export function estateSale(e: Pick<EstateView, 'status' | 'free' | 'homes'>) {
   return `${e.free} ${plural(e.free, 'дом', 'дома', 'домов')} в продаже`
 }
 
-/** Lists put what can be bought first, then what is coming, then the sold-out estates (they show scale, not offers). */
-const estateRank = (e: { status: EstateStatus; free: number }) => (e.status === 'planned' ? 1 : e.free ? 0 : 2)
+/** Lists put what can be bought first, then sold-out estates as proof of scale; «Скоро» is always last. */
+const estateRank = (e: { status: EstateStatus; free: number }) => (e.status === 'planned' ? 2 : e.free ? 0 : 1)
 export const byEstateStatus = <T extends { status: EstateStatus; free: number }>(list: T[]) =>
   [...list].sort((a, b) => estateRank(a) - estateRank(b)) // stable: the admin's order inside each group
 

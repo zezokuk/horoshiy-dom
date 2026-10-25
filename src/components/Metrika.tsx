@@ -42,8 +42,9 @@ export function Metrika() {
     const onClick = (e: MouseEvent) => {
       const a = (e.target as HTMLElement).closest('a')
       if (!a) return
-      if (a.href.startsWith('tel:')) goal('phone_click')
-      else if (MESSENGER.test(a.href)) goal('messenger_click', { to: new URL(a.href).hostname })
+      const href = a.getAttribute('href') || ''
+      if (href.startsWith('tel:')) goal('phone_click')
+      else if (MESSENGER.test(href)) goal('messenger_click', { to: new URL(href, window.location.origin).hostname })
     }
     document.addEventListener('click', onClick)
     return () => document.removeEventListener('click', onClick)
