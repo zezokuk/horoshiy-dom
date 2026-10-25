@@ -452,19 +452,90 @@ html[data-palette="terracotta"] { --green: #6d4d3d; --green-deep: #3b2a22; --gre
 /* motion switched off: page changes and in-page transitions become instant (PageMotion is not mounted either) */
 html.no-motion::view-transition-group(*), html.no-motion::view-transition-old(*), html.no-motion::view-transition-new(*), html.no-motion::view-transition-image-pair(*) { animation: none !important; }
 
-/* ── Variant 5 «Vintara» (reference 1, components/heroes/HeroTonal): one tone, the house as an object ───────────────
-   The board of variant 4 without the grid; soft light from below; the house tinted into the dark brand colour by a
-   colour layer cut to its own shape (mix-blend-mode: color keeps the brick's light and shade, takes the hue). The mouse
-   moves the house and the title a little against each other (--px, --py from PageMotion). */
+/* ── Tonal house treatment kept for the alternate art direction ───────────────────────────────────────────────── */
 .hv .hd__stage { background: radial-gradient(70% 60% at 62% 92%, color-mix(in srgb, var(--gold) 26%, var(--green-deep)) 0%, var(--green-deep) 70%); }
 .hv__house { translate: calc(var(--px, 0) * -16px) calc(var(--py, 0) * -8px); transition: translate .6s cubic-bezier(.2, .7, .2, 1); }
 .hv .hd__title { translate: calc(var(--px, 0) * 10px) calc(var(--py, 0) * 5px); transition: translate .6s cubic-bezier(.2, .7, .2, 1); }
-/* the neighbour's green roof and the white fence left of the house go: below our eave, left of our wall */
 .hv__house img, .hv__tone { clip-path: polygon(0 0, 100% 0, 100% 100%, 16.2% 100%, 16.2% 52%, 0 52%); }
 .hv__tone { position: absolute; inset: 0; z-index: 1; background: var(--green-deep); mix-blend-mode: color; opacity: .62; pointer-events: none;
   -webkit-mask: url(/design/hero1-house-900.webp) 0 0 / 100% 100% no-repeat; mask: url(/design/hero1-house-900.webp) 0 0 / 100% 100% no-repeat; }
 .hv .hd__lines, .hv .hd__dot, .hv .hd__label { z-index: 3; }
 @media (prefers-reduced-motion: reduce) { .hv__house, .hv .hd__title { translate: none; } }
+
+/* ── Variant 5: a handshake is drawn, then a real house takes its place ────────────────────────────────────────── */
+.hh .hd__stage { height: calc(100svh - var(--header-h) - 24px); min-height: 640px; max-height: 920px; aspect-ratio: auto; isolation: isolate; }
+.hh__sky { position: absolute; left: 0; right: 0; top: 0; height: 22%; z-index: 0; overflow: hidden; -webkit-mask-image: linear-gradient(#000 20%, transparent 100%); mask-image: linear-gradient(#000 20%, transparent 100%); }
+.hh__sky img { position: absolute; left: 0; top: 0; width: 100%; height: auto; filter: saturate(.65); }
+.hh__sky i { position: absolute; inset: 0; background: var(--green-deep); opacity: .76; }
+.hh__intro { position: absolute; inset: 0; z-index: 5; overflow: hidden; background: var(--green-deep); pointer-events: none; animation: hh-intro-away .7s 2.3s both; }
+@keyframes hh-intro-away { to { opacity: 0; visibility: hidden; } }
+.hh__eyebrow { position: absolute; left: 40px; top: 32px; font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--gold-soft); animation: hh-soft-in .8s .2s both; }
+.hh__intro-title { position: absolute; left: 40px; right: 40px; top: 12%; font-family: var(--font-serif); font-size: clamp(64px, 8vw, 124px); font-weight: 600; line-height: .88; letter-spacing: -.03em; }
+.hh__intro-title > span { display: block; animation: hh-title-in 1.05s .2s cubic-bezier(.2, .7, .2, 1) both; }
+.hh__intro-title > span + span { animation-delay: .4s; }
+.hh__intro-title em { color: var(--gold-soft); font-weight: 500; }
+@keyframes hh-title-in { from { opacity: 0; transform: translateY(42px); } to { opacity: 1; transform: none; } }
+.hh__deal { position: absolute; left: 50%; top: 59%; width: 240px; transform: translate(-50%, -50%); animation: hh-soft-in .8s .4s both; }
+.hh__handshake { display: block; width: 100%; height: auto; overflow: visible; }
+.hh__hand { stroke: var(--gold-soft); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+@keyframes hh-line-in { to { stroke-dashoffset: 0; } }
+.hh__note { position: absolute; left: 40px; bottom: 110px; max-width: 430px; color: var(--cream); font-size: 16px; animation: hh-soft-in .8s 1s both; }
+.hh .hd__title span { animation-delay: 2.35s; }
+.hh .hd__title span + span { animation-delay: 2.5s; }
+.hh__promise { animation: hh-soft-in .8s 2.4s both; }
+.hh__sketch { z-index: 2; stroke: var(--gold-soft); stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; animation: hh-sketch-away .6s 3.7s both; }
+.hh__sketch polyline { stroke-dasharray: 1; stroke-dashoffset: 1; animation: hh-line-in 1.2s 2.25s cubic-bezier(.45, 0, .2, 1) forwards; }
+.hh__sketch .hl-wall polyline { animation-delay: 2.4s; }
+.hh__sketch .hl-roof polyline { animation-delay: 2.55s; }
+.hh__sketch .hl-hatch { opacity: .4; }
+.hh__sketch .hl-hatch polyline { animation-delay: 2.7s; }
+@keyframes hh-sketch-away { to { opacity: 0; } }
+.hh__reality { position: absolute; inset: 0; animation: hh-reality-in 1.4s 2.95s cubic-bezier(.65, 0, .2, 1) both; }
+@keyframes hh-reality-in { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
+.hh__reality img { filter: saturate(.92) contrast(1.03) drop-shadow(0 22px 20px rgba(8, 16, 11, .22)); }
+.hh .hv__tone { opacity: .22; }
+.hh .hd__arc circle { stroke-dasharray: 1; stroke-dashoffset: 1; animation: hh-arc-in 2s 2.4s cubic-bezier(.2, .7, .2, 1) forwards; }
+@keyframes hh-arc-in { to { stroke-dashoffset: 0; } }
+.hh .hd__label, .hh .hd__dot { animation: hh-soft-in .7s 3.9s both; }
+.hh__footer { position: absolute; z-index: 4; left: 0; right: 0; bottom: 0; min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px 28px; border-top: 1px solid rgba(234, 223, 201, .18); background: var(--green-deep); animation: hh-soft-in .8s 3.8s both; }
+.hh__footer p { max-width: 650px; color: var(--gold-soft); font-size: clamp(14px, 1.25vw, 17px); }
+.hh__footer a { display: inline-flex; align-items: center; gap: 18px; color: var(--cream); font-size: 14px; font-weight: 600; }
+.hh__footer a i { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid rgba(234, 223, 201, .45); border-radius: 50%; color: var(--gold-soft); font-style: normal; transition: transform .25s ease, background-color .25s ease; }
+.hh__footer a:hover i { transform: translateY(3px); background: rgba(251, 248, 242, .08); }
+@keyframes hh-soft-in { from { opacity: 0; translate: 0 10px; } to { opacity: 1; translate: 0 0; } }
+@media (min-width: 960px) {
+  .hh .hx__house { top: 8cqi; }
+}
+@media (min-width: 960px) and (max-height: 780px) {
+  .hh .hx__house { top: 6cqi; left: 14cqi; width: 72cqi; }
+}
+@media (max-width: 959px) {
+  .hh .hd__stage { height: calc(100svh - var(--header-h) - 104px); min-height: 560px; }
+  .hh .hx__house { top: 56cqi; width: 180cqi; transform: translateX(-54%); }
+  .hh__eyebrow { left: 22px; top: 24px; font-size: 10px; }
+  .hh__intro-title { left: 22px; right: 22px; top: 11%; font-size: clamp(44px, 11vw, 82px); line-height: .92; }
+  .hh__deal { top: 56%; width: 210px; }
+  .hh__note { left: 22px; right: 22px; bottom: 100px; max-width: 330px; font-size: 13px; }
+  .hh__footer { min-height: 82px; gap: 12px; padding: 15px 18px; }
+  .hh__footer p { max-width: 330px; font-size: 13px; line-height: 1.4; }
+  .hh__footer a { gap: 8px; font-size: 12px; line-height: 1.35; text-align: right; }
+  .hh__footer a span { max-width: 118px; }
+  .hh__footer a i { flex: none; width: 28px; height: 28px; }
+}
+@media (max-width: 480px) {
+  .hh__footer p { max-width: 205px; font-size: 12px; }
+  .hh__footer a span { max-width: 100px; }
+}
+html.no-motion .hh__intro, html.no-motion .hh__sketch { display: none; }
+html.no-motion .hh__intro-title > span, html.no-motion .hh__eyebrow, html.no-motion .hh__hand path,
+html.no-motion .hh__note, html.no-motion .hh__promise, html.no-motion .hh .hd__title span,
+html.no-motion .hh__sketch polyline, html.no-motion .hh__reality, html.no-motion .hh .hd__arc circle,
+html.no-motion .hh .hd__label, html.no-motion .hh .hd__dot, html.no-motion .hh__footer { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .hh__intro, .hh__sketch { display: none; }
+  .hh__intro-title > span, .hh__eyebrow, .hh__hand path, .hh__note, .hh__promise, .hh .hd__title span,
+  .hh__sketch polyline, .hh__reality, .hh .hd__arc circle, .hh .hd__label, .hh .hd__dot, .hh__footer { animation: none; }
+}
 
 /* «Чертёж ↔ дом» on /projects (components/DraftBoard): the variant 4 board, without the big title */
 .dr .hd__eyebrow { z-index: 5; }

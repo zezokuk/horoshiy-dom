@@ -28,7 +28,7 @@ export const Design: GlobalConfig = {
       required: true,
       defaultValue: 'hero-5',
       options: [
-        { label: 'Vintara: дом в тон бренда перед названием', value: 'hero-5' },
+        { label: 'Рукопожатие → настоящий дом', value: 'hero-5' },
         { label: 'Чертёж → дом (мышь «достраивает» дом)', value: 'hero-4' },
         { label: 'Дом перед названием', value: 'hero-1' },
         { label: 'Через 3D-генплан посёлка', value: 'hero-2' },
