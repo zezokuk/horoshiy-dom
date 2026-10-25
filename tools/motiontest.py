@@ -6,7 +6,8 @@
    console errors (two cards with one transition name would raise one).
 2. Estate → house page on a region subdomain: the browser starts a cross-document view transition, and the clicked
    card's photo carries the name «house-photo» that the house page's main photo has too (the photo flies into place).
-3. Hover on a computer: the card gets a green edge, leans to the pointer; a gold button fills with green.
+3. Hover on a computer: the card gets a green edge, leans to the pointer; a gold button fills with green,
+   or gets a gold ring when it already sits on a green panel.
 4. Phone: no lean (nothing «stuck» after a tap).
 """
 import json, sys, time
@@ -52,8 +53,12 @@ with Browser(9411, "prof-motion-d", 1440, 900) as b:
     if g:
         b.cmd("Input.dispatchMouseEvent", type="mouseMoved", x=g["x"] + g["width"] / 2, y=g["y"] + g["height"] / 2)
         time.sleep(0.7)
-        size = b.js("getComputedStyle(document.querySelector('.btn--gold')).backgroundSize")
-        check("hover: a gold button fills with green", size.startswith("100%"), size)
+        size, shadow = b.js("(() => { const s = getComputedStyle(document.querySelector('.btn--gold')); return [s.backgroundSize, s.boxShadow] })()")
+        on_green = b.js("!!document.querySelector('.btn--gold').closest('.lead-box, .section--green, .hero2__panel, .footer, .hd__stage, .s2h, .region-card, .tour__soon')")
+        if on_green:
+            check("hover: a gold button on green gets a gold ring", shadow != "none" and size.startswith("0%"), f"{size}, {shadow}")
+        else:
+            check("hover: a gold button fills with green", size.startswith("100%"), size)
 
     # estate → house: cross-document view transition with the card photo named
     b.go(f"http://krd.{H}/objects/dinskaya", 3)
