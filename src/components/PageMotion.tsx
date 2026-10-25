@@ -18,7 +18,9 @@ export function PageMotion() {
       const card = target.closest<HTMLAnchorElement>('a.house-card')
       const showcase = target.closest<HTMLAnchorElement>('a[data-house-photo]')
       const origin = card ?? showcase?.closest<HTMLElement>('.real-homes__stage')
-      const img = origin?.querySelector<HTMLImageElement>('img')
+      const img =
+        origin?.querySelector<HTMLImageElement>('.real-homes__media img.is-on') ??
+        origin?.querySelector<HTMLImageElement>('img')
       if (!img) return
       document.querySelectorAll<HTMLElement>('[data-vt-named]').forEach((el) => {
         el.style.viewTransitionName = ''
