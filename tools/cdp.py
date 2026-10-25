@@ -1,14 +1,40 @@
-"""Tiny Chrome DevTools helper for the browser tests: start headless Edge, run JS, click, type, screenshot.
+"""Tiny Chrome DevTools helper for the browser tests: start headless Chrome or Edge, run JS, click, type, screenshot.
 
     from cdp import Browser
     with Browser(port=9360, profile="prof-x", width=1440, height=900) as b:
         b.go("http://horoshiy.localhost:3000/")
         b.shot("home.png")
+
+Set CDP_BROWSER to use a browser at a custom path.
 """
-import base64, json, os, subprocess, time, urllib.request
+import base64, json, os, subprocess, sys, time, urllib.request
 import websocket
 
-EDGE = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+
+def browser_executable():
+    if os.environ.get("CDP_BROWSER"):
+        return os.environ["CDP_BROWSER"]
+    if sys.platform == "darwin":
+        candidates = [
+            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+            "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+            "/Applications/Chromium.app/Contents/MacOS/Chromium",
+        ]
+    elif os.name == "nt":
+        candidates = [
+            r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+            r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+            r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        ]
+    else:
+        candidates = ["/usr/bin/microsoft-edge", "/usr/bin/google-chrome", "/usr/bin/chromium", "/usr/bin/chromium-browser"]
+    for path in candidates:
+        if os.path.isfile(path) and os.access(path, os.X_OK):
+            return path
+    raise FileNotFoundError("Chrome or Edge not found. Set CDP_BROWSER to the browser executable.")
+
+
+EDGE = browser_executable()
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".shots")
 
 
@@ -19,9 +45,10 @@ class Browser:
         self.events = []
 
     def __enter__(self):
+        os.makedirs(OUT, exist_ok=True)
         self.proc = subprocess.Popen([EDGE, "--headless=new", "--use-angle=swiftshader", "--enable-unsafe-swiftshader",
                                       f"--remote-debugging-port={self.port}", "--remote-allow-origins=*",
-                                      f"--user-data-dir={OUT}\\{self.profile}", f"--window-size={self.w},{self.h}", "about:blank"])
+                                      f"--user-data-dir={os.path.join(OUT, self.profile)}", f"--window-size={self.w},{self.h}", "about:blank"])
         for _ in range(60):
             try:
                 page = next(t for t in json.load(urllib.request.urlopen(f"http://127.0.0.1:{self.port}/json")) if t["type"] == "page")
