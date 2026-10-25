@@ -522,6 +522,9 @@ html.no-motion::view-transition-group(*), html.no-motion::view-transition-old(*)
   .hh__footer a span { max-width: 118px; }
   .hh__footer a i { flex: none; width: 28px; height: 28px; }
 }
+@media (min-width: 481px) and (max-width: 959px) {
+  .hh .hx__house { top: 28cqi; width: 100cqi; transform: translateX(-50%); }
+}
 @media (max-width: 480px) {
   .hh__footer p { max-width: 205px; font-size: 12px; }
   .hh__footer a span { max-width: 100px; }
