@@ -9,6 +9,7 @@ import type { HeroFacts } from '@/components/heroes/facts'
 import { MortgageCalc } from '@/components/MortgageCalc'
 import { CountUp } from '@/components/Motion'
 import { Pic } from '@/components/Pic'
+import { HomeWays, type HomeWay } from '@/components/HomeWays'
 import { PlacesMap } from '@/components/PlacesMap'
 import { PromoCards } from '@/components/PromoCards'
 import { RealHomes } from '@/components/RealHomes'
@@ -78,45 +79,57 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
   // that would take the network from fonts and scripts (measured with tools/perfcheck.py, 19.10)
   const heroPhone = img(hero, 'card')
 
-  // two different pictures (20.10: light cards instead of dark photos): build — a project's plan seen from above with
-  // furniture (its «3D-вид», else the «dream» render), buy — a real house on sale (not the type already shown in the hero).
-  // The places band under them is a scheme from the estates' coordinates (PlacesMap)
-  const planned = projects.find((p) => p.render && typeof p.render === 'object')
-  const buildProject = planned ?? projects.find((p) => p.slug === 'tip-12') ?? projects[0]
-  const buildPhoto = img(planned ? planned.render : buildProject?.photo, 'card')
   const heroType = (company.heroCaption || '').match(/Тип \d+/)?.[0]
-  // (Тип 12's photo is a render with a pool: not for «готовый», where the picture must be a real house)
-  const buyPhoto = (
-    free.find(
-      (h) =>
-        h.photoCard &&
-        !h.title.startsWith('Тип 12') &&
-        h.title.split(' (')[0] !== heroType &&
-        h.title.split(' (')[0] !== buildProject?.name,
-    ) ?? free[0]
-  )?.photoCard
-  const minArea = Math.min(...projects.map((p) => p.area || 999))
+  const buyHouse =
+    free.find((h) => h.photo && !h.title.startsWith('Тип 12') && h.title.split(' (')[0] !== heroType) ??
+    free.find((h) => h.photo && !h.title.startsWith('Тип 12'))
+  const buildProject =
+    projects.find(
+      (p) =>
+        p.storeys === 2 &&
+        p.plan &&
+        p.name !== heroType &&
+        p.name !== buyHouse?.title.split(' (')[0],
+    ) ??
+    projects.find(
+      (p) =>
+        p.plan &&
+        p.name !== 'Тип 12' &&
+        p.name !== heroType &&
+        p.name !== buyHouse?.title.split(' (')[0],
+    ) ?? projects.find((p) => p.plan && p.name !== 'Тип 12')
 
-  const ways = [
+  const ways: HomeWay[] = [
     {
       n: '01',
-      href: mainHref('/build'),
-      photo: buildPhoto,
-      caption: planned ? `Проект «${planned.name}» — планировка, мебель для примера` : undefined,
-      title: 'Построить дом',
-      text: `${projects.length} проверенных проектов от ${minArea} м². Капитальный кирпичный дом под ключ за 6 месяцев.`,
-      go: 'Как мы строим →',
+      href: mainHref('/catalog'),
+      kind: 'photo',
+      photo: buyHouse?.photo,
+      alt: buyHouse ? `Дом «${buyHouse.title}» в посёлке «${buyHouse.estateName}»` : '',
+      kicker: 'Готовые дома',
+      title: 'Посмотреть',
+      accent: 'свободные дома',
+      text: 'Цена, планировка, комплектация и расчёт ипотеки — до того, как вы запишетесь на показ.',
+      go: 'Выбрать дом',
+      meta: free.length
+        ? `${free.length} ${plural(free.length, 'дом', 'дома', 'домов')}${priceFrom ? ` · от ${formatMillions(priceFrom)}` : ''}`
+        : 'Каталог домов',
     },
     {
       n: '02',
-      href: mainHref('/catalog'),
-      photo: buyPhoto,
-      caption: undefined,
-      title: 'Купить готовый',
-      text: `Дома с предчистовой отделкой, двором и парковкой на 2 машины. Ипотеку и регистрацию оформим за 2 недели.`,
-      go: free.length
-        ? `${free.length} ${plural(free.length, 'дом', 'дома', 'домов')}${priceFrom ? ` от ${formatMillions(priceFrom)}` : ''} →`
-        : 'Смотреть дома →',
+      href: mainHref('/build'),
+      kind: 'plan',
+      plan: buildProject?.slug === 'tip-9' ? '/design/plan-tip9-lines.webp' : img(buildProject?.plan, 'wide'),
+      planNote: buildProject
+        ? `Проект «${buildProject.name}»${buildProject.area ? ` · ${buildProject.area.toLocaleString('ru-RU')} м²` : ''}`
+        : 'Архитектурный проект',
+      alt: buildProject ? `Планировка дома по проекту «${buildProject.name}»` : 'Архитектурная схема строительства',
+      kicker: 'Строительство под ключ',
+      title: 'Построить',
+      accent: 'дом',
+      text: 'Выберите проект и посмотрите, как мы строим: от плана и фундамента до кирпича и кровли.',
+      go: 'Как мы строим',
+      meta: `${projects.length} ${plural(projects.length, 'проект', 'проекта', 'проектов')}`,
     },
   ]
 
@@ -264,41 +277,13 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
         </section>
       )}
 
-      {realHomes.length > 0 && <RealHomes houses={realHomes} />}
+      <HomeWays ways={ways} />
 
       <Thread off={!effectOn(design, 'thread')}>
-        <section className="section" id="choose">
-          <div className="container">
-            <div className="head" data-reveal>
-              <span className="idx">Что вас интересует</span>
-              <Words text="Два пути к *своему дому*" />
-            </div>
-            <div className="ways">
-              <span className="ways__or" aria-hidden>
-                или
-              </span>
-              {ways.map((w, i) => (
-                <a
-                  key={w.n}
-                  href={w.href}
-                  className="way"
-                  data-reveal
-                  style={{ ['--d' as string]: `${i * 90}ms` }}
-                >
-                  <span className={`way__pic ${w.caption ? 'way__pic--plan' : ''}`}>
-                    {w.photo && <img src={w.photo} alt="" loading="lazy" decoding="async" />}
-                    {w.caption && <small>{w.caption}</small>}
-                  </span>
-                  <div className="way__body">
-                    <span className="way__num">{w.n}</span>
-                    <h3>{w.title}</h3>
-                    <p>{w.text}</p>
-                    <span className="way__go">{w.go}</span>
-                  </div>
-                </a>
-              ))}
-            </div>
+        {realHomes.length > 0 && <RealHomes houses={realHomes} />}
 
+        <section className="section" aria-label="Локации">
+          <div className="container">
             {/* the places tie both ways together: where the ready houses stand and where we build */}
             <div className="places" data-reveal>
               <PlacesMap estates={estateViews} />
