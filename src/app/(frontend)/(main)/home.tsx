@@ -1,6 +1,6 @@
 import { HeroDepth } from '@/components/heroes/HeroDepth'
 import { HeroDraft } from '@/components/heroes/HeroDraft'
-import { HeroTonal } from '@/components/heroes/HeroTonal'
+import { HeroHandshake } from '@/components/heroes/HeroHandshake'
 import { HeroGenplan } from '@/components/heroes/HeroGenplan'
 import { HeroMinimal } from '@/components/heroes/HeroMinimal'
 import { Thread } from '@/components/Thread'
@@ -163,7 +163,7 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
       <JsonLd data={organizationLd(company, regions)} />
       {faq && <JsonLd data={faq} />}
       {variant === 'hero-5' ? (
-        <HeroTonal f={facts} hasRealHomes={realHomes.length > 0} />
+        <HeroHandshake f={facts} place={active.map((r) => r.name).join(', ')} />
       ) : variant === 'hero-4' ? (
         <HeroDraft f={facts} />
       ) : variant === 'hero-1' ? (
