@@ -1130,6 +1130,26 @@ export interface Company {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Фото — на объекте, днём, горизонтально. Пока фото нет, на сайте стоит рамка «здесь будет фото»
+   */
+  founder?: {
+    photo?: (number | null) | Media;
+    name?: string | null;
+    role?: string | null;
+    /**
+     * 3–5 предложений: почему начали строить и что такое «хороший дом»
+     */
+    quote?: string | null;
+  };
+  offices?:
+    | {
+        title: string;
+        address: string;
+        hours?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   legalName?: string | null;
   inn?: string | null;
   ogrn?: string | null;
@@ -1148,8 +1168,12 @@ export interface Design {
   /**
    * Посмотреть любой вариант вживую: /preview/hero-1 … /preview/hero-5 и /preview/current
    */
-  hero: 'hero-5' | 'hero-4' | 'hero-1' | 'hero-2' | 'hero-3' | 'current';
-  palette: 'forest' | 'graphite' | 'navy' | 'terracotta';
+  hero: 'hero-6' | 'hero-5' | 'hero-4' | 'hero-1' | 'hero-2' | 'hero-3' | 'current';
+  palette: 'listva' | 'shalfey' | 'forest' | 'graphite' | 'navy' | 'terracotta';
+  /**
+   * Второй и третий экраны главной (палитры v2)
+   */
+  homeOrder?: ('founder' | 'estates' | 'together') | null;
   /**
    * Фоны, кнопки. Пусто — из набора выше
    */
@@ -1326,6 +1350,22 @@ export interface CompanySelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  founder?:
+    | T
+    | {
+        photo?: T;
+        name?: T;
+        role?: T;
+        quote?: T;
+      };
+  offices?:
+    | T
+    | {
+        title?: T;
+        address?: T;
+        hours?: T;
+        id?: T;
+      };
   legalName?: T;
   inn?: T;
   ogrn?: T;
@@ -1341,6 +1381,7 @@ export interface CompanySelect<T extends boolean = true> {
 export interface DesignSelect<T extends boolean = true> {
   hero?: T;
   palette?: T;
+  homeOrder?: T;
   colorDark?: T;
   colorAccent?: T;
   effects?:

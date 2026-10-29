@@ -1,3 +1,4 @@
+import { HomeV2 } from './home-v2'
 import { HeroDepth } from '@/components/heroes/HeroDepth'
 import { HeroDraft } from '@/components/heroes/HeroDraft'
 import { HeroHandshake } from '@/components/heroes/HeroHandshake'
@@ -36,8 +37,8 @@ import {
 } from '@/lib/view'
 
 /** The first screen: the live one, or a variant from the 20.10 references shown at /preview/hero-N for choosing. */
-export type HeroKind = 'current' | 'hero-1' | 'hero-2' | 'hero-3' | 'hero-4' | 'hero-5'
-export const HERO_VARIANTS: Exclude<HeroKind, 'current'>[] = ['hero-1', 'hero-2', 'hero-3', 'hero-4', 'hero-5']
+export type HeroKind = 'current' | 'hero-1' | 'hero-2' | 'hero-3' | 'hero-4' | 'hero-5' | 'hero-6'
+export const HERO_VARIANTS: Exclude<HeroKind, 'current'>[] = ['hero-1', 'hero-2', 'hero-3', 'hero-4', 'hero-5', 'hero-6']
 
 /**
  * The brand home: the emotional first screen, two visual ways, real houses with prices, then interactive places.
@@ -53,6 +54,15 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
     getPromos(),
     getDesign(),
   ])
+  // v2 (29.10): the first screen «hero-6» comes with the new nine-screen home; the old first screens keep this one
+  if (variant === 'hero-6') {
+    return (
+      <>
+        <JsonLd data={organizationLd(company, regions)} />
+        <HomeV2 company={company} design={design} estates={estates} houses={houses} projects={projects} regions={regions} />
+      </>
+    )
+  }
   const free = houses.filter((h) => h.status === 'free').map(houseView)
   const realHomePhotos = new Set<string>()
   const realHomes = [...free]

@@ -19,6 +19,7 @@ const NAMES: Record<HeroKind, [string, string]> = {
   'hero-3': ['3', ' · Минимализм'],
   'hero-4': ['4', ' · Чертёж → дом'],
   'hero-5': ['5', ' · Vintara: дом в тон бренда'],
+  'hero-6': ['6', ' · v2: дом на весь экран'],
 }
 
 type Props = { params: Promise<{ variant: string }> }

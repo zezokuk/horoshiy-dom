@@ -94,7 +94,7 @@ export default async function BuildPage() {
         end={
           <>
             <h2>Дом готов — заезжайте</h2>
-            <p>Ипотеку и регистрацию оформим за 2 недели: семейная, IT, военная.</p>
+            <p>Ипотеку и регистрацию оформим за 2 недели: семейная, IT или сельская ипотека, рассрочка.</p>
             <p className="story__note">Мебель на макете — для примера: дом сдаём с предчистовой отделкой.</p>
             <div className="btns">
               <a href="#calc" className="btn btn--gold">
@@ -161,8 +161,7 @@ export default async function BuildPage() {
               {company.finishing.map((f) => (
                 <li key={f}>{f}</li>
               ))}
-              {/* the client's own words: «вода, 15 кВт, септик, возможность подключить газ» */}
-              <li>Вода (центральная или скважина), электричество 15 кВт и септик, газ можно подключить</li>
+              {/* water, 15 kW, septic tank and gas are in the finishing list itself since the price list of 27.10 */}
             </ul>
           </div>
         </section>

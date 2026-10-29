@@ -13,6 +13,6 @@ export const generateMetadata = () => pageMeta('home', META)
 export default async function Home() {
   // the first screen is chosen in the admin: «Внешний вид» (20.10: «Vintara», variant 5, by default); all of them at /preview/<variant>
   const { hero } = await getDesign()
-  const variant: HeroKind = hero === 'current' || HERO_VARIANTS.includes(hero as never) ? (hero as HeroKind) : 'hero-5'
+  const variant: HeroKind = hero === 'current' || HERO_VARIANTS.includes(hero as never) ? (hero as HeroKind) : 'hero-6'
   return <HomeView hero={variant} />
 }

@@ -21,6 +21,7 @@ export function Header({
   homeHref,
   ctaHref,
   slogan,
+  switcher: showSwitcher = true,
 }: {
   nav: NavItem[]
   phone?: string | null
@@ -29,6 +30,7 @@ export function Header({
   homeHref: string
   ctaHref: string
   slogan?: string | null
+  switcher?: boolean
 }) {
   const path = usePathname()
   // menu links are absolute in subdomain mode (http://домен/catalog): compare their path with the page's
@@ -65,7 +67,7 @@ export function Header({
     <header className="header">
       <div className="container header__in">
         <Logo href={homeHref} slogan={slogan} />
-        {switcher}
+        {showSwitcher && switcher}
         <nav className="nav" aria-label="Основное меню">
           {nav.map((n) => (
             <Link key={n.href} href={n.href} aria-current={here(n.href) ? 'page' : undefined}>

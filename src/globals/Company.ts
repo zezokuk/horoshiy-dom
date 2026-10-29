@@ -94,6 +94,38 @@ export const Company: GlobalConfig = {
           ],
         },
         {
+          label: 'Кто строит и офисы',
+          fields: [
+            {
+              name: 'founder',
+              label: 'Экран «Кто строит» на главной',
+              type: 'group',
+              admin: { description: 'Фото — на объекте, днём, горизонтально. Пока фото нет, на сайте стоит рамка «здесь будет фото»' },
+              fields: [
+                { name: 'photo', label: 'Фото', type: 'upload', relationTo: 'media' },
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'name', label: 'Имя', type: 'text' },
+                    { name: 'role', label: 'Кто он в компании', type: 'text', admin: { placeholder: 'основатель СК «Хороший дом»' } },
+                  ],
+                },
+                { name: 'quote', label: 'Слова от первого лица', type: 'textarea', admin: { description: '3–5 предложений: почему начали строить и что такое «хороший дом»' } },
+              ],
+            },
+            {
+              name: 'offices',
+              label: 'Отделы продаж',
+              type: 'array',
+              fields: [
+                { name: 'title', label: 'Где', type: 'text', required: true, admin: { placeholder: 'Дома в Динской' } },
+                { name: 'address', label: 'Адрес', type: 'text', required: true },
+                { name: 'hours', label: 'Часы работы', type: 'text' },
+              ],
+            },
+          ],
+        },
+        {
           label: 'Реквизиты',
           fields: [
             { name: 'legalName', label: 'Юрлицо / ИП', type: 'text' },

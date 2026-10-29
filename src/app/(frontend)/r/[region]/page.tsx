@@ -8,7 +8,8 @@ import { EstatesFan } from '@/components/EstatesFan'
 import { RegionHero } from '@/components/RegionHero'
 import { Words } from '@/components/Words'
 import { PromoCards } from '@/components/PromoCards'
-import { getEstates, getHouses, getProjects, getPromos, getRegion, img } from '@/lib/data'
+import { EstateCovers } from '@/components/home/EstateCovers'
+import { getDesign, getEstates, getHouses, getProjects, getPromos, getRegion, img } from '@/lib/data'
 import { formatMillions, plural, telHref } from '@/lib/format'
 import { mainHref, regionHref } from '@/lib/site'
 import { byEstateStatus, estateView, genplanEstate, houseView, promoView } from '@/lib/view'
@@ -73,8 +74,14 @@ export default async function RegionPage({ params }: Props) {
     )
   }
 
-  const [estates, houses, promos] = await Promise.all([getEstates(region.id), getHouses({ region: region.id }), getPromos(region.id)])
+  const [estates, houses, promos, design] = await Promise.all([getEstates(region.id), getHouses({ region: region.id }), getPromos(region.id), getDesign()])
   const views = byEstateStatus(estates.map((e) => estateView(e, houses)))
+  // v2 (27.10): the island of scenes and the fan go («вот эту шляпу убираем»); the client's covers open the page instead
+  const v2 = ['listva', 'shalfey'].includes(design.palette)
+  const covers = views.map((v) => {
+    const n = estates.find((e) => e.slug === v.slug)?.nearby?.[0]
+    return { ...v, near: n ? `${n.label} — ${n.value}` : null }
+  })
   const built = views.filter((v) => v.status !== 'planned').length
   const free = houses.filter((h) => h.status === 'free').map(houseView)
   const priceFrom = free.length ? Math.min(...free.map((h) => h.price)) : null
@@ -103,8 +110,47 @@ export default async function RegionPage({ params }: Props) {
     houses: houses.filter((h) => (typeof h.estate === 'object' ? h.estate?.id : h.estate) === top.id).map(houseView),
   }
 
+  const facts = [
+    { value: String(built), label: plural(built, 'посёлок', 'посёлка', 'посёлков') },
+    { value: String(free.length), label: `${plural(free.length, 'дом', 'дома', 'домов')} в продаже` },
+    { value: priceFrom ? formatMillions(priceFrom) : '—', label: 'цена от' },
+    { value: '5 лет', label: 'гарантия на дом' },
+  ]
+  const pickLead = (
+    <LeadInline
+      title="Не знаете, какой посёлок выбрать?"
+      text="Расскажите о семье и бюджете — подберём 2–3 свободных дома и пришлём подборку."
+      cta="Подобрать дом"
+      target={{ region: region.slug, context: `${region.name}: подбор посёлка`, phone: region.office?.phone, hours: region.office?.hours }}
+    />
+  )
+
   return (
     <>
+      {v2 ? (
+        <section className="section v2-sec v2-region" id="estates">
+          <div className="container">
+            <div className="v2-head">
+              <div>
+                <p className="eyebrow">Регион</p>
+                <h1 className="title title--xl">{region.name}</h1>
+                {(region.tagline || region.intro) && <p className="lead">{region.tagline || region.intro}</p>}
+              </div>
+              <dl className="v2-facts v2-region__facts">
+                {facts.map((x) => (
+                  <div key={x.label}>
+                    <dt>{x.value}</dt>
+                    <dd>{x.label}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </div>
+          <EstateCovers estates={covers} />
+          <div className="container v2-region__lead">{pickLead}</div>
+        </section>
+      ) : (
+        <>
       <div className="container intro">
         <RegionHero
           name={region.name}
@@ -112,12 +158,7 @@ export default async function RegionPage({ params }: Props) {
           intro={region.intro}
           scenes={scenes}
           photo={photo}
-          facts={[
-            { value: String(built), label: plural(built, 'посёлок', 'посёлка', 'посёлков') },
-            { value: String(free.length), label: `${plural(free.length, 'дом', 'дома', 'домов')} в продаже` },
-            { value: priceFrom ? formatMillions(priceFrom) : '—', label: 'цена от' },
-            { value: '5 лет', label: 'гарантия на дом' },
-          ]}
+          facts={facts}
           actions={
             <>
               <a href="#estates" className="btn btn--gold">
@@ -143,14 +184,11 @@ export default async function RegionPage({ params }: Props) {
             </p>
           </div>
           <EstatesView estates={views} cards={<EstatesFan estates={fan} />} />
-          <LeadInline
-            title="Не знаете, какой посёлок выбрать?"
-            text="Расскажите о семье и бюджете — подберём 2–3 свободных дома и пришлём подборку."
-            cta="Подобрать дом"
-            target={{ region: region.slug, context: `${region.name}: подбор посёлка`, phone: region.office?.phone, hours: region.office?.hours }}
-          />
+          {pickLead}
         </div>
       </section>
+        </>
+      )}
 
       {promos.length > 0 && (
         <section className="section" id="promo" style={{ paddingTop: 0 }}>

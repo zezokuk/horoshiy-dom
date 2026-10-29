@@ -226,7 +226,8 @@ export function FloatingCall() {
   return (
     <a
       href="#lead"
-      className={`float-call magnet ${shown ? 'is-shown' : ''}`}
+      // no «magnet» since 27.10: the client did not like the button running after the mouse
+      className={`float-call ${shown ? 'is-shown' : ''}`}
       aria-label="Заказать обратный звонок"
     >
       <span className="float-call__dot" />
@@ -242,6 +243,7 @@ export function LeadSection({
   target,
   ask = false,
   eyebrow = 'Подбор дома',
+  offices,
 }: {
   title: string
   text: string
@@ -249,15 +251,30 @@ export function LeadSection({
   target?: LeadTarget
   ask?: boolean
   eyebrow?: string
+  /** sales offices under the text (brand pages, v2): where to come for the showing */
+  offices?: { title: string; address: string; hours?: string | null }[]
 }) {
   return (
     <section className="section" id="lead" style={{ paddingBottom: 96 }}>
       <div className="container">
         <div className="lead-box">
-          <div style={{ display: 'grid', gap: 16 }}>
+          <div style={{ display: 'grid', gap: 16, alignContent: 'start' }}>
             <p className="eyebrow">{eyebrow}</p>
             <h2 className="title title--lg">{title}</h2>
             <p className="lead">{text}</p>
+            {!!offices?.length && (
+              <ul className="lead-offices">
+                {offices.map((o) => (
+                  <li key={o.address}>
+                    <b>{o.title}</b>
+                    <span>
+                      {o.address}
+                      {o.hours ? ` · ${o.hours}` : ''}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           <LeadForm cta={cta} target={target} ask={ask} />
         </div>

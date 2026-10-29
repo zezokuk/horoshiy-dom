@@ -26,8 +26,11 @@ export const Design: GlobalConfig = {
       label: 'Первый экран главной',
       type: 'select',
       required: true,
+      // defaults stay as on 20.10: changing one makes the SQLite push rebuild the table, and with the new column
+      // home_order that rebuild fails (29.10). v2 is switched on by data: `npx payload run tools/look.ts`
       defaultValue: 'hero-5',
       options: [
+        { label: 'Рукопожатие → дом раскрывается на весь экран (v2)', value: 'hero-6' },
         { label: 'Рукопожатие → настоящий дом', value: 'hero-5' },
         { label: 'Чертёж → дом (мышь «достраивает» дом)', value: 'hero-4' },
         { label: 'Дом перед названием', value: 'hero-1' },
@@ -44,11 +47,27 @@ export const Design: GlobalConfig = {
       required: true,
       defaultValue: 'forest',
       options: [
+        { label: 'v2 · A «Листва»: белый фон, свежий зелёный (основной)', value: 'listva' },
+        { label: 'v2 · B «Шалфей»: белый фон, спокойный зелёный', value: 'shalfey' },
         { label: 'Фирменные: тёмно-зелёный и золото', value: 'forest' },
         { label: 'Графит и латунь', value: 'graphite' },
         { label: 'Тёмно-синий и песок', value: 'navy' },
         { label: 'Тёплый: шоколад и терракота', value: 'terracotta' },
       ],
+    },
+    {
+      name: 'homeOrder',
+      label: 'Главная: кто строит и посёлки',
+      type: 'select',
+      // not required: SQLite schema push rebuilds a table for a new NOT NULL column and fails on the old rows (29.10);
+      // empty means «founder» (home-v2.tsx)
+      defaultValue: 'founder',
+      options: [
+        { label: 'Сначала «Кто строит», потом посёлки', value: 'founder' },
+        { label: 'Сначала посёлки, потом «Кто строит»', value: 'estates' },
+        { label: 'На одном экране: слева основатель, справа посёлки', value: 'together' },
+      ],
+      admin: { description: 'Второй и третий экраны главной (палитры v2)' },
     },
     {
       type: 'row',

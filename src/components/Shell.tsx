@@ -50,6 +50,8 @@ export async function Shell({ region, children }: { region?: Region; children: R
         nav={nav}
         phone={phone}
         regions={views}
+        // one region on sale (Moscow is «not today», 27.10): no switcher in the bar, the mobile menu still lists them
+        switcher={views.filter((r) => r.status === 'active').length > 1}
         current={current}
         homeHref={region ? regionHref(region.slug) : mainHref('/')}
         ctaHref={region && !soon ? regionHref(region.slug, '/catalog') : mainHref('/catalog')}
@@ -57,16 +59,19 @@ export async function Shell({ region, children }: { region?: Region; children: R
       />
       <main>{children}</main>
       <LeadSection
-        title={soon ? `Узнайте первыми: ${region!.name}` : region ? 'Подберём дом под ваш бюджет' : 'Подберём дом и место под вашу семью'}
+        title={soon ? `Узнайте первыми: ${region!.name}` : region ? 'Подберём дом под ваш бюджет' : 'Это место нужно увидеть самому'}
         text={
           soon
             ? 'Оставьте телефон — сообщим о старте продаж, ценах и первых домах раньше всех.'
-            : 'Расскажем, какие дома свободны прямо сейчас, рассчитаем ипотеку и привезём на показ.'
+            : region
+              ? 'Расскажем, какие дома свободны прямо сейчас, рассчитаем ипотеку и привезём на показ.'
+              : 'Приезжайте на показ: пройдёте по посёлку, зайдёте в дом и посмотрите участок. Расскажем, что свободно, и посчитаем ипотеку.'
         }
-        cta={soon ? 'Записаться в лист ожидания' : 'Отправить'}
+        cta={soon ? 'Записаться в лист ожидания' : region ? 'Отправить' : 'Записаться на показ'}
         target={target}
         ask={!soon}
-        eyebrow={soon ? 'Лист ожидания' : undefined}
+        eyebrow={soon ? 'Лист ожидания' : region ? undefined : 'Показ'}
+        offices={!region ? (company.offices ?? []).map((o) => ({ title: o.title, address: o.address, hours: o.hours })) : undefined}
       />
       <Footer company={company} regions={views} nav={nav} current={current} />
       <StickyCta phone={phone} label={soon ? 'Узнать первым' : undefined} />

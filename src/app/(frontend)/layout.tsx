@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Cormorant_Garamond, Manrope } from 'next/font/google'
+import { Cormorant_Garamond, Forum, Golos_Text, Manrope } from 'next/font/google'
 import { CookieNotice } from '@/components/CookieNotice'
 import { Metrika } from '@/components/Metrika'
 import { MorphLayer } from '@/components/MorphLayer'
@@ -11,13 +11,20 @@ import { absUrl } from '@/lib/seo'
 import { INDEXABLE, MAIN_URL } from '@/lib/site'
 import './globals.css'
 import './design.css'
+import './v2.css'
 
-const manrope = Manrope({ variable: '--font-manrope', subsets: ['latin', 'cyrillic'] })
+// v2 (29.10, Igor's choice): headings and estate names in Forum — the lettering of the client's covers, so the covers and
+// the page speak in one voice; text in Golos. The old pair stays for the dark palettes, not preloaded.
+const forum = Forum({ variable: '--font-forum', subsets: ['latin', 'cyrillic'], weight: '400' })
+const golos = Golos_Text({ variable: '--font-golos', subsets: ['latin', 'cyrillic'], weight: ['400', '500', '600'] })
+const manrope = Manrope({ variable: '--font-manrope', subsets: ['latin', 'cyrillic'], preload: false })
 const cormorant = Cormorant_Garamond({
   variable: '--font-cormorant',
   subsets: ['latin', 'cyrillic'],
   weight: ['600'], // only the weight we use: fewer font files before the first paint
+  preload: false,
 })
+const V2 = ['listva', 'shalfey']
 
 const BASE: Metadata = {
   title: { default: 'Хороший дом — строим и продаём дома для жизни', template: '%s · Хороший дом' },
@@ -40,20 +47,23 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export const viewport: Viewport = { themeColor: '#2c3a30' }
+export const viewport: Viewport = { themeColor: '#ffffff' }
 
 export default async function FrontendLayout({ children }: { children: React.ReactNode }) {
   // «Внешний вид» in the admin: the colour set (design.css → [data-palette]), the client's own colours, motion on/off
   const design = await getDesign()
   const motion = effectOn(design, 'motion')
+  // a v2 palette switches the whole light look (v2.css → html[data-look="v2"]); the old dark ones keep design.css
+  const v2 = V2.includes(design.palette ?? 'listva')
   return (
     // data-scroll-behavior: lets Next switch off CSS smooth scrolling while it jumps to the top of a new page
     <html
       lang="ru"
       data-scroll-behavior="smooth"
       data-palette={design.palette && design.palette !== 'forest' ? design.palette : undefined}
-      className={`${manrope.variable} ${cormorant.variable}${motion ? '' : ' no-motion'}`}
-      style={paletteStyle(design)}
+      data-look={v2 ? 'v2' : undefined}
+      className={[forum.variable, golos.variable, manrope.variable, cormorant.variable, motion ? '' : 'no-motion'].filter(Boolean).join(' ')}
+      style={v2 ? undefined : paletteStyle(design)}
       suppressHydrationWarning
     >
       <head>
