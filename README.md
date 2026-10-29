@@ -69,3 +69,5 @@ Seed напечатает логин и пароль админа и сохра�
 3. Цены из прайса 27.10 (если база из сида): при запущенном сервере `python tools/price_27_10.py` (план), `--apply` (запись), `--undo` (откат). Нужны SEED_ADMIN_EMAIL и SEED_ADMIN_PASSWORD в `.env`.
 
 Что ждёт клиента: фото основателя (поле «Компания → Кто строит и офисы»), обложки в исходнике, генпланы с номерами, вечерний и широкий рендер для первого экрана (промпты — `БАЗА/Промты/lark/`), картинки сцен в `public/design/scenes/{breakfast,lawn,grill,car,fireplace,snow}.webp` — появятся на главной сами.
+
+Если при первом запуске ветки сервер падает с `no such column: home_order` (баг миграции SQLite у Payload/drizzle): остановить сервер, сделать бэкап `platform.db`, удалить пустую временную таблицу и добавить колонку руками — в sqlite3: `DROP TABLE IF EXISTS __new_design; ALTER TABLE design ADD COLUMN home_order text DEFAULT 'founder';` — затем снова `npm run dev`.
