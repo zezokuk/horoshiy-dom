@@ -54,7 +54,8 @@ export default async function EstatePage({ params }: Props) {
   if (!d) notFound()
   const { region, estate: e } = d
   if (e.status === 'planned') return <ComingEstate region={region} e={e} />
-  const rawHouses = await getHouses({ estate: e.id })
+  const [rawHouses, design] = await Promise.all([getHouses({ estate: e.id }), getDesign()])
+  const v2 = ['listva', 'shalfey'].includes(design.palette)
   const houses = rawHouses.map(houseView)
   const free = houses.filter((h) => h.status === 'free')
   const scheme = img(e.scheme, 'wide')
@@ -63,6 +64,7 @@ export default async function EstatePage({ params }: Props) {
   const photo = free[0]?.photo ?? houses.find((h) => h.photo)?.photo ?? img(e.poster, 'wide') ?? img(e.cover, 'wide')
   const photoPhone = free[0]?.photoCard ?? houses.find((h) => h.photoCard)?.photoCard ?? img(e.poster, 'card') ?? img(e.cover, 'card')
   const priceFrom = free.length ? Math.min(...free.map((h) => h.price)) : null
+  const cover = img(e.cover, 'card')
   const plot = houses.find((h) => h.plot)?.plot?.replace(/\s*сот\.?$/, '')
   const eyebrow = [e.kind, e.place].filter(Boolean).join(' · ')
   const target = { region: region.slug, context: `${region.name}: ${e.name}`, phone: region.office?.phone, hours: region.office?.hours }
@@ -76,6 +78,49 @@ export default async function EstatePage({ params }: Props) {
           { name: e.name, url: regionHref(region.slug, `/objects/${e.slug}`) },
         ])}
       />
+      {v2 ? (
+        // v2: a house of this estate on the whole screen, the name in Forum like on the client's cover, the facts as
+        // badges on the photo; the client's own cover stands beside it like a booklet (it has the logo and the slogan)
+        <section className={`v2-hero v2-hero--estate ${photo ? '' : 'v2-hero--none'}`}>
+          {photo && (
+            <div className="v2-hero__img">
+              {/* the 1600 px copy on phones too: the 640 px one is blurry on a full-height screen */}
+              <Pic src={photo} alt={`Дом в посёлке ${e.name}`} priority />
+            </div>
+          )}
+          <div className="container v2-hero__in">
+            <nav className="crumbs" aria-label="Навигация">
+              <a href={regionHref(region.slug)}>{region.name}</a>
+              <span>{e.name}</span>
+            </nav>
+            <div className="v2-hero__text">
+              {eyebrow && <p className="v2-hero__eyebrow">{eyebrow}</p>}
+              <h1 className="v2-hero__title v2-hero__title--xl">{e.name}</h1>
+              {e.tagline && <p className="v2-hero__lead">{e.tagline}</p>}
+              <ul className="v2-hero__badges">
+                {priceFrom && <li>от {formatMillions(priceFrom)}</li>}
+                <li>
+                  {!free.length
+                    ? 'Все дома проданы'
+                    : e.homes
+                      ? `свободно ${free.length} из ${e.homes} ${plural(e.homes, 'дома', 'домов', 'домов')}`
+                      : `свободно ${free.length} ${plural(free.length, 'дом', 'дома', 'домов')}`}
+                </li>
+                {plot && <li>участки {plot} сот.</li>}
+              </ul>
+              <div className="btns">
+                <a href="#genplan" className="btn btn--light">
+                  Смотреть генплан
+                </a>
+                <a href="#lead" className="btn v2-hero__ghost">
+                  Записаться на показ
+                </a>
+              </div>
+            </div>
+            {cover && <img className="v2-hero__poster" src={cover} alt={`Обложка посёлка «${e.name}»`} loading="lazy" decoding="async" />}
+          </div>
+        </section>
+      ) : (
       <div className="container intro">
         <nav className="crumbs" aria-label="Навигация">
           <a href={regionHref(region.slug)}>{region.name}</a>
@@ -127,8 +172,9 @@ export default async function EstatePage({ params }: Props) {
           </div>
         </div>
       </div>
+      )}
 
-      <section className="section" id="genplan" style={{ paddingTop: 40 }}>
+      <section className="section" id="genplan" style={{ paddingTop: v2 ? 72 : 40 }}>
         <div className="container">
           <div className="head head--split">
             <div style={{ display: 'grid', gap: 14 }}>

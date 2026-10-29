@@ -373,3 +373,92 @@ html[data-look="v2"] .footer .logo__name small { color: rgba(255, 255, 255, .7);
 .v2-region__facts { margin: 0; min-width: min(100%, 520px); }
 @media (min-width: 600px) { .v2-region__facts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .v2-region__lead { margin-top: 48px; }
+
+/* ---------- estate and house pages v2: the photo on the whole screen (references: «Сашино», KASKAD) ----------
+   The picture fills the screen under the header; a soft dark fade at the bottom carries the white name and facts. */
+.v2-hero { position: relative; min-height: min(calc(100svh - var(--header-h)), 900px); display: grid; align-items: end; color: #fff; background: var(--brand-deep); overflow: clip; isolation: isolate; }
+.v2-hero__img { position: absolute; inset: 0; z-index: -2; }
+.v2-hero__img img { width: 100%; height: 100%; object-fit: cover; animation: v2-settle 1.6s cubic-bezier(.2, .7, .2, 1) both; }
+.v2-hero::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(10, 24, 16, .5) 0, rgba(10, 24, 16, .18) 45%, rgba(10, 24, 16, 0) 70%),
+    linear-gradient(180deg, rgba(10, 24, 16, .42) 0, rgba(10, 24, 16, 0) 22%, rgba(10, 24, 16, 0) 38%, rgba(10, 24, 16, .78) 100%); }
+.v2-hero__text, .v2-hero .crumbs { text-shadow: 0 1px 18px rgba(0, 0, 0, .35); }
+.v2-hero--none .v2-hero__text, .v2-hero--none .crumbs { text-shadow: none; }
+@keyframes v2-settle { from { transform: scale(1.06); } to { transform: none; } }
+html.no-motion .v2-hero__img img { animation: none; }
+@media (prefers-reduced-motion: reduce) { .v2-hero__img img { animation: none; } }
+.v2-hero--none { min-height: 0; background: var(--tint); color: var(--ink); }
+.v2-hero--none::after { display: none; }
+.v2-hero__in { position: relative; display: grid; gap: 28px; padding-top: 24px; padding-bottom: clamp(32px, 6vh, 64px); min-height: inherit; grid-template-rows: auto 1fr; }
+.v2-hero .crumbs { color: rgba(255, 255, 255, .82); align-self: start; }
+.v2-hero .crumbs a:hover { color: #fff; }
+.v2-hero--none .crumbs { color: var(--muted); }
+.v2-hero__text { display: grid; gap: 14px; align-content: end; justify-items: start; max-width: 760px; }
+.v2-hero .badge { position: static; color: var(--ink); }
+.v2-hero__eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; opacity: .9; }
+.v2-hero__title { font-size: clamp(40px, 6vw, 84px); line-height: .98; text-wrap: balance; }
+.v2-hero__title--xl { font-size: clamp(56px, 10vw, 148px); line-height: .9; }
+.v2-hero__big { font-family: var(--font-serif); font-size: clamp(30px, 3.6vw, 48px); line-height: 1; }
+.v2-hero__big small { font-family: var(--font-sans); font-size: .42em; opacity: .86; margin-left: 4px; }
+.v2-hero__lead { font-size: clamp(17px, 1.5vw, 21px); line-height: 1.45; max-width: 560px; opacity: .92; }
+.v2-hero__badges { display: flex; flex-wrap: wrap; gap: 8px; }
+.v2-hero__badges li { padding: 8px 14px; border-radius: 999px; background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .32); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); font-size: 15px; font-weight: 500; }
+.v2-hero__badges li:first-child { background: #fff; color: var(--brand-ink); border-color: #fff; font-weight: 600; }
+.v2-hero .btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+.v2-hero__ghost { border: 1.5px solid rgba(255, 255, 255, .7); color: #fff; background: transparent; }
+.v2-hero__ghost:hover { background: rgba(255, 255, 255, .14); }
+.v2-hero__note { position: absolute; right: 24px; bottom: 18px; font-size: 12px; opacity: .8; }
+/* the client's own cover beside the name, tilted a little like a booklet on a table */
+.v2-hero__poster { display: none; }
+@media (min-width: 1100px) {
+  .v2-hero--estate .v2-hero__in { grid-template-columns: minmax(0, 1fr) auto; }
+  .v2-hero--estate .crumbs { grid-column: 1 / -1; }
+  .v2-hero__poster { display: block; align-self: end; width: clamp(220px, 19vw, 300px); aspect-ratio: 1673 / 2260; object-fit: cover; border-radius: 14px;
+    box-shadow: 0 30px 70px -20px rgba(0, 0, 0, .55); transform: rotate(2.5deg); transition: transform .5s cubic-bezier(.2, .7, .2, 1); }
+  .v2-hero__poster:hover { transform: rotate(0) translateY(-6px); }
+}
+
+/* the house page: purchase facts in a strip under the photo */
+.v2-hs { display: grid; gap: 18px 40px; padding-top: 40px; padding-bottom: 8px; align-items: center; }
+.v2-hs .hs__price { display: grid; gap: 4px; }
+.v2-hs .hs__price span { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+@media (min-width: 960px) {
+  .v2-hs { grid-template-columns: auto auto minmax(0, 1fr) auto; }
+  .v2-hs .chips { grid-column: 3; }
+  .v2-hs > .btn, .v2-hs > p, .v2-hs > .hs__mortgage { grid-row: 2; }
+  .v2-hs > .btn--gold, .v2-hs > .btn--green { grid-column: 1; }
+  .v2-hs > p { grid-column: 2 / 4; }
+  .v2-hs > .hs__mortgage { grid-column: 2 / 4; justify-self: start; min-width: 320px; }
+  .v2-hs > .btn--ghost { grid-column: 4; }
+}
+
+/* the bar that follows the visitor down the house page */
+.v2-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: rgba(255, 255, 255, .94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--line); box-shadow: 0 -12px 40px -24px rgba(16, 40, 26, .35); transition: transform .4s cubic-bezier(.2, .7, .2, 1); }
+.v2-bar.is-hidden { transform: translateY(110%); }
+.v2-bar__in { max-width: 1280px; margin: 0 auto; padding: 10px var(--gutter, 16px) calc(10px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 12px; }
+.v2-bar__name { display: none; }
+.v2-bar__facts { display: none; }
+.v2-bar__price { font-family: var(--font-serif); font-weight: 400; font-size: 24px; white-space: nowrap; color: var(--ink); margin-right: auto; }
+.v2-bar__cta { min-height: 46px; padding-inline: 18px; white-space: nowrap; }
+@media (min-width: 960px) {
+  .v2-bar__in { padding-block: 12px; gap: 28px; }
+  .v2-bar__name { display: grid; gap: 1px; min-width: 0; }
+  .v2-bar__name b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .v2-bar__name span { font-size: 13px; color: var(--muted); }
+  .v2-bar__facts { display: flex; gap: 22px; margin-right: auto; font-size: 15px; color: var(--muted); }
+  .v2-bar__facts li { white-space: nowrap; }
+  .v2-bar__facts a { color: var(--brand-ink); font-weight: 500; }
+  .v2-bar__price { margin-right: 0; font-size: 28px; }
+}
+/* the bar replaces the floating «Заказать звонок» and the phones' bottom bar on the house page */
+body:has(.v2-bar) .float-call, body:has(.v2-bar) .sticky-cta { display: none; }
+body:has(.v2-bar) { padding-bottom: 72px; }
+/* the bar is there from the first screen: the house's name and area stay above it */
+body:has(.v2-bar) .v2-hero__in { padding-bottom: calc(clamp(32px, 6vh, 64px) + 72px); }
+/* phones: the estate's buttons stay above the phones' own bottom bar (StickyCta) */
+@media (max-width: 959px) {
+  body:has(.sticky-cta):not(:has(.v2-bar)) .v2-hero__in { padding-bottom: 104px; }
+  .v2-hs > .btn--gold { display: none; } /* the bar under the thumb has the same button */
+}
