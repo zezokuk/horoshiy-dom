@@ -92,7 +92,8 @@ function HoverCard({ hover, plots, touch }: { hover: Hover; plots: Plot[]; touch
             </span>
             <span className="note">
               {u.title}
-              {u.plot ? ` · участок ${u.plot}` : ''}
+              {/* the title already says «уч. 18» (the plot number): here only its size, «4 сот.» */}
+              {u.plot ? ` · ${u.plot}` : ''}
             </span>
             {touch ? (
               <Link href={u.href} className="btn btn--green btn--sm" style={{ marginTop: 6 }}>

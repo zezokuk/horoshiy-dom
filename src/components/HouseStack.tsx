@@ -10,7 +10,8 @@ export function HouseStack({ houses }: { houses: HouseView[] }) {
   const seen = new Set<string>()
   const cards = houses
     .filter((h) => {
-      const type = h.title.split(' (')[0]
+      // «Тип 5 (В3), уч. 18» and «Тип 1, ул. Таманская, уч. 6» (price list 27.10): the type is what comes before «(» or «,»
+      const type = h.title.split(/\s*[(,]/)[0]
       // Тип 12 has no photo of its own: the project's render with a pool would pass for a real house
       if (!h.photoCard || seen.has(type) || type.startsWith('Тип 12')) return false
       seen.add(type)
