@@ -179,7 +179,7 @@ export function HomeV2({
                     От дома до города — <em>{road[0].minutes}–{road[road.length - 1].minutes} минут</em>
                   </h2>
                 </div>
-                <p className="v2-head__note">Живёте за городом, а в Краснодар на работу, в школу и по делам ездите как из соседнего района. Время в пути — по данным застройщика.</p>
+                <p className="v2-head__note">Сколько ехать от посёлка до города. Время в пути — по данным застройщика.</p>
               </div>
               <Road stops={road} />
             </div>

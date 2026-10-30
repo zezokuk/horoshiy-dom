@@ -91,7 +91,8 @@ export function HouseFilm({ houses, catalogHref }: { houses: HouseView[]; catalo
           <button type="button" onClick={() => go(-1)} disabled={cur === 0} aria-label="Предыдущий дом">
             ←
           </button>
-          <span className="v2-film__count" aria-live="polite">
+          {/* no aria-live: the film rolls by itself, and a screen reader would announce every card */}
+          <span className="v2-film__count">
             {String(cur + 1).padStart(2, '0')} / {String(list.length).padStart(2, '0')}
           </span>
           <button type="button" onClick={() => go(1)} disabled={cur >= list.length - 1} aria-label="Следующий дом">
