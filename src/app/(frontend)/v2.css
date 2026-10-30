@@ -149,7 +149,8 @@ html.no-motion .h6__sun, html.no-motion .h6__rays, html.no-motion .h6__dapple { 
 
 .h6__veil { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: linear-gradient(180deg, rgba(12, 28, 18, .42) 0%, rgba(12, 28, 18, 0) 34%, rgba(12, 28, 18, 0) 60%, rgba(12, 28, 18, .62) 100%); opacity: 0; animation: h6-fade-in 1s 4.7s both; }
 /* below the sun and the crown, on the open sky, and dark: white lettering dissolved in the glow (the client, 30.10: «солнце мешает, Хороший дом не видно») */
-.h6__copy { position: absolute; z-index: 4; left: 0; right: 0; top: 30cqh; display: grid; justify-items: center; gap: 10px; padding: 0 var(--gutter); text-align: center; color: #14301f; animation: h6-in .9s 4.85s both; }
+/* padding-left: the centre moves a little right, off the crown and over the ridge of the roof */
+.h6__copy { position: absolute; z-index: 4; left: 0; right: 0; top: 30cqh; display: grid; justify-items: center; gap: 10px; padding: 0 var(--gutter) 0 calc(var(--gutter) + 9cqw); text-align: center; color: #14301f; animation: h6-in .9s 4.85s both; }
 .h6__eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; opacity: .9; }
 .h6__title { font-family: var(--font-brand); font-weight: 400; font-size: clamp(46px, min(6.4cqw, 13cqh), 110px); line-height: .92; letter-spacing: .04em; text-transform: uppercase; text-shadow: 0 1px 18px rgba(255, 255, 255, .55); }
 .h6__slogan { font-family: var(--font-brand); font-size: clamp(18px, 1.8cqw, 26px); letter-spacing: .06em; opacity: .95; text-shadow: 0 1px 14px rgba(255, 255, 255, .55); }
@@ -194,7 +195,7 @@ html.no-motion .h6__sun, html.no-motion .h6__rays, html.no-motion .h6__dapple { 
   .h6__scene { transform: scale(.86); }
   .h6__points { display: none; }
   /* just above the roof (the frame is 270cqw wide, the ridge stands 42% of its height up), in the gap under the crown */
-  .h6__copy { top: auto; bottom: calc(12cqh + 84cqw); gap: 6px; }
+  .h6__copy { top: auto; bottom: calc(12cqh + 84cqw); gap: 6px; padding-left: var(--gutter); }
   .h6__bar { flex-direction: column; align-items: stretch; gap: 14px; }
   .h6__lead { max-width: none; }
   .h6__actions { justify-content: space-between; }
@@ -339,16 +340,13 @@ html.no-motion .h6__veil, html.no-motion .h6__points { opacity: 1; }
 .v2-story::-webkit-scrollbar { display: none; }
 .v2-slide { position: relative; scroll-snap-align: start; aspect-ratio: 4 / 5; border-radius: 24px; overflow: hidden; display: grid; align-content: end; gap: 10px; padding: 22px; color: #fff; isolation: isolate; }
 .v2-slide img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
-.v2-slide:not(.v2-slide--intro, .v2-slide--text)::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(10, 22, 14, 0) 45%, rgba(10, 22, 14, .68) 100%); }
+.v2-slide:not(.v2-slide--intro)::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(10, 22, 14, 0) 45%, rgba(10, 22, 14, .68) 100%); }
 .v2-slide__season { font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; opacity: .9; }
 .v2-slide__text { font-family: var(--font-serif); font-size: clamp(30px, 4.4vw, 68px); line-height: 1.04; max-width: 15em; text-wrap: balance; text-shadow: 0 2px 26px rgba(8, 24, 14, .4); }
 .v2-slide--intro { aspect-ratio: auto; align-content: center; gap: 22px; padding: 0 12px 0 0; border-radius: 0; color: var(--ink); }
 .v2-slide__words { font-family: var(--font-serif); font-size: clamp(44px, 6.4vw, 104px); line-height: 1; letter-spacing: -.01em; font-weight: 400; }
 .v2-slide__words span:nth-child(2) { color: var(--brand); }
 .v2-slide__words span:nth-child(3) { color: var(--brand-ink); }
-.v2-slide--text { background: var(--tint); color: var(--ink); align-content: space-between; }
-.v2-slide--text .v2-slide__text { text-shadow: none; }
-.v2-slide--text.v2-slide--winter { background: #eef3f7; }
 
 /* screen 7: included and how to buy */
 .v2-included { display: grid; gap: 20px; }
@@ -416,9 +414,6 @@ html[data-look="v2"] .footer .logo__name small { color: rgba(255, 255, 255, .7);
 .sx.is-pinned .v2-slide:nth-child(6) { height: calc(var(--slide-h) * .8); width: calc(var(--slide-h) * .8 * 4 / 5); }
 .sx.is-pinned .v2-slide:nth-child(7) { align-self: end; height: var(--slide-h); width: calc(var(--slide-h) * 16 / 9); }
 .sx.is-pinned .v2-slide--intro { align-self: center; height: auto; width: min(52vw, 760px); padding: 0; }
-/* a scene whose picture is not made yet stays a quiet caption in the same place */
-.sx.is-pinned .v2-slide.v2-slide--text:nth-child(n) { width: min(30vw, 420px); height: calc(var(--slide-h) * .5); align-self: center; }
-.sx.is-pinned .v2-slide--text .v2-slide__text { font-size: clamp(26px, 2.6vw, 40px); }
 .sx.is-pinned .sx__bar { display: block; position: absolute; left: max(var(--gutter), calc((100vw - 1280px) / 2 + var(--gutter))); right: max(var(--gutter), calc((100vw - 1280px) / 2 + var(--gutter))); bottom: 22px; height: 2px; background: var(--tint-2); }
 .sx.is-pinned .sx__bar > span { display: block; height: 100%; background: var(--brand); transform: scaleX(0); transform-origin: 0 50%; }
 
@@ -546,6 +541,7 @@ body:has(.v2-bar) .v2-hero__in { padding-bottom: calc(clamp(32px, 6vh, 64px) + 7
   .road__stop > i { position: absolute; left: -8px; top: -8px; margin: 0; }
   .road__stop > div { position: absolute; left: -8px; top: 22px; width: 250px; }
   .road__stop--up > div { top: auto; bottom: 22px; }
+  .road__stop--fall > div { top: 58px; }
   .road__stop--last > div { left: auto; right: -8px; text-align: right; }
   .road__stop--start > div { top: auto; bottom: 22px; }
 }

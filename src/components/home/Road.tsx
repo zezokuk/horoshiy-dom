@@ -46,7 +46,8 @@ export function Road({ stops }: { stops: RoadStop[] }) {
             return (
               <li
                 key={s.minutes}
-                className={`road__stop ${n % 2 ? 'road__stop--up' : ''} ${share > 0.8 ? 'road__stop--last' : ''}`}
+                // --fall: the words go under the dot where the road runs downhill, a little lower so the line does not cross them
+                className={`road__stop ${n % 2 ? 'road__stop--up' : Math.cos(share * Math.PI * 3) > 0 ? 'road__stop--fall' : ''} ${share > 0.8 ? 'road__stop--last' : ''}`}
                 style={{ ['--x' as string]: share.toFixed(3), ['--l' as string]: `${(p.x / 1200) * 100}%`, ['--t' as string]: `${(p.y / 240) * 100}%` }}
               >
                 <i aria-hidden />

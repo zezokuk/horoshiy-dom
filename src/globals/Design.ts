@@ -84,7 +84,7 @@ export const Design: GlobalConfig = {
       fields: [
         { name: 'thread', label: 'Золотая нить по главной', type: 'checkbox', defaultValue: true },
         { name: 'motion', label: 'Переходы между страницами и наклон карточек за мышью', type: 'checkbox', defaultValue: true },
-        { name: 'fan', label: '«Выберите проект» веером (выключено — сеткой карточек)', type: 'checkbox', defaultValue: true },
+        { name: 'fan', label: '«Выберите проект»: большой дом и линейка проектов (выключено — сеткой карточек)', type: 'checkbox', defaultValue: true },
         { name: 'sketch', label: 'Блок «План → каркас → дом» на «Построить» и у посёлков «скоро»', type: 'checkbox', defaultValue: true },
         { name: 'key', label: 'Веер фото свободных домов на «Готовых домах»', type: 'checkbox', defaultValue: true },
       ],

@@ -49,7 +49,7 @@ const STEPS: { title: string; text: string; href: string; go: string; for: Who[]
   // settings: admins only (for: [] — the cards above go to their roles, these to nobody else)
   {
     title: 'Как выглядит сайт',
-    text: 'Первый экран главной (5 вариантов), цвета — фирменные или свои, приёмы: нить, веер проектов, переходы. Выключенный приём заменяется простым вариантом.',
+    text: 'Первый экран главной (5 вариантов), цвета — фирменные или свои, приёмы: нить, выбор проекта, переходы. Выключенный приём заменяется простым вариантом.',
     href: '/admin/globals/design',
     go: 'Внешний вид',
     for: [],

@@ -15,8 +15,8 @@ import { mainHref } from '@/lib/site'
 import { byEstateStatus, estateView, genplanEstate, houseView } from '@/lib/view'
 
 /**
- * Home v2 (29.10, after the call of 27.10): nine screens, one thought and one action each — the house opens to the whole
- * screen → who builds → the estates on the client's covers → a free plot on the plan → the houses as a film strip →
+ * Home v2 (29.10, after the call of 27.10): one thought and one action per screen — the house opens to the whole
+ * screen → who builds → the estates on the client's covers → the road from the city → a free plot on the plan → the houses as a film strip →
  * life out of town in the client's words → what the price includes and how to buy → build your own (last: the company
  * sells houses first) → «Это место нужно увидеть самому» (the lead form of Shell).
  */

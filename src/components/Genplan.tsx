@@ -262,6 +262,18 @@ export function Genplan({ estate, houses, stage: wantStage = false }: { estate: 
   const flyRef = useRef<((n: number) => Promise<void>) | null>(null)
   const leaving = useRef(false) // «3D → reality» transition in progress
 
+  // back from a house on another subdomain: the browser restores this very page, curtain up and the plan «still leaving»
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => {
+      if (!e.persisted) return
+      leaving.current = false
+      document.documentElement.classList.remove('is-morphing')
+      morph.set(null)
+    }
+    window.addEventListener('pageshow', onShow)
+    return () => window.removeEventListener('pageshow', onShow)
+  }, [])
+
   // Performance: three.js (≈125 KB gzip) and the scene build only start when the plan is about to be seen
   // (or the visitor presses «Открыть 3D»). Until then a lightweight poster of the same scene is shown.
   const [live, setLive] = useState(false)
@@ -428,7 +440,11 @@ export function Genplan({ estate, houses, stage: wantStage = false }: { estate: 
         ) : plot ? (
           <p style={{ gridColumn: '1 / -1' }}>Участок {plot.n} сейчас не в продаже. Спросите менеджера о похожих домах — подберём вариант в этом или соседнем посёлке.</p>
         ) : (
-          <p style={{ gridColumn: '1 / -1' }}>Нажмите на дом с ценой, чтобы посмотреть его фото и условия.</p>
+          <p style={{ gridColumn: '1 / -1' }}>
+            {freeUnits.length
+              ? 'Нажмите на дом с ценой, чтобы посмотреть его фото и условия.'
+              : 'Свободных домов здесь сейчас нет. Спросите менеджера о похожих домах — подберём вариант в соседнем посёлке.'}
+          </p>
         )}
       </div>
       )}
