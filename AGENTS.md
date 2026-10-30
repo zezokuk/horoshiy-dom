@@ -7,3 +7,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+# Перед любой задачей
+
+Забери свежую ветку `redesign-v2` (в `main` лежит старая версия) и прочитай [СЕЙЧАС.md](СЕЙЧАС.md): кто что делает, чьи файлы и что поменялось. Правила для нейросети Игоря — [KIMI.md](KIMI.md).
+
+Ветка `redesign-v2` отправляется в репозиторий автоматически (`tools/sync.mjs`): на компьютере Ильи при завершении работы Claude и после каждого коммита. Коммить законченные куски сам и с понятным сообщением по-русски, иначе в журнал попадёт безличное «Автосохранение». Вручную `git push` не нужен.

@@ -56,3 +56,6 @@ __pycache__/
 
 # daily backups (tools/backup.py)
 /backups
+
+# personal Claude Code settings
+.claude/settings.local.json
