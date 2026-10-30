@@ -6,7 +6,9 @@ import { HouseFilm } from '@/components/home/HouseFilm'
 import { Included } from '@/components/home/Included'
 import { LifeScenes } from '@/components/home/LifeScenes'
 import { PlotPicker, type PlotEstate } from '@/components/home/PlotPicker'
+import { Road, type RoadStop } from '@/components/home/Road'
 import { ScrollX } from '@/components/home/ScrollX'
+import { Thread } from '@/components/home/Thread'
 import { HeroOpen } from '@/components/heroes/HeroOpen'
 import { img, plural } from '@/lib/data'
 import { mainHref } from '@/lib/site'
@@ -61,6 +63,18 @@ export function HomeV2({
   const covers: CoverView[] = byEstateStatus(
     estates.map((e) => ({ ...estateView(e, houses), near: e.nearby?.[0] ? `${e.nearby[0].label} — ${e.nearby[0].value}` : null })),
   )
+
+  // the road: every estate at its own «рядом» line that leads to Krasnodar, estates at the same distance share a stop
+  const stops = new Map<number, RoadStop>()
+  for (const e of estates) {
+    const place = e.status === 'planned' ? null : e.nearby?.find((n) => /краснодар/i.test(n.label) && /\d+\s*мин/.test(n.value))
+    if (!place) continue
+    const minutes = Number(place.value.match(/(\d+)\s*мин/)![1])
+    const stop = stops.get(minutes) ?? { minutes, estates: [] }
+    stop.estates.push({ name: e.name, href: estateView(e, houses).href, to: place.label })
+    stops.set(minutes, stop)
+  }
+  const road = [...stops.values()].sort((a, b) => a.minutes - b.minutes)
 
   // screen 4: estates with free houses, each with all its houses so the plan shows sold and reserved plots too
   const plots: PlotEstate[] = estates
@@ -127,6 +141,7 @@ export function HomeV2({
         catalogHref={mainHref('/catalog')}
       />
       <div id="next" />
+      <Thread from={600} to={130} />
 
       {order === 'together' ? (
         <section className="section v2-sec" id="who">
@@ -141,15 +156,38 @@ export function HomeV2({
       ) : order === 'estates' ? (
         <>
           {estatesSection}
+          <Thread from={130} to={1070} />
           {founderSection}
         </>
       ) : (
         <>
           {founderSection}
+          <Thread from={130} to={1070} />
           {estatesSection}
         </>
       )}
 
+      {road.length > 1 && (
+        <>
+          <Thread from={1070} to={130} />
+          <section className="section v2-sec" id="road">
+            <div className="container">
+              <div className="v2-head" data-reveal>
+                <div>
+                  <p className="eyebrow">Дорога</p>
+                  <h2 className="title title--lg">
+                    От дома до города — <em>{road[0].minutes}–{road[road.length - 1].minutes} минут</em>
+                  </h2>
+                </div>
+                <p className="v2-head__note">Живёте за городом, а в Краснодар на работу, в школу и по делам ездите как из соседнего района. Время в пути — по данным застройщика.</p>
+              </div>
+              <Road stops={road} />
+            </div>
+          </section>
+        </>
+      )}
+
+      <Thread from={road.length > 1 ? 130 : 1070} to={1070} />
       {plots.length > 0 && (
         <section className="section v2-sec" id="plots">
           <div className="container">
@@ -160,13 +198,14 @@ export function HomeV2({
                   Выберите <em>свой участок</em> на плане посёлка
                 </h2>
               </div>
-              <p className="v2-head__note">Зелёные — свободны. Наведите на дом, чтобы увидеть цену, нажмите — откроется дом.</p>
+              <p className="v2-head__note">Дома с ценой свободны. Нажмите на дом, и он откроется.</p>
             </div>
             <PlotPicker estates={plots} />
           </div>
         </section>
       )}
 
+      <Thread from={1070} to={130} />
       {film.length > 0 && (
         <section className="section v2-sec v2-sec--tint" id="houses">
           <div className="container">
@@ -212,6 +251,7 @@ export function HomeV2({
           />
         </div>
       </section>
+      <Thread from={130} to={600} end />
     </>
   )
 }

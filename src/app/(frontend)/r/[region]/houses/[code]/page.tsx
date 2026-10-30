@@ -159,6 +159,7 @@ export default async function HousePage({ params }: Props) {
           <section className={`v2-hero ${photo ? '' : 'v2-hero--none'}`}>
             {photo && (
               <div className="v2-hero__img">
+                <HouseReady />
                 {/* no 640 px copy: on a phone the photo fills a tall screen, and the small one turned to mush (29.10) */}
                 <Pic src={photo} alt={`${h.title} в посёлке ${e.name}`} priority />
               </div>

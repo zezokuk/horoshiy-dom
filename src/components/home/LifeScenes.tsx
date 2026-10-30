@@ -1,8 +1,10 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { Sprinkle } from './Sprinkle'
 
-// the client's own scenes (27.10, «Мысли и ощущения о загородной жизни»); a picture appears as soon as its file is put
-// into public/design/scenes/ (prompts: БАЗА/Промты/lark/), until then the slide is typographic and narrow
+// the client's own scenes (27.10, «Мысли и ощущения о загородной жизни»); a slide appears as soon as its picture is put
+// into public/design/scenes/ (prompts: БАЗА/Промты/lark/). Without one it stays away: pale empty cards were the weakest
+// moment of the page (call of 30.10)
 const SCENES = [
   { file: 'lawn', season: 'Лето', text: 'Дети на газоне с поливалкой и собакой' },
   { file: 'breakfast', season: 'Лето', text: 'Тихий завтрак на воздухе' },
@@ -31,17 +33,15 @@ export function LifeScenes() {
           шума, а чувство, что своё пространство принадлежит только вам.
         </p>
       </li>
-      {SCENES.map((s) => {
-        const pic = has(s.file)
-        return (
-          <li key={s.file} className={`v2-slide ${pic ? '' : 'v2-slide--text'} ${s.season === 'Зима' ? 'v2-slide--winter' : ''}`}>
-            {/* not lazy: a slide comes in sideways through a transform and was still empty when it reached the screen */}
-            {pic && <img src={`/design/scenes/${s.file}.webp`} alt={s.text} decoding="async" />}
-            <span className="v2-slide__season">{s.season}</span>
-            <span className="v2-slide__text">{s.text}</span>
-          </li>
-        )
-      })}
+      {SCENES.filter((s) => has(s.file)).map((s) => (
+        <li key={s.file} className="v2-slide">
+          {/* not lazy: a slide comes in sideways through a transform and was still empty when it reached the screen */}
+          <img src={`/design/scenes/${s.file}.webp`} alt={s.text} decoding="async" />
+          {s.file === 'lawn' && <Sprinkle />}
+          <span className="v2-slide__season">{s.season}</span>
+          <span className="v2-slide__text">{s.text}</span>
+        </li>
+      ))}
     </ul>
   )
 }

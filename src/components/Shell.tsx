@@ -41,7 +41,11 @@ export async function Shell({ region, children }: { region?: Region; children: R
   const current = region ? regionView(region) : undefined
   const phone = region?.office?.phone || company.phone
   const soon = region?.status === 'soon'
-  const nav = soon ? soonNav() : region ? regionNav(region.slug) : brandNav()
+  // one region on sale: a house lives on krd.…, but it is still one site, so the same menu and the logo always leads to
+  // the main page (Igor, 30.10: «захожу на главную, а она кидает на Краснодар»). The region's own menu returns with a second region
+  const severalRegions = views.filter((r) => r.status === 'active').length > 1
+  const regional = region && !soon && severalRegions
+  const nav = soon ? soonNav() : regional ? regionNav(region.slug) : brandNav()
   const target = { region: region?.slug, phone, hours: region?.office?.hours, interest: soon ? ('future' as const) : undefined }
 
   return (
@@ -51,10 +55,10 @@ export async function Shell({ region, children }: { region?: Region; children: R
         phone={phone}
         regions={views}
         // one region on sale (Moscow is «not today», 27.10): no switcher in the bar, the mobile menu still lists them
-        switcher={views.filter((r) => r.status === 'active').length > 1}
+        switcher={severalRegions}
         current={current}
-        homeHref={region ? regionHref(region.slug) : mainHref('/')}
-        ctaHref={region && !soon ? regionHref(region.slug, '/catalog') : mainHref('/catalog')}
+        homeHref={regional ? regionHref(region.slug) : mainHref('/')}
+        ctaHref={regional ? regionHref(region.slug, '/catalog') : mainHref('/catalog')}
         slogan={company.slogan}
       />
       <main>{children}</main>
@@ -72,6 +76,7 @@ export async function Shell({ region, children }: { region?: Region; children: R
         ask={!soon}
         eyebrow={soon ? 'Лист ожидания' : region ? undefined : 'Показ'}
         offices={!region ? (company.offices ?? []).map((o) => ({ title: o.title, address: o.address, hours: o.hours })) : undefined}
+        phone={!region ? phone : undefined}
       />
       <Footer company={company} regions={views} nav={nav} current={current} />
       <StickyCta phone={phone} label={soon ? 'Узнать первым' : undefined} />

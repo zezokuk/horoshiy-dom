@@ -415,34 +415,6 @@ html:active-view-transition-type(page)::view-transition-new(root) { animation: 3
 ::view-transition-old(.hc-out) { animation: 220ms ease-in both hc-out; }
 @keyframes hc-in { from { opacity: 0; transform: translateX(48px); filter: blur(6px); } }
 @keyframes hc-out { to { opacity: 0; transform: translateX(-48px); filter: blur(6px); } }
-/* ── «Выберите проект» as a fan (reference 49d13… «The Gali», components/ProjectFan) ───────────────────────────── */
-.pf { display: grid; gap: 22px; justify-items: center; }
-.pf__stage { position: relative; width: 100%; max-width: 1120px; }
-.pf__svg { display: block; width: 100%; height: auto; overflow: hidden; } /* the hub is a dome cut by the stage's bottom */
-.pf__w { cursor: pointer; outline: none; transform-box: view-box; transform-origin: 600px 560px; transition: transform .35s cubic-bezier(.2, .7, .2, 1), opacity .3s ease; }
-.pf__bg { fill: var(--gold-soft); }
-.pf__edge { fill: none; stroke: var(--paper); stroke-width: 2px; vector-effect: non-scaling-stroke; transition: stroke .25s ease, stroke-width .25s ease; }
-.pf__label { display: none; font-family: var(--font-serif); font-size: 17px; font-weight: 600; fill: var(--ink); transition: fill .2s ease; }
-.pf__label-i { font-family: var(--font-sans); font-size: 13px; font-weight: 500; fill: var(--muted); }
-.pf__w:hover, .pf__w:focus-visible { transform: translate(var(--dx), var(--dy)); }
-.pf__w:hover .pf__edge, .pf__w:focus-visible .pf__edge { stroke: var(--green); stroke-width: 4px; }
-.pf__w:hover .pf__label, .pf__w:focus-visible .pf__label, .pf__w:hover .pf__label-i { fill: var(--green); }
-@media (hover: hover) and (pointer: fine) { .pf__ring:hover .pf__w:not(:hover) { opacity: .55; } }
-.pf.is-ready .pf__w { animation: pf-deal .6s cubic-bezier(.2, .7, .2, 1) backwards; animation-delay: calc(var(--i) * 35ms); }
-@keyframes pf-deal { from { opacity: 0; transform: rotate(-10deg) scale(.86); } }
-.pf__hub-bg { fill: var(--green-deep); }
-.pf__hub-ring { fill: none; stroke: var(--gold); stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
-.pf.is-ready .pf__hub image { animation: pf-hub .7s ease backwards; }
-@keyframes pf-hub { from { opacity: 0; } }
-.pf__info { display: grid; justify-items: center; gap: 6px; text-align: center; }
-.pf__info b { font-family: var(--font-serif); font-size: clamp(30px, 4vw, 42px); font-weight: 600; line-height: 1; color: var(--green-deep); }
-.pf__info span { color: var(--muted); }
-.pf__info .pf__free { color: var(--green); font-weight: 600; }
-.pf__info .btn { margin-top: 8px; }
-@media (min-width: 900px) { .pf__label { display: inline; } }
-/* narrower screens hide the labels, so the fan takes their room: the slices reach the edges */
-@media (max-width: 899px) { .pf__stage { overflow: hidden; } .pf__svg { width: 128%; margin-inline: -14%; } }
-@media (prefers-reduced-motion: reduce) { .pf.is-ready .pf__w, .pf.is-ready .pf__hub image { animation: none; } }
 
 /* ── «Внешний вид» in the admin (globals/Design, app/(frontend)/layout): colour sets and motion off ────────────────
    Each set swaps the brand tokens of globals.css; the client's own two colours (lib/look.ts → inline style) win over it. */

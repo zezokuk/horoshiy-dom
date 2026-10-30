@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { BuildStory, type TrustPoint } from '@/components/BuildStory'
 import { LeadInline } from '@/components/LeadForm'
 import { ProjectCard } from '@/components/ProjectCard'
-import { ProjectFan } from '@/components/ProjectFan'
+import { ProjectPicker } from '@/components/ProjectPicker'
 import { SketchToHouse } from '@/components/SketchToHouse'
 import { Words } from '@/components/Words'
 import { getCompany, getDesign, getEstates, getHouses, getProjects } from '@/lib/data'
@@ -196,10 +196,10 @@ export default async function BuildPage() {
               Все {projects.length} {plural(projects.length, 'проект', 'проекта', 'проектов')}
             </a>
           </div>
-          {/* reference 49d13…: the chosen project in the hub, the others as a fan of photos around it («Внешний вид»: or the grid) */}
+          {/* the chosen project big, the range under it («Внешний вид»: or the grid) */}
           {effectOn(design, 'fan') ? (
             <>
-              <ProjectFan
+              <ProjectPicker
                 projects={projects.map((p) => ({
                   ...projectCard(p, houses),
                   href: mainHref(`/projects/${p.slug}`),

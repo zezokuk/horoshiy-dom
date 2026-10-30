@@ -78,7 +78,8 @@ html[data-look="v2"] .logo__name { font-family: var(--font-brand); font-weight: 
 html[data-look="v2"] .logo__name small { font-family: var(--font-sans); color: var(--brand-ink); }
 html[data-look="v2"] .header__phone { color: var(--ink); }
 html[data-look="v2"] .nav a:hover, html[data-look="v2"] .nav a[aria-current="page"] { color: var(--brand); }
-html[data-look="v2"]:has(.h6):not(.past-hero) .header:not(:focus-within) { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+/* :focus-visible, not :focus-within: a mouse click on the logo leaves focus in the header, and it then stayed over the first screen */
+html[data-look="v2"]:has(.h6):not(.past-hero) .header:not(:has(:focus-visible)) { transform: translateY(-100%); opacity: 0; pointer-events: none; }
 html[data-look="v2"] .mobile-nav { background: #fff; }
 html[data-look="v2"] .mobile-nav a { font-family: var(--font-serif); }
 
@@ -147,10 +148,11 @@ html.no-motion .h6__sun, html.no-motion .h6__rays, html.no-motion .h6__dapple { 
 .h6__point--left > span { text-align: right; }
 
 .h6__veil { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: linear-gradient(180deg, rgba(12, 28, 18, .42) 0%, rgba(12, 28, 18, 0) 34%, rgba(12, 28, 18, 0) 60%, rgba(12, 28, 18, .62) 100%); opacity: 0; animation: h6-fade-in 1s 4.7s both; }
-.h6__copy { position: absolute; z-index: 4; left: 0; right: 0; top: clamp(40px, 7cqh, 84px); display: grid; justify-items: center; gap: 10px; padding: 0 var(--gutter); text-align: center; color: #fff; animation: h6-in .9s 4.85s both; }
+/* below the sun and the crown, on the open sky, and dark: white lettering dissolved in the glow (the client, 30.10: «солнце мешает, Хороший дом не видно») */
+.h6__copy { position: absolute; z-index: 4; left: 0; right: 0; top: 30cqh; display: grid; justify-items: center; gap: 10px; padding: 0 var(--gutter); text-align: center; color: #14301f; animation: h6-in .9s 4.85s both; }
 .h6__eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; opacity: .9; }
-.h6__title { font-family: var(--font-brand); font-weight: 400; font-size: clamp(46px, 7.4cqw, 118px); line-height: .92; letter-spacing: .04em; text-transform: uppercase; text-shadow: 0 8px 36px rgba(8, 24, 14, .35); }
-.h6__slogan { font-family: var(--font-brand); font-size: clamp(18px, 1.8cqw, 26px); letter-spacing: .06em; opacity: .95; text-shadow: 0 2px 16px rgba(8, 24, 14, .4); }
+.h6__title { font-family: var(--font-brand); font-weight: 400; font-size: clamp(46px, min(6.4cqw, 13cqh), 110px); line-height: .92; letter-spacing: .04em; text-transform: uppercase; text-shadow: 0 1px 18px rgba(255, 255, 255, .55); }
+.h6__slogan { font-family: var(--font-brand); font-size: clamp(18px, 1.8cqw, 26px); letter-spacing: .06em; opacity: .95; text-shadow: 0 1px 14px rgba(255, 255, 255, .55); }
 .h6__bar { position: absolute; z-index: 4; left: 0; right: 0; bottom: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding: 0 clamp(18px, 3cqw, 44px) clamp(18px, 3.4cqh, 34px); color: #fff; animation: h6-in .9s 5.05s both; }
 .h6__lead { max-width: 440px; font-size: clamp(15px, 1.25cqw, 18px); line-height: 1.45; text-shadow: 0 2px 14px rgba(8, 24, 14, .45); }
 .h6__actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
@@ -191,7 +193,8 @@ html.no-motion .h6__sun, html.no-motion .h6__rays, html.no-motion .h6__dapple { 
   .h6__sketch polyline { stroke: #fff; }
   .h6__scene { transform: scale(.86); }
   .h6__points { display: none; }
-  .h6__copy { top: 13cqh; }
+  /* just above the roof (the frame is 270cqw wide, the ridge stands 42% of its height up), in the gap under the crown */
+  .h6__copy { top: auto; bottom: calc(12cqh + 84cqw); gap: 6px; }
   .h6__bar { flex-direction: column; align-items: stretch; gap: 14px; }
   .h6__lead { max-width: none; }
   .h6__actions { justify-content: space-between; }
@@ -267,7 +270,13 @@ html.no-motion .h6__veil, html.no-motion .h6__points { opacity: 1; }
 .v2-cover__poster { position: relative; display: block; aspect-ratio: 1673 / 2260; /* the covers are 1673×2260 posters: shown whole, slogan included */ overflow: hidden; background: var(--tint-2); }
 .v2-cover__poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s cubic-bezier(.2, .7, .2, 1); }
 .v2-cover:hover .v2-cover__poster img { transform: scale(1.03); }
-.v2-cover__blank { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(47, 125, 78, .08) 0 1px, transparent 1px 28px), repeating-linear-gradient(90deg, rgba(47, 125, 78, .08) 0 1px, transparent 1px 28px), var(--tint); }
+.v2-cover__blank { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--brand-ink); font-family: var(--font-brand); font-size: clamp(26px, 2.4vw, 36px); line-height: 1.1; background: repeating-linear-gradient(0deg, rgba(47, 125, 78, .08) 0 1px, transparent 1px 28px), repeating-linear-gradient(90deg, rgba(47, 125, 78, .08) 0 1px, transparent 1px 28px), var(--tint); }
+.v2-cover__go { margin-top: 12px; justify-self: start; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; background: var(--brand); color: #fff; font-size: 14px; font-weight: 600; transition: background .2s; }
+.v2-cover__go i { font-style: normal; transition: transform .25s cubic-bezier(.2, .7, .2, 1); }
+.v2-cover:hover .v2-cover__go { background: var(--brand-ink); }
+.v2-cover:hover .v2-cover__go i { transform: translateX(4px); }
+.v2-cover--soldOut .v2-cover__go, .v2-cover--planned .v2-cover__go { background: var(--tint); color: var(--brand-ink); }
+.v2-cover--soldOut:hover .v2-cover__go, .v2-cover--planned:hover .v2-cover__go { background: var(--tint-2); }
 .v2-cover__tag { position: absolute; z-index: 1; left: 16px; top: 16px; padding: 6px 12px; border-radius: 999px; background: #fff; color: var(--brand-ink); font-size: 12px; font-weight: 600; letter-spacing: .04em; }
 .v2-cover__tag--sold { background: rgba(255, 255, 255, .9); color: var(--muted); }
 .v2-cover__body { display: grid; gap: 4px; align-content: start; padding: 18px 22px 22px; }
@@ -287,9 +296,8 @@ html.no-motion .h6__veil, html.no-motion .h6__points { opacity: 1; }
 .v2-tabs button:hover:not([aria-selected="true"]) { border-color: var(--brand); }
 .v2-plots__count { font-size: 14px; color: var(--muted); }
 .v2-plots__list { display: grid; gap: 8px; }
-.v2-plots__list a { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; background: var(--tint); transition: background .2s, transform .2s; }
+.v2-plots__list a { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 16px; background: var(--tint); transition: background .2s, transform .2s; }
 .v2-plots__list a:hover { background: var(--tint-2); transform: translateX(3px); }
-.v2-plots__no { font-weight: 600; color: var(--brand-ink); font-size: 14px; }
 .v2-plots__what { display: grid; gap: 1px; min-width: 0; }
 .v2-plots__what b { font-size: 15px; font-weight: 600; }
 .v2-plots__what span { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -378,6 +386,7 @@ html[data-look="v2"] .footer .logo { color: #fff; }
 html[data-look="v2"] .footer .logo__name small { color: rgba(255, 255, 255, .7); }
 /* phones and tablets: the sticky bottom bar (StickyCta) already offers the call and the form — the hero's bar sits
    above it and drops its own «Выбрать дом»; an empty founder frame does not take a whole screen */
+@media (max-width: 599px) { .h6__eyebrow { display: none; } } /* the gap under the crown holds the name and the slogan only */
 @media (max-width: 959px) {
   .h6__bar { padding-bottom: 92px; }
   .h6__actions .btn { display: none; }
@@ -501,3 +510,73 @@ body:has(.v2-bar) .v2-hero__in { padding-bottom: calc(clamp(32px, 6vh, 64px) + 7
   body:has(.sticky-cta):not(:has(.v2-bar)) .v2-hero__in { padding-bottom: 104px; }
   .v2-hs > .btn--gold { display: none; } /* the bar under the thumb has the same button */
 }
+/* ---------- the line that goes on from the first screen (components/home/Thread): across the gaps between screens, computers only ---------- */
+.thread { position: relative; z-index: 2; height: 0; pointer-events: none; }
+.thread > svg:first-child { position: absolute; left: 0; top: -120px; width: 100%; height: 240px; overflow: visible; }
+.thread path { stroke: var(--brand); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--p, 0)); }
+.thread--end > svg:first-child { height: 146px; }
+.thread__house { position: absolute; left: 50%; top: 24px; width: 40px; translate: -50% 0; overflow: visible; }
+.thread__house path { stroke-width: 2; vector-effect: none; stroke-dashoffset: calc(1 - clamp(0, calc((var(--p, 0) - .75) * 4), 1)); }
+@media (max-width: 959px) { .thread { display: none; } }
+
+/* ---------- «Дорога» (components/home/Road): computers a wave from left to right, phones a line down ---------- */
+.road__map { position: relative; }
+.road__map > svg { display: none; }
+.road__map::before { content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px; background: var(--tint-2); }
+.road__rail { position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px; background: var(--brand); transform: scaleY(var(--p, 0)); transform-origin: 50% 0; }
+.road__stops { position: relative; display: grid; gap: 26px; margin: 0; padding: 0; list-style: none; }
+.road__stop { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 16px; align-items: start; }
+.road__stop > i { position: relative; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--brand); background: #fff; margin-top: 8px; }
+.road__stop--start > i { background: var(--brand); }
+.road__stop > div { display: grid; gap: 2px; }
+.road__stop b { font-family: var(--font-serif); font-weight: 400; font-size: clamp(26px, 2.6vw, 38px); line-height: 1.05; color: var(--ink); }
+.road__names { font-weight: 600; font-size: 15px; color: var(--brand-ink); }
+.road__names a { border-bottom: 1px solid currentColor; }
+.road__names a:hover { color: var(--brand); }
+.road__to { font-size: 13px; color: var(--muted); line-height: 1.35; }
+@media (min-width: 960px) {
+  .road__map { height: 460px; }
+  .road__map::before, .road__rail { display: none; }
+  .road__map > svg, .road__stops { display: block; position: absolute; left: 0; width: 100%; top: 110px; height: 240px; }
+  .road__map > svg { overflow: visible; }
+  .road__base { stroke: var(--tint-2); stroke-width: 2; vector-effect: non-scaling-stroke; }
+  .road__line { stroke: var(--brand); stroke-width: 2.4; stroke-linecap: round; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--p, 0)); }
+  /* every stop stands on the wave and comes up when the line reaches it; its words go under the dot, or over it for every second one */
+  .road__stop { position: absolute; left: var(--l); top: var(--t); display: block; width: 0; height: 0; opacity: clamp(0, calc((var(--p, 0) - var(--x)) * 16 + 1), 1); transition: opacity .3s; }
+  .road__stop > i { position: absolute; left: -8px; top: -8px; margin: 0; }
+  .road__stop > div { position: absolute; left: -8px; top: 22px; width: 250px; }
+  .road__stop--up > div { top: auto; bottom: 22px; }
+  .road__stop--last > div { left: auto; right: -8px; text-align: right; }
+  .road__stop--start > div { top: auto; bottom: 22px; }
+}
+
+/* ---------- the day on the lawn: the water is alive, the page warms towards the evening ---------- */
+.v2-slide__water { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; pointer-events: none; }
+.sx.is-pinned .sx__stick { background: color-mix(in srgb, #fbf0dd calc(var(--p, 0) * 100%), #fff); }
+
+/* ---------- the last screen: the number, big ---------- */
+.lead-phone { display: inline-block; margin-top: 10px; font-family: var(--font-brand); font-size: clamp(30px, 3.6vw, 52px); line-height: 1.05; letter-spacing: .01em; color: #fff; white-space: nowrap; transition: opacity .2s; }
+.lead-phone:hover { opacity: .8; }
+
+/* ---------- «Выберите проект» on «Построить» (components/ProjectPicker): the chosen house big, the range under it ---------- */
+.pp { display: grid; gap: 22px; }
+.pp__main { display: grid; gap: 22px; align-items: center; }
+@media (min-width: 960px) { .pp__main { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 48px; } }
+.pp__photo { margin: 0; aspect-ratio: 16 / 10; border-radius: var(--radius); overflow: hidden; background: var(--tint); }
+.pp__photo img { width: 100%; height: 100%; object-fit: cover; animation: pp-in .6s ease both; }
+@keyframes pp-in { from { opacity: 0; transform: scale(1.02); } }
+.pp__info { display: grid; gap: 10px; justify-items: start; }
+.pp__info h3 { font-family: var(--font-brand); font-weight: 400; font-size: clamp(36px, 4vw, 60px); line-height: 1; color: var(--ink); }
+.pp__facts { color: var(--muted); font-size: 16px; }
+.pp__free { color: var(--brand-ink); font-weight: 600; font-size: 15px; }
+.pp__info .btn { margin-top: 10px; }
+.pp__range { display: grid; grid-auto-flow: column; grid-auto-columns: 148px; gap: 12px; overflow-x: auto; padding: 4px 4px 12px; scrollbar-width: thin; }
+.pp__range button { display: grid; gap: 2px; width: 100%; padding: 0; border: 0; background: none; color: var(--ink); text-align: left; font: inherit; cursor: pointer; }
+.pp__thumb { display: block; aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden; background: var(--tint); margin-bottom: 6px; outline: 2px solid transparent; outline-offset: 2px; transition: outline-color .2s; }
+.pp__thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s cubic-bezier(.2, .7, .2, 1); }
+.pp__range button:hover img { transform: scale(1.05); }
+.pp__range button[aria-pressed="true"] .pp__thumb, .pp__range button:focus-visible .pp__thumb { outline-color: var(--brand); }
+.pp__range b { font-size: 15px; font-weight: 600; }
+.pp__range span:not(.pp__thumb) { font-size: 13px; color: var(--muted); }
+html.no-motion .pp__photo img { animation: none; }
+@media (prefers-reduced-motion: reduce) { .pp__photo img { animation: none; } }

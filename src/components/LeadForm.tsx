@@ -244,6 +244,7 @@ export function LeadSection({
   ask = false,
   eyebrow = 'Подбор дома',
   offices,
+  phone,
 }: {
   title: string
   text: string
@@ -253,6 +254,8 @@ export function LeadSection({
   eyebrow?: string
   /** sales offices under the text (brand pages, v2): where to come for the showing */
   offices?: { title: string; address: string; hours?: string | null }[]
+  /** the number, big: the last thing on the page is the shortest way to a call (ERA's last screen) */
+  phone?: string | null
 }) {
   return (
     <section className="section" id="lead" style={{ paddingBottom: 96 }}>
@@ -274,6 +277,11 @@ export function LeadSection({
                   </li>
                 ))}
               </ul>
+            )}
+            {phone && (
+              <a className="lead-phone" href={telHref(phone)}>
+                {phone}
+              </a>
             )}
           </div>
           <LeadForm cta={cta} target={target} ask={ask} />

@@ -22,6 +22,8 @@ export function MorphLayer() {
   useEffect(() => {
     if (!m) return
     document.documentElement.classList.add('is-morphing')
+    // arrived from another subdomain: the layer takes over from what the head script put up before the first paint
+    document.documentElement.classList.remove('morph-carried')
     const finish = () => {
       // reveal the page's own photo right under the landed copy, then fade the copy out — no gap, no double
       document.documentElement.classList.remove('is-morphing')
@@ -36,6 +38,8 @@ export function MorphLayer() {
     }
     window.addEventListener(HOUSE_READY, onReady)
     timers.current.push(window.setTimeout(finish, 4000)) // safety: never keep the curtain if something goes wrong
+    const already = morph.landed()
+    if (already) onReady(new CustomEvent(HOUSE_READY, { detail: already.rect }))
     return () => {
       window.removeEventListener(HOUSE_READY, onReady)
       timers.current.forEach(clearTimeout)
@@ -45,7 +49,7 @@ export function MorphLayer() {
 
   if (!m || !rect || t.of !== m) return null
   return (
-    <div className={`morph morph--${phase}`} aria-hidden>
+    <div className={`morph morph--${phase} ${m.carried ? 'morph--carried' : ''}`} aria-hidden>
       <div className="morph__curtain" />
       <div className="morph__photo" style={{ top: rect.top, left: rect.left, width: rect.width, height: rect.height }}>
         <img src={m.src} alt="" />

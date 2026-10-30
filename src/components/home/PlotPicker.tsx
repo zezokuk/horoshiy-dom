@@ -33,13 +33,13 @@ export function PlotPicker({ estates }: { estates: PlotEstate[] }) {
         <ul className="v2-plots__list">
           {free.slice(0, 6).map((h) => (
             <li key={h.code}>
+              {/* the buyer's words: how big and how much. «Тип 1 (В2), уч. 28» said nothing (call of 30.10) and waits on the house page */}
               <a href={h.href}>
-                <span className="v2-plots__no">{h.plotNo ? `№ ${h.plotNo}` : '—'}</span>
                 <span className="v2-plots__what">
-                  <b>{h.title}</b>
-                  <span>
-                    {h.area.toLocaleString('ru-RU')} м²{h.plot ? ` · ${h.plot}` : ''}
-                  </span>
+                  <b>
+                    Дом {h.area.toLocaleString('ru-RU')} м²{h.mansard ? ` + мансарда ${h.mansard} м²` : ''}
+                  </b>
+                  {h.plot && <span>Участок {h.plot}</span>}
                 </span>
                 <span className="v2-plots__price">{formatMillions(h.price)}</span>
               </a>

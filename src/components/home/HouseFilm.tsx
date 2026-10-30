@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { formatMillions, plural } from '@/lib/format'
 import type { HouseView } from '@/lib/view'
 
@@ -13,15 +13,65 @@ const BUDGETS = [
 
 /**
  * Home v2, screen 5 «Дома» (Igor, 27.10: cards that roll like a film strip, swiped to the right): the free houses with
- * real prices around a centre card, the budget chips of KASKAD on top. Drag, swipe, arrows or the keyboard.
+ * real prices around a centre card, the budget chips of KASKAD on top. Drag, swipe, two fingers on a trackpad, arrows or
+ * the keyboard; on its own it rolls slowly while nobody touches it (30.10).
  */
 export function HouseFilm({ houses, catalogHref }: { houses: HouseView[]; catalogHref: string }) {
   const [budget, setBudget] = useState<(typeof BUDGETS)[number]['key']>('all')
   const list = useMemo(() => houses.filter((h) => BUDGETS.find((b) => b.key === budget)!.test(h.price)), [houses, budget])
   const [at, setAt] = useState(0)
   const cur = Math.min(at, Math.max(list.length - 1, 0))
-  const go = (d: number) => setAt((n) => Math.max(0, Math.min(list.length - 1, Math.min(n, list.length - 1) + d)))
+  const go = (d: number) => {
+    touched.current = Date.now()
+    setAt((n) => Math.max(0, Math.min(list.length - 1, Math.min(n, list.length - 1) + d)))
+  }
   const drag = useRef<{ x: number; moved: boolean } | null>(null)
+  const stage = useRef<HTMLDivElement>(null)
+  const touched = useRef(0) // when the visitor last moved the film
+  const size = useRef(list.length) // the two effects below live for the whole page, the list changes with the budget
+  useEffect(() => {
+    size.current = list.length
+  }, [list.length])
+
+  // two fingers on a trackpad: a sideways gesture rolls one card; a non-passive listener, or the browser swipes «back» instead
+  useEffect(() => {
+    const el = stage.current
+    if (!el) return
+    let sum = 0
+    let lock = 0
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return
+      e.preventDefault()
+      const now = Date.now()
+      touched.current = now
+      if (now < lock) return
+      sum += e.deltaX
+      if (Math.abs(sum) < 40) return
+      const d = sum > 0 ? 1 : -1
+      setAt((n) => Math.max(0, Math.min(size.current - 1, Math.min(n, size.current - 1) + d)))
+      sum = 0
+      lock = now + 420 // one gesture throws dozens of events: one card per gesture
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [])
+
+  // rolls by itself only on screen, and waits for a visitor who is looking at or moving a card
+  useEffect(() => {
+    const el = stage.current
+    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('no-motion')) return
+    let seen = false
+    const io = new IntersectionObserver(([e]) => (seen = e.isIntersecting), { threshold: 0.4 })
+    io.observe(el)
+    const timer = window.setInterval(() => {
+      const busy = Date.now() - touched.current < 9000 || el.matches(':hover') || el.contains(document.activeElement)
+      if (seen && !busy && !document.hidden) setAt((n) => (Math.min(n, size.current - 1) + 1) % Math.max(size.current, 1))
+    }, 4500)
+    return () => {
+      io.disconnect()
+      window.clearInterval(timer)
+    }
+  }, [])
 
   return (
     <div className="v2-film">
@@ -52,6 +102,7 @@ export function HouseFilm({ houses, catalogHref }: { houses: HouseView[]; catalo
 
       <div
         className="v2-film__stage"
+        ref={stage}
         tabIndex={0}
         aria-roledescription="карусель"
         aria-label="Свободные дома"

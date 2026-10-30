@@ -27,6 +27,7 @@ export function ScrollX({ track, children }: { track: string; children: ReactNod
       const p = Math.min(1, Math.max(0, -el.getBoundingClientRect().top / dist))
       row.style.transform = `translate3d(${-p * dist}px, 0, 0)`
       if (bar.current) bar.current.style.transform = `scaleX(${p})`
+      el.style.setProperty('--p', p.toFixed(3)) // the page warms up towards the evening as the day goes by (v2.css)
     }
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(paint)

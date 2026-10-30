@@ -27,7 +27,9 @@ export function EstateCovers({ estates, grid = false }: { estates: CoverView[]; 
               {e.cover ? (
                 <img src={e.cover} srcSet={e.coverCard ? `${e.coverCard} 640w, ${e.cover} 1600w` : undefined} sizes="(min-width: 960px) 420px, 82vw" alt={`Посёлок «${e.name}»`} loading="lazy" decoding="async" />
               ) : (
-                <span className="v2-cover__blank" aria-hidden />
+                <span className="v2-cover__blank">
+                  <span>{e.name}</span>
+                </span>
               )}
               {e.status === 'planned' && <span className="v2-cover__tag">Скоро</span>}
               {e.status === 'soldOut' && <span className="v2-cover__tag v2-cover__tag--sold">Все дома проданы</span>}
@@ -40,6 +42,10 @@ export function EstateCovers({ estates, grid = false }: { estates: CoverView[]; 
                 {e.priceFrom ? ` · от ${formatMillions(e.priceFrom)}` : ''}
               </span>
               {e.near && <span className="v2-cover__near">{e.near}</span>}
+              {/* says what the picture is for: without it the cover read as a book, not as an estate one can open (call of 30.10) */}
+              <span className="v2-cover__go">
+                {e.status === 'planned' ? 'Узнать о старте продаж' : e.status === 'soldOut' ? 'Посмотреть посёлок' : 'Смотреть дома'} <i aria-hidden>→</i>
+              </span>
             </span>
           </a>
         ))}

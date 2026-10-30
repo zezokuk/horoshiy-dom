@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { STATUS_LABEL, formatPrice } from '@/lib/format'
 import { EDGE, FILL, PAD, STREET, W, footprint, layout, type GenplanEstate, type Plot } from '@/lib/genplan'
-import { morph } from '@/lib/morph'
+import { carryMorph, morph } from '@/lib/morph'
 import { houseTitle, type HouseView } from '@/lib/view'
 import { Filters, Ribbon, isFiltered, passes, useFilter } from './GenplanFilters'
 
@@ -249,7 +249,9 @@ export function Genplan({ estate, houses, stage: wantStage = false }: { estate: 
   const shown = useMemo(() => freeUnits.filter((x) => passes(x.u, f)), [freeUnits, f])
   const match = useMemo(() => (stage && isFiltered(f) ? shown.map((x) => x.n) : null), [stage, f, shown])
   const [view, setView] = useState<'3d' | '2d'>('3d')
-  const [active, setActive] = useState<number | null>(() => plan.plots.find((p) => p.status === 'free')?.n ?? null)
+  // nothing chosen until the visitor chooses: a house shown by itself raised «почему именно этот дом?» (call of 30.10).
+  // Only the stage keeps one, its ribbon shows the choice
+  const [active, setActive] = useState<number | null>(() => (stage ? (plan.plots.find((p) => p.status === 'free')?.n ?? null) : null))
   const onFail = useCallback(() => setView('2d'), [])
   const plot = plan.plots.find((p) => p.n === active)
   const router = useRouter()
@@ -277,10 +279,14 @@ export function Genplan({ estate, houses, stage: wantStage = false }: { estate: 
       if (leaving.current) return
       leaving.current = true
       router.prefetch(u.href)
+      // the house may live on another subdomain: its page asks for the photo at that address
+      const to = new URL(u.href, window.location.href)
+      const away = to.origin !== window.location.origin
+      const src = u.photo && (away ? new URL(u.photo, to).href : u.photo)
       // warm the big photo while the camera flies: the overlay and the house page reuse it from cache
-      if (u.photo) {
+      if (src) {
         const warm = new Image()
-        warm.src = u.photo
+        warm.src = src
         warm.decode().catch(() => {})
       }
       setHover(null)
@@ -289,8 +295,13 @@ export function Genplan({ estate, houses, stage: wantStage = false }: { estate: 
       // hand over to the layout-level transition layer: photo blooms here, the route changes under a curtain,
       // then the photo lands in its slot on the house page (components/MorphLayer.tsx)
       const r = viewRef.current?.getBoundingClientRect()
-      if (r && u.photo) morph.set({ src: u.photo, caption: houseTitle(u), rect: { top: r.top, left: r.left, width: r.width, height: r.height } })
-      setTimeout(() => router.push(u.href), u.photo ? 950 : 0) // swap pages once the curtain is fully opaque
+      if (r && src) morph.set({ src, caption: houseTitle(u), rect: { top: r.top, left: r.left, width: r.width, height: r.height } })
+      // swap pages once the curtain is fully opaque
+      setTimeout(() => {
+        if (!away) return router.push(u.href)
+        carryMorph()
+        window.location.assign(u.href)
+      }, src ? 950 : 0)
     },
     [router],
   )
@@ -414,11 +425,10 @@ export function Genplan({ estate, houses, stage: wantStage = false }: { estate: 
               Подробнее о доме
             </Link>
           </>
+        ) : plot ? (
+          <p style={{ gridColumn: '1 / -1' }}>Участок {plot.n} сейчас не в продаже. Спросите менеджера о похожих домах — подберём вариант в этом или соседнем посёлке.</p>
         ) : (
-          <p style={{ gridColumn: '1 / -1' }}>
-            {plot ? `Участок ${plot.n} сейчас не в продаже.` : 'Выберите дом.'} Спросите менеджера о похожих домах — подберём вариант в этом или соседнем
-            посёлке.
-          </p>
+          <p style={{ gridColumn: '1 / -1' }}>Нажмите на дом с ценой, чтобы посмотреть его фото и условия.</p>
         )}
       </div>
       )}

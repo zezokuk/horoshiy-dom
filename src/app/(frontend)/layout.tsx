@@ -69,6 +69,12 @@ export default async function FrontendLayout({ children }: { children: React.Rea
       <head>
         {/* Reveal animations only arm when JS runs, so content is never hidden without it. */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+        {/* «3D → house» arriving from another subdomain (lib/morph): curtain and photo before the first paint, or the page flashes */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var m=document.cookie.match(/(?:^|; )hd_morph=([^;]*)/);if(m){var s=JSON.parse(decodeURIComponent(m[1])),d=document.documentElement,r=s.rect;d.classList.add('morph-carried','is-morphing');d.style.setProperty('--mc-t',r.top+'px');d.style.setProperty('--mc-l',r.left+'px');d.style.setProperty('--mc-w',r.width+'px');d.style.setProperty('--mc-h',r.height+'px');d.style.setProperty('--mc-src','url("'+encodeURI(s.src)+'")')}}catch(e){}`,
+          }}
+        />
       </head>
       <body>
         <ScrollProgress />

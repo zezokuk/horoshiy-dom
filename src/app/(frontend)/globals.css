@@ -509,7 +509,17 @@ body { padding-bottom: 76px; }
 .morph--land .morph__caption, .morph--out .morph__caption { opacity: 0; }
 .morph__caption span { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-soft); }
 .morph__caption b { font-family: var(--font-serif); font-size: 22px; }
-.is-morphing .house__photo img { opacity: 0; } /* the layer's photo stands in until it has landed */
+.is-morphing .house__photo img, .is-morphing .v2-hero__img img { opacity: 0; } /* the layer's photo stands in until it has landed */
+html[data-look="v2"] .morph--land .morph__photo, html[data-look="v2"] .morph--out .morph__photo { border-radius: 0; } /* v2: the house's photo fills the screen */
+/* arrived from another subdomain: the same curtain and photo, painted by the head script until the layer takes over.
+   They clear by themselves after 5 s, so a page whose scripts failed is never left covered */
+.morph-carried body::before, .morph-carried body::after { content: ""; position: fixed; animation: carried-away .3s 5s both; pointer-events: none; }
+.morph-carried body::before { inset: 0; z-index: 47; background: radial-gradient(circle at 50% 45%, #fffaf1 0%, var(--paper) 55%, #efe6d6 100%); }
+.morph-carried body::after { z-index: 48; top: var(--mc-t); left: var(--mc-l); width: var(--mc-w); height: var(--mc-h); border-radius: 12px; background: var(--mc-src) center / cover no-repeat; }
+@keyframes carried-away { to { opacity: 0; visibility: hidden; } }
+.morph--carried .morph__curtain { animation: none; }
+.morph--carried:not(.morph--land, .morph--out) .morph__photo img { animation: reality-drift 8s linear both; }
+.morph--carried.morph--land .morph__curtain, .morph--carried.morph--out .morph__curtain { animation: curtain-out .65s .12s ease both; }
 @media (prefers-reduced-motion: reduce) { .morph, .morph * { animation: none !important; transition: none !important; } }
 .hover-card img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
 .hover-card__body { padding: 12px 14px 14px; display: grid; gap: 4px; font-size: 14px; }
