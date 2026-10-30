@@ -92,7 +92,9 @@ function writeJournal() {
   const rows = raw.split('\x01').filter(Boolean).map((c) => {
     const [head, ...rest] = c.split('\n')
     const [date, who, subject] = head.split('\x02')
-    const files = rest.filter((f) => f && f !== JOURNAL).map((f) => basename(f))
+    // «page.tsx, page.tsx» says nothing: the folder is what tells such files apart
+    const label = (f) => (/^(page|layout|route)\./.test(basename(f)) ? f.split('/').slice(-2).join('/') : basename(f))
+    const files = rest.filter((f) => f && f !== JOURNAL).map(label)
     const short = subject.length > 170 ? `${subject.slice(0, 170)}…` : subject
     const list = files.length ? ` _(${files.slice(0, 4).join(', ')}${files.length > 4 ? ` и ещё ${files.length - 4}` : ''})_` : ''
     return `- ${date} · ${NAMES[who] || who} · ${short}${list}`
