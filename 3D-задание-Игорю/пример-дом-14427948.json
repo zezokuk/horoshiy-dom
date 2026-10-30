@@ -1,0 +1,52 @@
+{
+  "card": "14427948",
+  "type": "Тип 5",
+  "area_m2": 105,
+  "mansard_m2": 67,
+  "confidence": "medium",
+  "storeys": 1,
+  "mansard": true,
+  "footprint_m": [[-0.5, -5.5], [6.0, -5.5], [6.0, 5.5], [-6.0, 5.5], [-6.0, -2.0], [-0.5, -2.0]],
+  "wall_height_m": 3.0,
+  "walls": { "material": "brick", "color": "#a0452e", "accent_color": "#4a3a36", "plinth_color": null },
+  "frame_color": "#2f3133",
+  "roof": {
+    "type": "hip",
+    "pitch_deg": 28,
+    "overhang_m": 0.6,
+    "color": "#4b4e54",
+    "dormers": [{ "at_m": [-3.5, 1.0], "faces": "left", "width_m": 1.6, "type": "gable" }],
+    "skylights": 0
+  },
+  "windows": [
+    { "at_m": [-4.6, 5.5], "width_m": 1.2, "height_m": 1.5, "sill_m": 0.9, "corner": true },
+    { "at_m": [3.4, 5.5], "width_m": 1.6, "height_m": 1.5, "sill_m": 0.9, "corner": false },
+    { "at_m": [6.0, -2.5], "width_m": 1.4, "height_m": 1.5, "sill_m": 0.9, "corner": false },
+    { "at_m": [6.0, 2.6], "width_m": 1.6, "height_m": 1.5, "sill_m": 0.9, "corner": false },
+    { "at_m": [-6.0, 0.2], "width_m": 1.4, "height_m": 1.5, "sill_m": 0.9, "corner": false },
+    { "at_m": [-6.0, 3.8], "width_m": 1.2, "height_m": 1.5, "sill_m": 0.9, "corner": true },
+    { "at_m": [3.2, -5.5], "width_m": 1.6, "height_m": 1.5, "sill_m": 0.9, "corner": false },
+    { "at_m": [-3.2, -2.0], "width_m": 1.4, "height_m": 1.5, "sill_m": 0.9, "corner": false }
+  ],
+  "doors": [
+    { "at_m": [-0.3, 5.5], "width_m": 1.0, "main": true },
+    { "at_m": [-0.5, -3.8], "width_m": 1.6, "main": false }
+  ],
+  "porch": { "at_m": [-0.3, 5.5], "width_m": 2.8, "depth_m": 1.6, "columns": 2, "column_material": "brick", "covered": true },
+  "terraces": [
+    { "polygon_m": [[-6.0, -5.5], [-0.5, -5.5], [-0.5, -2.0], [-6.0, -2.0]], "covered": true, "columns": 1 }
+  ],
+  "chimney": null,
+  "notes": [
+    "Пример формата. Значения оценены по планировке и фото на глаз, точность ±0,5 м.",
+    "Терраса 19 м² по тексту карточки: вырез в контуре сзади слева, под общей крышей.",
+    "Мансардное окно — по иконке дома в карточке; на фото с фасада его почти не видно."
+  ],
+  "evidence": {
+    "footprint_m": "планировка: вход снизу = фасад; терраса сверху слева",
+    "walls": "фото: красный кирпич с тёмными вставками",
+    "roof": "фото + иконка: вальмовая, тёмно-серая металлочерепица, слуховое окно",
+    "windows": "планировка + фото фасада; боковые и задние — только по планировке",
+    "porch": "фото: два кирпичных столба у входа"
+  }
+}
