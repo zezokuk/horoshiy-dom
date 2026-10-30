@@ -15,10 +15,11 @@ const NAMES = { 'Ilia Berdnikov': 'Илья', zezokuk: 'Игорь' }
 const MAX_MB = 50
 const MAX_DELETED = 30
 const FORBIDDEN = [/(^|\/)\.env$/, /(^|\/)\.env\.(?!example$)/, /\.(db|sqlite|pem|key)$/, /\.db\./, /ЛИЧНОЕ-/]
-const SECRET = /gh[pousr]_[A-Za-z0-9]{30,}|sk-[A-Za-z0-9_-]{30,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY/
+const SECRET = /\bgh[pousr]_[A-Za-z0-9]{30,}|\bsk-[A-Za-z0-9_-]{30,}|\bAKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY/
 
 // a post-commit hook runs with git's own variables set, they would point the nested commands at the hook's index
-const env = { ...process.env, HD_SYNC: '1' }
+// and nobody is there to answer a password prompt, it would hang until the hook is killed
+const env = { ...process.env, HD_SYNC: '1', GIT_TERMINAL_PROMPT: '0' }
 for (const k of ['GIT_DIR', 'GIT_INDEX_FILE', 'GIT_PREFIX', 'GIT_WORK_TREE']) delete env[k]
 
 const git = (...args) => {
