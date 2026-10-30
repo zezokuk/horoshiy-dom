@@ -100,13 +100,15 @@ html[data-look="v2"] .float-call { background: var(--brand); }
    Home v2, screen 1 (components/heroes/HeroOpen): handshake → the house is drawn in a window → the real house →
    the window opens to the whole screen (ERA Residence); scrolling pushes the camera in.
    ====================================================================== */
-.h6 { position: relative; height: 100svh; min-height: 600px; margin-top: calc(var(--header-h) * -1); background: #fff; overflow: clip; isolation: isolate; container-type: size; }
+/* the pin: the screen stays put for 1.6 screens of scrolling while the day turns into evening (--dusk: HeroOpen) */
+.h6-pin { --dusk: 0; position: relative; height: 260svh; margin-top: calc(var(--header-h) * -1); }
+.h6 { position: sticky; top: 0; height: 100svh; min-height: 600px; background: #fff; overflow: clip; isolation: isolate; container-type: size; }
 .h6__pane { position: absolute; inset: 0; z-index: 1; overflow: hidden; background-color: #f6f9f7; background-image: repeating-linear-gradient(0deg, rgba(47, 125, 78, .07) 0 1px, transparent 1px 40px), repeating-linear-gradient(90deg, rgba(47, 125, 78, .07) 0 1px, transparent 1px 40px); clip-path: inset(15% 15% 15% 15% round 28px); animation: h6-open 1.5s 4.05s cubic-bezier(.7, 0, .2, 1) both; }
 .h6__scene { position: absolute; inset: 0; transform: scale(.7); animation: h6-grow 1.5s 4.05s cubic-bezier(.7, 0, .2, 1) both; }
 /* the photo's own box, covering the stage by hand: everything inside is placed in photo pixels */
 .h6__frame { position: absolute; left: 50%; top: 50%; width: max(100cqw, 100cqh * 1673 / 897); aspect-ratio: 1673 / 897; translate: -50% -50%; transform-origin: 50% 72%; }
 @supports (animation-timeline: scroll()) {
-  .h6__frame { animation: h6-push linear both; animation-timeline: scroll(root); animation-range: 0 100svh; }
+  .h6__frame { animation: h6-push linear both; animation-timeline: scroll(root); animation-range: 0 160svh; }
 }
 .h6__real { position: absolute; inset: 0; animation: h6-wipe 1.3s 2.95s cubic-bezier(.65, 0, .2, 1) both; }
 .h6__real img { width: 100%; height: 100%; object-fit: cover; }
@@ -118,11 +120,18 @@ html[data-look="v2"] .float-call { background: var(--brand); }
 .h6__sketch .hl-hatch polyline { animation-delay: 2.7s; }
 
 /* evening: the same frame under dusk, warm light in the real windows (an illustration until the client's evening render) */
-.h6__night { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease; pointer-events: none; }
+.h6__night { position: absolute; inset: 0; opacity: var(--dusk); pointer-events: none; }
 .h6__night::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, #16234a 0%, #273562 30%, #3d3c5c 58%, #2c2d36 100%); mix-blend-mode: multiply; }
-.h6__glow { position: absolute; background: linear-gradient(180deg, rgba(255, 214, 150, .95), rgba(255, 176, 92, .9)); mix-blend-mode: screen; box-shadow: 0 0 40px 12px rgba(255, 170, 80, .35); border-radius: 2px; }
+.h6__glow { position: absolute; background: radial-gradient(ellipse at 50% 35%, rgba(255, 208, 140, .72), rgba(255, 168, 86, .42) 75%); mix-blend-mode: screen; box-shadow: 0 0 46px 10px rgba(255, 170, 80, .22); border-radius: 2px; filter: blur(1.2px); }
 .h6__lamp { position: absolute; width: 5%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 220, 160, .95), rgba(255, 190, 110, .35) 45%, rgba(255, 190, 110, 0)); mix-blend-mode: screen; }
-.h6[data-time="night"] .h6__night { opacity: 1; }
+/* the sky goes first, the lights come on when it is dark enough */
+.h6__glow, .h6__lamp { opacity: calc((var(--dusk) - .5) * 2); }
+.h6__mood { position: absolute; z-index: 4; left: 0; right: 0; top: 50%; display: grid; justify-items: center; padding: 0 var(--gutter); pointer-events: none; color: #fff; font-family: var(--font-serif); font-size: clamp(26px, 3.4cqw, 52px); line-height: 1.1; text-align: center; text-shadow: 0 4px 30px rgba(8, 24, 14, .55); }
+.h6__mood span { grid-area: 1 / 1; }
+.h6__mood span:first-child { opacity: calc(min(var(--dusk) * 5, (.5 - var(--dusk)) * 5)); }
+.h6__mood span:last-child { opacity: calc((var(--dusk) - .65) * 4); }
+.h6__note-eve { opacity: calc(var(--dusk) * 2); }
+.h6__point > span { opacity: calc(1 - var(--dusk) * 3); }
 
 .h6__points { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; animation: h6-fade-in .8s 5.3s both; }
 .h6__point { position: absolute; display: flex; align-items: center; gap: 10px; translate: -11px -11px; color: #fff; }
@@ -141,9 +150,6 @@ html[data-look="v2"] .float-call { background: var(--brand); }
 .h6__bar { position: absolute; z-index: 4; left: 0; right: 0; bottom: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding: 0 clamp(18px, 3cqw, 44px) clamp(18px, 3.4cqh, 34px); color: #fff; animation: h6-in .9s 5.05s both; }
 .h6__lead { max-width: 440px; font-size: clamp(15px, 1.25cqw, 18px); line-height: 1.45; text-shadow: 0 2px 14px rgba(8, 24, 14, .45); }
 .h6__actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
-.h6__time { display: inline-flex; padding: 4px; border-radius: 999px; background: rgba(255, 255, 255, .16); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, .3); }
-.h6__time button { border: 0; background: transparent; color: #fff; font-size: 13px; font-weight: 600; padding: 9px 15px; border-radius: 999px; cursor: pointer; transition: background .25s, color .25s; }
-.h6__time button[aria-pressed="true"] { background: #fff; color: var(--ink); }
 .h6__down { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .6); color: #fff; }
 .h6__down i { font-style: normal; font-size: 18px; animation: h6-bob 2.4s 6s ease-in-out infinite; }
 .h6__note { position: absolute; z-index: 4; right: clamp(18px, 3cqw, 44px); top: 20px; font-size: 11px; color: rgba(255, 255, 255, .72); animation: h6-in .9s 5.05s both; }
@@ -175,6 +181,8 @@ html[data-look="v2"] .float-call { background: var(--brand); }
 @media (max-aspect-ratio: 1/1) {
   .h6__frame { width: 150cqw; top: auto; bottom: 21cqh; translate: -50% 0; -webkit-mask-image: linear-gradient(transparent, #000 22%); mask-image: linear-gradient(transparent, #000 22%); }
   .h6__pane { clip-path: inset(18% 7% 20% 7% round 22px); background: linear-gradient(180deg, #3f86c9 0%, #79afe0 40%, #c6def0 100%); }
+  /* the frame covers only the lower part here: the sky above it has to go dark with it (under the scene, so the house is not darkened twice) */
+  .h6__pane::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, #16234a 0%, #273562 55%, #2c2d36 100%); opacity: var(--dusk); }
   .h6__sketch polyline { stroke: #fff; }
   .h6__scene { transform: scale(.86); }
   .h6__points { display: none; }
@@ -185,6 +193,10 @@ html[data-look="v2"] .float-call { background: var(--brand); }
   .h6__actions .btn { flex: 1; }
   .h6__note { top: 16px; right: 16px; }
 }
+/* the floating call waits too: over the pinned house it covered «Выбрать дом» */
+html:has(.h6):not(.past-hero) .float-call { display: none; }
+html.no-motion .h6-pin { height: auto; }
+@media (prefers-reduced-motion: reduce) { .h6-pin { height: auto; } }
 html.no-motion .h6__intro, html.no-motion .h6__sketch { display: none; }
 html.no-motion .h6__pane, html.no-motion .h6__scene, html.no-motion .h6__real, html.no-motion .h6__veil, html.no-motion .h6__copy,
 html.no-motion .h6__bar, html.no-motion .h6__points, html.no-motion .h6__note, html.no-motion .h6__frame { animation: none; }
@@ -373,6 +385,20 @@ html[data-look="v2"] .footer .logo__name small { color: rgba(255, 255, 255, .7);
 .v2-region__facts { margin: 0; min-width: min(100%, 520px); }
 @media (min-width: 600px) { .v2-region__facts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .v2-region__lead { margin-top: 48px; }
+
+/* ---------- «сначала вниз, потом вправо» (components/home/ScrollX): computers only, the class comes from the script ---------- */
+.sx__bar { display: none; }
+.v2-sec:has(.sx.is-pinned) { padding-block: 0; }
+/* minmax(0, 1fr): the max-content row must not widen the column, or the heading drifts to its middle */
+.sx.is-pinned .sx__stick { position: sticky; top: 0; height: 100svh; overflow: clip; display: grid; grid-template-columns: minmax(0, 1fr); align-content: center; gap: 12px; padding-top: var(--header-h); }
+.sx.is-pinned .v2-life { grid-template-columns: minmax(0, 1fr); }
+.sx.is-pinned .v2-head { margin-bottom: 20px; }
+.sx.is-pinned .v2-covers__nav { display: none; }
+.sx.is-pinned .v2-covers__track { overflow: visible; scroll-snap-type: none; width: max-content; padding-block: 0; will-change: transform; grid-auto-columns: min(30vw, calc((100svh - 420px) * 1673 / 2260)); }
+.sx.is-pinned .v2-life { gap: 28px; }
+.sx.is-pinned .v2-life__row { overflow: visible; scroll-snap-type: none; width: max-content; margin-inline: 0; padding-inline: 0; will-change: transform; }
+.sx.is-pinned .sx__bar { display: block; position: absolute; left: max(var(--gutter), calc((100vw - 1280px) / 2 + var(--gutter))); right: max(var(--gutter), calc((100vw - 1280px) / 2 + var(--gutter))); bottom: 22px; height: 2px; background: var(--tint-2); }
+.sx.is-pinned .sx__bar > span { display: block; height: 100%; background: var(--brand); transform: scaleX(0); transform-origin: 0 50%; }
 
 /* ---------- estate and house pages v2: the photo on the whole screen (references: «Сашино», KASKAD) ----------
    The picture fills the screen under the header; a soft dark fade at the bottom carries the white name and facts. */

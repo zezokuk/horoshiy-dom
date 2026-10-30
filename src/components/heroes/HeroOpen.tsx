@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { HOUSE_LINES } from '@/components/house-lines-data'
 import { Pic } from '@/components/Pic'
 import { HANDSHAKE } from './HeroHandshake'
@@ -22,7 +22,7 @@ export type HeroPoint = { x: number; y: number; title: string; text: string }
 /**
  * Home v2, screen 1 (29.10, ERA Residence): «Одно рукопожатие до вашей мечты» → the house is drawn line by line in a
  * window → the real house wipes in → the window opens to the whole screen and the header waits until the visitor
- * scrolls. Scrolling pushes the camera in. «День / вечер» swaps the light on the same frame.
+ * scrolls. The screen then stays pinned: scrolling pushes the camera in, the sun goes down and the windows light up.
  */
 export function HeroOpen({
   since,
@@ -35,17 +35,31 @@ export function HeroOpen({
   points: HeroPoint[]
   catalogHref: string
 }) {
-  const [time, setTime] = useState<'day' | 'night'>('day')
+  const pin = useRef<HTMLElement>(null)
 
   // the header stays away while the house fills the screen: CSS hides it from the first paint (html:has(.h6)), this
-  // only marks the moment the visitor has scrolled past the house (v2.css: html.past-hero)
+  // marks the moment the visitor has scrolled past the house (v2.css: html.past-hero). The same scroll is the time of
+  // day (Ilya, 30.10: a day/evening button is useless): the sun goes down as the visitor stays with the house.
   useEffect(() => {
     const root = document.documentElement
-    const sync = () => root.classList.toggle('past-hero', window.scrollY > window.innerHeight * 0.6)
-    sync()
+    const el = pin.current
+    let frame = 0
+    const paint = () => {
+      frame = 0
+      const range = el ? el.offsetHeight - window.innerHeight : 0
+      root.classList.toggle('past-hero', window.scrollY > Math.max(range - window.innerHeight * 0.2, window.innerHeight * 0.6))
+      if (!el || range <= 0) return
+      const dusk = Math.min(1, Math.max(0, (window.scrollY / range - 0.12) / 0.7))
+      el.style.setProperty('--dusk', dusk.toFixed(3))
+    }
+    const sync = () => {
+      if (!frame) frame = requestAnimationFrame(paint)
+    }
+    paint()
     window.addEventListener('scroll', sync, { passive: true })
     window.addEventListener('resize', sync)
     return () => {
+      cancelAnimationFrame(frame)
       window.removeEventListener('scroll', sync)
       window.removeEventListener('resize', sync)
       root.classList.remove('past-hero')
@@ -53,7 +67,8 @@ export function HeroOpen({
   }, [])
 
   return (
-    <section className="h6" data-time={time} aria-label="Хороший дом">
+    <section className="h6-pin" ref={pin} aria-label="Хороший дом">
+    <div className="h6">
       <div className="h6__pane">
         <div className="h6__scene">
           <div className="h6__frame">
@@ -101,19 +116,19 @@ export function HeroOpen({
         <p className="h6__slogan">сюда приводят мечты</p>
       </div>
 
-      <p className="h6__note">Фото построенного дома{time === 'night' ? ' · вечер — иллюстрация' : ''}</p>
+      <p className="h6__note">
+        Фото построенного дома<span className="h6__note-eve"> · вечер — иллюстрация</span>
+      </p>
+
+      {/* the client's own words for the two moods; they cross-fade with the light */}
+      <p className="h6__mood" aria-hidden>
+        <span>Воздух и тишина</span>
+        <span>Вечерние огни на участке</span>
+      </p>
 
       <div className="h6__bar">
         <p className="h6__lead">{lead}</p>
         <div className="h6__actions">
-          <div className="h6__time" role="group" aria-label="Время суток">
-            <button type="button" aria-pressed={time === 'day'} onClick={() => setTime('day')}>
-              День
-            </button>
-            <button type="button" aria-pressed={time === 'night'} onClick={() => setTime('night')}>
-              Вечер
-            </button>
-          </div>
           <a className="btn btn--light" href={catalogHref}>
             Выбрать дом
           </a>
@@ -139,6 +154,7 @@ export function HeroOpen({
           </svg>
         </div>
       </div>
+    </div>
     </section>
   )
 }

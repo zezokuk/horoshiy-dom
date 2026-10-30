@@ -6,6 +6,7 @@ import { HouseFilm } from '@/components/home/HouseFilm'
 import { Included } from '@/components/home/Included'
 import { LifeScenes } from '@/components/home/LifeScenes'
 import { PlotPicker, type PlotEstate } from '@/components/home/PlotPicker'
+import { ScrollX } from '@/components/home/ScrollX'
 import { HeroOpen } from '@/components/heroes/HeroOpen'
 import { img, plural } from '@/lib/data'
 import { mainHref } from '@/lib/site'
@@ -112,8 +113,10 @@ export function HomeV2({
   )
   const estatesSection = (
     <section className="section v2-sec v2-sec--tint" id="estates">
-      <div className="container">{estatesHead}</div>
-      <EstateCovers estates={covers} />
+      <ScrollX track=".v2-covers__track">
+        <div className="container">{estatesHead}</div>
+        <EstateCovers estates={covers} />
+      </ScrollX>
     </section>
   )
 
@@ -186,9 +189,11 @@ export function HomeV2({
       )}
 
       <section className="section v2-sec" id="life">
-        <div className="container">
-          <LifeScenes />
-        </div>
+        <ScrollX track=".v2-life__row">
+          <div className="container">
+            <LifeScenes />
+          </div>
+        </ScrollX>
       </section>
 
       <section className="section v2-sec v2-sec--tint" id="included">
