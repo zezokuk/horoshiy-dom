@@ -113,10 +113,8 @@ export function HomeV2({
   )
   const estatesSection = (
     <section className="section v2-sec v2-sec--tint" id="estates">
-      <ScrollX track=".v2-covers__track">
-        <div className="container">{estatesHead}</div>
-        <EstateCovers estates={covers} />
-      </ScrollX>
+      <div className="container">{estatesHead}</div>
+      <EstateCovers estates={covers} />
     </section>
   )
 
@@ -189,10 +187,8 @@ export function HomeV2({
       )}
 
       <section className="section v2-sec" id="life">
-        <ScrollX track=".v2-life__row">
-          <div className="container">
-            <LifeScenes />
-          </div>
+        <ScrollX track=".v2-story">
+          <LifeScenes />
         </ScrollX>
       </section>
 

@@ -100,15 +100,15 @@ html[data-look="v2"] .float-call { background: var(--brand); }
    Home v2, screen 1 (components/heroes/HeroOpen): handshake → the house is drawn in a window → the real house →
    the window opens to the whole screen (ERA Residence); scrolling pushes the camera in.
    ====================================================================== */
-/* the pin: the screen stays put for 1.6 screens of scrolling while the day turns into evening (--dusk: HeroOpen) */
-.h6-pin { --dusk: 0; position: relative; height: 260svh; margin-top: calc(var(--header-h) * -1); }
+/* a short pin: the camera moves in for half a screen before the page goes on */
+.h6-pin { position: relative; height: 150svh; margin-top: calc(var(--header-h) * -1); }
 .h6 { position: sticky; top: 0; height: 100svh; min-height: 600px; background: #fff; overflow: clip; isolation: isolate; container-type: size; }
 .h6__pane { position: absolute; inset: 0; z-index: 1; overflow: hidden; background-color: #f6f9f7; background-image: repeating-linear-gradient(0deg, rgba(47, 125, 78, .07) 0 1px, transparent 1px 40px), repeating-linear-gradient(90deg, rgba(47, 125, 78, .07) 0 1px, transparent 1px 40px); clip-path: inset(15% 15% 15% 15% round 28px); animation: h6-open 1.5s 4.05s cubic-bezier(.7, 0, .2, 1) both; }
 .h6__scene { position: absolute; inset: 0; transform: scale(.7); animation: h6-grow 1.5s 4.05s cubic-bezier(.7, 0, .2, 1) both; }
 /* the photo's own box, covering the stage by hand: everything inside is placed in photo pixels */
-.h6__frame { position: absolute; left: 50%; top: 50%; width: max(100cqw, 100cqh * 1673 / 897); aspect-ratio: 1673 / 897; translate: -50% -50%; transform-origin: 50% 72%; }
+.h6__frame { position: absolute; left: 50%; top: 50%; width: max(100cqw, 100cqh * 3 / 2); aspect-ratio: 3 / 2; translate: -50% -50%; transform-origin: 50% 66%; }
 @supports (animation-timeline: scroll()) {
-  .h6__frame { animation: h6-push linear both; animation-timeline: scroll(root); animation-range: 0 160svh; }
+  .h6__frame { animation: h6-push linear both; animation-timeline: scroll(root); animation-range: 0 100svh; }
 }
 .h6__real { position: absolute; inset: 0; animation: h6-wipe 1.3s 2.95s cubic-bezier(.65, 0, .2, 1) both; }
 .h6__real img { width: 100%; height: 100%; object-fit: cover; }
@@ -119,19 +119,22 @@ html[data-look="v2"] .float-call { background: var(--brand); }
 .h6__sketch .hl-hatch { opacity: .5; }
 .h6__sketch .hl-hatch polyline { animation-delay: 2.7s; }
 
-/* evening: the same frame under dusk, warm light in the real windows (an illustration until the client's evening render) */
-.h6__night { position: absolute; inset: 0; opacity: var(--dusk); pointer-events: none; }
-.h6__night::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, #16234a 0%, #273562 30%, #3d3c5c 58%, #2c2d36 100%); mix-blend-mode: multiply; }
-.h6__glow { position: absolute; background: radial-gradient(ellipse at 50% 35%, rgba(255, 208, 140, .72), rgba(255, 168, 86, .42) 75%); mix-blend-mode: screen; box-shadow: 0 0 46px 10px rgba(255, 170, 80, .22); border-radius: 2px; filter: blur(1.2px); }
-.h6__lamp { position: absolute; width: 5%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 220, 160, .95), rgba(255, 190, 110, .35) 45%, rgba(255, 190, 110, 0)); mix-blend-mode: screen; }
-/* the sky goes first, the lights come on when it is dark enough */
-.h6__glow, .h6__lamp { opacity: calc((var(--dusk) - .5) * 2); }
-.h6__mood { position: absolute; z-index: 4; left: 0; right: 0; top: 50%; display: grid; justify-items: center; padding: 0 var(--gutter); pointer-events: none; color: #fff; font-family: var(--font-serif); font-size: clamp(26px, 3.4cqw, 52px); line-height: 1.1; text-align: center; text-shadow: 0 4px 30px rgba(8, 24, 14, .55); }
-.h6__mood span { grid-area: 1 / 1; }
-.h6__mood span:first-child { opacity: calc(min(var(--dusk) * 5, (.5 - var(--dusk)) * 5)); }
-.h6__mood span:last-child { opacity: calc((var(--dusk) - .65) * 4); }
-.h6__note-eve { opacity: calc(var(--dusk) * 2); }
-.h6__point > span { opacity: calc(1 - var(--dusk) * 3); }
+/* the living light: the sun in the upper left comes and goes as if leaves pass in front of it, its rays drift, patches of
+   light move over the lawn. Added light only (screen), so it works over any picture of the house */
+/* z-index 4, the same as the text but earlier in the markup: over the veil, whose shade turned the sun grey, and under the words */
+.h6__light { position: absolute; inset: 0; z-index: 4; overflow: hidden; pointer-events: none; mix-blend-mode: screen; mix-blend-mode: plus-lighter; animation: h6-fade-in 1.6s 5s both; } /* plus-lighter: on deep blue, screen gave a grey sun */
+.h6__sun { position: absolute; left: 9%; top: 4%; width: 90cqh; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 244, 214, .95) 0, rgba(255, 224, 170, .55) 22%, rgba(255, 196, 120, .16) 55%, rgba(255, 190, 110, 0) 100%); animation: h6-sun 8s ease-in-out infinite; }
+.h6__rays { position: absolute; left: 9%; top: 4%; width: 260cqw; aspect-ratio: 1; translate: -50% -50%; background: conic-gradient(from 92deg, transparent 0 3deg, rgba(255, 234, 190, .2) 5deg 8deg, transparent 11deg 15deg, rgba(255, 234, 190, .13) 17deg 19deg, transparent 22deg 28deg, rgba(255, 234, 190, .18) 31deg 35deg, transparent 39deg 46deg, rgba(255, 234, 190, .1) 48deg 50deg, transparent 54deg 360deg); -webkit-mask-image: radial-gradient(closest-side, #000 0, rgba(0, 0, 0, .5) 32%, transparent 62%); mask-image: radial-gradient(closest-side, #000 0, rgba(0, 0, 0, .5) 32%, transparent 62%); filter: blur(12px); animation: h6-rays 15s ease-in-out infinite alternate; }
+.h6__dapple { position: absolute; left: -6%; right: -6%; bottom: 0; height: 26%; opacity: .55; background: radial-gradient(ellipse 7% 22% at 12% 62%, rgba(255, 232, 170, .5), transparent), radial-gradient(ellipse 5% 16% at 27% 78%, rgba(255, 232, 170, .42), transparent), radial-gradient(ellipse 8% 20% at 44% 58%, rgba(255, 232, 170, .34), transparent), radial-gradient(ellipse 5% 18% at 63% 80%, rgba(255, 232, 170, .4), transparent), radial-gradient(ellipse 7% 20% at 82% 66%, rgba(255, 232, 170, .34), transparent); filter: blur(6px); animation: h6-dapple 11s ease-in-out infinite alternate; }
+@keyframes h6-sun { 0%, 100% { opacity: .72; } 16% { opacity: .96; } 31% { opacity: .58; } 47% { opacity: 1; } 63% { opacity: .66; } 81% { opacity: .9; } }
+@keyframes h6-rays { from { transform: rotate(-1.5deg); opacity: .4; } to { transform: rotate(2deg); opacity: .65; } }
+@keyframes h6-dapple { from { transform: translateX(-1.4%); opacity: .4; } to { transform: translateX(1.4%); opacity: .65; } }
+@media (prefers-reduced-motion: reduce) { .h6__sun, .h6__rays, .h6__dapple { animation: none; } }
+html.no-motion .h6__sun, html.no-motion .h6__rays, html.no-motion .h6__dapple { animation: none; }
+/* the labels wait for the pointer, so nothing lies on the facade */
+.h6__point { pointer-events: auto; cursor: default; }
+.h6__point > span { opacity: 0; transition: opacity .25s; }
+.h6__point:hover > span { opacity: 1; }
 
 .h6__points { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; animation: h6-fade-in .8s 5.3s both; }
 .h6__point { position: absolute; display: flex; align-items: center; gap: 10px; translate: -11px -11px; color: #fff; }
@@ -179,10 +182,9 @@ html[data-look="v2"] .float-call { background: var(--brand); }
 
 /* phones: the house sits low under a tall sky (the vertical render from the prompts will replace the photo) */
 @media (max-aspect-ratio: 1/1) {
-  .h6__frame { width: 150cqw; top: auto; bottom: 21cqh; translate: -50% 0; -webkit-mask-image: linear-gradient(transparent, #000 22%); mask-image: linear-gradient(transparent, #000 22%); }
-  .h6__pane { clip-path: inset(18% 7% 20% 7% round 22px); background: linear-gradient(180deg, #3f86c9 0%, #79afe0 40%, #c6def0 100%); }
-  /* the frame covers only the lower part here: the sky above it has to go dark with it (under the scene, so the house is not darkened twice) */
-  .h6__pane::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, #16234a 0%, #273562 55%, #2c2d36 100%); opacity: var(--dusk); }
+  .h6__frame { width: 270cqw; top: auto; bottom: 12cqh; translate: -50% 0; -webkit-mask-image: linear-gradient(transparent, #000 12%); mask-image: linear-gradient(transparent, #000 12%); }
+  /* sky above the picture, its lawn below it (the vertical render will replace this) */
+  .h6__pane { clip-path: inset(18% 7% 20% 7% round 22px); background: linear-gradient(180deg, #1f5ea8 0 50%, #7ba84f 50% 100%); }
   .h6__sketch polyline { stroke: #fff; }
   .h6__scene { transform: scale(.86); }
   .h6__points { display: none; }
@@ -321,22 +323,21 @@ html.no-motion .h6__veil, html.no-motion .h6__points { opacity: 1; }
 }
 
 /* screen 6: life out of town */
-.v2-life { display: grid; gap: 48px; }
-.v2-life__head { display: grid; gap: 20px; max-width: 900px; }
-.v2-life__words { font-family: var(--font-serif); font-size: clamp(40px, 5.6vw, 84px); line-height: 1.02; letter-spacing: -.01em; font-weight: 400; }
-.v2-life__words span:nth-child(2) { color: var(--brand); }
-.v2-life__words span:nth-child(3) { color: var(--brand-ink); }
-.v2-life__row { display: grid; grid-auto-flow: column; grid-auto-columns: clamp(220px, 23vw, 300px); gap: 14px; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 12px; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scrollbar-width: none; }
-.v2-life__row::-webkit-scrollbar { display: none; }
-.v2-scene { position: relative; scroll-snap-align: start; aspect-ratio: 4 / 5; border-radius: 20px; overflow: hidden; display: grid; align-content: end; gap: 6px; padding: 20px; color: #fff; isolation: isolate; }
-.v2-scene img { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; object-fit: cover; }
-.v2-scene:not(.v2-scene--text)::after { content: ""; position: absolute; inset: 40% 0 0; z-index: -1; background: linear-gradient(180deg, rgba(10, 22, 14, 0), rgba(10, 22, 14, .7)); }
-.v2-scene--text { color: var(--ink); background: var(--tint); aspect-ratio: 4 / 3; align-content: space-between; }
-.v2-scene--text.v2-scene--winter { background: #eef3f7; }
-.v2-scene--text::before { content: ""; position: absolute; right: -40px; top: -40px; width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(closest-side, rgba(47, 125, 78, .16), transparent); }
-.v2-scene--text.v2-scene--winter::before { background: radial-gradient(closest-side, rgba(90, 130, 170, .2), transparent); }
-.v2-scene__season { font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; opacity: .8; }
-.v2-scene__text { font-family: var(--font-serif); font-size: 22px; line-height: 1.2; font-weight: 400; }
+/* phones: a swipe row of tall slides; computers: ScrollX turns it into the page's one long sideways stretch (below) */
+.v2-story { display: grid; grid-auto-flow: column; grid-auto-columns: 86vw; gap: 12px; overflow-x: auto; scroll-snap-type: x proximity; padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); scrollbar-width: none; }
+.v2-story::-webkit-scrollbar { display: none; }
+.v2-slide { position: relative; scroll-snap-align: start; aspect-ratio: 4 / 5; border-radius: 24px; overflow: hidden; display: grid; align-content: end; gap: 10px; padding: 22px; color: #fff; isolation: isolate; }
+.v2-slide img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+.v2-slide:not(.v2-slide--intro, .v2-slide--text)::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(10, 22, 14, 0) 45%, rgba(10, 22, 14, .68) 100%); }
+.v2-slide__season { font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; opacity: .9; }
+.v2-slide__text { font-family: var(--font-serif); font-size: clamp(30px, 4.4vw, 68px); line-height: 1.04; max-width: 15em; text-wrap: balance; text-shadow: 0 2px 26px rgba(8, 24, 14, .4); }
+.v2-slide--intro { aspect-ratio: auto; align-content: center; gap: 22px; padding: 0 12px 0 0; border-radius: 0; color: var(--ink); }
+.v2-slide__words { font-family: var(--font-serif); font-size: clamp(44px, 6.4vw, 104px); line-height: 1; letter-spacing: -.01em; font-weight: 400; }
+.v2-slide__words span:nth-child(2) { color: var(--brand); }
+.v2-slide__words span:nth-child(3) { color: var(--brand-ink); }
+.v2-slide--text { background: var(--tint); color: var(--ink); align-content: space-between; }
+.v2-slide--text .v2-slide__text { text-shadow: none; }
+.v2-slide--text.v2-slide--winter { background: #eef3f7; }
 
 /* screen 7: included and how to buy */
 .v2-included { display: grid; gap: 20px; }
@@ -390,13 +391,22 @@ html[data-look="v2"] .footer .logo__name small { color: rgba(255, 255, 255, .7);
 .sx__bar { display: none; }
 .v2-sec:has(.sx.is-pinned) { padding-block: 0; }
 /* minmax(0, 1fr): the max-content row must not widen the column, or the heading drifts to its middle */
-.sx.is-pinned .sx__stick { position: sticky; top: 0; height: 100svh; overflow: clip; display: grid; grid-template-columns: minmax(0, 1fr); align-content: center; gap: 12px; padding-top: var(--header-h); }
-.sx.is-pinned .v2-life { grid-template-columns: minmax(0, 1fr); }
-.sx.is-pinned .v2-head { margin-bottom: 20px; }
-.sx.is-pinned .v2-covers__nav { display: none; }
-.sx.is-pinned .v2-covers__track { overflow: visible; scroll-snap-type: none; width: max-content; padding-block: 0; will-change: transform; grid-auto-columns: min(30vw, calc((100svh - 420px) * 1673 / 2260)); }
-.sx.is-pinned .v2-life { gap: 28px; }
-.sx.is-pinned .v2-life__row { overflow: visible; scroll-snap-type: none; width: max-content; margin-inline: 0; padding-inline: 0; will-change: transform; }
+.sx.is-pinned .sx__stick { position: sticky; top: 0; height: 100svh; overflow: clip; display: grid; grid-template-columns: minmax(0, 1fr); align-content: center; padding-top: var(--header-h); }
+/* big slides: nearly the whole screen height, picture first; the slide's own width sets the column */
+/* a collage, not a row of equal cards: pictures of different sizes stand high and low, and the next one is always cut by
+   the screen edge, so the eye wants to go on. --slide-h is the free height under the header */
+.sx.is-pinned .v2-story { --slide-h: calc(100svh - var(--header-h) - 72px); overflow: visible; scroll-snap-type: none; width: max-content; grid-auto-columns: max-content; gap: clamp(48px, 6vw, 110px); height: var(--slide-h); align-items: start; padding-inline: max(var(--gutter), calc((100vw - 1280px) / 2 + var(--gutter))) 12vw; will-change: transform; }
+.sx.is-pinned .v2-slide { aspect-ratio: auto; border-radius: 0; padding: clamp(24px, 2.4vw, 40px); height: calc(var(--slide-h) * .72); width: calc(var(--slide-h) * .72 * 3 / 2); }
+.sx.is-pinned .v2-slide:nth-child(2) { height: var(--slide-h); width: calc(var(--slide-h) * 16 / 9); }
+.sx.is-pinned .v2-slide:nth-child(3) { align-self: end; height: calc(var(--slide-h) * .78); width: calc(var(--slide-h) * .78 * 4 / 5); }
+.sx.is-pinned .v2-slide:nth-child(4) { height: calc(var(--slide-h) * .66); width: calc(var(--slide-h) * .66 * 16 / 9); }
+.sx.is-pinned .v2-slide:nth-child(5) { align-self: end; height: var(--slide-h); width: calc(var(--slide-h) * 3 / 2); }
+.sx.is-pinned .v2-slide:nth-child(6) { height: calc(var(--slide-h) * .8); width: calc(var(--slide-h) * .8 * 4 / 5); }
+.sx.is-pinned .v2-slide:nth-child(7) { align-self: end; height: var(--slide-h); width: calc(var(--slide-h) * 16 / 9); }
+.sx.is-pinned .v2-slide--intro { align-self: center; height: auto; width: min(52vw, 760px); padding: 0; }
+/* a scene whose picture is not made yet stays a quiet caption in the same place */
+.sx.is-pinned .v2-slide.v2-slide--text:nth-child(n) { width: min(30vw, 420px); height: calc(var(--slide-h) * .5); align-self: center; }
+.sx.is-pinned .v2-slide--text .v2-slide__text { font-size: clamp(26px, 2.6vw, 40px); }
 .sx.is-pinned .sx__bar { display: block; position: absolute; left: max(var(--gutter), calc((100vw - 1280px) / 2 + var(--gutter))); right: max(var(--gutter), calc((100vw - 1280px) / 2 + var(--gutter))); bottom: 22px; height: 2px; background: var(--tint-2); }
 .sx.is-pinned .sx__bar > span { display: block; height: 100%; background: var(--brand); transform: scaleX(0); transform-origin: 0 50%; }
 

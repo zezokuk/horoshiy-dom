@@ -1,28 +1,26 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { HOUSE_LINES } from '@/components/house-lines-data'
 import { Pic } from '@/components/Pic'
 import { HANDSHAKE } from './HeroHandshake'
 
-// the frame is the photo's own box (tools/heroassets.py: «Тип 5», 1673×897): photo, line drawing, evening light and the
-// points all sit in it in photo pixels, and the frame covers the screen by hand (v2.css), so nothing drifts apart
-const W = 1673
-const H = 897
-const pct = (x: number, y: number) => ({ left: `${(x / W) * 100}%`, top: `${(y / H) * 100}%` })
-const box = (x: number, y: number, w: number, h: number) => ({ ...pct(x, y), width: `${(w / W) * 100}%`, height: `${(h / H) * 100}%` })
-
-// warm light in the glass of the real photo (photo pixels): two windows, the narrow one by the porch, the door's transom
-const WINDOWS = [box(282, 532, 76, 182), box(1143, 512, 166, 212), box(584, 526, 32, 90), box(808, 528, 100, 30)]
-// garden lights along the fence and over the door: «вечерние огни на участке» from the client's own text
-const LAMPS = [pct(858, 556), pct(330, 842), pct(640, 850), pct(1050, 846), pct(1420, 842)]
+// the frame is the 3:2 picture (real «Тип 5» on a canvas, surroundings by the image model, 30.10): the house stands in it at
+// a known box, and the line drawing, evening light and points are all given in the house photo's pixels (1673×897) + that
+// offset. The frame covers the screen by hand (v2.css), so nothing drifts apart
+const W = 3000
+const H = 2000
+const OX = 664
+const OY = 863
+const PHOTO_W = 1673
+const pct = (x: number, y: number) => ({ left: `${((x + OX) / W) * 100}%`, top: `${((y + OY) / H) * 100}%` })
 
 export type HeroPoint = { x: number; y: number; title: string; text: string }
 
 /**
  * Home v2, screen 1 (29.10, ERA Residence): «Одно рукопожатие до вашей мечты» → the house is drawn line by line in a
  * window → the real house wipes in → the window opens to the whole screen and the header waits until the visitor
- * scrolls. The screen then stays pinned: scrolling pushes the camera in, the sun goes down and the windows light up.
+ * scrolls. Scrolling pushes the camera in, and the sun keeps playing through the leaves over the whole picture.
  */
 export function HeroOpen({
   since,
@@ -35,31 +33,15 @@ export function HeroOpen({
   points: HeroPoint[]
   catalogHref: string
 }) {
-  const pin = useRef<HTMLElement>(null)
-
   // the header stays away while the house fills the screen: CSS hides it from the first paint (html:has(.h6)), this
-  // marks the moment the visitor has scrolled past the house (v2.css: html.past-hero). The same scroll is the time of
-  // day (Ilya, 30.10: a day/evening button is useless): the sun goes down as the visitor stays with the house.
+  // only marks the moment the visitor has scrolled past the house (v2.css: html.past-hero)
   useEffect(() => {
     const root = document.documentElement
-    const el = pin.current
-    let frame = 0
-    const paint = () => {
-      frame = 0
-      const range = el ? el.offsetHeight - window.innerHeight : 0
-      root.classList.toggle('past-hero', window.scrollY > Math.max(range - window.innerHeight * 0.2, window.innerHeight * 0.6))
-      if (!el || range <= 0) return
-      const dusk = Math.min(1, Math.max(0, (window.scrollY / range - 0.12) / 0.7))
-      el.style.setProperty('--dusk', dusk.toFixed(3))
-    }
-    const sync = () => {
-      if (!frame) frame = requestAnimationFrame(paint)
-    }
-    paint()
+    const sync = () => root.classList.toggle('past-hero', window.scrollY > window.innerHeight * 0.6)
+    sync()
     window.addEventListener('scroll', sync, { passive: true })
     window.addEventListener('resize', sync)
     return () => {
-      cancelAnimationFrame(frame)
       window.removeEventListener('scroll', sync)
       window.removeEventListener('resize', sync)
       root.classList.remove('past-hero')
@@ -67,15 +49,15 @@ export function HeroOpen({
   }, [])
 
   return (
-    <section className="h6-pin" ref={pin} aria-label="Хороший дом">
+    <section className="h6-pin" aria-label="Хороший дом">
     <div className="h6">
       <div className="h6__pane">
         <div className="h6__scene">
           <div className="h6__frame">
             <div className="h6__real">
-              <Pic src="/design/hero1-photo.webp" phone="/design/hero1-photo-900.webp" alt="Кирпичный дом «Хорошего дома» по проекту «Тип 5»" priority />
+              <Pic src="/design/hero-day.webp" alt="Кирпичный дом «Хорошего дома» по проекту «Тип 5» на участке с газоном" priority />
             </div>
-            <svg className="h6__sketch" viewBox={`0 0 ${W} ${H}`} fill="none" aria-hidden focusable="false">
+            <svg className="h6__sketch" viewBox={`${-OX} ${-OY} ${W} ${H}`} fill="none" aria-hidden focusable="false">
               {(['fence', 'wall', 'roof', 'hatch'] as const).map((g) => (
                 <g key={g} className={`hl-${g}`}>
                   {HOUSE_LINES[g].map((p) => (
@@ -84,18 +66,10 @@ export function HeroOpen({
                 </g>
               ))}
             </svg>
-            <div className="h6__night" aria-hidden>
-              {WINDOWS.map((s, i) => (
-                <i key={i} className="h6__glow" style={s} />
-              ))}
-              {LAMPS.map((s, i) => (
-                <i key={i} className="h6__lamp" style={s} />
-              ))}
-            </div>
             <div className="h6__points">
               {points.map((p) => (
                 // a point on the right half puts its label to the left, so it never runs off the screen
-                <span key={p.title} className={`h6__point ${p.x > W * 0.6 ? 'h6__point--left' : ''}`} style={pct(p.x, p.y)}>
+                <span key={p.title} className={`h6__point ${p.x > PHOTO_W * 0.6 ? 'h6__point--left' : ''}`} style={pct(p.x, p.y)}>
                   <i aria-hidden />
                   <span>
                     <b>{p.title}</b>
@@ -108,6 +82,13 @@ export function HeroOpen({
         </div>
       </div>
 
+      {/* the living light (Ilya, 30.10: not day and night, but the sun through leaves in the wind) */}
+      <div className="h6__light" aria-hidden>
+        <i className="h6__rays" />
+        <i className="h6__sun" />
+        <i className="h6__dapple" />
+      </div>
+
       <div className="h6__veil" aria-hidden />
 
       <div className="h6__copy">
@@ -116,15 +97,7 @@ export function HeroOpen({
         <p className="h6__slogan">сюда приводят мечты</p>
       </div>
 
-      <p className="h6__note">
-        Фото построенного дома<span className="h6__note-eve"> · вечер — иллюстрация</span>
-      </p>
-
-      {/* the client's own words for the two moods; they cross-fade with the light */}
-      <p className="h6__mood" aria-hidden>
-        <span>Воздух и тишина</span>
-        <span>Вечерние огни на участке</span>
-      </p>
+      <p className="h6__note">Дом настоящий, окружение — визуализация</p>
 
       <div className="h6__bar">
         <p className="h6__lead">{lead}</p>
