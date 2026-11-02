@@ -213,89 +213,27 @@ html.no-motion .h6__pane { clip-path: none; }
 /* the sun and its rays move together (the dawn lifts them); the box is the light's own, so their places do not change */
 .h6__rise { position: absolute; inset: 0; }
 
-/* ---------- «Утро» (HeroOpen morning, 03.11, 39-…): the dream in the clouds, then the sunrise on the first screen of scrolling ----------
-   HeroOpen feeds --p (0 → 1 over the pinned screen), --flare (one hump over 0.6–0.8), .is-clear (the clouds have parted)
-   and .is-skipped (the visitor scrolled during the intro). The photo is a plain <img>; the clouds are a picture with alpha,
-   so nothing here needs a blend mode */
-.h6-pin--morning { height: 200svh; }
-/* the window no longer opens: the stage is the dawn sky from the first paint, and the photo comes through as the clouds part */
+/* ---------- «Утро» (HeroOpen morning, 03.11, 39-…, КНИГА-И-МЕЧТА-для-Игоря.md): one scroll, four acts ----------
+   On load: the night — stars, a falling star (the wish), the author on the moon with a rod, the name like the title of a
+   book, the line paying out a little (the invitation to scroll). The scroll then builds the house in gold (--wall,
+   --hatch), the roof comes down on the line (HeroOpen moves it), the night gives way to the dawn and the clouds settle
+   into a bank (--dawn), the clouds part and the morning photo comes through (--part), the sun climbs (--rise), one soft
+   glare (--flare). .is-building / .is-day / .is-clear switch the words. Nothing here needs a blend mode */
+.h6-pin--morning { height: 300svh; }
 .h6-pin--morning .h6__pane { clip-path: none; animation: none; background: linear-gradient(180deg, #8fb0d8 0%, #c3d3e6 38%, #f1dcc6 66%, #f6e6d6 100%); }
-.h6-pin--morning .h6__scene { transform: none; animation: none; }
-.h6-pin--morning .h6__real { animation: none; opacity: clamp(0, (var(--p, 0) - .04) / .36, 1); }
-/* the house is drawn in the night (timings below, «луна-кран»), then the settling bank covers it */
-.h6-pin--morning .h6__sketch { animation: h6-fade .5s 2.9s both; }
-.h6-pin--morning .h6__intro { background: transparent; animation: h6-away .7s 2.3s both; }
-.h6-pin--morning .h6__intro-title { text-shadow: 0 2px 24px rgba(255, 255, 255, .8); }
-/* «Выбрать дом» is there from the first paint; the name, the slogan and the lead come as the intro leaves */
-.h6-pin--morning :is(.h6__copy, .h6__bar, .h6__note) { z-index: 5; }
-.h6-pin--morning .h6__bar { animation: none; transition: color .5s; }
-.h6-pin--morning .h6__copy { animation: h6-in .9s 2.7s both; }
-.h6-pin--morning .h6__lead { animation: h6-in .9s 2.9s both; transition: text-shadow .5s; }
-.h6-pin--morning .h6__actions .btn { box-shadow: 0 8px 28px rgba(20, 48, 31, .2); }
-.h6-pin--morning .h6__down { transition: color .5s, border-color .5s; }
-/* over the white cloud bank the words are dark; over the lawn, white on the shade (as before) */
-.h6-pin--morning:not(.is-clear) .h6__bar { color: #14301f; }
-.h6-pin--morning:not(.is-clear) .h6__lead { text-shadow: 0 1px 14px rgba(255, 255, 255, .85); }
-.h6-pin--morning:not(.is-clear) .h6__down { color: #14301f; border-color: rgba(20, 48, 31, .4); background: rgba(255, 255, 255, .55); }
-.h6-pin--morning .h6__veil, .h6-pin--morning .h6__note { animation: none; opacity: 0; transition: opacity .6s; }
-.h6-pin--morning.is-clear .h6__veil, .h6-pin--morning.is-clear .h6__note { opacity: 1; }
-/* the sun stands behind the bank (light 3, clouds 4) and climbs to the sun of the photo (24 % × 46 % of the frame) by 0.55 */
-.h6-pin--morning .h6__light { animation: none; z-index: 3; opacity: calc(.45 + .55 * min(1, var(--p, 0) / .55)); }
-.h6-pin--morning :is(.h6__sun, .h6__rays, .h6__flare) { left: calc(50% - max(100cqw, 150cqh) * .26); top: calc(50% - max(100cqw, 150cqh) * .027); }
-.h6-pin--morning .h6__rise { transform: translate3d(0, calc((1 - min(1, var(--p, 0) / .55)) * 34cqh), 0); }
-.h6-pin--morning .h6__points { animation: none; opacity: clamp(0, (var(--p, 0) - .8) * 5, 1); }
+.h6-pin--morning .h6__scene { transform: none; animation: none; z-index: 1; }
+.h6-pin--morning .h6__real { animation: none; opacity: var(--part, 0); }
+.h6-pin--morning .h6__intro { display: none; }
+/* the gold drawing turns into the real house as the photo comes through */
+.h6-pin--morning .h6__sketch { animation: none; opacity: calc(1 - var(--part, 0)); }
+.h6-pin--morning .h6__sketch polyline { stroke: #f1d39a; }
+.h6-pin--morning .h6__sketch :is(.hl-fence, .hl-wall) polyline { animation: none; stroke-dashoffset: calc(1 - var(--wall, 0)); }
+.h6-pin--morning .h6__sketch .hl-hatch polyline { animation: none; stroke-dashoffset: calc(1 - var(--hatch, 0)); }
+/* the roof is drawn under the rod as the page opens; the scroll lowers it */
+.h6-pin--morning .h6__sketch .hl-roof polyline { animation-delay: .5s; animation-duration: .8s; }
 
-.h6__clouds { position: absolute; inset: 0; z-index: 4; overflow: hidden; pointer-events: none; }
-/* at rest the three pieces make one bank over the lower half; the intro holds them apart (translate), the scroll parts
-   them (transform) — two properties, so the two motions never fight */
-.h6__cloud { position: absolute; top: 52cqh; height: 72cqh; background: url(/design/clouds.webp) center top / cover no-repeat; }
-/* the picture is cut at the box: the inner edges melt, or straight seams stand in the sky */
-.h6__cloud--left, .h6__cloud--right { -webkit-mask-image: linear-gradient(90deg, #000 55%, transparent 98%); mask-image: linear-gradient(90deg, #000 55%, transparent 98%); }
-.h6__cloud--back { -webkit-mask-image: linear-gradient(90deg, transparent 2%, #000 30%, #000 70%, transparent 98%); mask-image: linear-gradient(90deg, transparent 2%, #000 30%, #000 70%, transparent 98%); }
-.h6__cloud--back { left: 14cqw; width: 72cqw; top: 57cqh; animation: h6-cloud-back 1s 2.25s cubic-bezier(.6, 0, .2, 1) both; transform: translate3d(0, calc(min(1, var(--p, 0) / .5) * 50cqh), 0); }
-.h6__cloud--left { left: -16cqw; width: 74cqw; animation: h6-cloud-left 1.05s 2.2s cubic-bezier(.6, 0, .2, 1) both; transform: translate3d(calc(min(1, var(--p, 0) / .6) * -82cqw), 0, 0); }
-/* mirrored by scale, which applies after transform: a negative shift moves it right on the screen */
-.h6__cloud--right { right: -16cqw; width: 74cqw; scale: -1 1; animation: h6-cloud-right 1.05s 2.2s cubic-bezier(.6, 0, .2, 1) both; transform: translate3d(calc(min(1, var(--p, 0) / .6) * -82cqw), 0, 0); }
-/* during the intro the clouds stand up the sides and open the middle of the sky for the drawing (left and right: below, with the night) */
-@keyframes h6-cloud-back { from { translate: 0 34cqh; opacity: 0; } to { translate: 0 0; opacity: 1; } }
-/* one soft glare through the leaves, on the sun of the picture; its strength is the scroll's, so it cannot flicker */
-.h6__flare { position: absolute; width: 170cqh; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 249, 232, .95) 0, rgba(255, 232, 186, .5) 26%, rgba(255, 216, 160, .14) 60%, rgba(255, 210, 150, 0) 100%); opacity: calc(var(--flare, 0) * .75); }
-
-/* phones: Weave's wider frame with more sky stands low and shows the whole house; the sun stays put, no glare */
-@media (max-aspect-ratio: 1/1) {
-  .h6-pin--morning { height: 160svh; }
-  .h6-pin--morning .h6__frame { width: 170cqw; translate: -52% 0; }
-  .h6-pin--morning .h6__pane { background: linear-gradient(180deg, #8cafdb 0%, #bccde6 40%, #f1dcc6 72%, #f6e6d6 100%); }
-  /* the lawn under the frame (12cqh) comes with the photo, so no green band shows under the clouds of the dream */
-  .h6-pin--morning .h6__pane::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 13cqh; background: #6d8a3e; opacity: clamp(0, (var(--p, 0) - .04) / .36, 1); }
-  /* the drawing is placed on the computer's frame; here the house stands elsewhere */
-  .h6-pin--morning .h6__sketch { display: none; }
-  .h6-pin--morning :is(.h6__sun, .h6__rays) { left: calc(50% - 47.6cqw); top: calc(88cqh - 58.9cqw); }
-  .h6-pin--morning .h6__rise { transform: none; }
-  .h6-pin--morning .h6__flare { display: none; }
-  /* just above the ridge: it stands 39 % of the frame's height (113cqw) above its bottom (12cqh) */
-  .h6-pin--morning .h6__copy { bottom: calc(12cqh + 50cqw); }
-  .h6__cloud { top: 62cqh; height: 46cqh; }
-  .h6__cloud--back { top: 66cqh; }
-}
-/* «reduce motion»: no intro and nothing travels — the morning photo at once, the bank melts away on scrolling */
-@media (prefers-reduced-motion: reduce) {
-  .h6-pin--morning { height: auto; }
-  .h6-pin--morning .h6__real { opacity: 1; }
-  .h6-pin--morning :is(.h6__intro, .h6__sketch) { display: none; }
-  .h6-pin--morning :is(.h6__copy, .h6__lead) { animation: none; }
-  .h6-pin--morning .h6__cloud { animation: none; transform: none; opacity: clamp(0, 1 - var(--p, 0) * 2, 1); }
-  .h6-pin--morning .h6__rise { transform: none; }
-  .h6-pin--morning .h6__flare { display: none; }
-}
-html.no-motion .h6-pin--morning .h6__real { opacity: 1; }
-html.no-motion .h6-pin--morning :is(.h6__copy, .h6__lead) { animation: none; }
-html.no-motion .h6-pin--morning .h6__cloud { animation: none; transform: none; opacity: clamp(0, 1 - var(--p, 0) * 2, 1); }
-html.no-motion .h6-pin--morning .h6__rise { transform: none; }
-html.no-motion .h6-pin--morning .h6__flare { display: none; }
-/* ---- the night of the dream (03.11, «луна-кран»): stars and a crescent; the walls are drawn in gold, the crescent lowers
-   the roof on a thread onto them, then the night gives way to the dawn and the clouds ---- */
-.h6__night { position: absolute; inset: 0; z-index: 0; pointer-events: none; animation: h6-fade .9s 2.15s both;
+/* the night: stars over deep blue, fading into the dawn sky of the pane */
+.h6__night { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: calc(1 - var(--dawn, 0));
   background:
     radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent), radial-gradient(1px 1px at 22% 42%, #fff 50%, transparent),
     radial-gradient(1.5px 1.5px at 31% 9%, #fff 50%, transparent), radial-gradient(1px 1px at 38% 27%, rgba(255, 255, 255, .8) 50%, transparent),
@@ -305,35 +243,93 @@ html.no-motion .h6-pin--morning .h6__flare { display: none; }
     radial-gradient(2px 2px at 93% 6%, #fff8e1 50%, transparent), radial-gradient(1px 1px at 6% 33%, #fff 50%, transparent),
     radial-gradient(1px 1px at 17% 58%, rgba(255, 255, 255, .7) 50%, transparent), radial-gradient(1px 1px at 84% 60%, rgba(255, 255, 255, .7) 50%, transparent),
     linear-gradient(180deg, #0b1631 0%, #172852 45%, #33467a 78%, #5d6c9a 100%); }
-.h6-pin--morning .h6__scene { z-index: 1; }
-/* gold lines on the night sky */
-.h6-pin--morning .h6__sketch polyline, .h6__rope { stroke: #f1d39a; }
-.h6__moon { fill: #f7ebcc; stroke: #f1d39a; stroke-width: 1.4; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 18px rgba(247, 235, 204, .55)); animation: h6-fade-in .6s .1s both, h6-fade .7s 2.15s forwards; }
-.h6__rope { stroke-width: 1.2; vector-effect: non-scaling-stroke; animation: h6-fade .3s 1.95s both; }
-/* drawn small under the crescent first (the roof's own lines), then lowered with the thread onto the walls */
-.h6-pin--morning .h6__sketch :is(.hl-fence, .hl-wall) polyline { animation-delay: .6s; }
-/* the wish: a star streaks from the top left to where the house will stand (0.1–0.75 s), the walls start where it lands */
+/* the wish: a star streaks from the top left to where the house will stand (0.1–0.75 s after the page opens) */
 .h6__star { position: absolute; z-index: 2; left: 6cqw; top: 4cqh; width: 180px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, rgba(255, 248, 225, 0), #fff8e1); rotate: 37deg; transform-origin: 100% 50%; pointer-events: none; animation: h6-star .65s .1s cubic-bezier(.5, 0, .9, .6) both; }
 .h6__star::after { content: ""; position: absolute; right: -4px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: #fffaf0; box-shadow: 0 0 14px 6px rgba(255, 236, 180, .8); }
 @keyframes h6-star { 0% { translate: 0 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { translate: 46cqw 54cqh; opacity: 0; } }
-.h6-pin--morning .h6__sketch .hl-roof polyline { animation-delay: .3s; animation-duration: .7s; }
-.h6-pin--morning .h6__sketch .hl-hatch polyline { animation-delay: 2.05s; animation-duration: .5s; }
-.h6__lift { transform-origin: 1010px 235px; animation: h6-roof-land 1.05s 1s cubic-bezier(.45, 0, .25, 1) both; }
-@keyframes h6-roof-land { from { transform: translate(850px, -505px) scale(.3); } 70% { transform: translate(0, -18px) scale(1); } to { transform: none; } }
-/* the intro words on the night: warm white, the dream in gold; the handshake gives its place to the crescent */
-.h6-pin--morning .h6__intro { color: #f7efe1; }
-.h6-pin--morning .h6__intro-eyebrow { color: #e9c98f; }
-.h6-pin--morning .h6__intro-title { text-shadow: 0 2px 30px rgba(8, 16, 40, .6); }
-.h6-pin--morning .h6__intro-title em { color: #f0c987; }
-.h6-pin--morning .h6__deal { display: none; }
-/* moonlit clouds at night, white at dawn */
-@keyframes h6-cloud-left { from { translate: -24cqw -40cqh; opacity: .4; } to { translate: 0 0; opacity: 1; } }
-@keyframes h6-cloud-right { from { translate: 24cqw -40cqh; opacity: .4; } to { translate: 0 0; opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .h6-pin--morning :is(.h6__night, .h6__star) { display: none; } }
-html.no-motion .h6-pin--morning :is(.h6__night, .h6__star) { display: none; }
+/* the moon, the author on it and the line leave with the night */
+.h6__sky { opacity: calc(1 - var(--dawn, 0)); }
+.h6__moon { fill: #f7ebcc; stroke: #f1d39a; stroke-width: 1.4; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 18px rgba(247, 235, 204, .55)); animation: h6-fade-in .8s .1s both; }
+.h6__fisher { animation: h6-fade-in .8s .3s both; }
+.h6__fisher :is(circle, polyline) { fill: none; stroke: #f7ebcc; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.h6__fisher circle { fill: #f7ebcc; }
+.h6__rope { stroke: #f1d39a; stroke-width: 1; vector-effect: non-scaling-stroke; animation: h6-fade-in .6s .5s both; }
 
-/* the first scroll plays the intro to its end at once (after every delay above, so it wins) */
-.h6-pin--morning.is-skipped :is(.h6__intro, .h6__intro *, .h6__sketch, .h6__sketch polyline, .h6__cloud, .h6__copy, .h6__lead, .h6__night, .h6__moon, .h6__rope, .h6__lift, .h6__star) { animation-delay: 0s; animation-duration: .01s; }
+/* the words: the name of the book from the first paint; warm white in the night, dark over the cloud bank at dawn, white
+   over the lawn on the shade (as before) */
+.h6-pin--morning :is(.h6__copy, .h6__bar, .h6__note, .h6__hint) { z-index: 5; }
+.h6-pin--morning .h6__copy { animation: h6-in .9s .35s both; transition: color .6s; }
+.h6-pin--morning .h6__bar { animation: none; transition: color .5s; }
+.h6-pin--morning .h6__lead { animation: h6-in .9s .55s both; transition: text-shadow .5s; }
+.h6-pin--morning .h6__actions .btn { box-shadow: 0 8px 28px rgba(20, 48, 31, .2); }
+.h6-pin--morning .h6__down { transition: color .5s, border-color .5s, background-color .5s; }
+.h6-pin--morning:not(.is-day) :is(.h6__copy, .h6__bar) { color: #f6eedd; }
+.h6-pin--morning:not(.is-day) :is(.h6__title, .h6__slogan) { text-shadow: 0 2px 26px rgba(8, 16, 40, .65); }
+.h6-pin--morning:not(.is-day) .h6__lead { text-shadow: 0 2px 14px rgba(8, 16, 40, .6); }
+.h6-pin--morning:not(.is-day) .h6__down { color: #f6eedd; border-color: rgba(246, 238, 221, .55); }
+.h6-pin--morning.is-day:not(.is-clear) .h6__bar { color: #14301f; }
+.h6-pin--morning.is-day:not(.is-clear) .h6__lead { text-shadow: 0 1px 14px rgba(255, 255, 255, .85); }
+.h6-pin--morning.is-day:not(.is-clear) .h6__down { color: #14301f; border-color: rgba(20, 48, 31, .4); background: rgba(255, 255, 255, .55); }
+.h6-pin--morning .h6__veil, .h6-pin--morning .h6__note { animation: none; opacity: 0; transition: opacity .6s; }
+.h6-pin--morning.is-clear .h6__veil, .h6-pin--morning.is-clear .h6__note { opacity: 1; }
+/* the invitation under the name; it leaves as soon as the house starts being built */
+.h6__hint { position: absolute; left: 50%; bottom: 17cqh; translate: -50% 0; display: grid; justify-items: center; gap: 8px; margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: rgba(246, 238, 221, .85); pointer-events: none; transition: opacity .4s; }
+.h6__hint > * { animation: h6-fade-in .9s 1.6s both; }
+.h6__hint i { font-style: normal; font-size: 18px; letter-spacing: 0; }
+.h6-pin--morning.is-building .h6__hint { opacity: 0; }
+
+/* the sun stands behind the bank (light 3, clouds 4), shows at dawn and climbs to the sun of the photo (24 % × 46 %) */
+.h6-pin--morning .h6__light { animation: none; z-index: 3; opacity: calc(var(--dawn, 0) * (.35 + .65 * var(--rise, 0))); }
+.h6-pin--morning :is(.h6__sun, .h6__rays, .h6__flare) { left: calc(50% - max(100cqw, 150cqh) * .26); top: calc(50% - max(100cqw, 150cqh) * .027); }
+.h6-pin--morning .h6__rise { transform: translate3d(0, calc((1 - var(--rise, 0)) * 34cqh), 0); }
+.h6-pin--morning .h6__points { animation: none; opacity: clamp(0, (var(--p, 0) - .85) * 7, 1); }
+
+.h6__clouds { position: absolute; inset: 0; z-index: 4; overflow: hidden; pointer-events: none; }
+.h6__cloud { position: absolute; top: 52cqh; height: 72cqh; background: url(/design/clouds.webp) center top / cover no-repeat; }
+/* the picture is cut at the box: the inner edges melt, or straight seams stand in the sky */
+.h6__cloud--left, .h6__cloud--right { -webkit-mask-image: linear-gradient(90deg, #000 55%, transparent 98%); mask-image: linear-gradient(90deg, #000 55%, transparent 98%); }
+.h6__cloud--back { -webkit-mask-image: linear-gradient(90deg, transparent 2%, #000 30%, #000 70%, transparent 98%); mask-image: linear-gradient(90deg, transparent 2%, #000 30%, #000 70%, transparent 98%); }
+/* in the night they stand up the sides, moonlit (translate, opacity); the dawn settles them into one bank over the lower
+   half; then they part to the sides (transform) — separate properties, so the motions never fight. The right one is
+   mirrored by scale, which applies after transform: a negative shift moves it right on the screen */
+.h6__cloud--back { left: 14cqw; width: 72cqw; top: 57cqh; opacity: var(--dawn, 0); translate: 0 calc((1 - var(--dawn, 0)) * 34cqh); transform: translate3d(0, calc(var(--part, 0) * 50cqh), 0); }
+.h6__cloud--left { left: -16cqw; width: 74cqw; opacity: calc(.4 + .6 * var(--dawn, 0)); translate: calc((1 - var(--dawn, 0)) * -24cqw) calc((1 - var(--dawn, 0)) * -40cqh); transform: translate3d(calc(var(--part, 0) * -82cqw), 0, 0); }
+.h6__cloud--right { right: -16cqw; width: 74cqw; scale: -1 1; opacity: calc(.4 + .6 * var(--dawn, 0)); translate: calc((1 - var(--dawn, 0)) * 24cqw) calc((1 - var(--dawn, 0)) * -40cqh); transform: translate3d(calc(var(--part, 0) * -82cqw), 0, 0); }
+/* one soft glare through the leaves, on the sun of the picture; its strength is the scroll's, so it cannot flicker */
+.h6__flare { position: absolute; width: 170cqh; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 249, 232, .95) 0, rgba(255, 232, 186, .5) 26%, rgba(255, 216, 160, .14) 60%, rgba(255, 210, 150, 0) 100%); opacity: calc(var(--flare, 0) * .75); }
+
+/* phones: Weave's wider frame with more sky stands low and shows the whole house; no drawing (it is placed on the
+   computer's frame), the sun stays put, no glare */
+@media (max-aspect-ratio: 1/1) {
+  .h6-pin--morning { height: 220svh; }
+  .h6-pin--morning .h6__frame { width: 170cqw; translate: -52% 0; }
+  .h6-pin--morning .h6__pane { background: linear-gradient(180deg, #8cafdb 0%, #bccde6 40%, #f1dcc6 72%, #f6e6d6 100%); }
+  /* the lawn under the frame (12cqh) comes with the photo */
+  .h6-pin--morning .h6__pane::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 13cqh; background: #6d8a3e; opacity: var(--part, 0); }
+  .h6-pin--morning .h6__sketch { display: none; }
+  .h6-pin--morning :is(.h6__sun, .h6__rays) { left: calc(50% - 47.6cqw); top: calc(88cqh - 58.9cqw); }
+  .h6-pin--morning .h6__rise { transform: none; }
+  .h6-pin--morning :is(.h6__flare, .h6__hint) { display: none; }
+  /* just above the ridge: it stands 39 % of the frame's height (113cqw) above its bottom (12cqh) */
+  .h6-pin--morning .h6__copy { bottom: calc(12cqh + 50cqw); }
+  .h6__cloud { top: 62cqh; height: 46cqh; }
+  .h6__cloud--back { top: 66cqh; }
+}
+/* «reduce motion»: none of the story — the morning house at once, as the first screen was before (HeroOpen sets
+   .is-day and .is-clear) */
+@media (prefers-reduced-motion: reduce) {
+  .h6-pin--morning { height: auto; }
+  .h6-pin--morning .h6__real { opacity: 1; }
+  .h6-pin--morning :is(.h6__sketch, .h6__night, .h6__star, .h6__hint, .h6__clouds, .h6__flare) { display: none; }
+  .h6-pin--morning :is(.h6__copy, .h6__lead) { animation: none; }
+  .h6-pin--morning .h6__light { opacity: 1; }
+  .h6-pin--morning .h6__rise { transform: none; }
+}
+html.no-motion .h6-pin--morning .h6__real { opacity: 1; }
+html.no-motion .h6-pin--morning :is(.h6__sketch, .h6__night, .h6__star, .h6__hint, .h6__clouds, .h6__flare) { display: none; }
+html.no-motion .h6-pin--morning :is(.h6__copy, .h6__lead) { animation: none; }
+html.no-motion .h6-pin--morning .h6__light { opacity: 1; }
+html.no-motion .h6-pin--morning .h6__rise { transform: none; }
 html.no-motion .h6__scene { transform: none; }
 html.no-motion .h6__veil, html.no-motion .h6__points { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
@@ -759,3 +755,18 @@ html.no-motion .v2-steam { display: none; }/* one line from a book over the morn
 .v2-morning__quote { display: grid; gap: 6px; padding-left: 16px; border-left: 2px solid rgba(154, 122, 69, .45); }
 .v2-morning__quote p { font-family: var(--font-brand); font-size: clamp(17px, 1.4vw, 20px); line-height: 1.4; color: #5b5442; }
 .v2-morning__quote cite { font-style: normal; font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+
+/* chapter I as a page of the book (03.11): the paragraph opens with a gold drop cap, a fleuron closes it, a page number at the foot */
+.v2-morning__dream { text-align: left; }
+.v2-morning__dream::first-letter { float: left; margin: .06em .12em 0 0; font-family: var(--font-brand); font-size: 3.4em; line-height: .82; color: #b08a4a; }
+.v2-morning__fleuron { margin: 0; font-size: 26px; line-height: 1; color: #b08a4a; }
+.v2-morning__page { margin: clamp(48px, 6vw, 80px) 0 0; text-align: center; font-family: var(--font-brand); font-size: 15px; letter-spacing: .2em; color: var(--muted); }
+/* the imprint: the last page of the book «Хороший дом» */
+.v2-colophon { background: #fbf6ee; }
+.v2-colophon__page { max-width: 620px; margin: 0 auto; display: grid; gap: 12px; padding: 34px 0; border-top: 1px solid rgba(154, 122, 69, .35); border-bottom: 1px solid rgba(154, 122, 69, .35); text-align: center; font-size: 15px; line-height: 1.55; color: #5b5442; }
+.v2-colophon__page p { margin: 0; }
+.v2-colophon__label { font-size: 11px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: #9a7a45; }
+.v2-colophon__title { font-family: var(--font-brand); font-size: clamp(22px, 2vw, 28px); line-height: 1.25; color: var(--ink); }
+.v2-colophon__title span { display: block; font-size: .7em; color: #5b5442; }
+.v2-colophon__page em { font-style: normal; color: var(--muted); }
+.v2-colophon__coauthors { font-family: var(--font-brand); font-size: 18px; color: var(--brand); }

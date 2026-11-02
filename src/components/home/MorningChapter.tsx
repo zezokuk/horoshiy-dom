@@ -12,8 +12,9 @@ export function MorningChapter() {
       <img className="v2-morning__leaves" src="/design/branches.webp" alt="" aria-hidden decoding="async" />
       <div className="container">
         <header className="v2-morning__head" data-reveal>
+          {/* the site is the book «Хороший дом» (Igor, 03.11): a chapter heading, a drop cap, a fleuron, a page number */}
           <p className="v2-morning__chapter">
-            <span>I</span> Дом
+            <span>I</span> Глава первая · Дом
           </p>
           {/* the fairy tale stays in the picture of the first screen; the words are plain (Ilya, 03.11: «мы же в реальной жизни») */}
           <p className="v2-morning__dream">
@@ -21,6 +22,9 @@ export function MorningChapter() {
             кирпиче под Краснодаром.
           </p>
           <p className="v2-morning__moral">Мечта — ваша. Кирпич, крыша и документы — наши.</p>
+          <p className="v2-morning__fleuron" aria-hidden>
+            ❦
+          </p>
         </header>
 
         <div className="v2-morning__scene" data-reveal>
@@ -76,6 +80,9 @@ export function MorningChapter() {
             </div>
           </div>
         </div>
+        <p className="v2-morning__page" aria-hidden>
+          — 1 —
+        </p>
       </div>
     </section>
   )

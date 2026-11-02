@@ -1,4 +1,5 @@
 import type { Company, Design, Estate, House, Project, Region } from '@/payload-types'
+import { BookColophon } from '@/components/home/BookColophon'
 import { BuildTeaser } from '@/components/home/BuildTeaser'
 import { EstateCovers, type CoverView } from '@/components/home/EstateCovers'
 import { Founder, type Fact } from '@/components/home/Founder'
@@ -255,6 +256,7 @@ export function HomeV2({
           />
         </div>
       </section>
+      <BookColophon since={company.since} estates={estates} />
       <Thread from={130} to={600} end />
     </>
   )

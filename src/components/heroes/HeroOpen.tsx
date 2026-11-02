@@ -17,6 +17,23 @@ const pct = (x: number, y: number) => ({ left: `${((x + OX) / W) * 100}%`, top: 
 
 export type HeroPoint = { x: number; y: number; title: string; text: string }
 
+// «Утро»: the roof's ridge on the house, the tip of the author's rod, and where the ridge hangs before the scroll (under
+// the rod, the roof at 0.3 of its size); all in the photo's pixels, as the sketch
+const RIDGE = [1010, 235] as const
+const ROD_TIP = [1660, -610] as const
+const HANG = [1660, -470] as const
+const clamp = (v: number) => Math.min(1, Math.max(0, v))
+const ease = (t: number) => t * t * (3 - 2 * t)
+/** where the ridge is at build progress `b` (0 under the rod, 1 on the house), plus `drop` paid out on the line */
+const ridgeAt = (b: number, drop: number) => {
+  const e = ease(b)
+  return [HANG[0] + (RIDGE[0] - HANG[0]) * e, HANG[1] + (RIDGE[1] - HANG[1]) * e + drop * (1 - e)] as const
+}
+const liftAt = (b: number, drop: number) => {
+  const [x, y] = ridgeAt(b, drop)
+  return `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${(0.3 + 0.7 * ease(b)).toFixed(3)}) translate(${-RIDGE[0]} ${-RIDGE[1]})`
+}
+
 /**
  * Home v2, screen 1 (29.10, ERA Residence): «Одно рукопожатие до вашей мечты» → the house is drawn line by line in a
  * window → the real house wipes in → the window opens to the whole screen and the header waits until the visitor
@@ -47,20 +64,56 @@ export function HeroOpen({
   useEffect(() => {
     const root = document.documentElement
     const pin = pinRef.current
+    const lift = pin?.querySelector<SVGGElement>('.h6__lift')
+    const rope = pin?.querySelector<SVGLineElement>('.h6__rope')
+    const born = performance.now()
     let frame = 0
+    let idle = 0
+    let build = 0
+    // the roof on the line: before any scroll the line pays out a little and the roof sways on it — the invitation to
+    // scroll (ERA); the scroll then brings it down onto the walls
+    const drawRoof = (now: number) => {
+      if (!lift || !rope) return
+      const t = (now - born) / 1000
+      const drop = 80 * ease(clamp((t - 0.9) / 0.9)) + (t > 1.8 ? 7 * Math.sin((t - 1.8) * 2.2) : 0)
+      const [x, y] = ridgeAt(build, drop)
+      lift.setAttribute('transform', liftAt(build, drop))
+      rope.setAttribute('x2', x.toFixed(1))
+      rope.setAttribute('y2', y.toFixed(1))
+    }
+    // «reduce motion»: no story, the morning house at once (v2.css); no sway either where the drawing is not shown (phones)
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches || root.classList.contains('no-motion')
+    const still = calm || window.matchMedia('(max-aspect-ratio: 1/1)').matches
+    const tease = (now: number) => {
+      idle = 0
+      drawRoof(now)
+      if (build === 0 && !still) idle = requestAnimationFrame(tease)
+    }
     const sync = () => {
       frame = 0
-      // the dawn takes the pinned part of the scroll (one screen on a computer); not pinned (reduced motion) — 0.6 screen
+      // the story takes the pinned part of the scroll (two screens on a computer); not pinned (reduced motion) — 0.6 screen
       const span = Math.max((pin?.offsetHeight ?? 0) - window.innerHeight, window.innerHeight * 0.6)
       const p = Math.min(1, Math.max(0, window.scrollY / span))
       if (morning && pin) {
-        pin.style.setProperty('--p', p.toFixed(3))
-        // one soft hump over 0.6–0.8: rises and falls once, follows the scroll, so it never blinks by itself
-        pin.style.setProperty('--flare', p > 0.6 && p < 0.8 ? Math.sin(((p - 0.6) / 0.2) * Math.PI).toFixed(3) : '0')
-        // over the cloud bank the words are dark; once the clouds part over the lawn they turn white over the shade
-        pin.classList.toggle('is-clear', p > 0.3)
-        // nobody has to wait for the intro: the first scroll plays it to the end at once
-        if (p > 0) pin.classList.add('is-skipped')
+        // one scroll, four acts: the house is built in the night, the dawn, the clouds part, the sun climbs
+        build = clamp(p / 0.25)
+        const dawn = clamp((p - 0.24) / 0.14)
+        const part = clamp((p - 0.36) / 0.28)
+        const s = pin.style
+        s.setProperty('--p', p.toFixed(3))
+        s.setProperty('--wall', clamp(build / 0.6).toFixed(3))
+        s.setProperty('--hatch', clamp((build - 0.85) / 0.15).toFixed(3))
+        s.setProperty('--dawn', dawn.toFixed(3))
+        s.setProperty('--part', part.toFixed(3))
+        s.setProperty('--rise', clamp((p - 0.4) / 0.3).toFixed(3))
+        // one soft hump over 0.74–0.9: rises and falls once, follows the scroll, so it never blinks by itself
+        s.setProperty('--flare', p > 0.74 && p < 0.9 ? Math.sin(((p - 0.74) / 0.16) * Math.PI).toFixed(3) : '0')
+        pin.classList.toggle('is-building', build > 0)
+        // the words: warm white on the night, dark over the cloud bank at dawn, white over the lawn on the shade
+        pin.classList.toggle('is-day', calm || dawn > 0.5)
+        pin.classList.toggle('is-clear', calm || part > 0.5)
+        drawRoof(performance.now())
+        if (build === 0 && !idle && !still) idle = requestAnimationFrame(tease)
       }
       // the header and the floating call come once the house starts leaving (as before: 0.1 screen past the pin), so
       // they never cover «Выбрать дом» while the dawn plays
@@ -74,6 +127,7 @@ export function HeroOpen({
     window.addEventListener('resize', queue)
     return () => {
       cancelAnimationFrame(frame)
+      cancelAnimationFrame(idle)
       window.removeEventListener('scroll', queue)
       window.removeEventListener('resize', queue)
       root.classList.remove('past-hero')
@@ -104,9 +158,21 @@ export function HeroOpen({
               )}
             </div>
             <svg className="h6__sketch" viewBox={`${-OX} ${-OY} ${W} ${H}`} fill="none" aria-hidden focusable="false">
-              {/* «луна-кран» (Ilya, 03.11, our own take on a dream on the moon): the crescent holds the roof on a thread
-                  and lowers it onto the walls being drawn; the thread starts at its lower horn (1860, −390), v2.css h6-roof-land */}
-              {morning && <path className="h6__moon" d="M1820,-710 A170,170 0 1,1 1860,-390 A205,205 0 0,0 1820,-710 Z" />}
+              {/* the author on the moon (Ilya, 03.11, after Shrek's opening): a man in gold line sits in the crescent and
+                  fishes the roof down onto the house on a line. Our own figure, not the DreamWorks boy; drop this <g> to
+                  go without him. The line runs from the rod's tip (ROD_TIP) to the ridge, HeroOpen moves its lower end */}
+              {morning && (
+                <g className="h6__sky">
+                  <path className="h6__moon" d="M1820,-710 A170,170 0 1,1 1860,-390 A205,205 0 0,0 1820,-710 Z" />
+                  <g className="h6__fisher">
+                    <circle cx={1883} cy={-550} r={19} />
+                    <polyline points="1886,-530 1895,-440 1846,-438 1840,-388" />
+                    <polyline points="1887,-512 1842,-478" />
+                    <polyline points={`1842,-478 ${ROD_TIP.join(',')}`} />
+                  </g>
+                  <line className="h6__rope" x1={ROD_TIP[0]} y1={ROD_TIP[1]} x2={ROD_TIP[0]} y2={ROD_TIP[1] + 140} />
+                </g>
+              )}
               {(['fence', 'wall', 'roof', 'hatch'] as const).map((g) => {
                 const lines = (
                   <g key={g} className={`hl-${g}`}>
@@ -115,10 +181,9 @@ export function HeroOpen({
                     ))}
                   </g>
                 )
-                // the thread hangs from the ridge (1010, 235); the roof and the thread travel together
+                // the roof hangs on the line under the rod, small; the scroll brings it down onto the walls (liftAt)
                 return morning && g === 'roof' ? (
-                  <g key={g} className="h6__lift">
-                    <line className="h6__rope" x1={1010} y1={235} x2={1010} y2={-165} />
+                  <g key={g} className="h6__lift" transform={liftAt(0, 0)}>
                     {lines}
                   </g>
                 ) : (
@@ -169,6 +234,13 @@ export function HeroOpen({
         <h1 className="h6__title">Хороший дом</h1>
         <p className="h6__slogan">сюда приводят мечты</p>
       </div>
+
+      {morning && (
+        <p className="h6__hint" aria-hidden>
+          <span>Листайте — история начинается</span>
+          <i>↓</i>
+        </p>
+      )}
 
       <p className="h6__note">Дом настоящий, окружение — визуализация</p>
 
