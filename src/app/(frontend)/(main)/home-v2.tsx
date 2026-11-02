@@ -5,6 +5,7 @@ import { Founder, type Fact } from '@/components/home/Founder'
 import { HouseFilm } from '@/components/home/HouseFilm'
 import { Included } from '@/components/home/Included'
 import { LifeScenes } from '@/components/home/LifeScenes'
+import { MorningChapter } from '@/components/home/MorningChapter'
 import { PlotPicker, type PlotEstate } from '@/components/home/PlotPicker'
 import { Road, type RoadStop } from '@/components/home/Road'
 import { ScrollX } from '@/components/home/ScrollX'
@@ -16,7 +17,7 @@ import { byEstateStatus, estateView, genplanEstate, houseView } from '@/lib/view
 
 /**
  * Home v2 (29.10, after the call of 27.10): one thought and one action per screen — the house opens to the whole
- * screen → who builds → the estates on the client's covers → the road from the city → a free plot on the plan → the houses as a film strip →
+ * screen (since 03.11: the dream in the clouds and the sunrise) → chapter I, the morning there → who builds → the estates on the client's covers → the road from the city → a free plot on the plan → the houses as a film strip →
  * life out of town in the client's words → what the price includes and how to buy → build your own (last: the company
  * sells houses first) → «Это место нужно увидеть самому» (the lead form of Shell).
  */
@@ -141,6 +142,7 @@ export function HomeV2({
         catalogHref={mainHref('/catalog')}
       />
       <div id="next" />
+      <MorningChapter />
       <Thread from={600} to={130} />
 
       {order === 'together' ? (

@@ -22,10 +22,11 @@ export type HeroPoint = { x: number; y: number; title: string; text: string }
  * window → the real house wipes in → the window opens to the whole screen and the header waits until the visitor
  * scrolls. Scrolling pushes the camera in, and the sun keeps playing through the leaves over the whole picture.
  *
- * `morning` (default since 02.11, 33-… §6.1, version 1 on the same picture): no intro, the house is there at once with the
- * name and the button, in a cold fog with the sun low. The first screen of scrolling is the dawn: the sun climbs to its
- * place behind the crown, the fog thins and lifts in layers, the light warms, one soft glare at 0.6–0.8, the last haze
- * leaves upwards at 0.8–1. Scrolling only feeds `--p` (0→1) and `--flare` to CSS (v2.css: .h6-pin--morning)
+ * `morning` (default; 03.11, «мечта в облаках → утро», 39-…): the intro plays in the clouds — the handshake, the house
+ * drawn over the dawn sky — then the clouds settle into a bank below and cover the drawing; «Выбрать дом» is there from
+ * the start. The first screen of scrolling is the sunrise: the clouds part to the sides, the morning photo comes through,
+ * the sun climbs from behind the bank to the sun of the picture, one soft glare at 0.6–0.8. Scrolling only feeds `--p`
+ * (0→1), `--flare` and two classes to CSS (v2.css: .h6-pin--morning)
  */
 export function HeroOpen({
   since,
@@ -56,6 +57,10 @@ export function HeroOpen({
         pin.style.setProperty('--p', p.toFixed(3))
         // one soft hump over 0.6–0.8: rises and falls once, follows the scroll, so it never blinks by itself
         pin.style.setProperty('--flare', p > 0.6 && p < 0.8 ? Math.sin(((p - 0.6) / 0.2) * Math.PI).toFixed(3) : '0')
+        // over the cloud bank the words are dark; once the clouds part over the lawn they turn white over the shade
+        pin.classList.toggle('is-clear', p > 0.3)
+        // nobody has to wait for the intro: the first scroll plays it to the end at once
+        if (p > 0) pin.classList.add('is-skipped')
       }
       // the header and the floating call come once the house starts leaving (as before: 0.1 screen past the pin), so
       // they never cover «Выбрать дом» while the dawn plays
@@ -82,9 +87,19 @@ export function HeroOpen({
         <div className="h6__scene">
           <div className="h6__frame">
             <div className="h6__real">
-              <Pic src="/design/hero-day.webp" alt="Кирпичный дом «Хорошего дома» по проекту «Тип 5» на участке с газоном" priority />
+              {morning ? (
+                // the same frame in the morning haze (Weave, 03.11): the house stands where it stood, so the sketch and the points still fit
+                <Pic
+                  src="/design/hero-morning.webp"
+                  phone="/design/hero-morning-phone.webp"
+                  alt="Кирпичный дом «Хорошего дома» по проекту «Тип 5» ранним утром, солнце сквозь листву и дымка над полем"
+                  priority
+                />
+              ) : (
+                <Pic src="/design/hero-day.webp" alt="Кирпичный дом «Хорошего дома» по проекту «Тип 5» на участке с газоном" priority />
+              )}
             </div>
-            {!morning && <svg className="h6__sketch" viewBox={`${-OX} ${-OY} ${W} ${H}`} fill="none" aria-hidden focusable="false">
+            <svg className="h6__sketch" viewBox={`${-OX} ${-OY} ${W} ${H}`} fill="none" aria-hidden focusable="false">
               {(['fence', 'wall', 'roof', 'hatch'] as const).map((g) => (
                 <g key={g} className={`hl-${g}`}>
                   {HOUSE_LINES[g].map((p) => (
@@ -92,7 +107,7 @@ export function HeroOpen({
                   ))}
                 </g>
               ))}
-            </svg>}
+            </svg>
             <div className="h6__points">
               {points.map((p) => (
                 // a point on the right half puts its label to the left, so it never runs off the screen
@@ -109,16 +124,6 @@ export function HeroOpen({
         </div>
       </div>
 
-      {/* the cold before sunrise and three layers of fog over the picture, under the shade and the words */}
-      {morning && (
-        <div className="h6__mist" aria-hidden>
-          <i className="h6__cold" />
-          <i className="h6__fog h6__fog--low" />
-          <i className="h6__fog h6__fog--mid" />
-          <i className="h6__fog h6__fog--last" />
-        </div>
-      )}
-
       {/* the living light (Ilya, 30.10: not day and night, but the sun through leaves in the wind) */}
       <div className="h6__light" aria-hidden>
         <i className="h6__rise">
@@ -130,6 +135,16 @@ export function HeroOpen({
       </div>
 
       <div className="h6__veil" aria-hidden />
+
+      {/* the dream in the clouds: they fill the screen during the intro, settle into a bank below and part to the sides
+          on scrolling, over the sun, so it rises from behind them (clouds.webp: Weave, alpha made from the black) */}
+      {morning && (
+        <div className="h6__clouds" aria-hidden>
+          <i className="h6__cloud h6__cloud--back" />
+          <i className="h6__cloud h6__cloud--left" />
+          <i className="h6__cloud h6__cloud--right" />
+        </div>
+      )}
 
       <div className="h6__copy">
         <p className="h6__eyebrow">Строим и продаём дома{since ? ` с ${since} года` : ''}</p>
@@ -151,7 +166,7 @@ export function HeroOpen({
         </div>
       </div>
 
-      {!morning && <div className="h6__intro" aria-hidden>
+      <div className="h6__intro" aria-hidden>
         <p className="h6__intro-eyebrow">Хороший дом{since ? ` · с ${since} года` : ''}</p>
         <p className="h6__intro-title">
           <span>Одно рукопожатие</span>
@@ -166,7 +181,7 @@ export function HeroOpen({
             ))}
           </svg>
         </div>
-      </div>}
+      </div>
     </div>
     </section>
   )

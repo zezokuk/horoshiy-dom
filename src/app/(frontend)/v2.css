@@ -213,52 +213,94 @@ html.no-motion .h6__pane { clip-path: none; }
 /* the sun and its rays move together (the dawn lifts them); the box is the light's own, so their places do not change */
 .h6__rise { position: absolute; inset: 0; }
 
-/* ---------- «Утро» (HeroOpen morning, 02.11, 33-… §6.1): the first screen of scrolling is a dawn in the fog ----------
-   HeroOpen feeds --p (0 → 1 over the pinned screen) and --flare (one hump over 0.6–0.8). The picture stays a plain <img>;
-   the cold, the fog and the glare are gradients over it, moved by transform and opacity only */
+/* ---------- «Утро» (HeroOpen morning, 03.11, 39-…): the dream in the clouds, then the sunrise on the first screen of scrolling ----------
+   HeroOpen feeds --p (0 → 1 over the pinned screen), --flare (one hump over 0.6–0.8), .is-clear (the clouds have parted)
+   and .is-skipped (the visitor scrolled during the intro). The photo is a plain <img>; the clouds are a picture with alpha,
+   so nothing here needs a blend mode */
 .h6-pin--morning { height: 200svh; }
-/* no intro: the house, the name and the button are on the first paint */
-.h6-pin--morning .h6__pane { clip-path: none; animation: none; }
+/* the window no longer opens: the stage is the dawn sky from the first paint, and the photo comes through as the clouds part */
+.h6-pin--morning .h6__pane { clip-path: none; animation: none; background: linear-gradient(180deg, #8fb0d8 0%, #c3d3e6 38%, #f1dcc6 66%, #f6e6d6 100%); }
 .h6-pin--morning .h6__scene { transform: none; animation: none; }
-.h6-pin--morning :is(.h6__real, .h6__copy, .h6__bar, .h6__note) { animation: none; }
-.h6-pin--morning .h6__veil { opacity: 1; animation: none; }
-/* the light warms by 0.6; the points wait for the clear air */
-.h6-pin--morning .h6__light { animation: none; opacity: calc(.3 + .7 * min(1, var(--p, 0) / .6)); }
+.h6-pin--morning .h6__real { animation: none; opacity: clamp(0, (var(--p, 0) - .04) / .36, 1); }
+/* the house is drawn over the sky while the clouds frame the screen, then the settling bank covers it */
+.h6-pin--morning .h6__sketch { animation: h6-fade .5s 2.9s both; }
+.h6-pin--morning .h6__sketch polyline { animation-delay: 1.15s; }
+.h6-pin--morning .h6__sketch .hl-wall polyline { animation-delay: 1.3s; }
+.h6-pin--morning .h6__sketch .hl-roof polyline { animation-delay: 1.45s; }
+.h6-pin--morning .h6__sketch .hl-hatch polyline { animation-delay: 1.6s; }
+.h6-pin--morning .h6__intro { background: transparent; animation: h6-away .7s 2.3s both; }
+.h6-pin--morning .h6__intro-title { text-shadow: 0 2px 24px rgba(255, 255, 255, .8); }
+/* «Выбрать дом» is there from the first paint; the name, the slogan and the lead come as the intro leaves */
+.h6-pin--morning :is(.h6__copy, .h6__bar, .h6__note) { z-index: 5; }
+.h6-pin--morning .h6__bar { animation: none; transition: color .5s; }
+.h6-pin--morning .h6__copy { animation: h6-in .9s 2.7s both; }
+.h6-pin--morning .h6__lead { animation: h6-in .9s 2.9s both; transition: text-shadow .5s; }
+.h6-pin--morning .h6__actions .btn { box-shadow: 0 8px 28px rgba(20, 48, 31, .2); }
+.h6-pin--morning .h6__down { transition: color .5s, border-color .5s; }
+/* over the white cloud bank the words are dark; over the lawn, white on the shade (as before) */
+.h6-pin--morning:not(.is-clear) .h6__bar { color: #14301f; }
+.h6-pin--morning:not(.is-clear) .h6__lead { text-shadow: 0 1px 14px rgba(255, 255, 255, .85); }
+.h6-pin--morning:not(.is-clear) .h6__down { color: #14301f; border-color: rgba(20, 48, 31, .4); background: rgba(255, 255, 255, .55); }
+.h6-pin--morning .h6__veil, .h6-pin--morning .h6__note { animation: none; opacity: 0; transition: opacity .6s; }
+.h6-pin--morning.is-clear .h6__veil, .h6-pin--morning.is-clear .h6__note { opacity: 1; }
+/* the sun stands behind the bank (light 3, clouds 4) and climbs to the sun of the photo (24 % × 46 % of the frame) by 0.55 */
+.h6-pin--morning .h6__light { animation: none; z-index: 3; opacity: calc(.45 + .55 * min(1, var(--p, 0) / .55)); }
+.h6-pin--morning :is(.h6__sun, .h6__rays, .h6__flare) { left: calc(50% - max(100cqw, 150cqh) * .26); top: calc(50% - max(100cqw, 150cqh) * .027); }
+.h6-pin--morning .h6__rise { transform: translate3d(0, calc((1 - min(1, var(--p, 0) / .55)) * 34cqh), 0); }
 .h6-pin--morning .h6__points { animation: none; opacity: clamp(0, (var(--p, 0) - .8) * 5, 1); }
-/* the sun starts low, behind the crown and the roof, and reaches the sun of the picture at 0.6 */
-.h6-pin--morning .h6__rise { transform: translate3d(0, calc((1 - min(1, var(--p, 0) / .6)) * 22cqh), 0); }
 
-/* z-index 2: over the picture, under the shade (3) and the words (4), so the fog never washes the name or the button. It
-   sits on the layers, not on .h6__mist: a z-index there makes its own stacking context, and the cold multiplied with nothing
-   and covered the house with flat grey */
-.h6__mist { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.h6__mist > i { position: absolute; z-index: 2; display: block; }
-/* before sunrise: the whole frame cooler and darker (multiply), the painted sun dimmed most, so only the low one shines; gone by 0.7 */
-.h6__cold { inset: 0; background: radial-gradient(circle 20cqh at calc(50% - max(100cqw, 150cqh) * .25) calc(50% - max(100cqw, 150cqh) * .167), #61789a 0, #7d93b2 45%, transparent 100%), linear-gradient(180deg, #7d93b2 0%, #9cabbd 52%, #7f8f97 100%); mix-blend-mode: multiply; opacity: clamp(0, 1 - var(--p, 0) / .7, 1); }
-/* three layers that thin and lift at their own pace: the lawn first, the crowns next, the high haze last */
-.h6__fog--low { left: -10%; right: -10%; bottom: -6%; height: 58%; background: radial-gradient(ellipse 34% 46% at 22% 58%, rgba(236, 241, 244, .58), transparent 72%), radial-gradient(ellipse 38% 42% at 58% 62%, rgba(236, 241, 244, .52), transparent 72%), radial-gradient(ellipse 30% 44% at 88% 56%, rgba(236, 241, 244, .58), transparent 72%), linear-gradient(0deg, rgba(236, 241, 244, .28), transparent 70%); opacity: clamp(0, 1 - var(--p, 0) / .5, 1); transform: translate3d(0, calc(var(--p, 0) * -22cqh), 0); }
-.h6__fog--mid { left: -15%; right: -15%; top: 18%; height: 56%; background: radial-gradient(ellipse 26% 40% at 18% 52%, rgba(240, 244, 246, .5), transparent 72%), radial-gradient(ellipse 30% 36% at 50% 42%, rgba(240, 244, 246, .42), transparent 72%), radial-gradient(ellipse 26% 42% at 84% 50%, rgba(240, 244, 246, .5), transparent 72%); opacity: clamp(0, 1 - (var(--p, 0) - .1) / .6, 1); transform: translate3d(0, calc(var(--p, 0) * -38cqh), 0); }
-/* the last haze: a sheet with a cloudy lower edge; it only thins until 0.8, then leaves upwards like the clouds at ERA */
-.h6__fog--last { left: -12%; right: -12%; top: -30%; height: 140%; background: radial-gradient(ellipse 22% 9% at 14% 92%, rgba(238, 242, 245, .58), transparent 75%), radial-gradient(ellipse 26% 10% at 42% 95%, rgba(238, 242, 245, .58), transparent 75%), radial-gradient(ellipse 22% 9% at 70% 91%, rgba(238, 242, 245, .58), transparent 75%), radial-gradient(ellipse 20% 8% at 94% 94%, rgba(238, 242, 245, .58), transparent 75%), linear-gradient(180deg, rgba(238, 242, 245, .45) 0 84%, transparent 94%); opacity: calc(.75 - .35 * min(1, var(--p, 0) / .8) - 2 * max(0, var(--p, 0) - .8)); transform: translate3d(0, calc(max(0, var(--p, 0) - .8) * -7.5 * 100cqh), 0); }
+.h6__clouds { position: absolute; inset: 0; z-index: 4; overflow: hidden; pointer-events: none; }
+/* at rest the three pieces make one bank over the lower half; the intro holds them apart (translate), the scroll parts
+   them (transform) — two properties, so the two motions never fight */
+.h6__cloud { position: absolute; top: 52cqh; height: 72cqh; background: url(/design/clouds.webp) center top / cover no-repeat; }
+/* the picture is cut at the box: the inner edges melt, or straight seams stand in the sky */
+.h6__cloud--left, .h6__cloud--right { -webkit-mask-image: linear-gradient(90deg, #000 55%, transparent 98%); mask-image: linear-gradient(90deg, #000 55%, transparent 98%); }
+.h6__cloud--back { -webkit-mask-image: linear-gradient(90deg, transparent 2%, #000 30%, #000 70%, transparent 98%); mask-image: linear-gradient(90deg, transparent 2%, #000 30%, #000 70%, transparent 98%); }
+.h6__cloud--back { left: 14cqw; width: 72cqw; top: 57cqh; animation: h6-cloud-back 1s 2.25s cubic-bezier(.6, 0, .2, 1) both; transform: translate3d(0, calc(min(1, var(--p, 0) / .5) * 50cqh), 0); }
+.h6__cloud--left { left: -16cqw; width: 74cqw; animation: h6-cloud-left 1.05s 2.2s cubic-bezier(.6, 0, .2, 1) both; transform: translate3d(calc(min(1, var(--p, 0) / .6) * -82cqw), 0, 0); }
+/* mirrored by scale, which applies after transform: a negative shift moves it right on the screen */
+.h6__cloud--right { right: -16cqw; width: 74cqw; scale: -1 1; animation: h6-cloud-right 1.05s 2.2s cubic-bezier(.6, 0, .2, 1) both; transform: translate3d(calc(min(1, var(--p, 0) / .6) * -82cqw), 0, 0); }
+/* during the intro the clouds stand up the sides and open the middle of the sky for the handshake and the drawing */
+@keyframes h6-cloud-left { from { translate: -24cqw -40cqh; } to { translate: 0 0; } }
+@keyframes h6-cloud-right { from { translate: 24cqw -40cqh; } to { translate: 0 0; } }
+@keyframes h6-cloud-back { from { translate: 0 34cqh; } to { translate: 0 0; } }
 /* one soft glare through the leaves, on the sun of the picture; its strength is the scroll's, so it cannot flicker */
-.h6__flare { position: absolute; left: calc(50% - max(100cqw, 150cqh) * .25); top: calc(50% - max(100cqw, 150cqh) * .167); width: 170cqh; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 249, 232, .95) 0, rgba(255, 232, 186, .5) 26%, rgba(255, 216, 160, .14) 60%, rgba(255, 210, 150, 0) 100%); opacity: var(--flare, 0); }
+.h6__flare { position: absolute; width: 170cqh; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 249, 232, .95) 0, rgba(255, 232, 186, .5) 26%, rgba(255, 216, 160, .14) 60%, rgba(255, 210, 150, 0) 100%); opacity: calc(var(--flare, 0) * .75); }
 
-/* phones and «reduce motion»: just the cold frame turning into the warm one — nothing climbs or lifts, no glare */
+/* phones: Weave's wider frame with more sky stands low and shows the whole house; the sun stays put, no glare */
 @media (max-aspect-ratio: 1/1) {
   .h6-pin--morning { height: 160svh; }
-  .h6-pin--morning :is(.h6__rise, .h6__fog) { transform: none; }
-  .h6-pin--morning .h6__fog { opacity: clamp(0, 1 - var(--p, 0), 1); }
+  .h6-pin--morning .h6__frame { width: 170cqw; translate: -52% 0; }
+  .h6-pin--morning .h6__pane { background: linear-gradient(180deg, #8cafdb 0%, #bccde6 40%, #f1dcc6 72%, #f6e6d6 100%); }
+  /* the lawn under the frame (12cqh) comes with the photo, so no green band shows under the clouds of the dream */
+  .h6-pin--morning .h6__pane::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 13cqh; background: #6d8a3e; opacity: clamp(0, (var(--p, 0) - .04) / .36, 1); }
+  /* the drawing is placed on the computer's frame; here the house stands elsewhere */
+  .h6-pin--morning .h6__sketch { display: none; }
+  .h6-pin--morning :is(.h6__sun, .h6__rays) { left: calc(50% - 47.6cqw); top: calc(88cqh - 58.9cqw); }
+  .h6-pin--morning .h6__rise { transform: none; }
   .h6-pin--morning .h6__flare { display: none; }
+  /* just above the ridge: it stands 39 % of the frame's height (113cqw) above its bottom (12cqh) */
+  .h6-pin--morning .h6__copy { bottom: calc(12cqh + 50cqw); }
+  .h6__cloud { top: 62cqh; height: 46cqh; }
+  .h6__cloud--back { top: 66cqh; }
 }
+/* «reduce motion»: no intro and nothing travels — the morning photo at once, the bank melts away on scrolling */
 @media (prefers-reduced-motion: reduce) {
   .h6-pin--morning { height: auto; }
-  .h6-pin--morning :is(.h6__rise, .h6__fog) { transform: none; }
-  .h6-pin--morning .h6__fog { opacity: clamp(0, 1 - var(--p, 0), 1); }
+  .h6-pin--morning .h6__real { opacity: 1; }
+  .h6-pin--morning :is(.h6__intro, .h6__sketch) { display: none; }
+  .h6-pin--morning :is(.h6__copy, .h6__lead) { animation: none; }
+  .h6-pin--morning .h6__cloud { animation: none; transform: none; opacity: clamp(0, 1 - var(--p, 0) * 2, 1); }
+  .h6-pin--morning .h6__rise { transform: none; }
   .h6-pin--morning .h6__flare { display: none; }
 }
-html.no-motion .h6-pin--morning :is(.h6__rise, .h6__fog) { transform: none; }
-html.no-motion .h6-pin--morning .h6__fog { opacity: clamp(0, 1 - var(--p, 0), 1); }
+html.no-motion .h6-pin--morning .h6__real { opacity: 1; }
+html.no-motion .h6-pin--morning :is(.h6__copy, .h6__lead) { animation: none; }
+html.no-motion .h6-pin--morning .h6__cloud { animation: none; transform: none; opacity: clamp(0, 1 - var(--p, 0) * 2, 1); }
+html.no-motion .h6-pin--morning .h6__rise { transform: none; }
 html.no-motion .h6-pin--morning .h6__flare { display: none; }
+/* the first scroll plays the intro to its end at once (after every delay above, so it wins) */
+.h6-pin--morning.is-skipped :is(.h6__intro, .h6__intro *, .h6__sketch, .h6__sketch polyline, .h6__cloud, .h6__copy, .h6__lead) { animation-delay: 0s; animation-duration: .01s; }
 html.no-motion .h6__scene { transform: none; }
 html.no-motion .h6__veil, html.no-motion .h6__points { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
@@ -625,3 +667,42 @@ body:has(.v2-bar) .v2-hero__in { padding-bottom: calc(clamp(32px, 6vh, 64px) + 7
 .pp__range span:not(.pp__thumb) { font-size: 13px; color: var(--muted); }
 html.no-motion .pp__photo img { animation: none; }
 @media (prefers-reduced-motion: reduce) { .pp__photo img { animation: none; } }
+
+/* ======================================================================
+   Home v2, chapter I under the sunrise (components/home/MorningChapter, 03.11): the epigraph, the dream line, and the
+   morning as it is lived — breakfast outdoors, what you hear at seven. It starts in the colour of the haze above.
+   ====================================================================== */
+.v2-morning { position: relative; overflow: hidden; background: linear-gradient(180deg, #f5e9db 0%, #fbf6ef 26%, #fff 62%); padding-top: clamp(72px, 9vw, 128px); }
+/* the leaves hang over the top left corner and sway a little, as if the table stood under a tree */
+.v2-morning__leaves { position: absolute; z-index: 0; left: -3vw; top: -2vw; width: min(44vw, 620px); height: auto; pointer-events: none; transform-origin: 0 0; animation: v2-leaves 9s ease-in-out infinite alternate; }
+@keyframes v2-leaves { from { transform: rotate(-1.2deg); } to { transform: rotate(1.4deg) translateY(4px); } }
+.v2-morning .container { position: relative; z-index: 1; }
+.v2-morning__head { max-width: 760px; margin: 0 auto clamp(56px, 7vw, 96px); display: grid; justify-items: center; gap: 26px; text-align: center; }
+.v2-morning__chapter { display: inline-flex; align-items: baseline; gap: 12px; font-size: 12px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--brand-ink); }
+.v2-morning__chapter span { font-family: var(--font-brand); font-size: 44px; font-weight: 400; letter-spacing: 0; line-height: 1; color: var(--brand); }
+.v2-morning__epigraph { display: grid; gap: 12px; justify-items: center; }
+.v2-morning__epigraph p { font-family: var(--font-brand); font-size: clamp(18px, 1.6vw, 22px); line-height: 1.5; letter-spacing: .02em; color: #55625a; }
+.v2-morning__epigraph cite { font-style: normal; font-size: 12px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+.v2-morning__epigraph cite::before { content: "— "; }
+.v2-morning__dream { max-width: 680px; font-family: var(--font-serif); font-size: clamp(24px, 2.4vw, 34px); line-height: 1.28; color: var(--ink); }
+.v2-morning__scene { display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(32px, 5vw, 72px); align-items: center; }
+.v2-morning__photo { position: relative; margin: 0; border-radius: 28px; overflow: hidden; aspect-ratio: 3 / 2; box-shadow: 0 30px 80px -40px rgba(20, 48, 31, .45); }
+.v2-morning__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.v2-morning__photo figcaption { position: absolute; left: 18px; bottom: 18px; padding: 8px 14px; border-radius: 999px; background: rgba(255, 255, 255, .82); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-size: 13px; font-weight: 600; color: var(--ink); }
+.v2-morning__words { display: grid; gap: 22px; }
+.v2-morning__words .title em { font-style: normal; color: var(--brand); }
+.v2-morning__ears { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding-top: 22px; border-top: 1px solid rgba(20, 48, 31, .12); }
+.v2-morning__label { margin-bottom: 10px; font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--brand-ink); }
+.v2-morning__ears ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.v2-morning__ears li { position: relative; padding-left: 18px; font-size: 16px; line-height: 1.4; color: var(--ink); }
+.v2-morning__ears li::before { content: ""; position: absolute; left: 0; top: .6em; width: 7px; height: 7px; border-radius: 50%; background: var(--brand); }
+/* what you don't hear: crossed out and quiet */
+.v2-morning__ears div + div li { color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(20, 48, 31, .35); }
+.v2-morning__ears div + div li::before { background: rgba(20, 48, 31, .25); }
+@media (max-width: 899px) {
+  .v2-morning__scene { grid-template-columns: 1fr; }
+  .v2-morning__leaves { width: 74vw; left: -10vw; top: -6vw; opacity: .9; }
+}
+@media (max-width: 479px) { .v2-morning__ears { grid-template-columns: 1fr; } }
+html.no-motion .v2-morning__leaves { animation: none; }
+@media (prefers-reduced-motion: reduce) { .v2-morning__leaves { animation: none; } }
