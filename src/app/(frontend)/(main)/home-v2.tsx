@@ -230,6 +230,8 @@ export function HomeV2({
       <section className="section v2-sec" id="life">
         <ScrollX track=".v2-story">
           <LifeScenes />
+          {/* leaves in front of the slides, drifting the other way as the day goes by (ERA: the foliage moves on scroll) */}
+          <img className="v2-life__leaves" src="/design/branches.webp" alt="" aria-hidden decoding="async" />
         </ScrollX>
       </section>
 

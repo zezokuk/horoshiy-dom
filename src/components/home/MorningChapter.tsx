@@ -1,8 +1,9 @@
 /**
- * Home v2, right under the sunrise (03.11, lore «Один день», 40-…): chapter I. The epigraph says what the screen above has
- * just shown — the sun has risen — then the dream line, then the morning itself: breakfast outdoors on an ordinary
- * Tuesday, what you hear at seven and what you don't. Not a resort for a week, as on ERA, but every day.
- * Fet's lines are from memory: check them against an edition before the client sees the page (40-…, «Цитаты: статус»).
+ * Home v2, right under the sunrise (03.11, lore «Один день», 40-…): chapter I. The first screen was the dream (the night,
+ * the star, the crescent lowering the roof); here it lands in plain words — the dream is yours, brick and papers are ours —
+ * then the morning itself: breakfast outdoors on an ordinary Tuesday, what you hear at seven and what you don't. Not a
+ * resort for a week, as on ERA, but every day. The Saint-Exupéry line is our own translation of the French original
+ * (Nora Gal's Russian text is still under copyright): «…il faut faire soigneusement la toilette de la planète».
  */
 export function MorningChapter() {
   return (
@@ -14,22 +15,12 @@ export function MorningChapter() {
           <p className="v2-morning__chapter">
             <span>I</span> Дом
           </p>
-          <blockquote className="v2-morning__epigraph">
-            <p>
-              Я пришёл к тебе с приветом,
-              <br />
-              Рассказать, что солнце встало,
-              <br />
-              Что оно горячим светом
-              <br />
-              По листам затрепетало…
-            </p>
-            <cite>Афанасий Фет, 1843</cite>
-          </blockquote>
+          {/* the fairy tale stays in the picture of the first screen; the words are plain (Ilya, 03.11: «мы же в реальной жизни») */}
           <p className="v2-morning__dream">
-            Каждый дом сначала живёт в облаках: в разговорах на кухне, в картинке, которую видишь, закрыв глаза. Мы строим
-            так, чтобы однажды утром он оказался настоящим.
+            Сначала дом — это мечта: окна на восход, яблоня у крыльца, своя комната для детей. С 2014 года мы строим её в
+            кирпиче под Краснодаром.
           </p>
+          <p className="v2-morning__moral">Мечта — ваша. Кирпич, крыша и документы — наши.</p>
         </header>
 
         <div className="v2-morning__scene" data-reveal>
@@ -40,9 +31,24 @@ export function MorningChapter() {
               loading="lazy"
               decoding="async"
             />
+            {/* steam over the two cups (their places on this picture), rising and thinning, over and over */}
+            <span className="v2-steam" style={{ left: '47.5%', top: '60%' }} aria-hidden>
+              <i />
+              <i />
+              <i />
+            </span>
+            <span className="v2-steam" style={{ left: '55%', top: '55%' }} aria-hidden>
+              <i />
+              <i />
+              <i />
+            </span>
             <figcaption>Обычный вторник, 7:40</figcaption>
           </figure>
           <div className="v2-morning__words">
+            <blockquote className="v2-morning__quote">
+              <p>Умылся поутру — приведи в порядок и свою планету.</p>
+              <cite>Антуан де Сент-Экзюпери, «Маленький принц»</cite>
+            </blockquote>
             <h2 className="title title--lg" id="morning-title">
               Сюда не приезжают отдыхать. <em>Здесь живут.</em>
             </h2>

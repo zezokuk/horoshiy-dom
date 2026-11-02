@@ -222,12 +222,8 @@ html.no-motion .h6__pane { clip-path: none; }
 .h6-pin--morning .h6__pane { clip-path: none; animation: none; background: linear-gradient(180deg, #8fb0d8 0%, #c3d3e6 38%, #f1dcc6 66%, #f6e6d6 100%); }
 .h6-pin--morning .h6__scene { transform: none; animation: none; }
 .h6-pin--morning .h6__real { animation: none; opacity: clamp(0, (var(--p, 0) - .04) / .36, 1); }
-/* the house is drawn over the sky while the clouds frame the screen, then the settling bank covers it */
+/* the house is drawn in the night (timings below, «луна-кран»), then the settling bank covers it */
 .h6-pin--morning .h6__sketch { animation: h6-fade .5s 2.9s both; }
-.h6-pin--morning .h6__sketch polyline { animation-delay: 1.15s; }
-.h6-pin--morning .h6__sketch .hl-wall polyline { animation-delay: 1.3s; }
-.h6-pin--morning .h6__sketch .hl-roof polyline { animation-delay: 1.45s; }
-.h6-pin--morning .h6__sketch .hl-hatch polyline { animation-delay: 1.6s; }
 .h6-pin--morning .h6__intro { background: transparent; animation: h6-away .7s 2.3s both; }
 .h6-pin--morning .h6__intro-title { text-shadow: 0 2px 24px rgba(255, 255, 255, .8); }
 /* «Выбрать дом» is there from the first paint; the name, the slogan and the lead come as the intro leaves */
@@ -260,10 +256,8 @@ html.no-motion .h6__pane { clip-path: none; }
 .h6__cloud--left { left: -16cqw; width: 74cqw; animation: h6-cloud-left 1.05s 2.2s cubic-bezier(.6, 0, .2, 1) both; transform: translate3d(calc(min(1, var(--p, 0) / .6) * -82cqw), 0, 0); }
 /* mirrored by scale, which applies after transform: a negative shift moves it right on the screen */
 .h6__cloud--right { right: -16cqw; width: 74cqw; scale: -1 1; animation: h6-cloud-right 1.05s 2.2s cubic-bezier(.6, 0, .2, 1) both; transform: translate3d(calc(min(1, var(--p, 0) / .6) * -82cqw), 0, 0); }
-/* during the intro the clouds stand up the sides and open the middle of the sky for the handshake and the drawing */
-@keyframes h6-cloud-left { from { translate: -24cqw -40cqh; } to { translate: 0 0; } }
-@keyframes h6-cloud-right { from { translate: 24cqw -40cqh; } to { translate: 0 0; } }
-@keyframes h6-cloud-back { from { translate: 0 34cqh; } to { translate: 0 0; } }
+/* during the intro the clouds stand up the sides and open the middle of the sky for the drawing (left and right: below, with the night) */
+@keyframes h6-cloud-back { from { translate: 0 34cqh; opacity: 0; } to { translate: 0 0; opacity: 1; } }
 /* one soft glare through the leaves, on the sun of the picture; its strength is the scroll's, so it cannot flicker */
 .h6__flare { position: absolute; width: 170cqh; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 249, 232, .95) 0, rgba(255, 232, 186, .5) 26%, rgba(255, 216, 160, .14) 60%, rgba(255, 210, 150, 0) 100%); opacity: calc(var(--flare, 0) * .75); }
 
@@ -299,8 +293,47 @@ html.no-motion .h6-pin--morning :is(.h6__copy, .h6__lead) { animation: none; }
 html.no-motion .h6-pin--morning .h6__cloud { animation: none; transform: none; opacity: clamp(0, 1 - var(--p, 0) * 2, 1); }
 html.no-motion .h6-pin--morning .h6__rise { transform: none; }
 html.no-motion .h6-pin--morning .h6__flare { display: none; }
+/* ---- the night of the dream (03.11, «луна-кран»): stars and a crescent; the walls are drawn in gold, the crescent lowers
+   the roof on a thread onto them, then the night gives way to the dawn and the clouds ---- */
+.h6__night { position: absolute; inset: 0; z-index: 0; pointer-events: none; animation: h6-fade .9s 2.15s both;
+  background:
+    radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent), radial-gradient(1px 1px at 22% 42%, #fff 50%, transparent),
+    radial-gradient(1.5px 1.5px at 31% 9%, #fff 50%, transparent), radial-gradient(1px 1px at 38% 27%, rgba(255, 255, 255, .8) 50%, transparent),
+    radial-gradient(2px 2px at 47% 14%, #fff8e1 50%, transparent), radial-gradient(1px 1px at 55% 36%, #fff 50%, transparent),
+    radial-gradient(1.5px 1.5px at 63% 8%, #fff 50%, transparent), radial-gradient(1px 1px at 71% 31%, rgba(255, 255, 255, .8) 50%, transparent),
+    radial-gradient(1.5px 1.5px at 78% 46%, #fff 50%, transparent), radial-gradient(1px 1px at 88% 22%, #fff 50%, transparent),
+    radial-gradient(2px 2px at 93% 6%, #fff8e1 50%, transparent), radial-gradient(1px 1px at 6% 33%, #fff 50%, transparent),
+    radial-gradient(1px 1px at 17% 58%, rgba(255, 255, 255, .7) 50%, transparent), radial-gradient(1px 1px at 84% 60%, rgba(255, 255, 255, .7) 50%, transparent),
+    linear-gradient(180deg, #0b1631 0%, #172852 45%, #33467a 78%, #5d6c9a 100%); }
+.h6-pin--morning .h6__scene { z-index: 1; }
+/* gold lines on the night sky */
+.h6-pin--morning .h6__sketch polyline, .h6__rope { stroke: #f1d39a; }
+.h6__moon { fill: #f7ebcc; stroke: #f1d39a; stroke-width: 1.4; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 18px rgba(247, 235, 204, .55)); animation: h6-fade-in .6s .1s both, h6-fade .7s 2.15s forwards; }
+.h6__rope { stroke-width: 1.2; vector-effect: non-scaling-stroke; animation: h6-fade .3s 1.95s both; }
+/* drawn small under the crescent first (the roof's own lines), then lowered with the thread onto the walls */
+.h6-pin--morning .h6__sketch :is(.hl-fence, .hl-wall) polyline { animation-delay: .6s; }
+/* the wish: a star streaks from the top left to where the house will stand (0.1–0.75 s), the walls start where it lands */
+.h6__star { position: absolute; z-index: 2; left: 6cqw; top: 4cqh; width: 180px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, rgba(255, 248, 225, 0), #fff8e1); rotate: 37deg; transform-origin: 100% 50%; pointer-events: none; animation: h6-star .65s .1s cubic-bezier(.5, 0, .9, .6) both; }
+.h6__star::after { content: ""; position: absolute; right: -4px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: #fffaf0; box-shadow: 0 0 14px 6px rgba(255, 236, 180, .8); }
+@keyframes h6-star { 0% { translate: 0 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { translate: 46cqw 54cqh; opacity: 0; } }
+.h6-pin--morning .h6__sketch .hl-roof polyline { animation-delay: .3s; animation-duration: .7s; }
+.h6-pin--morning .h6__sketch .hl-hatch polyline { animation-delay: 2.05s; animation-duration: .5s; }
+.h6__lift { transform-origin: 1010px 235px; animation: h6-roof-land 1.05s 1s cubic-bezier(.45, 0, .25, 1) both; }
+@keyframes h6-roof-land { from { transform: translate(850px, -505px) scale(.3); } 70% { transform: translate(0, -18px) scale(1); } to { transform: none; } }
+/* the intro words on the night: warm white, the dream in gold; the handshake gives its place to the crescent */
+.h6-pin--morning .h6__intro { color: #f7efe1; }
+.h6-pin--morning .h6__intro-eyebrow { color: #e9c98f; }
+.h6-pin--morning .h6__intro-title { text-shadow: 0 2px 30px rgba(8, 16, 40, .6); }
+.h6-pin--morning .h6__intro-title em { color: #f0c987; }
+.h6-pin--morning .h6__deal { display: none; }
+/* moonlit clouds at night, white at dawn */
+@keyframes h6-cloud-left { from { translate: -24cqw -40cqh; opacity: .4; } to { translate: 0 0; opacity: 1; } }
+@keyframes h6-cloud-right { from { translate: 24cqw -40cqh; opacity: .4; } to { translate: 0 0; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .h6-pin--morning :is(.h6__night, .h6__star) { display: none; } }
+html.no-motion .h6-pin--morning :is(.h6__night, .h6__star) { display: none; }
+
 /* the first scroll plays the intro to its end at once (after every delay above, so it wins) */
-.h6-pin--morning.is-skipped :is(.h6__intro, .h6__intro *, .h6__sketch, .h6__sketch polyline, .h6__cloud, .h6__copy, .h6__lead) { animation-delay: 0s; animation-duration: .01s; }
+.h6-pin--morning.is-skipped :is(.h6__intro, .h6__intro *, .h6__sketch, .h6__sketch polyline, .h6__cloud, .h6__copy, .h6__lead, .h6__night, .h6__moon, .h6__rope, .h6__lift, .h6__star) { animation-delay: 0s; animation-duration: .01s; }
 html.no-motion .h6__scene { transform: none; }
 html.no-motion .h6__veil, html.no-motion .h6__points { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
@@ -680,10 +713,6 @@ html.no-motion .pp__photo img { animation: none; }
 .v2-morning__head { max-width: 760px; margin: 0 auto clamp(56px, 7vw, 96px); display: grid; justify-items: center; gap: 26px; text-align: center; }
 .v2-morning__chapter { display: inline-flex; align-items: baseline; gap: 12px; font-size: 12px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--brand-ink); }
 .v2-morning__chapter span { font-family: var(--font-brand); font-size: 44px; font-weight: 400; letter-spacing: 0; line-height: 1; color: var(--brand); }
-.v2-morning__epigraph { display: grid; gap: 12px; justify-items: center; }
-.v2-morning__epigraph p { font-family: var(--font-brand); font-size: clamp(18px, 1.6vw, 22px); line-height: 1.5; letter-spacing: .02em; color: #55625a; }
-.v2-morning__epigraph cite { font-style: normal; font-size: 12px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
-.v2-morning__epigraph cite::before { content: "— "; }
 .v2-morning__dream { max-width: 680px; font-family: var(--font-serif); font-size: clamp(24px, 2.4vw, 34px); line-height: 1.28; color: var(--ink); }
 .v2-morning__scene { display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(32px, 5vw, 72px); align-items: center; }
 .v2-morning__photo { position: relative; margin: 0; border-radius: 28px; overflow: hidden; aspect-ratio: 3 / 2; box-shadow: 0 30px 80px -40px rgba(20, 48, 31, .45); }
@@ -706,3 +735,26 @@ html.no-motion .pp__photo img { animation: none; }
 @media (max-width: 479px) { .v2-morning__ears { grid-template-columns: 1fr; } }
 html.no-motion .v2-morning__leaves { animation: none; }
 @media (prefers-reduced-motion: reduce) { .v2-morning__leaves { animation: none; } }
+/* chapter I, the tale (03.11, replaces the epigraph): our own words, nothing to check against an edition */
+.v2-morning__moral { font-family: var(--font-serif); font-size: clamp(22px, 2vw, 28px); line-height: 1.3; color: var(--brand); }
+/* steam over a cup, smoke over a grill or a chimney: three soft puffs rising and thinning in turn */
+.v2-steam { position: absolute; z-index: 1; width: 44px; height: 90px; translate: -50% -100%; pointer-events: none; }
+.v2-steam i { position: absolute; left: 50%; bottom: 0; width: 16px; height: 42px; margin-left: -8px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 255, 255, .8), rgba(255, 255, 255, 0)); filter: blur(4px); opacity: 0; animation: v2-steam 4.2s ease-out infinite; }
+.v2-steam i:nth-child(2) { animation-delay: 1.4s; }
+.v2-steam i:nth-child(3) { animation-delay: 2.8s; }
+@keyframes v2-steam { 0% { opacity: 0; transform: translate(0, 0) scale(.6); } 25% { opacity: .85; } 100% { opacity: 0; transform: translate(9px, -62px) scale(1.7, 1.5); } }
+.v2-steam--smoke { width: 110px; height: 220px; }
+.v2-steam--smoke i { width: 44px; height: 76px; margin-left: -22px; background: radial-gradient(closest-side, rgba(230, 230, 228, .75), rgba(230, 230, 228, 0)); filter: blur(9px); animation: v2-smoke 6.5s ease-out infinite; }
+.v2-steam--smoke i:nth-child(2) { animation-delay: 2.15s; }
+.v2-steam--smoke i:nth-child(3) { animation-delay: 4.3s; }
+@keyframes v2-smoke { 0% { opacity: 0; transform: translate(0, 0) scale(.5); } 20% { opacity: .8; } 100% { opacity: 0; transform: translate(34px, -160px) scale(2.6, 2.2); } }
+/* «Жизнь за городом» on a computer: maple leaves hang in front of the slides from the top right, sway and drift a little
+   against the day going by (ScrollX feeds --p) */
+.v2-life__leaves { display: none; }
+.sx.is-pinned .v2-life__leaves { display: block; position: absolute; z-index: 2; right: -5vw; top: calc(var(--header-h) - 4vw); width: min(34vw, 500px); height: auto; pointer-events: none; scale: -1 1; translate: calc(var(--p, 0) * -14vw) 0; transform-origin: 0 0; animation: v2-leaves 8s ease-in-out infinite alternate; }
+html.no-motion :is(.v2-steam i, .v2-life__leaves) { animation: none; }
+@media (prefers-reduced-motion: reduce) { :is(.v2-steam i, .v2-life__leaves) { animation: none; } .v2-steam { display: none; } }
+html.no-motion .v2-steam { display: none; }/* one line from a book over the morning (our translation): small, quiet, above the heading */
+.v2-morning__quote { display: grid; gap: 6px; padding-left: 16px; border-left: 2px solid rgba(154, 122, 69, .45); }
+.v2-morning__quote p { font-family: var(--font-brand); font-size: clamp(17px, 1.4vw, 20px); line-height: 1.4; color: #5b5442; }
+.v2-morning__quote cite { font-style: normal; font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }

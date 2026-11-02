@@ -84,6 +84,10 @@ export function HeroOpen({
     <section ref={pinRef} className={`h6-pin${morning ? ' h6-pin--morning' : ''}`} aria-label="Хороший дом">
     <div className="h6">
       <div className="h6__pane">
+        {/* the night the dream is built in: stars, then the dawn takes over (v2.css) */}
+        {morning && <i className="h6__night" aria-hidden />}
+        {/* a falling star — the wish — lands where the house starts being drawn */}
+        {morning && <i className="h6__star" aria-hidden />}
         <div className="h6__scene">
           <div className="h6__frame">
             <div className="h6__real">
@@ -100,13 +104,27 @@ export function HeroOpen({
               )}
             </div>
             <svg className="h6__sketch" viewBox={`${-OX} ${-OY} ${W} ${H}`} fill="none" aria-hidden focusable="false">
-              {(['fence', 'wall', 'roof', 'hatch'] as const).map((g) => (
-                <g key={g} className={`hl-${g}`}>
-                  {HOUSE_LINES[g].map((p) => (
-                    <polyline key={p} points={p} pathLength={1} />
-                  ))}
-                </g>
-              ))}
+              {/* «луна-кран» (Ilya, 03.11, our own take on a dream on the moon): the crescent holds the roof on a thread
+                  and lowers it onto the walls being drawn; the thread starts at its lower horn (1860, −390), v2.css h6-roof-land */}
+              {morning && <path className="h6__moon" d="M1820,-710 A170,170 0 1,1 1860,-390 A205,205 0 0,0 1820,-710 Z" />}
+              {(['fence', 'wall', 'roof', 'hatch'] as const).map((g) => {
+                const lines = (
+                  <g key={g} className={`hl-${g}`}>
+                    {HOUSE_LINES[g].map((p) => (
+                      <polyline key={p} points={p} pathLength={1} />
+                    ))}
+                  </g>
+                )
+                // the thread hangs from the ridge (1010, 235); the roof and the thread travel together
+                return morning && g === 'roof' ? (
+                  <g key={g} className="h6__lift">
+                    <line className="h6__rope" x1={1010} y1={235} x2={1010} y2={-165} />
+                    {lines}
+                  </g>
+                ) : (
+                  lines
+                )
+              })}
             </svg>
             <div className="h6__points">
               {points.map((p) => (

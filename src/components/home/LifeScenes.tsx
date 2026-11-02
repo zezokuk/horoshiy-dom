@@ -5,7 +5,10 @@ import { Sprinkle } from './Sprinkle'
 // the client's own scenes (27.10, «Мысли и ощущения о загородной жизни»); a slide appears as soon as its picture is put
 // into public/design/scenes/ (prompts: БАЗА/Промты/lark/). Without one it stays away: pale empty cards were the weakest
 // moment of the page (call of 30.10)
-const SCENES = [
+// `smoke`: where smoke or steam rises on that picture (the grill, a chimney), in % of the slide — set it once the picture is
+// in, by eye on a screenshot; the puffs are pure CSS (.v2-steam, v2.css)
+type Scene = { file: string; season: string; text: string; smoke?: { left: string; top: string }[] }
+const SCENES: Scene[] = [
   { file: 'lawn', season: 'Лето', text: 'Дети на газоне с поливалкой и собакой' },
   { file: 'breakfast', season: 'Лето', text: 'Тихий завтрак на воздухе' },
   { file: 'car', season: 'Лето', text: 'Машина заезжает прямо во двор' },
@@ -38,6 +41,13 @@ export function LifeScenes() {
           {/* not lazy: a slide comes in sideways through a transform and was still empty when it reached the screen */}
           <img src={`/design/scenes/${s.file}.webp`} alt={s.text} decoding="async" />
           {s.file === 'lawn' && <Sprinkle />}
+          {s.smoke?.map((at) => (
+            <span key={`${at.left}${at.top}`} className="v2-steam v2-steam--smoke" style={at} aria-hidden>
+              <i />
+              <i />
+              <i />
+            </span>
+          ))}
           <span className="v2-slide__season">{s.season}</span>
           <span className="v2-slide__text">{s.text}</span>
         </li>
