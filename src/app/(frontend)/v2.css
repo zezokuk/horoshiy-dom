@@ -751,7 +751,8 @@ html.no-motion .v2-morning__leaves { animation: none; }
 /* «Жизнь за городом» on a computer: maple leaves hang in front of the slides from the top right, sway and drift a little
    against the day going by (ScrollX feeds --p) */
 .v2-life__leaves { display: none; }
-.sx.is-pinned .v2-life__leaves { display: block; position: absolute; z-index: 2; right: -5vw; top: calc(var(--header-h) - 4vw); width: min(34vw, 500px); height: auto; pointer-events: none; scale: -1 1; translate: calc(var(--p, 0) * -14vw) 0; transform-origin: 0 0; animation: v2-leaves 8s ease-in-out infinite alternate; }
+/* the mirror turns about the middle (about the left edge it threw the leaves into the middle of the screen) */
+.sx.is-pinned .v2-life__leaves { display: block; position: absolute; z-index: 2; right: -5vw; top: calc(var(--header-h) - 1.5vw); width: min(34vw, 500px); height: auto; pointer-events: none; scale: -1 1; translate: calc(var(--p, 0) * -14vw) 0; transform-origin: 50% 0; animation: v2-leaves 8s ease-in-out infinite alternate; }
 html.no-motion :is(.v2-steam i, .v2-life__leaves) { animation: none; }
 @media (prefers-reduced-motion: reduce) { :is(.v2-steam i, .v2-life__leaves) { animation: none; } .v2-steam { display: none; } }
 html.no-motion .v2-steam { display: none; }/* one line from a book over the morning (our translation): small, quiet, above the heading */
