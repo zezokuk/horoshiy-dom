@@ -57,7 +57,9 @@ export function HeroOpen({
         // one soft hump over 0.6–0.8: rises and falls once, follows the scroll, so it never blinks by itself
         pin.style.setProperty('--flare', p > 0.6 && p < 0.8 ? Math.sin(((p - 0.6) / 0.2) * Math.PI).toFixed(3) : '0')
       }
-      root.classList.toggle('past-hero', morning ? p > 0.9 : window.scrollY > window.innerHeight * 0.6)
+      // the header and the floating call come once the house starts leaving (as before: 0.1 screen past the pin), so
+      // they never cover «Выбрать дом» while the dawn plays
+      root.classList.toggle('past-hero', window.scrollY > (morning ? span : window.innerHeight * 0.5) + window.innerHeight * 0.1)
     }
     const queue = () => {
       if (!frame) frame = requestAnimationFrame(sync)
