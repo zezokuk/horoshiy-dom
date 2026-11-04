@@ -823,7 +823,6 @@ html.no-motion .v2-steam { display: none; }/* one line from a book over the morn
   .bk { height: auto; }
   .bk__stage { position: static; height: auto; }
 }
-<<<<<<< HEAD
 /* Sketch «Ночь → рассвет одним кадром» (04.11, /preview/night, HeroNight.tsx): one photo, two times of day; --p is the
    scroll through the block, 0 night → 1 morning. The night picture from Nano Banana replaces .hn__night--css */
 .hn { --p: 0; position: relative; height: 200svh; background: #0b1530; }
