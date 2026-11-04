@@ -826,17 +826,17 @@ html.no-motion .v2-steam { display: none; }/* one line from a book over the morn
 /* Sketch «Ночь → рассвет одним кадром» (04.11, /preview/night, HeroNight.tsx): one photo, two times of day; --p is the
    scroll through the block, 0 night → 1 morning. The night picture from Nano Banana replaces .hn__night--css */
 .hn { --p: 0; position: relative; height: 200svh; background: #0b1530; }
-.hn__pane { position: sticky; top: 0; height: 100svh; overflow: hidden; container-type: size; }
+.hn__pane { position: sticky; top: var(--header-h); height: calc(100svh - var(--header-h)); overflow: hidden; container-type: size; }
 .hn__day, .hn__night { position: absolute; inset: 0; }
 .hn__day img, .hn__night img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; }
 .hn__day img { transform: scale(calc(1.06 - .06 * var(--p))); }
 .hn__night { opacity: calc(1 - min(1, var(--p) * 1.35)); }
-.hn__night--css img { filter: brightness(.3) saturate(.45) contrast(1.15); transform: scale(1.06); }
-.hn__night--css::after { content: ""; position: absolute; inset: 0; background: linear-gradient(#081231 0%, rgba(14, 28, 70, .85) 38%, rgba(20, 34, 72, .35) 70%, rgba(10, 16, 34, .5) 100%); mix-blend-mode: multiply; }
+.hn__night--css img { filter: brightness(.62) saturate(.35) contrast(1.1); transform: scale(1.06); }
+.hn__night--css::after { content: ""; position: absolute; inset: 0; background: linear-gradient(#0c1a44 0%, #1d3270 40%, #2c3f78 62%, #1a2448 100%); mix-blend-mode: multiply; }
 .hn__windows { position: absolute; inset: 0; z-index: 1; background:
-  radial-gradient(3.2cqw 2.6cqw at 30.5% 76%, rgba(255, 196, 110, .75), transparent 70%),
-  radial-gradient(3.4cqw 2.8cqw at 64% 76%, rgba(255, 196, 110, .7), transparent 70%),
-  radial-gradient(1.4cqw 1.4cqw at 50.6% 71%, rgba(255, 214, 150, .9), transparent 70%); mix-blend-mode: screen; }
+  radial-gradient(2cqw 3.6cqw at 31% 76%, rgba(255, 190, 100, .55), transparent 70%),
+  radial-gradient(3cqw 3.6cqw at 63.5% 76%, rgba(255, 190, 100, .5), transparent 70%),
+  radial-gradient(.8cqw .8cqw at 50.6% 71%, rgba(255, 214, 150, .9), transparent 70%); mix-blend-mode: screen; }
 .hn__stars { position: absolute; inset: 0 0 45%; z-index: 1; opacity: .9; background-image:
   radial-gradient(1.2px 1.2px at 12% 18%, #fff 98%, transparent), radial-gradient(1px 1px at 27% 8%, #fff 98%, transparent),
   radial-gradient(1.4px 1.4px at 41% 26%, #fff 98%, transparent), radial-gradient(1px 1px at 58% 12%, #fff 98%, transparent),
@@ -868,9 +868,10 @@ html.no-motion .v2-steam { display: none; }/* one line from a book over the morn
   .hn__copy { top: 16cqh; gap: 6px; }
   .hn__windows { display: none; }
   .hn__star { width: 34cqw; top: 6%; right: 8%; }
-  .hn__bar { flex-direction: column; align-items: stretch; gap: 14px; padding-bottom: 20px; }
+  /* phones have the site's own bottom bar (Позвонить · Подобрать дом), so the text sits above it and the button goes */
+  .hn__bar { padding-bottom: 104px; }
   .hn__lead { font-size: 16px; }
-  .hn__cta { justify-content: center; }
+  .hn__cta { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .hn__star { display: none; } .hn__day img { transform: none; } }
 html.no-motion .hn__star { display: none; }
