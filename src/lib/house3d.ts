@@ -1,52 +1,169 @@
 import * as THREE from 'three'
 
 /**
- * One house model shared by the 3D master plan and the «we build it» scroll scene.
- * Styled after the developer's own renders: warm beige walls, brick plinth, dark-brown hip roof,
- * white-framed windows, a small porch. Parts are named so the build scene can animate them.
+ * House geometry for the 3D master plan (Genplan3D). The build scroll scene (BuildHouse3D) uses its own GLB model.
+ *
+ * Materials follow the photo of the built house (05-эталон-настоящий-дом-фото.webp):
+ * red brick #a0452e with dark clinker flecks (#4a3a36), graphite metal tile roof #4b4e54, graphite frames #2f3133.
+ * If the developer chooses the beige look from their render instead, swap PALETTE.brick/wallStyle below.
+ *
+ * Everything is procedural CanvasTexture — no downloaded images. Houses are emitted as plain BufferGeometries
+ * grouped by material (HouseGeoms.byMat) so the scene can merge all walls of all houses into one draw call.
  */
 
 export const PALETTE = {
-  wall: '#e7dac3',
-  plinth: '#8c5a44',
-  roof: '#5a4136',
-  frame: '#f6f1e7',
-  glass: '#56707a',
-  door: '#4d3a30',
+  brick: '#a0452e',
+  clinker: '#4a3a36',
+  brickLight: '#b5654a',
+  joint: '#c4bcb0',
+  roof: '#4b4e54',
+  frame: '#2f3133',
+  glass: '#7d919b',
+  door: '#2f3133',
+  plinth: '#413f3c',
   slab: '#b9b2a7',
+  trim: '#2f3133',
+  gutter: '#33363b',
   lawn: '#8fa676',
   paving: '#cfc6b6',
   fence: '#f1ece2',
 }
 
-// Geometry cache: 34 houses of one estate share identical parts (windows, walls, porch columns).
-// Re-using one BufferGeometry instead of creating ~40 new ones per house makes the scene build several times faster
-// and uses less GPU memory. three.js re-uploads a disposed geometry automatically if it is used again.
-const geoCache = new Map<string, THREE.BoxGeometry>()
-function box(w: number, h: number, d: number) {
-  const key = `${w.toFixed(3)}|${h.toFixed(3)}|${d.toFixed(3)}`
-  let g = geoCache.get(key)
-  if (!g) geoCache.set(key, (g = new THREE.BoxGeometry(w, h, d)))
-  return g
+/** Deterministic pseudo-random from a number or a string seed (one project type looks the same on every plot). */
+export function rand(seed: number | string) {
+  const s = typeof seed === 'string' ? seed.split('').reduce((a, c) => a * 31 + c.charCodeAt(0), 7) : seed
+  const x = Math.sin(s * 12.9898) * 43758.5453
+  return x - Math.floor(x)
 }
 
-const roofCache = new Map<string, THREE.BufferGeometry>()
-function roofGeo(a: number, b: number, h: number) {
-  const key = `${a.toFixed(3)}|${b.toFixed(3)}|${h.toFixed(3)}`
-  let g = roofCache.get(key)
-  if (!g) roofCache.set(key, (g = hipRoofGeometry(a, b, h)))
-  return g
+type Ctx = CanvasRenderingContext2D
+
+function makeTex(w: number, h: number, draw: (g: Ctx) => void): THREE.CanvasTexture {
+  const cv = document.createElement('canvas')
+  cv.width = w
+  cv.height = h
+  const g = cv.getContext('2d')!
+  draw(g)
+  const t = new THREE.CanvasTexture(cv)
+  t.wrapS = t.wrapT = THREE.RepeatWrapping
+  t.colorSpace = THREE.SRGBColorSpace
+  return t
 }
 
-export type HouseParts = {
-  group: THREE.Group
-  foundation: THREE.Object3D
-  walls: THREE.Object3D
-  roof: THREE.Object3D
-  openings: THREE.Object3D // windows + door + porch
-  height: number // ridge height above ground
+/** Кирпич: ряды ~250×60 со швом ~10, ~8% тёмного клинкера. Тайл 3.12×3.12 м = 12 кирпичей × 44 ряда. */
+export function brickTexture(): THREE.CanvasTexture {
+  return makeTex(512, 512, (g) => {
+    g.fillStyle = '#b3aa9e'
+    g.fillRect(0, 0, 512, 512)
+    const rows = 44
+    const bw = 512 / 12 // 12 кирпичей в ряду
+    const bh = 512 / rows
+    const bwReal = bw - 1.2
+    for (let r = 0; r < rows; r++) {
+      const off = r % 2 ? bw / 2 : 0
+      for (let x = -bw; x < 512 + bw; x += bw) {
+        const i = r * 131 + Math.round(x)
+        const k = rand(i)
+        const v = 0.92 + rand(i + 1.7) * 0.16
+        const [br, bg, bb] = [0xa0, 0x45, 0x2e].map((c) => Math.round(Math.min(255, c * v)))
+        g.fillStyle = k < 0.08 ? PALETTE.clinker : k < 0.14 ? PALETTE.brickLight : k > 0.97 ? `rgb(${br - 22},${bg - 12},${bb - 8})` : `rgb(${br},${bg},${bb})`
+        g.fillRect(x + off + 1, r * bh + 1, bwReal, bh - 2)
+        if (rand(i + 3) < 0.4) {
+          g.fillStyle = 'rgba(0,0,0,0.07)'
+          g.fillRect(x + off + 3 + rand(i + 5) * (bwReal - 14), r * bh + 2 + rand(i + 7) * (bh - 6), 9, 2)
+        }
+      }
+    }
+  })
 }
 
+/** Металлочерепица: вертикальные листы с горизонтальным рельефом рядов. Тайл = 2×2 м. */
+export function roofTexture(): THREE.CanvasTexture {
+  return makeTex(256, 256, (g) => {
+    g.fillStyle = PALETTE.roof
+    g.fillRect(0, 0, 256, 256)
+    for (let x = 0; x < 256; x += 32) {
+      // лист: свет слева, тень справа
+      const gr = g.createLinearGradient(x, 0, x + 32, 0)
+      gr.addColorStop(0, 'rgba(255,255,255,0.13)')
+      gr.addColorStop(0.5, 'rgba(255,255,255,0)')
+      gr.addColorStop(1, 'rgba(0,0,0,0.22)')
+      g.fillStyle = gr
+      g.fillRect(x, 0, 32, 256)
+    }
+    for (let y = 0; y < 256; y += 28) {
+      g.fillStyle = 'rgba(0,0,0,0.28)'
+      g.fillRect(0, y, 256, 2.5)
+      g.fillStyle = 'rgba(255,255,255,0.07)'
+      g.fillRect(0, y + 2.5, 256, 2)
+    }
+  })
+}
+
+/** Газон: шумовые пятна. */
+export function lawnTexture(): THREE.CanvasTexture {
+  return makeTex(256, 256, (g) => {
+    g.fillStyle = '#93ac6f'
+    g.fillRect(0, 0, 256, 256)
+    for (let i = 0; i < 800; i++) {
+      const x = rand(i * 1.7) * 256
+      const y = rand(i * 3.1) * 256
+      const r = 2 + rand(i * 5.3) * 8
+      const k = rand(i * 7.9)
+      g.fillStyle = k < 0.45 ? 'rgba(111,132,80,0.35)' : k < 0.8 ? 'rgba(150,168,105,0.3)' : 'rgba(190,185,120,0.2)'
+      g.beginPath()
+      g.arc(x, y, r, 0, Math.PI * 2)
+      g.fill()
+    }
+  })
+}
+
+/** Тротуарная плитка. */
+export function paverTexture(): THREE.CanvasTexture {
+  return makeTex(128, 128, (g) => {
+    g.fillStyle = '#b7ab96'
+    g.fillRect(0, 0, 128, 128)
+    const ph = 32
+    for (let y = 0; y < 128; y += ph) {
+      for (let x = 0; x < 128; x += 64) {
+        const v = 0.9 + rand(x + y) * 0.2
+        const [r, gg, b] = [0xb7, 0xab, 0x96].map((c) => Math.round(c * v))
+        g.fillStyle = `rgb(${r},${gg},${b})`
+        g.fillRect(x + ((y / ph) % 2 ? 32 : 0) - 32 + 1, y + 1, 62, ph - 2)
+        g.fillRect(x + ((y / ph) % 2 ? 32 : 0) + 32 + 1, y + 1, 62, ph - 2)
+      }
+    }
+  })
+}
+
+/** Пересчёт UV бокса в метры: кирпич одного размера на любой стене. Box: 24 вершины, по 4 на грань (+x,-x,+y,-y,+z,-z). */
+export function metricBoxUV(geo: THREE.BoxGeometry, scale = 3.12) {
+  const pos = geo.attributes.position
+  const nor = geo.attributes.normal
+  const uv = new Float32Array((pos.count * 2) as number)
+  for (let i = 0; i < pos.count; i++) {
+    const nx = Math.abs(nor.getX(i))
+    const ny = Math.abs(nor.getY(i))
+    let u: number
+    let v: number
+    if (nx > 0.5) {
+      u = pos.getZ(i)
+      v = pos.getY(i)
+    } else if (ny > 0.5) {
+      u = pos.getX(i)
+      v = pos.getZ(i)
+    } else {
+      u = pos.getX(i)
+      v = pos.getY(i)
+    }
+    uv[i * 2] = u / scale
+    uv[i * 2 + 1] = v / scale
+  }
+  geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2))
+  return geo
+}
+
+/** Геометрия вальмовой крыши + плановая UV (для черепицы). @param a по X, @param b по Z. */
 export function hipRoofGeometry(a: number, b: number, h: number) {
   const long = a >= b
   const L = long ? a : b
@@ -59,158 +176,182 @@ export function hipRoofGeometry(a: number, b: number, h: number) {
   g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3))
   g.setIndex(long ? idx : idx.slice().reverse())
   g.computeVertexNormals()
+  // плановая проекция: черепица «раскатывается» по скату как по земле
+  const uv = new Float32Array(12)
+  for (let i = 0; i < 6; i++) {
+    uv[i * 2] = (long ? v[i * 3] : v[i * 3 + 2]) / 2
+    uv[i * 2 + 1] = (long ? v[i * 3 + 2] : v[i * 3]) / 2
+  }
+  g.setAttribute('uv', new THREE.BufferAttribute(uv, 2))
   return g
 }
 
-/** Cached materials so dozens of houses share a handful of GPU materials. */
-export function houseMaterials(dim = false) {
-  const m = (color: string, extra: THREE.MeshStandardMaterialParameters = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.85, ...extra })
-  const tone = (c: string) => (dim ? new THREE.Color(c).lerp(new THREE.Color('#b8b2a6'), 0.22).getStyle() : c)
-  return {
-    wall: m(tone(PALETTE.wall)),
-    plinth: m(tone(PALETTE.plinth)),
-    roof: m(tone(PALETTE.roof), { roughness: 0.7, side: THREE.DoubleSide }),
-    frame: m(PALETTE.frame, { roughness: 0.5 }),
-    glass: m(PALETTE.glass, { roughness: 0.15, metalness: 0.4 }),
-    door: m(PALETTE.door),
-    slab: m(PALETTE.slab),
+export type MatKey = 'wall' | 'plinth' | 'roof' | 'frame' | 'glass' | 'door' | 'slab' | 'trim'
+export type HouseGeoms = { byMat: Map<MatKey, THREE.BufferGeometry[]>; height: number }
+
+/** Все геометрии дома складываются сюда; вызывающий потом мержит по материалам. */
+function collect(): HouseGeoms {
+  return { byMat: new Map(), height: 0 }
+}
+function put(h: HouseGeoms, mat: MatKey, geo: THREE.BufferGeometry, x = 0, y = 0, z = 0, rotY = 0) {
+  if (rotY) geo.rotateY(rotY)
+  if (x || y || z) geo.translate(x, y, z)
+  if (!h.byMat.has(mat)) h.byMat.set(mat, [])
+  h.byMat.get(mat)!.push(geo)
+}
+
+const boxCache = new Map<string, THREE.BoxGeometry>()
+function box(w: number, h: number, d: number) {
+  const key = `${w.toFixed(3)}|${h.toFixed(3)}|${d.toFixed(3)}`
+  let g = boxCache.get(key)
+  if (!g) boxCache.set(key, (g = metricBoxUV(new THREE.BoxGeometry(w, h, d)) as THREE.BoxGeometry))
+  return g.clone() // мерж мутирует трансформ, поэтому клонируем из кэша
+}
+const roofCache = new Map<string, THREE.BufferGeometry>()
+function roof(a: number, b: number, h: number) {
+  const key = `${a.toFixed(3)}|${b.toFixed(3)}|${h.toFixed(3)}`
+  let g = roofCache.get(key)
+  if (!g) roofCache.set(key, (g = hipRoofGeometry(a, b, h)))
+  return g.clone()
+}
+
+/** Окно: графитовая рама + стекло + перекладина; отлив под окном. */
+function windowAt(h: HouseGeoms, w: number, ht: number, x: number, y: number, z: number, rotY: number) {
+  const frame = new THREE.BoxGeometry(w + 0.16, ht + 0.16, 0.1)
+  metricBoxUV(frame as unknown as THREE.BoxGeometry)
+  put(h, 'frame', frame, x, y, z, rotY)
+  const glass = new THREE.BoxGeometry(w, ht, 0.14)
+  put(h, 'glass', glass, x, y, z, rotY)
+  const bar = new THREE.BoxGeometry(0.05, ht, 0.12)
+  put(h, 'frame', bar, x, y, z, rotY)
+  const sill = new THREE.BoxGeometry(w + 0.24, 0.07, 0.18)
+  put(h, 'trim', sill, x, y - ht / 2 - 0.1, z, rotY)
+}
+
+/** Слуховое окно на скате крыши (мансарда). */
+function dormerAt(h: HouseGeoms, w: number, ht: number, dd: number, x: number, y: number, z: number, side: 1 | -1) {
+  put(h, 'wall', box(w, ht, dd), x, y + ht / 2, z)
+  put(h, 'roof', roof(w + 0.4, dd + 0.4, 0.6), x, y + ht, z)
+  windowAt(h, w * 0.5, ht * 0.55, x, y + ht / 2, z + side * (dd / 2 + 0.02), side === 1 ? 0 : Math.PI)
+}
+
+/** Вход: графитовая дверь, кирпичные столбы (по фото 05 — не белые колонны), козырёк, ступени. Локальные координаты, front = +Z. */
+function entrance(h: HouseGeoms, base: number, x: number, z: number) {
+  const door = new THREE.BoxGeometry(1.0, 2.1, 0.12)
+  metricBoxUV(door as unknown as THREE.BoxGeometry)
+  put(h, 'door', door, x, base + 1.05, z)
+  for (const px of [-1.15, 1.15]) {
+    put(h, 'wall', box(0.34, 2.6, 0.34), x + px, base + 1.3, z + 0.85)
+  }
+  put(h, 'trim', box(2.9, 0.1, 1.5), x, base + 2.62, z + 0.55) // козырёк
+  put(h, 'slab', box(2.6, 0.18, 1.2), x, base - 0.09, z + 0.45) // ступени
+}
+
+/** Водостоки: две трубы по торцам и желоб по нижней кромке крыши. */
+function gutters(h: HouseGeoms, a: number, b: number, wallH: number, base: number) {
+  const gh = wallH + 0.55
+  for (const sx of [-1, 1]) {
+    put(h, 'trim', box(0.13, gh, 0.13), (sx * (a + 0.6)) / 2, base + gh / 2, (b + 0.5) / 2)
+    put(h, 'trim', box(0.13, gh, 0.13), (sx * (a + 0.6)) / 2, base + gh / 2, -(b + 0.5) / 2)
   }
 }
-export type HouseMaterials = ReturnType<typeof houseMaterials>
 
-function windowAt(parent: THREE.Object3D, mats: HouseMaterials, w: number, h: number, x: number, y: number, z: number, rotY: number) {
-  const g = new THREE.Group()
-  const frame = new THREE.Mesh(box(w + 0.16, h + 0.16, 0.08), mats.frame)
-  const glass = new THREE.Mesh(box(w, h, 0.1), mats.glass)
-  const bar = new THREE.Mesh(box(0.06, h, 0.12), mats.frame)
-  g.add(frame, glass, bar)
-  g.position.set(x, y, z)
-  g.rotation.y = rotY
-  parent.add(g)
+export type HouseKind = 'straight' | 'gshape' | 'terrace'
+
+/** Форма дома определяется типом проекта (unit.title), а не номером участка: один тип везде одинаковый. */
+export function houseKindFor(title: string | undefined, storeys: 1 | 2, attic: boolean): HouseKind {
+  const t = (title ?? '').toLowerCase()
+  if (storeys === 2) return 'straight' // двухэтажные — прямоугольные блоки
+  const k = rand(t + ':kind')
+  if (attic && k < 0.34) return 'gshape'
+  if (k >= 0.34 && k < 0.67) return 'terrace'
+  return 'straight'
 }
 
 /**
- * @param a width along X (m), @param b depth along Z (m), front faces +Z.
+ * Геометрии одного дома, уже в локальных координатах (front = +Z, низ на y=0 над плитой).
+ * @param a ширина по X, @param b глубина по Z.
  */
-export function buildHouse(a: number, b: number, storeys: 1 | 2, mats: HouseMaterials, attic = false): HouseParts {
-  const group = new THREE.Group()
-  // attic (mansard) floor: a knee wall over the ground floor, a steeper roof and a dormer window on the front slope
-  const wallH = storeys === 2 ? 5.8 : attic ? 3.9 : 3.0
+export function buildHouseGeoms(a: number, b: number, storeys: 1 | 2, attic: boolean, kind: HouseKind, seed: string): HouseGeoms {
+  const h = collect()
   const base = 0.4
+  const wallH = storeys === 2 ? 5.8 : attic ? 3.9 : 3.0
 
-  const foundation = new THREE.Mesh(box(a + 0.5, base, b + 0.5), mats.slab)
-  foundation.position.y = base / 2
-  foundation.name = 'foundation'
+  // фундамент и цоколь
+  put(h, 'slab', box(a + 0.5, base, b + 0.5), 0, base / 2, 0)
+  put(h, 'plinth', box(a + 0.1, 0.55, b + 0.1), 0, base + 0.27, 0)
 
-  const walls = new THREE.Group()
-  walls.name = 'walls'
-  const body = new THREE.Mesh(box(a, wallH, b), mats.wall)
-  body.position.y = base + wallH / 2
-  const plinth = new THREE.Mesh(box(a + 0.08, 0.55, b + 0.08), mats.plinth)
-  plinth.position.y = base + 0.275
-  walls.add(body, plinth)
-  if (storeys === 2) {
-    const band = new THREE.Mesh(box(a + 0.1, 0.18, b + 0.1), mats.frame)
-    band.position.y = base + wallH / 2
-    walls.add(band)
+  if (kind === 'gshape') {
+    // Г-образный: основной объём + крыло по правой стороны, ниша входа спереди слева
+    const wing = a * 0.42
+    const mainD = b * 0.62
+    put(h, 'wall', box(a, wallH, mainD), 0, base + wallH / 2, (b - mainD) / 2 - 0)
+    put(h, 'wall', box(wing, wallH, b), a / 2 - wing / 2, base + wallH / 2, 0)
+    const roofH = Math.min(a, b) * 0.38
+    put(h, 'roof', roof(a + 0.9, mainD + 0.9, roofH), 0, base + wallH, (b - mainD) / 2)
+    put(h, 'roof', roof(wing + 0.9, b + 0.9, roofH * 0.94), a / 2 - wing / 2, base + wallH, 0)
+    put(h, 'trim', box(a + 0.95, 0.12, mainD + 0.95), 0, base + wallH + 0.02, (b - mainD) / 2) // карниз
+    put(h, 'trim', box(wing + 0.95, 0.12, b + 0.95), a / 2 - wing / 2, base + wallH + 0.02, 0)
+    // окна: фасад крыла, торец крыла, тыл основного объёма
+    windowAt(h, 1.5, 1.3, -a / 4, base + 1.6, b / 2 + 0.02, 0)
+    windowAt(h, 1.3, 1.3, a / 2 + 0.02, base + 1.6, -b / 4, Math.PI / 2)
+    windowAt(h, 1.3, 1.3, a / 2 - wing - 0.02, base + 1.6, b / 2 - 0.02, 0)
+    windowAt(h, 1.3, 1.3, 0, base + 1.6, -b / 2 - 0.02, Math.PI)
+    windowAt(h, 1.1, 1.3, -a / 2 - 0.02, base + 1.6, 0, -Math.PI / 2)
+    // вход в нише (слева, фасад)
+    entrance(h, base, -a / 2 + wing / 2 + 0.6, b / 2 - 0.35)
+    gutters(h, a, b, wallH, base)
+    h.height = base + wallH + Math.min(a, b) * 0.38
+    return h
   }
 
-  const roofH = Math.min(a, b) * (attic ? 0.6 : 0.36) // 0.36 also matches blueprintPoints of the build scene
-  const roof = new THREE.Group()
-  roof.name = 'roof'
-  const roofMesh = new THREE.Mesh(roofGeo(a + 0.9, b + 0.9, roofH), mats.roof)
-  roofMesh.position.y = base + wallH
-  const eave = new THREE.Mesh(box(a + 0.95, 0.12, b + 0.95), mats.frame)
-  eave.position.y = base + wallH + 0.02
-  roof.add(eave, roofMesh)
+  // straight / terrace — прямоугольный объём
+  put(h, 'wall', box(a, wallH, b), 0, base + wallH / 2, 0)
+  if (storeys === 2) put(h, 'trim', box(a + 0.12, 0.16, b + 0.12), 0, base + wallH / 2, 0) // перевязка этажей
+  const roofH = Math.min(a, b) * (attic ? 0.6 : 0.36)
+  put(h, 'roof', roof(a + 0.9, b + 0.9, roofH), 0, base + wallH, 0)
+  put(h, 'trim', box(a + 0.95, 0.12, b + 0.95), 0, base + wallH + 0.02, 0) // карниз
+  gutters(h, a, b, wallH, base)
+
   if (attic) {
     const dw = Math.min(2.4, a * 0.3)
     const dh = Math.min(1.6, roofH * 0.45)
     const dd = 1.8
-    // on both slopes: the 3D plan is turned around, so a house is often seen from the back
-    for (const side of [1, -1]) {
+    for (const side of [1, -1] as const) {
       const z = side * (b / 2 - dd / 2 + 0.3)
-      const dormer = new THREE.Mesh(box(dw, dh, dd), mats.wall)
-      dormer.position.set(0, base + wallH + dh / 2, z)
-      const cap = new THREE.Mesh(roofGeo(dw + 0.4, dd + 0.4, 0.7), mats.roof)
-      cap.position.set(0, base + wallH + dh, z)
-      roof.add(dormer, cap)
-      windowAt(roof, mats, dw * 0.5, dh * 0.6, 0, base + wallH + dh / 2, z + side * (dd / 2 + 0.02), side === 1 ? 0 : Math.PI)
+      dormerAt(h, dw, dh, dd, 0, base + wallH, z, side)
     }
   }
 
-  const openings = new THREE.Group()
-  openings.name = 'openings'
+  // окна: два на фасад, три сзади, по бокам пара
   const floors = storeys === 2 ? [base + 1.6, base + 1.6 + wallH / 2] : [base + 1.6]
-  const winW = Math.min(1.5, a * 0.14)
   for (const y of floors) {
-    for (const fx of [-0.32, 0.32]) windowAt(openings, mats, winW, 1.3, fx * a, y, b / 2 + 0.02, 0)
-    for (const fx of [-0.3, 0, 0.3]) windowAt(openings, mats, winW, 1.3, fx * a, y, -b / 2 - 0.02, Math.PI)
+    for (const fx of [-0.32, 0.32]) windowAt(h, Math.min(1.5, a * 0.14), 1.3, fx * a, y, b / 2 + 0.02, 0)
+    for (const fx of [-0.3, 0, 0.3]) windowAt(h, Math.min(1.5, a * 0.14), 1.3, fx * a, y, -b / 2 - 0.02, Math.PI)
     for (const fz of [-0.22, 0.22]) {
-      windowAt(openings, mats, winW, 1.3, a / 2 + 0.02, y, fz * b, Math.PI / 2)
-      windowAt(openings, mats, winW, 1.3, -a / 2 - 0.02, y, fz * b, -Math.PI / 2)
+      windowAt(h, Math.min(1.4, b * 0.12), 1.3, a / 2 + 0.02, y, fz * b, Math.PI / 2)
+      windowAt(h, Math.min(1.4, b * 0.12), 1.3, -a / 2 - 0.02, y, fz * b, -Math.PI / 2)
     }
   }
-  const door = new THREE.Mesh(box(1.0, 2.1, 0.1), mats.door)
-  door.position.set(0, base + 1.05, b / 2 + 0.03)
-  openings.add(door)
-  // porch: slab + two white columns
-  const porch = new THREE.Mesh(box(2.6, 0.2, 1.4), mats.slab)
-  porch.position.set(0, base - 0.1, b / 2 + 0.7)
-  openings.add(porch)
-  for (const px of [-1.1, 1.1]) {
-    const col = new THREE.Mesh(box(0.22, wallH - 0.2, 0.22), mats.frame)
-    col.position.set(px, base + (wallH - 0.2) / 2, b / 2 + 1.25)
-    openings.add(col)
+
+  if (kind === 'terrace') {
+    // крытая терраса сзади: плита на кирпичных столбиках + плоская крышка под основной скат
+    const tw = Math.min(a * 0.55, 4.4)
+    const td = 2.2
+    const tz = -b / 2 - td / 2 + 0.1
+    put(h, 'slab', box(tw, 0.14, td), 0, base + 0.07, tz)
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+      put(h, 'wall', box(0.3, 2.5, 0.3), (sx * (tw - 0.5)) / 2, base + 1.25, tz + (sz * (td - 0.5)) / 2)
+    }
+    put(h, 'trim', box(tw + 0.3, 0.1, td + 0.3), 0, base + 2.55, tz)
   }
 
-  for (const o of [foundation, walls, roof, openings]) {
-    o.traverse((c) => {
-      if ((c as THREE.Mesh).isMesh) {
-        c.castShadow = true
-        c.receiveShadow = true
-      }
-    })
-    group.add(o)
-  }
+  // вход по центру фасада
+  entrance(h, base, 0, b / 2 + 0.03)
 
-  return { group, foundation, walls, roof, openings, height: base + wallH + roofH }
+  h.height = base + wallH + roofH
+  return h
 }
 
-/** Points along the house edges — the «blueprint» state of the build scene (a nod to the dot-house). */
-export function blueprintPoints(a: number, b: number, storeys: 1 | 2, step = 0.35) {
-  const wallH = storeys === 2 ? 5.8 : 3.0
-  const base = 0.4
-  const roofH = Math.min(a, b) * 0.36
-  const pts: number[] = []
-  const seg = (x1: number, y1: number, z1: number, x2: number, y2: number, z2: number) => {
-    const n = Math.max(1, Math.round(Math.hypot(x2 - x1, y2 - y1, z2 - z1) / step))
-    for (let i = 0; i <= n; i++) pts.push(x1 + ((x2 - x1) * i) / n, y1 + ((y2 - y1) * i) / n, z1 + ((z2 - z1) * i) / n)
-  }
-  const A = a / 2
-  const B = b / 2
-  for (const y of [base, base + wallH]) {
-    seg(-A, y, -B, A, y, -B)
-    seg(A, y, -B, A, y, B)
-    seg(A, y, B, -A, y, B)
-    seg(-A, y, B, -A, y, -B)
-  }
-  for (const [x, z] of [
-    [-A, -B],
-    [A, -B],
-    [A, B],
-    [-A, B],
-  ])
-    seg(x, base, z, x, base + wallH, z)
-  const top = base + wallH
-  const long = a >= b
-  const r = Math.max(0, (long ? a : b) / 2 - (long ? b : a) / 2)
-  const r1: [number, number, number] = long ? [-r, top + roofH, 0] : [0, top + roofH, -r]
-  const r2: [number, number, number] = long ? [r, top + roofH, 0] : [0, top + roofH, r]
-  seg(...r1, ...r2)
-  seg(-A, top, -B, ...r1)
-  seg(-A, top, B, ...(long ? r1 : r2))
-  seg(A, top, -B, ...(long ? r2 : r1))
-  seg(A, top, B, ...r2)
-  return new Float32Array(pts)
-}
+/** Дом «нет в продаже» приглушён: та же геометрия, материалы сереют на стороне сцены. */
+export const DIM_TINT = '#b8b2a6'
