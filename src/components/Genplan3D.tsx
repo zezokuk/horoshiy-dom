@@ -209,8 +209,14 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     const lawnMat = std('#ffffff', { map: texLawn })
     const lawns = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 0.28, 1), lawnMat, N)
     const curbMat = std('#ffffff', { roughness: 0.6 })
-    const curbs = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 0.42, 0.25), curbMat, N * 4)
+    const curbs = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 0.55, 0.3), curbMat, N * 4)
     const lawnBase: THREE.Color[] = []
+    // статус читается с орбиты цветом самого газона: продан — сухая трава, бронь — прижелтённая, нет в продаже — серый
+    const STATUS_TINT: Partial<Record<Plot['status'], [string, number]>> = {
+      sold: ['#b39d5f', 0.72],
+      reserved: ['#b0a94f', 0.45],
+      na: ['#a8a28e', 0.55],
+    }
     layout.plots.forEach((p, i) => {
       const cw = p.w * S
       const ch = p.h * S
@@ -219,6 +225,8 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
       m4.compose(new THREE.Vector3(ccx, 0.34, ccz), new THREE.Quaternion(), new THREE.Vector3(cw, 1, ch))
       lawns.setMatrixAt(i, m4)
       const base = new THREE.Color(PALETTE.lawn).offsetHSL(0, 0, (rand(p.n * 3.7) - 0.5) * 0.06)
+      const tint = STATUS_TINT[p.status]
+      if (tint) base.lerp(new THREE.Color(tint[0]), tint[1])
       lawnBase.push(base)
       lawns.setColorAt(i, base)
       const edge = new THREE.Color(EDGE[p.status])
@@ -231,7 +239,7 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
       sides.forEach(([len, ox, oz], k) => {
         const vertical = ox !== 0
         m4.compose(
-          new THREE.Vector3(ccx + ox, 0.42, ccz + oz),
+          new THREE.Vector3(ccx + ox, 0.5, ccz + oz),
           new THREE.Quaternion(),
           new THREE.Vector3(vertical ? 1 : len, 1, vertical ? len : 1),
         )
