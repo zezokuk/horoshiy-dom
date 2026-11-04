@@ -15,6 +15,7 @@ import {
   buildHouseGeoms,
   houseKindFor,
   lawnTexture,
+  metricBoxUV,
   paverTexture,
   roofTexture,
   type MatKey,
@@ -367,12 +368,14 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
       }
     }
 
-    // ---------- дворы: подъезды, живые изгороди, кусты, машины ----------
+    // ---------- дворы: подъезды, живые изгороди, кусты, машины, парковочные контуры ----------
     const dwGeoms: THREE.BufferGeometry[] = []
     const hedgeGeoms: THREE.BufferGeometry[] = []
+    const parkingGeoms: THREE.BufferGeometry[] = []
     const carBodySpots: { pos: THREE.Vector3; rot: number; k: number }[] = []
     layout.plots.forEach((p) => {
       const cw = p.w * S
+      const ch = p.h * S
       const { hx, hy, hw, hh } = footprint(p)
       const a = hw * S
       const b = hh * S
@@ -389,7 +392,29 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
       const hg = new THREE.BoxGeometry(cw - 1.2, 0.9, 0.6)
       hg.translate(X(p.x + p.w / 2), 0.9, backZ)
       hedgeGeoms.push(hg)
-      if (p.status !== 'free' && rand(p.n + 11) < 0.55) {
+      // низкая изгородь по левой границе участка: одна на соседскую пару, а не двойная
+      const hs = new THREE.BoxGeometry(0.5, 0.7, ch - 1.4)
+      hs.translate(X(p.x) + 0.32, 0.85, Z(p.y + p.h / 2))
+      hedgeGeoms.push(hs)
+      // парковочный контур на свободном участке — «место под машину», как в референсе посёлка
+      if (p.status === 'free' && side > 1.2) {
+        const px = hxC - a / 2 - side / 2
+        const pz = p.flip ? Z(p.y + p.h) - 1.7 : Z(p.y) + 1.7
+        const pw = 4.8
+        const pd = 2.3
+        const t = 0.14
+        for (const [bx, bz, bw, bd] of [
+          [0, -pd / 2, pw, t],
+          [0, pd / 2, pw, t],
+          [-pw / 2, 0, t, pd],
+          [pw / 2, 0, t, pd],
+        ] as const) {
+          const bar = new THREE.BoxGeometry(bw, 0.025, bd)
+          bar.translate(px + bx, 0.5, pz + bz)
+          parkingGeoms.push(bar)
+        }
+      }
+      if (p.status !== 'free' && rand(p.n + 11) < (p.status === 'sold' ? 0.85 : 0.5)) {
         carBodySpots.push({ pos: new THREE.Vector3(hxC + a / 2 + side / 2, 0.48, streetZ + (p.flip ? -3 : 3)), rot: 0, k: Math.min(1, dwW / 2.1) })
       }
     })
@@ -399,6 +424,57 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     const hedgeMesh = new THREE.Mesh(mergeGeometries(hedgeGeoms, false)!, std('#617c52'))
     hedgeMesh.castShadow = !small
     add(hedgeMesh)
+    if (parkingGeoms.length) add(new THREE.Mesh(mergeGeometries(parkingGeoms, false)!, paint))
+
+    // ---------- въездные ворота с вывеской «ХОРОШИЙ ДОМ» ----------
+    const gateStreet = layout.streets[0]
+    if (gateStreet) {
+      const zc = Z(gateStreet.y + STREET / 2)
+      const gx = -((W - PAD * 2 + 20) * S) / 2 + 7
+      const roadW = (STREET - 16) * S
+      const colGeoms: THREE.BufferGeometry[] = []
+      const trimGeoms: THREE.BufferGeometry[] = []
+      for (const sz of [-1, 1]) {
+        const col = metricBoxUV(new THREE.BoxGeometry(0.52, 2.7, 0.52) as unknown as THREE.BoxGeometry)
+        col.translate(gx, 0.3 + 1.35, zc + sz * (roadW / 2 + 0.62))
+        colGeoms.push(col)
+        const cap = new THREE.BoxGeometry(0.74, 0.14, 0.74)
+        cap.translate(gx, 3.07, zc + sz * (roadW / 2 + 0.62))
+        trimGeoms.push(cap)
+      }
+      const beam = new THREE.BoxGeometry(0.26, 0.5, roadW + 2.24)
+      beam.translate(gx, 3.25, zc)
+      trimGeoms.push(beam)
+      const gateCols = new THREE.Mesh(mergeGeometries(colGeoms, false)!, std('#ffffff', { map: texBrick }))
+      gateCols.castShadow = !small
+      add(gateCols)
+      add(new THREE.Mesh(mergeGeometries(trimGeoms, false)!, std(PALETTE.trim, { roughness: 0.6 })))
+      // табличка с названием: видна с въезда (с западного торца)
+      const cv = document.createElement('canvas')
+      cv.width = 1024
+      cv.height = 160
+      const g2 = cv.getContext('2d')!
+      g2.fillStyle = '#2c2e31'
+      g2.fillRect(0, 0, 1024, 160)
+      g2.strokeStyle = '#c9a86a'
+      g2.lineWidth = 6
+      g2.strokeRect(12, 12, 1000, 136)
+      g2.fillStyle = '#f1ece2'
+      g2.font = '700 92px Georgia, "Times New Roman", serif'
+      g2.textAlign = 'center'
+      g2.textBaseline = 'middle'
+      g2.fillText('ХОРОШИЙ ДОМ', 512, 84)
+      const signTex = new THREE.CanvasTexture(cv)
+      signTex.colorSpace = THREE.SRGBColorSpace
+      signTex.anisotropy = aniso
+      const sign = new THREE.Mesh(
+        new THREE.PlaneGeometry(4.6, 0.72),
+        new THREE.MeshStandardMaterial({ map: signTex, roughness: 0.6, side: THREE.DoubleSide }),
+      )
+      sign.rotation.y = -Math.PI / 2
+      sign.position.set(gx - 0.14, 3.25, zc)
+      add(sign)
+    }
 
     // машины: кузова с instanceColor + стёкла
     const carBodyGeo = new THREE.BoxGeometry(1.8, 0.7, 4.2)
