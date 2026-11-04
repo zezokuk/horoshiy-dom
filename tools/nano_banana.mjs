@@ -14,12 +14,14 @@
 // Дальше для сайта: node tools/web_image.mjs <выход.png> <выход.webp>
 import fs from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const BASE = process.env.GEMINI_API_BASE || 'https://generativelanguage.googleapis.com'
 
 function readKey() {
   if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY.trim()
-  const file = path.resolve('.env.local')
+  // рядом с package.json, откуда бы ни запустили скрипт
+  const file = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.env.local')
   if (fs.existsSync(file)) {
     for (const line of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
       const m = line.match(/^\s*GEMINI_API_KEY\s*=\s*(.*)\s*$/)
@@ -35,7 +37,7 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]
     if (a === '--aspect') opts.aspect = argv[++i]
-    else if (a === '--size') opts.size = argv[++i]
+    else if (a === '--size') opts.size = String(argv[++i]).toUpperCase() // API требует заглавную K
     else if (a === '--model') opts.model = argv[++i]
     else if (a === '--ref') opts.ref.push(argv[++i])
     else pos.push(a)
@@ -43,16 +45,28 @@ function parseArgs(argv) {
   return { pos, opts }
 }
 
-// Ищем base64-картинку в ответе: сначала output_image.data, потом любое длинное поле data.
-function findImageData(node) {
-  if (node && typeof node === 'object') {
-    if (node.output_image && typeof node.output_image.data === 'string') return node.output_image.data
-    for (const v of Object.values(node)) {
-      const r = findImageData(v)
-      if (r) return r
-    }
+// Ищем base64-картинку в ответе. Документация Google показывает два пути:
+//   interaction.output_image.data (удобный доступ SDK) и
+//   steps[type=model_output].content[type=image].data (полный ответ).
+// Берём последнюю картинку из model_output; картинки из "thought" (черновики модели) пропускаем.
+function collectImages(node, out, inThought = false) {
+  if (!node || typeof node !== 'object') return
+  if (Array.isArray(node)) {
+    for (const v of node) collectImages(v, out, inThought)
+    return
   }
-  return null
+  if (node.type === 'image' && typeof node.data === 'string') out.push({ data: node.data, thought: inThought })
+  for (const [k, v] of Object.entries(node)) {
+    collectImages(v, out, inThought || node.type === 'thought' || k === 'summary')
+  }
+}
+
+function findImageData(json) {
+  if (json?.output_image && typeof json.output_image.data === 'string') return json.output_image.data
+  const found = []
+  collectImages(json, found)
+  const final = found.filter((i) => !i.thought)
+  return (final.length ? final : found).at(-1)?.data ?? null
 }
 
 const { pos, opts } = parseArgs(process.argv.slice(2))
