@@ -697,7 +697,7 @@ body:has(.v2-bar) .v2-hero__in { padding-bottom: calc(clamp(32px, 6vh, 64px) + 7
 html.no-motion .pp__photo img { animation: none; }
 @media (prefers-reduced-motion: reduce) { .pp__photo img { animation: none; } }
 
-/* ======================================================================
+/* ===============================================================
    Home v2, chapter I under the sunrise (components/home/MorningChapter, 03.11): the epigraph, the dream line, and the
    morning as it is lived — breakfast outdoors, what you hear at seven. It starts in the colour of the haze above.
    ====================================================================== */
@@ -823,6 +823,7 @@ html.no-motion .v2-steam { display: none; }/* one line from a book over the morn
   .bk { height: auto; }
   .bk__stage { position: static; height: auto; }
 }
+<<<<<<< HEAD
 /* Sketch «Ночь → рассвет одним кадром» (04.11, /preview/night, HeroNight.tsx): one photo, two times of day; --p is the
    scroll through the block, 0 night → 1 morning. The night picture from Nano Banana replaces .hn__night--css */
 .hn { --p: 0; position: relative; height: 200svh; background: #0b1530; }
@@ -875,3 +876,13 @@ html.no-motion .v2-steam { display: none; }/* one line from a book over the morn
 }
 @media (prefers-reduced-motion: reduce) { .hn__star { display: none; } .hn__day img { transform: none; } }
 html.no-motion .hn__star { display: none; }
+
+/* просмотр GLB «Тип 5» из Kimi 3D Make (только data-look=v2, тёмные палитры не трогаем) */
+.glb-type5 { max-width: 1100px; margin: 0 auto; padding: 96px 20px 60px; }
+.glb-type5 h1 { font-family: var(--font-forum, serif); font-size: clamp(28px, 4vw, 44px); margin: 0 0 10px; }
+.glb-type5 > p { margin: 0 0 18px; opacity: .75; max-width: 640px; }
+.glb-preview { position: relative; height: min(72vh, 640px); border-radius: 18px; overflow: hidden; background: linear-gradient(#f6f1e5, #ece4d2); box-shadow: var(--shadow, 0 10px 40px rgba(0,0,0,.12)); }
+.glb-preview__canvas { position: absolute; inset: 0; }
+.glb-preview__canvas canvas { display: block; }
+.glb-preview__reset { position: absolute; right: 14px; bottom: 14px; z-index: 2; padding: 8px 14px; border: 0; border-radius: 999px; background: var(--green-ink, #2f4b3a); color: #fff; font-size: 13px; cursor: pointer; }
+.glb-preview__info { position: absolute; left: 14px; bottom: 14px; z-index: 2; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.75); font-size: 12px; }
