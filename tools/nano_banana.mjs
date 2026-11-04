@@ -89,8 +89,10 @@ if (!key) {
   process.exit(1)
 }
 
+// API отдаёт только image/jpeg (проверено живым запросом: «Supported values: 'image/jpeg'»).
+// Если просили .png или .webp — после получения конвертируем через sharp.
 const ext = path.extname(out).toLowerCase()
-const mime = ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : 'image/png'
+const mime = 'image/jpeg'
 
 let input = prompt
 if (opts.ref.length) {
@@ -139,5 +141,11 @@ if (!data) {
 }
 
 fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true })
-fs.writeFileSync(out, Buffer.from(data, 'base64'))
+const bytes = Buffer.from(data, 'base64')
+if (ext === '.png' || ext === '.webp') {
+  const { default: sharp } = await import('sharp')
+  await (ext === '.png' ? sharp(bytes).png() : sharp(bytes).webp({ quality: 90 })).toFile(out)
+} else {
+  fs.writeFileSync(out, bytes)
+}
 console.log(`${out}: ${Math.round(fs.statSync(out).size / 1024)} KB (${opts.model}, ${opts.aspect}, ${opts.size})`)
