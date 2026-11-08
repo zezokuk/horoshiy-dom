@@ -713,7 +713,8 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     const labelObjs: CSS2DObject[] = []
     layout.plots.forEach((p) => {
       if (!p.unit) return
-      if (p.status !== 'free' && !(timeEnabled && p.status === 'sold')) return
+      // «Уже купили» only on a wide block: on a phone's overview they pile up over the price tags (09.11)
+      if (p.status !== 'free' && !(timeEnabled && !small && p.status === 'sold')) return
       const div = document.createElement('div')
       div.className = 'g3-label'
       if (p.status === 'free') {
