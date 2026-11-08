@@ -1013,8 +1013,30 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     io.observe(el)
     let raf = 0
     let last = performance.now()
-    const avgPlotW = layout.plots.reduce((a, p) => a + p.w * S, 0) / Math.max(1, layout.plots.length)
-    let tagsShown = true
+    // ценники и «Уже купили» (ночь 09→10.11, Claude по просьбе Ильи): показываем только те, что не налезают друг на друга и
+    // на панель сверху; ближние к камере и цены — первыми, остальные появляются при приближении. Прячем через
+    // object.visible: display CSS2DRenderer сам возвращает каждый кадр (прежнее скрытие по плотности поэтому не работало)
+    const tagAt = new THREE.Vector3()
+    const tagRects: { x0: number; y0: number; x1: number; y1: number }[] = []
+    const placeTags = () => {
+      const W = el.clientWidth
+      const H = el.clientHeight
+      const top = W < 700 ? 52 : 48 // строка «Утро · День · Вечер · Ночь» и легенда
+      const cand = labelObjs.map((l) => {
+        l.getWorldPosition(tagAt).project(camera)
+        const price = !l.element.textContent?.startsWith('Уже')
+        const w = (l.element.textContent?.length ?? 6) * (price ? 7.2 : 6.6) + 22
+        return { l, x: ((tagAt.x + 1) / 2) * W, y: ((1 - tagAt.y) / 2) * H, z: tagAt.z, w, price }
+      })
+      cand.sort((a, b) => Number(b.price) - Number(a.price) || a.z - b.z)
+      tagRects.length = 0
+      for (const c of cand) {
+        const r = { x0: c.x - c.w / 2 - 3, y0: c.y - 15, x1: c.x + c.w / 2 + 3, y1: c.y + 15 }
+        const fits = c.z < 1 && r.y0 > top && r.x0 > 0 && r.x1 < W && r.y1 < H && !tagRects.some((q) => r.x0 < q.x1 && r.x1 > q.x0 && r.y0 < q.y1 && r.y1 > q.y0)
+        c.l.visible = fits
+        if (fits) tagRects.push(r)
+      }
+    }
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop)
       const dt = Math.min(0.05, (now - last) / 1000)
@@ -1025,13 +1047,6 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
         const k = todAnim.t * todAnim.t * (3 - 2 * todAnim.t)
         applySnap(lerpSnap(todAnim.from, todAnim.to, k))
         if (todAnim.t === 1) todAnim = null
-      }
-      // ценники прячем, когда шаг участков на экране плотнее ~74 px: на телефоне не налезают друг на друга
-      const dist = camera.position.distanceTo(controls.target)
-      const showTags = (avgPlotW * el.clientHeight) / (0.689 * dist) > 74
-      if (showTags !== tagsShown) {
-        tagsShown = showTags
-        for (const l of labelObjs) l.element.style.display = showTags ? '' : 'none'
       }
       if (fly) {
         fly.t = Math.min(1, fly.t + dt / 1.25)
@@ -1056,6 +1071,7 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
         controls.update()
       }
       renderer.render(scene, camera)
+      placeTags()
       labels.render(scene, camera)
     }
     raf = requestAnimationFrame(loop)
