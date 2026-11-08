@@ -5,6 +5,7 @@ import { regionView } from '@/lib/view'
 import { Footer } from './Footer'
 import { Header, type NavItem } from './Header'
 import { FloatingCall, LeadSection } from './LeadForm'
+import { SkipOnHome } from './SkipOnHome'
 import { StickyCta } from './StickyCta'
 
 /** Brand site menu: ready houses first — the company sells them; building (own projects, own land only) goes last (08.11). */
@@ -48,6 +49,25 @@ export async function Shell({ region, children }: { region?: Region; children: R
   const nav = soon ? soonNav() : regional ? regionNav(region.slug) : brandNav()
   const target = { region: region?.slug, phone, hours: region?.office?.hours, interest: soon ? ('future' as const) : undefined }
 
+  const lead = (
+    <LeadSection
+      title={soon ? `Узнайте первыми: ${region!.name}` : region ? 'Подберём дом под ваш бюджет' : 'Это место нужно увидеть самому'}
+      text={
+        soon
+          ? 'Оставьте телефон — сообщим о старте продаж, ценах и первых домах раньше всех.'
+          : region
+            ? 'Расскажем, какие дома свободны прямо сейчас, рассчитаем ипотеку и привезём на показ.'
+            : 'Приезжайте на показ: пройдёте по посёлку, зайдёте в дом и посмотрите участок. Расскажем, что свободно, и посчитаем ипотеку.'
+      }
+      cta={soon ? 'Записаться в лист ожидания' : region ? 'Отправить' : 'Записаться на показ'}
+      target={target}
+      ask={!soon}
+      eyebrow={soon ? 'Лист ожидания' : region ? undefined : 'Показ'}
+      offices={!region ? (company.offices ?? []).map((o) => ({ title: o.title, address: o.address, hours: o.hours })) : undefined}
+      phone={!region ? phone : undefined}
+    />
+  )
+
   return (
     <>
       <Header
@@ -62,22 +82,8 @@ export async function Shell({ region, children }: { region?: Region; children: R
         slogan={company.slogan}
       />
       <main>{children}</main>
-      <LeadSection
-        title={soon ? `Узнайте первыми: ${region!.name}` : region ? 'Подберём дом под ваш бюджет' : 'Это место нужно увидеть самому'}
-        text={
-          soon
-            ? 'Оставьте телефон — сообщим о старте продаж, ценах и первых домах раньше всех.'
-            : region
-              ? 'Расскажем, какие дома свободны прямо сейчас, рассчитаем ипотеку и привезём на показ.'
-              : 'Приезжайте на показ: пройдёте по посёлку, зайдёте в дом и посмотрите участок. Расскажем, что свободно, и посчитаем ипотеку.'
-        }
-        cta={soon ? 'Записаться в лист ожидания' : region ? 'Отправить' : 'Записаться на показ'}
-        target={target}
-        ask={!soon}
-        eyebrow={soon ? 'Лист ожидания' : region ? undefined : 'Показ'}
-        offices={!region ? (company.offices ?? []).map((o) => ({ title: o.title, address: o.address, hours: o.hours })) : undefined}
-        phone={!region ? phone : undefined}
-      />
+      {/* the brand home ends in its own form, the evening finale (EveningFinale): no second form under it */}
+      {region ? lead : <SkipOnHome>{lead}</SkipOnHome>}
       <Footer company={company} regions={views} nav={nav} current={current} />
       <StickyCta phone={phone} label={soon ? 'Узнать первым' : undefined} />
       <FloatingCall />

@@ -2,6 +2,7 @@ import type { Company, Design, Estate, House, Project, Region } from '@/payload-
 import { Bridge } from '@/components/home/Bridge'
 import { BuildTeaser } from '@/components/home/BuildTeaser'
 import { EstateCovers, type CoverView } from '@/components/home/EstateCovers'
+import { EveningFinale } from '@/components/home/EveningFinale'
 import { Founder, type Fact } from '@/components/home/Founder'
 import { HouseFilm } from '@/components/home/HouseFilm'
 import { Included } from '@/components/home/Included'
@@ -24,7 +25,7 @@ import { byEstateStatus, estateView, genplanEstate, houseView } from '@/lib/view
  *   what the price includes and how to buy         Сколько платить?
  *   who builds + room for the residents' stories   Кому доверить деньги?
  *   building (second: own land, own projects)      Нет подходящего готового?
- *   the evening and the lead form (Shell, #lead)   Как посмотреть?
+ *   the evening, lights in the windows, the form   Как посмотреть?  (EveningFinale, #lead; Shell skips its form on «/»)
  *
  * Night 09→10.11: chapter I «Дом» (MorningChapter), the road, life out of town (LifeScenes) and the book's colophon
  * (BookColophon) left the home — the components stay; everything before is at git tag v2-do-nochnoy-glavnoy.
@@ -208,6 +209,11 @@ export function HomeV2({
         </div>
         <Bridge text="А лучше всего — увидеть дом вживую" href="#lead" />
       </section>
+
+      <EveningFinale
+        offices={(company.offices ?? []).map((o) => ({ title: o.title, address: o.address, hours: o.hours }))}
+        phone={company.phone}
+      />
     </>
   )
 }

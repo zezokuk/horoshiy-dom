@@ -2,13 +2,14 @@
 when the number is complete, the success card draws a house with a lit window. Sends one real lead per device and
 deletes them through the admin API. Needs `npm run dev`. Shots: tools/.shots/form_<d|m>_<half|full|done>.png
 
-    python tools/formtest.py
+    python tools/formtest.py [page]     (default /about; / = the evening finale of the home)
 """
 import json, os, sqlite3, sys, time, urllib.parse, urllib.request
 from cdp import Browser
 
 H = "horoshiy.localhost:3000"
 NAME = "Тест формы (formtest)"
+PAGE = sys.argv[1] if len(sys.argv) > 1 else "/about"  # «/» checks the home's evening finale (night 09→10.11)
 ok = True
 
 
@@ -21,7 +22,7 @@ def check(name, cond, info=""):
 FORM = "#lead form"
 for w, h, mob, dev, port in [(1440, 900, False, "d", 9386), (390, 844, True, "m", 9387)]:
     with Browser(port, f"prof-form-{dev}", w, h, mobile=mob) as b:
-        b.go(f"http://{H}/about", 3)
+        b.go(f"http://{H}{PAGE}", 3)
         b.js("document.querySelector('.cookie button')?.click()")
         b.js(f"document.querySelector('{FORM}').scrollIntoView({{block: 'center'}})")
         time.sleep(0.5)
