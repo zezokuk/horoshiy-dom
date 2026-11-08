@@ -55,12 +55,11 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     reset: () => void
     setTime: (t: TimeOfDay) => void
   } | null>(null)
-  // эксперименты до согласования прячем за адресом: ?land=model|day, ?time=1
-  const [timeUI, setTimeUI] = useState(false)
+  // 09.11 (Илья: «вставь ландшафт и остальное»): «живой день» и время суток — по умолчанию.
+  // Сравнить: ?land=model (макет застройщика), ?land=old (прежний вид); спрятать время суток: ?time=0
+  // the component loads only in the browser (Genplan.tsx: dynamic, ssr: false), so the address can be read right away
+  const [timeUI] = useState(() => typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('time') !== '0')
   const [tod, setTod] = useState<TimeOfDay>('day')
-  useEffect(() => {
-    setTimeUI(new URLSearchParams(window.location.search).get('time') === '1')
-  }, [])
   const matchRef = useRef(match) // the filter to apply when the scene is (re)built
   // latest callbacks for the scene's event handlers, which are created once per layout
   const select = useRef(onSelect)
@@ -87,8 +86,9 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     const small = el.clientWidth < 700
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const params = new URLSearchParams(window.location.search)
-    const land = params.get('land') === 'model' || params.get('land') === 'day' ? (params.get('land') as 'model' | 'day') : null
-    const timeEnabled = params.get('time') === '1'
+    const landParam = params.get('land')
+    const land: 'model' | 'day' | null = landParam === 'old' ? null : landParam === 'model' ? 'model' : 'day'
+    const timeEnabled = params.get('time') !== '0'
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.setSize(el.clientWidth, el.clientHeight)
     renderer.shadowMap.enabled = !small
