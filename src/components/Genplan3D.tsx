@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { MapControls } from 'three/examples/jsm/controls/MapControls.js'
 import { CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js'
@@ -43,6 +43,8 @@ function rand(seed: number) {
 
 const MAT_KEYS: MatKey[] = ['wall', 'plinth', 'roof', 'frame', 'glass', 'door', 'slab', 'trim']
 
+type TimeOfDay = 'morning' | 'day' | 'evening' | 'night'
+
 export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, flyRef, match = null }: Props) {
   const box = useRef<HTMLDivElement>(null) // canvas host, never gets React children
   const api = useRef<{
@@ -51,7 +53,14 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     zoom: (k: number) => void
     rotate: (a: number) => void
     reset: () => void
+    setTime: (t: TimeOfDay) => void
   } | null>(null)
+  // эксперименты до согласования прячем за адресом: ?land=model|day, ?time=1
+  const [timeUI, setTimeUI] = useState(false)
+  const [tod, setTod] = useState<TimeOfDay>('day')
+  useEffect(() => {
+    setTimeUI(new URLSearchParams(window.location.search).get('time') === '1')
+  }, [])
   const matchRef = useRef(match) // the filter to apply when the scene is (re)built
   // latest callbacks for the scene's event handlers, which are created once per layout
   const select = useRef(onSelect)
@@ -77,6 +86,9 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     }
     const small = el.clientWidth < 700
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const params = new URLSearchParams(window.location.search)
+    const land = params.get('land') === 'model' || params.get('land') === 'day' ? (params.get('land') as 'model' | 'day') : null
+    const timeEnabled = params.get('time') === '1'
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.setSize(el.clientWidth, el.clientHeight)
     renderer.shadowMap.enabled = !small
@@ -91,7 +103,8 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
 
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(SKY)
-    scene.fog = new THREE.Fog(SKY, 170, 460)
+    const fog = new THREE.Fog(SKY, land === 'day' ? 110 : 150, land === 'day' ? 400 : 460)
+    scene.fog = fog
     const pmrem = new THREE.PMREMGenerator(renderer)
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
     scene.environmentIntensity = 0.45
@@ -103,7 +116,8 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     const Z = (y: number) => (y - cz) * S
     const span = Math.max(W, layout.height) * S
 
-    scene.add(new THREE.HemisphereLight('#f4f8ff', '#a8a28c', 1.15))
+    const hemi = new THREE.HemisphereLight('#f4f8ff', '#a8a28c', 1.15)
+    scene.add(hemi)
     const sun = new THREE.DirectionalLight('#ffedd0', 2.2)
     sun.position.set(span * 0.5, span * 0.9, span * 0.35)
     sun.castShadow = !small
@@ -331,8 +345,9 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     // фонари: столб + голова, инстансы
     const lampPostGeo = new THREE.CylinderGeometry(0.07, 0.09, 3.2, 6)
     const lampHeadGeo = new THREE.BoxGeometry(0.5, 0.12, 0.22)
+    const lampGlowMat = std('#3a3d40')
     const lampPost = new THREE.InstancedMesh(lampPostGeo, std('#3a3d40'), lampPosts.length)
-    const lampHead = new THREE.InstancedMesh(lampHeadGeo, std('#3a3d40'), lampPosts.length)
+    const lampHead = new THREE.InstancedMesh(lampHeadGeo, lampGlowMat, lampPosts.length)
     lampPosts.forEach((pos, i) => {
       m4.compose(new THREE.Vector3(pos.x, pos.y + 1.6, pos.z), new THREE.Quaternion(), one)
       lampPost.setMatrixAt(i, m4)
@@ -531,6 +546,73 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
       }
     })
 
+    // «Живой день»: осевые лоскуты полей вокруг посёлка + лесополосы тополей по их кромкам
+    const fieldPatches: { x: number; z: number; w: number; h: number; c: string }[] = []
+    const fieldBelts: [number, number, number][] = []
+    if (land === 'day') {
+      const cols = ['#d9c07a', '#9c7a52', '#9ab86a', '#c9a35e', '#8fae62', '#cbbb84']
+      let fi = 0
+      for (let side = 0; side < 4; side++) {
+        for (let k = 0; k < 3; k++) {
+          const fw = 55 + rand(fi * 3.3) * 45
+          const fh = 40 + rand(fi * 7.1) * 30
+          const off = 30 + rand(fi * 5.7) * 60
+          const along = (k - 1) * 75 + (rand(fi) - 0.5) * 20
+          const x = side < 2 ? along : side === 2 ? -wS / 2 - off - fw / 2 : wS / 2 + off + fw / 2
+          const z = side < 2 ? (side === 0 ? -hS / 2 - off - fh / 2 : hS / 2 + off + fh / 2) : along * (hS / wS)
+          fieldPatches.push({ x, z, w: fw, h: fh, c: cols[fi % cols.length] })
+          const horizontal = side < 2
+          const count = Math.floor((horizontal ? fw : fh) / 7)
+          for (let b = 0; b < count; b++) {
+            const t = (b + 0.5) / count - 0.5
+            const bx = horizontal ? x + t * fw : side === 2 ? x + fw / 2 + 2 : x - fw / 2 - 2
+            const bz = horizontal ? (side === 0 ? z + fh / 2 + 2 : z - fh / 2 - 2) : z + t * fh
+            fieldBelts.push([bx, bz, 0.9 + rand(fi + b) * 0.3])
+          }
+          fi++
+        }
+      }
+    }
+
+    if (land) {
+      // мягкие деревья одного стиля: крона из 2–3 шаров (тополь — вытянутый эллипсоид)
+      const blobs: { x: number; y: number; z: number; sx: number; sy: number; sz: number; c: THREE.Color }[] = []
+      const trunkSpots: { x: number; z: number; s: number; h: number }[] = []
+      const greens = ['#7d9b6a', '#8aa374', '#6f8f60', '#93a97b'].map((c) => new THREE.Color(c))
+      const pushBlobs = (x: number, z: number, s: number, kind: number) => {
+        const c = greens[Math.floor(rand(x * 3.1 + z) * greens.length)]
+        if (kind === 2) {
+          blobs.push({ x, y: 3.3 * s, z, sx: 0.85 * s, sy: 2.4 * s, sz: 0.85 * s, c })
+          trunkSpots.push({ x, z, s, h: 1.6 })
+        } else if (kind === 1) {
+          blobs.push({ x, y: 1.9 * s, z, sx: 0.62 * s, sy: 1.5 * s, sz: 0.62 * s, c })
+          trunkSpots.push({ x, z, s, h: 0.5 })
+        } else {
+          blobs.push({ x, y: 2.7 * s, z, sx: 1.45 * s, sy: 1.6 * s, sz: 1.45 * s, c })
+          blobs.push({ x: x + 0.95 * s, y: 2.1 * s, z: z + 0.35 * s, sx: 0.95 * s, sy: 1.0 * s, sz: 0.95 * s, c })
+          blobs.push({ x: x - 0.75 * s, y: 2.25 * s, z: z - 0.5 * s, sx: 0.85 * s, sy: 0.95 * s, sz: 0.85 * s, c })
+          trunkSpots.push({ x, z, s, h: 1.6 })
+        }
+      }
+      yardSpots.forEach(([x, z, s], i) => pushBlobs(x, z, s, i % 3 === 2 ? 1 : 0))
+      aroundSpots.forEach(([x, z, s, k]) => pushBlobs(x, z, s, k))
+      fieldBelts.forEach(([x, z, s]) => pushBlobs(x, z, s, 2))
+      const crowns = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 9, 7), std('#ffffff', { roughness: 0.9 }), blobs.length)
+      blobs.forEach((b, i) => {
+        m4.compose(new THREE.Vector3(b.x, b.y, b.z), new THREE.Quaternion(), new THREE.Vector3(b.sx, b.sy, b.sz))
+        crowns.setMatrixAt(i, m4)
+        crowns.setColorAt(i, b.c)
+      })
+      crowns.castShadow = !small
+      add(crowns)
+      const trunks = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.12, 0.18, 1.6, 6), std('#6b5444'), trunkSpots.length)
+      trunkSpots.forEach((t, i) => {
+        m4.compose(new THREE.Vector3(t.x, (t.h * t.s) / 2 + 0.2, t.z), new THREE.Quaternion(), new THREE.Vector3(t.s, (t.h / 1.6) * t.s, t.s))
+        trunks.setMatrixAt(i, m4)
+      })
+      trunks.castShadow = !small
+      add(trunks)
+    } else {
     const mkTrees = (
       spots: { x: number; z: number; s: number }[],
       crownGeo: THREE.BufferGeometry,
@@ -562,6 +644,7 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     mkTrees(rounds, new THREE.IcosahedronGeometry(1.6, 0), new THREE.CylinderGeometry(0.15, 0.2, 1.6, 6), (s) => 2.8 * s, (s) => 0.8 * s, (s) => new THREE.Vector3(s, s * 1.15, s), ['#5c7a4f', '#6f8450', '#4f6a44'])
     mkTrees(thujas, new THREE.ConeGeometry(0.75, 3.2, 7), new THREE.CylinderGeometry(0.1, 0.12, 0.5, 5), (s) => 2.0 * s, () => 0.25, (s) => new THREE.Vector3(s, s, s), ['#3f5c3c', '#4a6b44', '#54764a'])
     mkTrees(poplars, new THREE.CylinderGeometry(0.55, 0.8, 4.6, 7), new THREE.CylinderGeometry(0.12, 0.16, 1.6, 5), (s) => 3.6 * s, (s) => 0.8 * s, (s) => new THREE.Vector3(s, s, s), ['#4c6b42', '#57774a'], false)
+    }
 
     // кусты вдоль фасадов и тротуаров
     const bushSpots: { x: number; z: number; s: number }[] = []
@@ -581,27 +664,41 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     bushes.castShadow = !small
     add(bushes)
 
-    // ---------- подложка и Кубань вокруг: поля, лесополосы, дымка ----------
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200), std('#cfd8b8'))
-    ground.rotation.x = -Math.PI / 2
-    ground.receiveShadow = true
-    add(ground)
-    const base = new THREE.Mesh(new THREE.BoxGeometry(wS + 4, 0.2, hS + 4), std('#e7e2d4'))
-    base.position.y = 0.1
-    base.receiveShadow = true
-    add(base)
+    // ---------- подложка и окружение ----------
+    if (land) {
+      // земля вместо «бетонной» плиты: трава до горизонта, посёлок стоит на ней
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(2400, 2400), std(land === 'day' ? '#8fa873' : '#aebd99', { roughness: 1 }))
+      ground.rotation.x = -Math.PI / 2
+      ground.receiveShadow = true
+      add(ground)
+      for (const f of fieldPatches) {
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(f.w, f.h), std(f.c, { roughness: 1 }))
+        m.rotation.x = -Math.PI / 2
+        m.position.set(f.x, 0.02, f.z)
+        add(m)
+      }
+    } else {
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200), std('#cfd8b8'))
+      ground.rotation.x = -Math.PI / 2
+      ground.receiveShadow = true
+      add(ground)
+      const base = new THREE.Mesh(new THREE.BoxGeometry(wS + 4, 0.2, hS + 4), std('#e7e2d4'))
+      base.position.y = 0.1
+      base.receiveShadow = true
+      add(base)
 
-    const fieldCols = ['#d9c07a', '#b08d5e', '#9ab86a', '#c9a35e', '#8fae62', '#cbbb84']
-    for (let i = 0; i < 6; i++) {
-      const fw = 60 + rand(i * 3.3) * 70
-      const fh = 45 + rand(i * 7.1) * 55
-      const ang = (i / 6) * Math.PI * 2 + rand(i) * 0.5
-      const dist = Math.max(wS, hS) * 0.75 + 30 + rand(i * 11) * 40
-      const field = new THREE.Mesh(new THREE.PlaneGeometry(fw, fh), std(fieldCols[i], { roughness: 1 }))
-      field.rotation.x = -Math.PI / 2
-      field.rotation.z = ang
-      field.position.set(Math.cos(ang) * dist, 0.02 + i * 0.004, Math.sin(ang) * dist)
-      add(field)
+      const fieldCols = ['#d9c07a', '#b08d5e', '#9ab86a', '#c9a35e', '#8fae62', '#cbbb84']
+      for (let i = 0; i < 6; i++) {
+        const fw = 60 + rand(i * 3.3) * 70
+        const fh = 45 + rand(i * 7.1) * 55
+        const ang = (i / 6) * Math.PI * 2 + rand(i) * 0.5
+        const dist = Math.max(wS, hS) * 0.75 + 30 + rand(i * 11) * 40
+        const field = new THREE.Mesh(new THREE.PlaneGeometry(fw, fh), std(fieldCols[i], { roughness: 1 }))
+        field.rotation.x = -Math.PI / 2
+        field.rotation.z = ang
+        field.position.set(Math.cos(ang) * dist, 0.02 + i * 0.004, Math.sin(ang) * dist)
+        add(field)
+      }
     }
 
     // статика заморожена: матрицы не пересчитываются каждый кадр
@@ -612,24 +709,105 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     ringHover.matrixAutoUpdate = true
     ringActive.matrixAutoUpdate = true
 
-    // ценники свободных домов
+    // ценники свободных домов; с ?time=1 на проданных — плашка «Уже купили»
+    const labelObjs: CSS2DObject[] = []
     layout.plots.forEach((p) => {
-      if (p.unit && p.status === 'free') {
-        const div = document.createElement('div')
-        div.className = 'g3-label'
+      if (!p.unit) return
+      if (p.status !== 'free' && !(timeEnabled && p.status === 'sold')) return
+      const div = document.createElement('div')
+      div.className = 'g3-label'
+      if (p.status === 'free') {
         div.textContent = `${(p.unit.price / 1_000_000).toLocaleString('ru-RU', { maximumFractionDigits: 2 })} млн`
         priceTags.set(p.n, div)
-        const h = housesAt.get(p.n)
-        const label = new CSS2DObject(div)
-        label.position.set(h?.pos.x ?? 0, 0.48 + (h?.h ?? 4) + 1.8, h?.pos.z ?? 0)
-        add(label)
+      } else {
+        div.textContent = 'Уже купили'
+        div.style.background = '#7a5b50'
+        div.style.fontSize = '11px'
       }
+      const h = housesAt.get(p.n)
+      const label = new CSS2DObject(div)
+      label.position.set(h?.pos.x ?? 0, 0.48 + (h?.h ?? 4) + 1.8, h?.pos.z ?? 0)
+      add(label)
+      labelObjs.push(label)
     })
+
+    // ---------- время суток (?time=1): Утро · День · Вечер · Ночь ----------
+    // сторона света условная (севера на генплане застройщика нет): утро — солнце с востока (+X), вечер — с запада (−X)
+    const TODS: Record<TimeOfDay, { sky: string; sun: string; sunI: number; pos: [number, number, number]; hs: string; hg: string; hi: number; env: number; glow: number; stars: number; fog: [number, number] }> = {
+      morning: { sky: '#f2e6d2', sun: '#ffd9a3', sunI: 1.9, pos: [0.95, 0.3, 0.25], hs: '#f6f0e4', hg: '#a8a28c', hi: 0.95, env: 0.4, glow: 0, stars: 0, fog: [130, 420] },
+      day: { sky: SKY, sun: '#ffedd0', sunI: 2.2, pos: [0.5, 0.9, 0.35], hs: '#f4f8ff', hg: '#a8a28c', hi: 1.15, env: 0.45, glow: 0, stars: 0, fog: [150, 460] },
+      evening: { sky: '#eec39a', sun: '#ff9e5e', sunI: 1.7, pos: [-0.9, 0.22, 0.3], hs: '#e8d8c8', hg: '#8a7a6a', hi: 0.6, env: 0.3, glow: 1, stars: 0, fog: [120, 420] },
+      night: { sky: '#0e1a30', sun: '#a9c0e8', sunI: 0.35, pos: [0.3, 0.8, -0.4], hs: '#2c3c5c', hg: '#141c2c', hi: 0.35, env: 0.12, glow: 1, stars: 1, fog: [110, 400] },
+    }
+    const starGeo = new THREE.BufferGeometry()
+    const starPos = new Float32Array(700 * 3)
+    for (let i = 0; i < 700; i++) {
+      const az = rand(i * 1.3) * Math.PI * 2
+      const elv = 0.12 + rand(i * 2.7) * 1.3
+      starPos[i * 3] = Math.cos(az) * Math.cos(elv) * 800
+      starPos[i * 3 + 1] = Math.sin(elv) * 800
+      starPos[i * 3 + 2] = Math.sin(az) * Math.cos(elv) * 800
+    }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3))
+    const starMat = new THREE.PointsMaterial({ color: '#dfe8ff', size: 1.8, sizeAttenuation: false, transparent: true, opacity: 0, depthWrite: false, fog: false })
+    const stars = new THREE.Points(starGeo, starMat)
+    stars.visible = false
+    add(stars)
+
+    type Snap = { sky: THREE.Color; sun: THREE.Color; sunI: number; pos: THREE.Vector3; hs: THREE.Color; hg: THREE.Color; hi: number; env: number; glow: number; stars: number; fogNear: number; fogFar: number }
+    const snapOf = (t: TimeOfDay): Snap => {
+      const p = TODS[t]
+      return { sky: new THREE.Color(p.sky), sun: new THREE.Color(p.sun), sunI: p.sunI, pos: new THREE.Vector3(...p.pos).multiplyScalar(span), hs: new THREE.Color(p.hs), hg: new THREE.Color(p.hg), hi: p.hi, env: p.env, glow: p.glow, stars: p.stars, fogNear: p.fog[0], fogFar: p.fog[1] }
+    }
+    const snapNow = (): Snap => ({
+      sky: (scene.background as THREE.Color).clone(), sun: sun.color.clone(), sunI: sun.intensity, pos: sun.position.clone(),
+      hs: hemi.color.clone(), hg: hemi.groundColor.clone(), hi: hemi.intensity, env: scene.environmentIntensity,
+      glow: liveMats.glass.emissiveIntensity, stars: starMat.opacity, fogNear: fog.near, fogFar: fog.far,
+    })
+    const lerpSnap = (a: Snap, b: Snap, k: number): Snap => ({
+      sky: a.sky.clone().lerp(b.sky, k), sun: a.sun.clone().lerp(b.sun, k), sunI: THREE.MathUtils.lerp(a.sunI, b.sunI, k),
+      pos: a.pos.clone().lerp(b.pos, k), hs: a.hs.clone().lerp(b.hs, k), hg: a.hg.clone().lerp(b.hg, k),
+      hi: THREE.MathUtils.lerp(a.hi, b.hi, k), env: THREE.MathUtils.lerp(a.env, b.env, k), glow: THREE.MathUtils.lerp(a.glow, b.glow, k),
+      stars: THREE.MathUtils.lerp(a.stars, b.stars, k), fogNear: THREE.MathUtils.lerp(a.fogNear, b.fogNear, k), fogFar: THREE.MathUtils.lerp(a.fogFar, b.fogFar, k),
+    })
+    const applySnap = (s: Snap) => {
+      ;(scene.background as THREE.Color).copy(s.sky)
+      scene.fog!.color.copy(s.sky)
+      fog.near = s.fogNear
+      fog.far = s.fogFar
+      sun.color.copy(s.sun)
+      sun.intensity = s.sunI
+      sun.position.copy(s.pos)
+      hemi.color.copy(s.hs)
+      hemi.groundColor.copy(s.hg)
+      hemi.intensity = s.hi
+      scene.environmentIntensity = s.env
+      liveMats.glass.emissive.set('#ffc478')
+      liveMats.glass.emissiveIntensity = s.glow * 0.95
+      dimMats.glass.emissive.set('#ffc478')
+      dimMats.glass.emissiveIntensity = s.glow * 0.5
+      lampGlowMat.emissive.set('#ffd9a0')
+      lampGlowMat.emissiveIntensity = s.glow * 1.4
+      starMat.opacity = s.stars * 0.9
+      stars.visible = s.stars > 0.02
+    }
+    let todAnim: { from: Snap; to: Snap; t: number } | null = null
 
     // camera + controls with a short fly-in
     const camera = new THREE.PerspectiveCamera(38, el.clientWidth / el.clientHeight, 0.5, 1500)
     const target = new THREE.Vector3(0, 0, 0)
-    const end = new THREE.Vector3(span * 0.22, span * (small ? 0.78 : 0.44), span * (small ? 0.78 : 0.52))
+    let end: THREE.Vector3
+    if (small) {
+      // телефон: вписываем посёлок по ширине блока (допускаем лёгкий подрез), а не ставим одну даль на всех
+      const aspect = el.clientWidth / el.clientHeight
+      const tan = Math.tan(THREE.MathUtils.degToRad(19))
+      const dW = (wS * 1.04) / (2 * tan * aspect)
+      const dH = (hS * 0.8 + 10) / (2 * tan)
+      const d = THREE.MathUtils.clamp(Math.max(dW * 0.85, dH), span * 0.45, span * 1.35)
+      end = new THREE.Vector3(d * 0.2, d * 0.62, d * 0.75)
+    } else {
+      end = new THREE.Vector3(span * 0.22, span * 0.44, span * 0.52)
+    }
     const start = end.clone().multiplyScalar(1.9).add(new THREE.Vector3(-span * 0.8, span * 0.4, 0))
     camera.position.copy(reduce ? end : start)
     camera.lookAt(target)
@@ -804,6 +982,14 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
       },
       zoom: dolly,
       rotate: orbit,
+      setTime: (t) => {
+        if (reduce) {
+          todAnim = null
+          applySnap(snapOf(t))
+        } else {
+          todAnim = { from: snapNow(), to: snapOf(t), t: 0 }
+        }
+      },
       reset: () => {
         controls.autoRotate = false
         fly = { from: camera.position.clone(), to: end.clone(), look0: controls.target.clone(), look1: target.clone(), t: 0, done: () => (controls.enabled = true) }
@@ -826,11 +1012,26 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     io.observe(el)
     let raf = 0
     let last = performance.now()
+    const avgPlotW = layout.plots.reduce((a, p) => a + p.w * S, 0) / Math.max(1, layout.plots.length)
+    let tagsShown = true
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop)
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
       if (!visible) return
+      if (todAnim) {
+        todAnim.t = Math.min(1, todAnim.t + dt / 1.4)
+        const k = todAnim.t * todAnim.t * (3 - 2 * todAnim.t)
+        applySnap(lerpSnap(todAnim.from, todAnim.to, k))
+        if (todAnim.t === 1) todAnim = null
+      }
+      // ценники прячем, когда шаг участков на экране плотнее ~74 px: на телефоне не налезают друг на друга
+      const dist = camera.position.distanceTo(controls.target)
+      const showTags = (avgPlotW * el.clientHeight) / (0.689 * dist) > 74
+      if (showTags !== tagsShown) {
+        tagsShown = showTags
+        for (const l of labelObjs) l.element.style.display = showTags ? '' : 'none'
+      }
       if (fly) {
         fly.t = Math.min(1, fly.t + dt / 1.25)
         const e = fly.t < 0.5 ? 4 * fly.t ** 3 : 1 - Math.pow(-2 * fly.t + 2, 3) / 2
@@ -928,6 +1129,33 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
       <div className={`map-hint ${hintState.on ? 'is-on' : ''}`} aria-hidden>
         {hintState.text}
       </div>
+      {timeUI && (
+        <div style={{ position: 'absolute', left: 10, top: 10, display: 'flex', gap: 4, zIndex: 5 }}>
+          {([['morning', 'Утро'], ['day', 'День'], ['evening', 'Вечер'], ['night', 'Ночь']] as const).map(([k, label]) => (
+            <button
+              key={k}
+              type="button"
+              aria-pressed={tod === k}
+              onClick={() => {
+                setTod(k)
+                api.current?.setTime(k)
+              }}
+              style={{
+                border: 0,
+                borderRadius: 999,
+                padding: '7px 12px',
+                fontSize: 12,
+                cursor: 'pointer',
+                background: tod === k ? '#2f4b3a' : 'rgba(255,255,255,.88)',
+                color: tod === k ? '#fff' : '#2f4b3a',
+                boxShadow: '0 2px 10px rgba(0,0,0,.12)',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="g3__ctrl" role="group" aria-label="Управление 3D-видом">
         <button type="button" aria-label="Приблизить" onClick={() => api.current?.zoom(0.75)}>
           +
