@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Cormorant_Garamond, Forum, Golos_Text, Manrope } from 'next/font/google'
+import { Cormorant_Garamond, Forum, Golos_Text, Manrope, Unbounded } from 'next/font/google'
 import { CookieNotice } from '@/components/CookieNotice'
 import { Metrika } from '@/components/Metrika'
 import { MorphLayer } from '@/components/MorphLayer'
@@ -12,6 +12,7 @@ import { INDEXABLE, MAIN_URL } from '@/lib/site'
 import './globals.css'
 import './design.css'
 import './v2.css'
+import './dom.css'
 
 // v2 (29.10, Igor's choice): headings and estate names in Forum — the lettering of the client's covers, so the covers and
 // the page speak in one voice; text in Golos. The old pair stays for the dark palettes, not preloaded.
@@ -24,6 +25,8 @@ const cormorant = Cormorant_Garamond({
   weight: ['600'], // only the weight we use: fewer font files before the first paint
   preload: false,
 })
+// look «dom» (09.11, dom.css): the wide grotesk Илья picked; loaded only when ?look=dom switches the look on
+const unbounded = Unbounded({ variable: '--font-unbounded', subsets: ['latin', 'cyrillic'], weight: ['400', '600'], preload: false })
 const V2 = ['listva', 'shalfey']
 
 const BASE: Metadata = {
@@ -62,13 +65,19 @@ export default async function FrontendLayout({ children }: { children: React.Rea
       data-scroll-behavior="smooth"
       data-palette={design.palette && design.palette !== 'forest' ? design.palette : undefined}
       data-look={v2 ? 'v2' : undefined}
-      className={[forum.variable, golos.variable, manrope.variable, cormorant.variable, motion ? '' : 'no-motion'].filter(Boolean).join(' ')}
+      className={[forum.variable, golos.variable, manrope.variable, cormorant.variable, unbounded.variable, motion ? '' : 'no-motion'].filter(Boolean).join(' ')}
       style={v2 ? undefined : paletteStyle(design)}
       suppressHydrationWarning
     >
       <head>
         {/* Reveal animations only arm when JS runs, so content is never hidden without it. */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+        {/* look «dom» on trial (dom.css): ?look=dom turns it on for this browser, ?look=v2 back; before the first paint, no flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var q=new URLSearchParams(location.search).get('look');if(q==='dom'||q==='v2')localStorage.setItem('hd_look',q);if(localStorage.getItem('hd_look')==='dom')document.documentElement.setAttribute('data-v3','dom')}catch(e){}`,
+          }}
+        />
         {/* «3D → house» arriving from another subdomain (lib/morph): curtain and photo before the first paint, or the page flashes */}
         <script
           dangerouslySetInnerHTML={{

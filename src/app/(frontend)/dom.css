@@ -1,0 +1,68 @@
+/* Look «dom» (09.11, Илья's six Refero picks: bella, Samara, The1, IDHEAL, Dezeen, Aspelin Reitan — newv2/refero/00-РАЗБОР.md).
+   One wide grotesk voice (Unbounded) at a big scale, a calm stone canvas, near-black ink, the client's green made architectural
+   and a brick-coral spark for «Акция». Photos lead in big rounded cards, buttons are pills, pages change with a curtain.
+   Opt-in only: html[data-v3="dom"], set by ?look=dom (layout.tsx, remembered in the browser; ?look=v2 goes back), so the
+   v2 site stays as it is until the look is approved. The logo and the estate covers keep the client's own lettering. */
+
+html[data-v3="dom"] {
+  --canvas: #f4f3ee;
+  --brand: #027b49;          /* white text on it 5.3:1 */
+  --brand-hover: #01633a;
+  --brand-ink: #01633a;      /* on white 7.4:1 */
+  --brand-deep: #0f2a1e;
+  --tint: #eae8e0;
+  --tint-2: #dedbd1;
+  --promo: #c8432a;          /* brick coral, white text 4.9:1 */
+  --green: var(--brand);
+  --green-deep: var(--brand-deep);
+  --green-ink: #0f2a1e;
+  --free: #027b49;
+  --cream: var(--canvas);
+  --paper: #ffffff;
+  --ink: #1c1c1a;            /* on the canvas 15:1 */
+  --muted: #66655f;          /* on the canvas 5.3:1, on the tint 4.8:1 */
+  --line: #dad8cf;
+  --grad-sand: var(--canvas);
+  --font-serif: var(--font-unbounded), "Unbounded", "Segoe UI", system-ui, sans-serif;
+  --font-sans: var(--font-manrope), "Manrope", "Segoe UI", system-ui, sans-serif;
+  --radius: 20px;
+  --shadow: 0 24px 60px -36px rgba(28, 28, 26, .32);
+}
+
+/* ---------- type: one voice, big and tight; Unbounded is wide, so a little smaller than Forum at the same role ---------- */
+html[data-v3="dom"] body { background: var(--canvas); color: var(--ink); font-family: var(--font-sans); letter-spacing: -.005em; }
+html[data-v3="dom"] .title,
+html[data-v3="dom"] h1, html[data-v3="dom"] h2 { font-weight: 400; letter-spacing: -.035em; line-height: 1.04; }
+html[data-v3="dom"] .title--lg { font-size: clamp(28px, 3.3vw, 50px); }
+html[data-v3="dom"] h3 { font-family: var(--font-sans); font-weight: 600; letter-spacing: -.015em; }
+html[data-v3="dom"] .eyebrow, html[data-v3="dom"] .idx { font-family: var(--font-sans); font-weight: 600; letter-spacing: .14em; color: var(--muted); }
+html[data-v3="dom"] .eyebrow::before { background: var(--brand); }
+html[data-v3="dom"] .lead { color: var(--muted); }
+
+/* our own captions and UI headings speak the same voice; the covers' lettering is the client's picture and stays */
+html[data-v3="dom"] :is(.v2-cover__name, .pp__info h3, .lead-phone, .road__stop b, .v2-bar__price) { font-family: var(--font-serif); font-weight: 400; letter-spacing: -.03em; }
+
+/* ---------- surfaces: white cards on the stone canvas, alternating sections a step darker ---------- */
+html[data-v3="dom"] .v2-sec--tint, html[data-v3="dom"] .section--paper { background: var(--tint); }
+html[data-v3="dom"] .header { background: rgba(244, 243, 238, .88); }
+
+/* ---------- buttons: pills, one green; «Акция» in brick coral ---------- */
+html[data-v3="dom"] .btn { border-radius: 999px; font-family: var(--font-sans); font-weight: 600; letter-spacing: -.01em; }
+html[data-v3="dom"] .btn--line { border-color: var(--ink); color: var(--ink); }
+html[data-v3="dom"] .btn--line:hover { background: var(--ink); color: #fff; }
+
+/* ---------- first screen (HeroNight): the name in the brand's wide voice, the slogan quiet ---------- */
+html[data-v3="dom"] .hn__title { font-family: var(--font-serif); font-weight: 600; font-size: clamp(36px, min(5.4cqw, 11cqh), 92px); letter-spacing: -.02em; line-height: .95; }
+html[data-v3="dom"] .hn__slogan { font-family: var(--font-sans); font-weight: 500; font-size: clamp(16px, 1.5cqw, 21px); letter-spacing: .02em; }
+html[data-v3="dom"] .hn__eyebrow { font-family: var(--font-sans); letter-spacing: .16em; }
+html[data-v3="dom"] .hn.is-day .hn__copy { color: var(--ink); }
+/* the live line reads as a status, The1-style: a dot before it */
+html[data-v3="dom"] .hn__facts { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-sans); }
+html[data-v3="dom"] .hn__facts::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #3ddc84; box-shadow: 0 0 0 3px rgba(61, 220, 132, .25); }
+
+/* ---------- page to page: the new page rises like a curtain over the old one, which steps back (bella) ----------
+   design.css already opts every page into cross-document view transitions (type «page»); this only swaps the animation. */
+html[data-v3="dom"]:active-view-transition-type(page)::view-transition-old(root) { animation: 520ms cubic-bezier(.7, 0, .3, 1) both dom-back; }
+html[data-v3="dom"]:active-view-transition-type(page)::view-transition-new(root) { animation: 620ms cubic-bezier(.7, 0, .2, 1) both dom-curtain; }
+@keyframes dom-back { to { transform: scale(.94); filter: brightness(.75); border-radius: 24px; } }
+@keyframes dom-curtain { from { clip-path: inset(100% 0 0 0 round 28px 28px 0 0); } to { clip-path: inset(0 0 0 0 round 0); } }
