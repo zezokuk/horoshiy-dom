@@ -8,13 +8,13 @@ export function BuildTeaser({ plan, planNote, projects, buildHref }: { plan?: st
   return (
     <div className="v2-build">
       <div className="v2-build__text" data-reveal>
-        <p className="eyebrow">Строительство под ключ</p>
+        <p className="eyebrow">Если нет подходящего готового дома</p>
         <h2 className="title title--lg">
-          Хотите свой дом <em>по своему плану</em>?
+          Обсудим строительство <em>на свободном участке</em>
         </h2>
         <p className="lead">
-          Построим кирпичный дом по одному из наших проектов. Посмотрите, как он растёт: план, фундамент, стены, кровля — шаг
-          за шагом в 3D.
+          Если в посёлке появляется доступная земля, строим на ней один из наших типовых кирпичных домов. Посмотрите, как он
+          растёт: план, фундамент, стены, кровля — шаг за шагом в 3D.
         </p>
         <div className="btns">
           <a className="btn btn--green" href={buildHref}>

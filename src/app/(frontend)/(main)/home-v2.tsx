@@ -138,7 +138,7 @@ export function HomeV2({
     <>
       <HeroOpen
         since={company.since}
-        lead="Капитальные кирпичные дома с участком в 15–40 минутах от Краснодара — готовые и под ключ."
+        lead="Готовые кирпичные дома с участком в 15–40 минутах от Краснодара. Выберите свой и приезжайте на показ."
         points={points}
         catalogHref={mainHref('/catalog')}
       />

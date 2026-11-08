@@ -12,6 +12,8 @@ const at = (share: number) => {
   const x = (LEFT + (RIGHT - LEFT) * share) * 1200
   return { x, y: 120 + Math.sin(share * Math.PI * 3) * 46 }
 }
+// Server and browser trig can differ in the last bits: stable rounded CSS avoids a hydration mismatch without moving the stops.
+const cssPct = (value: number) => `${value.toFixed(6)}%`
 const line = Array.from({ length: 61 }, (_, i) => {
   const { x, y } = at(i / 60)
   return `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`
@@ -34,7 +36,7 @@ export function Road({ stops }: { stops: RoadStop[] }) {
         </svg>
         <i className="road__rail" aria-hidden />
         <ol className="road__stops">
-          <li className="road__stop road__stop--start" style={{ ['--x' as string]: 0, ['--l' as string]: `${(at(0).x / 1200) * 100}%`, ['--t' as string]: `${(at(0).y / 240) * 100}%` }}>
+          <li className="road__stop road__stop--start" style={{ ['--x' as string]: 0, ['--l' as string]: cssPct((at(0).x / 1200) * 100), ['--t' as string]: cssPct((at(0).y / 240) * 100) }}>
             <i aria-hidden />
             <div>
               <b>Краснодар</b>
@@ -48,7 +50,7 @@ export function Road({ stops }: { stops: RoadStop[] }) {
                 key={s.minutes}
                 // --fall: the words go under the dot where the road runs downhill, a little lower so the line does not cross them
                 className={`road__stop ${n % 2 ? 'road__stop--up' : Math.cos(share * Math.PI * 3) > 0 ? 'road__stop--fall' : ''} ${share > 0.8 ? 'road__stop--last' : ''}`}
-                style={{ ['--x' as string]: share.toFixed(3), ['--l' as string]: `${(p.x / 1200) * 100}%`, ['--t' as string]: `${(p.y / 240) * 100}%` }}
+                style={{ ['--x' as string]: share.toFixed(3), ['--l' as string]: cssPct((p.x / 1200) * 100), ['--t' as string]: cssPct((p.y / 240) * 100) }}
               >
                 <i aria-hidden />
                 <div>

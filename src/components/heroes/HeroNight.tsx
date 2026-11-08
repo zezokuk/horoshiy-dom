@@ -52,13 +52,13 @@ export function HeroNight({ night, nightPhone }: { night?: string; nightPhone?: 
         <i className="hn__scrim" aria-hidden />
 
         <div className="hn__copy">
-          <p className="hn__eyebrow">Строим и продаём дома с 2014 года</p>
+          <p className="hn__eyebrow">Готовые дома с участком · строим с 2014 года</p>
           <h1 className="hn__title">Хороший дом</h1>
           <p className="hn__slogan">сюда приводят мечты</p>
         </div>
 
         <div className="hn__bar">
-          <p className="hn__lead">Капитальные кирпичные дома с участком в 15–40 минутах от Краснодара — готовые и под ключ.</p>
+          <p className="hn__lead">Готовые кирпичные дома с участком в 15–40 минутах от Краснодара. Выберите свой и приезжайте на показ.</p>
           <a className="btn btn--green hn__cta" href={mainHref('/catalog')}>
             Выбрать дом
           </a>

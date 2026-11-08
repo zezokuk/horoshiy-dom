@@ -121,7 +121,7 @@ export default async function HousePage({ params }: Props) {
         </a>
       ) : (
         <>
-          <p>Этот дом уже {h.status === 'sold' ? 'продан' : 'забронирован'}. Можем построить такой же проект за 6 месяцев или подобрать свободный дом.</p>
+          <p>Этот дом уже {h.status === 'sold' ? 'продан' : 'забронирован'}. Подберём свободный дом в этом или соседнем посёлке.</p>
           <a href={regionHref(region.slug, '/catalog')} className="btn btn--green">
             Свободные дома
           </a>
