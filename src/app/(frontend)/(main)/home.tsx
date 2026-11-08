@@ -15,6 +15,8 @@ import { PlacesExplorer } from '@/components/PlacesExplorer'
 import { PromoCards } from '@/components/PromoCards'
 import { RealHomes } from '@/components/RealHomes'
 import { Words } from '@/components/Words'
+import { LeadSection } from '@/components/LeadForm'
+import { OnlyOnHome } from '@/components/SkipOnHome'
 import {
   getCompany,
   getEstates,
@@ -449,6 +451,19 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
           </div>
         </section>
       </Thread>
+      {/* the frame skips its form on «/» (the v2 home ends in its own, EveningFinale): an older first screen chosen in the admin keeps one */}
+      <OnlyOnHome>
+        <LeadSection
+          title="Это место нужно увидеть самому"
+          text="Приезжайте на показ: пройдёте по посёлку, зайдёте в дом и посмотрите участок. Расскажем, что свободно, и посчитаем ипотеку."
+          cta="Записаться на показ"
+          target={{ phone: company.phone }}
+          ask
+          eyebrow="Показ"
+          offices={(company.offices ?? []).map((o) => ({ title: o.title, address: o.address, hours: o.hours }))}
+          phone={company.phone}
+        />
+      </OnlyOnHome>
     </>
   )
 }

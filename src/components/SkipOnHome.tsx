@@ -10,3 +10,9 @@ import { usePathname } from 'next/navigation'
 export function SkipOnHome({ children }: { children: React.ReactNode }) {
   return usePathname() === '/' ? null : children
 }
+
+/** The other way round: only on the brand home. An older first screen chosen in the admin (HomeView without the evening
+ * finale) brings back the shared form there, so «/» is never left without one. */
+export function OnlyOnHome({ children }: { children: React.ReactNode }) {
+  return usePathname() === '/' ? children : null
+}
