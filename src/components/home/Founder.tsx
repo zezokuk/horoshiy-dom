@@ -15,7 +15,21 @@ const FALLBACK_QUOTE =
  * Home v2, screen 2 «Кто строит» (27.10, Igor: «посмотрел дом — а кто это делает?»): the person behind the houses on a
  * real site, his words, three numbers. No photo yet — an honest frame says whose photo goes there.
  */
-export function Founder({ f, facts, compact = false }: { f: FounderView; facts: Fact[]; compact?: boolean }) {
+export function Founder({
+  f,
+  facts,
+  compact = false,
+  title,
+  action,
+}: {
+  f: FounderView
+  facts: Fact[]
+  compact?: boolean
+  /** the heading; the default is the client's own line «Мы создаём не дома, а образ жизни» */
+  title?: React.ReactNode
+  /** the one next step under the numbers (the home since 09.11: «Приехать на показ») */
+  action?: React.ReactNode
+}) {
   return (
     <div className={`v2-founder ${compact ? 'v2-founder--compact' : ''}`}>
       <figure className="v2-founder__photo" data-reveal>
@@ -33,7 +47,11 @@ export function Founder({ f, facts, compact = false }: { f: FounderView; facts: 
       <div className="v2-founder__text" data-reveal style={{ ['--d' as string]: '120ms' }}>
         <p className="eyebrow">Кто строит</p>
         <h2 className="title title--lg">
-          Мы создаём не дома, а <em>образ жизни</em>
+          {title ?? (
+            <>
+              Мы создаём не дома, а <em>образ жизни</em>
+            </>
+          )}
         </h2>
         <blockquote className="v2-founder__quote">
           <p>{f.quote || FALLBACK_QUOTE}</p>
@@ -50,6 +68,7 @@ export function Founder({ f, facts, compact = false }: { f: FounderView; facts: 
             </div>
           ))}
         </dl>
+        {action}
       </div>
     </div>
   )

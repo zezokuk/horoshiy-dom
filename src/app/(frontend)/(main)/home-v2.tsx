@@ -1,16 +1,12 @@
 import type { Company, Design, Estate, House, Project, Region } from '@/payload-types'
-import { BookColophon } from '@/components/home/BookColophon'
+import { Bridge } from '@/components/home/Bridge'
 import { BuildTeaser } from '@/components/home/BuildTeaser'
 import { EstateCovers, type CoverView } from '@/components/home/EstateCovers'
 import { Founder, type Fact } from '@/components/home/Founder'
 import { HouseFilm } from '@/components/home/HouseFilm'
 import { Included } from '@/components/home/Included'
-import { LifeScenes } from '@/components/home/LifeScenes'
-import { MorningChapter } from '@/components/home/MorningChapter'
 import { PlotPicker, type PlotEstate } from '@/components/home/PlotPicker'
-import { Road, type RoadStop } from '@/components/home/Road'
-import { ScrollX } from '@/components/home/ScrollX'
-import { Thread } from '@/components/home/Thread'
+import { Residents } from '@/components/home/Residents'
 import { HeroNight } from '@/components/heroes/HeroNight'
 import { img, plural } from '@/lib/data'
 import { formatMillions } from '@/lib/format'
@@ -18,15 +14,23 @@ import { mainHref } from '@/lib/site'
 import { byEstateStatus, estateView, genplanEstate, houseView } from '@/lib/view'
 
 /**
- * Home v2 (29.10, after the call of 27.10): one thought and one action per screen — the house opens to the whole
- * screen (since 08.11: one photo of the house from night with a falling star to morning, HeroNight; the clouds and the
- * moon of 03.11 are back with git tag v2-do-rassveta-na-glavnoy) → chapter I, the morning there → who builds → the estates on the client's covers → the road from the city → a free plot on the plan → the houses as a film strip →
- * life out of town in the client's words → what the price includes and how to buy → build your own (last: the company
- * sells houses first) → «Это место нужно увидеть самому» (the lead form of Shell).
+ * Home v2 by the frame «ночь → рассвет → день → вечер» and Igor's vision (08.11, задание-Игорю-08-11/видение-Игоря.md):
+ * one screen — one buyer's question — one next step, with a short bridge to the next question between the blocks.
+ *
+ *   night → dawn (HeroNight)                       Куда я попал? Сколько стоит?
+ *   the estates on the client's covers             Где вы проснётесь?
+ *   the ready houses as a film strip               Какой готовый дом мне подходит?
+ *   the 3D plan of an estate                       Где он стоит?
+ *   what the price includes and how to buy         Сколько платить?
+ *   who builds + room for the residents' stories   Кому доверить деньги?
+ *   building (second: own land, own projects)      Нет подходящего готового?
+ *   the evening and the lead form (Shell, #lead)   Как посмотреть?
+ *
+ * Night 09→10.11: chapter I «Дом» (MorningChapter), the road, life out of town (LifeScenes) and the book's colophon
+ * (BookColophon) left the home — the components stay; everything before is at git tag v2-do-nochnoy-glavnoy.
  */
 export function HomeV2({
   company,
-  design,
   estates,
   houses,
   projects,
@@ -42,16 +46,39 @@ export function HomeV2({
   const years = company.since ? new Date().getFullYear() - company.since : null
   const homesCount = company.homesBuilt || estates.reduce((s, e) => s + (e.homes || 0), 0)
 
-  // screen 1 (08.11, «ночь → рассвет»): the live line from the price list, so it never goes stale after a sale
+  // night → dawn: the live line from the price list, so it never goes stale after a sale
   const priceFrom = free.length ? Math.min(...free.map((h) => h.price).filter((p) => p > 0)) : 0
   const heroFacts = free.length
     ? `${free.length} ${plural(free.length, 'дом', 'дома', 'домов')} в продаже${Number.isFinite(priceFrom) && priceFrom > 0 ? ` · от ${formatMillions(priceFrom)}` : ''}`
     : undefined
 
-  // screen 2: the founder and three numbers
-  const f = company.founder
-  // homes: only the admin's «Домов построено» — the sum of estates' plots (108 after the price list of 27.10) counts
+  // the estates: every one on its cover, on sale first, the first «рядом» line as the distance
+  const covers: CoverView[] = byEstateStatus(
+    estates.map((e) => ({ ...estateView(e, houses), near: e.nearby?.[0] ? `${e.nearby[0].label} — ${e.nearby[0].value}` : null })),
+  )
+  const onSale = covers.filter((c) => c.status !== 'planned' && c.status !== 'soldOut').length
+
+  // the ready houses: free ones with a real picture, one card per picture (several houses share the project's photo);
+  // «Тип 12» has only the client's render with a pool — not passed off as a built house (decision of 23.10)
+  const seen = new Set<string>()
+  const film = [...free]
+    .sort((a, b) => a.price - b.price)
+    .filter((h) => h.photo && !h.title.startsWith('Тип 12') && !seen.has(h.photo) && seen.add(h.photo))
+    .slice(0, 14)
+
+  // the 3D plan: estates with free houses, each with all its houses so the plan shows sold and reserved plots too
+  const plots: PlotEstate[] = estates
+    .map((e) => {
+      const mine = houses.filter((h) => (typeof h.estate === 'object' ? h.estate?.id : h.estate) === e.id).map(houseView)
+      return { e, mine, free: mine.filter((h) => h.status === 'free').length }
+    })
+    .filter((x) => x.free > 0 && x.e.status !== 'planned')
+    .sort((a, b) => b.free - a.free)
+    .map(({ e, mine }) => ({ name: e.name, href: estateView(e, houses).href, estate: genplanEstate(e, mine.length), houses: mine }))
+
+  // who builds: the founder and the numbers. Homes: only the admin's «Домов построено» — the sum of estates' plots counts
   // unbuilt plots of the developer's plan, so without the client's number the fact is the estates
+  const f = company.founder
   const estatesCount = estates.filter((e) => e.status !== 'planned').length
   const facts: Fact[] = [
     ...(years ? [{ value: `${years} ${plural(years, 'год', 'года', 'лет')}`, label: `строим дома, с ${company.since}` }] : []),
@@ -62,157 +89,50 @@ export function HomeV2({
     { value: '5 лет', label: 'гарантия на дом' },
   ]
 
-  // screen 3: every estate on its cover, the first «рядом» line as the distance
-  const covers: CoverView[] = byEstateStatus(
-    estates.map((e) => ({ ...estateView(e, houses), near: e.nearby?.[0] ? `${e.nearby[0].label} — ${e.nearby[0].value}` : null })),
-  )
-
-  // the road: every estate at its own «рядом» line that leads to Krasnodar, estates at the same distance share a stop
-  const stops = new Map<number, RoadStop>()
-  for (const e of estates) {
-    const place = e.status === 'planned' ? null : e.nearby?.find((n) => /краснодар/i.test(n.label) && /\d+\s*мин/.test(n.value))
-    if (!place) continue
-    const minutes = Number(place.value.match(/(\d+)\s*мин/)![1])
-    const stop = stops.get(minutes) ?? { minutes, estates: [] }
-    stop.estates.push({ name: e.name, href: estateView(e, houses).href, to: place.label })
-    stops.set(minutes, stop)
-  }
-  const road = [...stops.values()].sort((a, b) => a.minutes - b.minutes)
-
-  // screen 4: estates with free houses, each with all its houses so the plan shows sold and reserved plots too
-  const plots: PlotEstate[] = estates
-    .map((e) => {
-      const mine = houses.filter((h) => (typeof h.estate === 'object' ? h.estate?.id : h.estate) === e.id).map(houseView)
-      return { e, mine, free: mine.filter((h) => h.status === 'free').length }
-    })
-    .filter((x) => x.free > 0 && x.e.status !== 'planned')
-    .sort((a, b) => b.free - a.free)
-    .map(({ e, mine }) => ({ name: e.name, href: estateView(e, houses).href, estate: genplanEstate(e, mine.length), houses: mine }))
-
-  // screen 5: free houses with a real picture, one card per picture (several houses share the project's photo);
-  // «Тип 12» has only the client's render with a pool — not passed off as a built house (decision of 23.10)
-  const seen = new Set<string>()
-  const film = [...free]
-    .sort((a, b) => a.price - b.price)
-    .filter((h) => h.photo && !h.title.startsWith('Тип 12') && !seen.has(h.photo) && seen.add(h.photo))
-    .slice(0, 14)
-
-  // screen 8: a two-storey project's plan as the architect's drawing (as on the old «Построить» card)
+  // building: a two-storey project's plan as the architect's drawing
   const build = projects.find((p) => p.storeys === 2 && p.plan) ?? projects.find((p) => p.plan)
   const buildPlan = build?.slug === 'tip-9' ? '/design/plan-tip9-lines.webp' : img(build?.plan, 'wide')
-
-  const founder = (
-    <Founder
-      f={{ photo: img(f?.photo, 'wide'), name: f?.name, role: f?.role, quote: f?.quote }}
-      facts={facts}
-      compact={design.homeOrder === 'together'}
-    />
-  )
-  const estatesHead = (
-    <div className="v2-head" data-reveal>
-      <div>
-        <p className="eyebrow">Посёлки</p>
-        <h2 className="title title--lg">
-          Где вы будете <em>жить</em>
-        </h2>
-      </div>
-      <a className="v2-link" href={mainHref('/locations')}>
-        Все посёлки на карте →
-      </a>
-    </div>
-  )
-
-  const order = design.homeOrder ?? 'founder'
-  const founderSection = (
-    <section className="section v2-sec" id="who">
-      <div className="container">{founder}</div>
-    </section>
-  )
-  const estatesSection = (
-    <section className="section v2-sec v2-sec--tint" id="estates">
-      <div className="container">{estatesHead}</div>
-      <EstateCovers estates={covers} />
-    </section>
-  )
 
   return (
     <>
       <HeroNight facts={heroFacts} />
-      <div id="next" />
-      <MorningChapter />
-      <Thread from={600} to={130} />
+      <div id="next" className="bridge-wrap bridge-wrap--first">
+        <Bridge text="Теперь выберем, где именно проснуться" href="#estates" />
+      </div>
 
-      {order === 'together' ? (
-        <section className="section v2-sec" id="who">
-          <div className="container v2-duo">
-            {founder}
-            <div className="v2-duo__estates">
-              {estatesHead}
-              <EstateCovers estates={covers} grid />
+      <section className="section v2-sec v2-sec--tint home-step" id="estates">
+        <div className="container">
+          <div className="v2-head" data-reveal>
+            <div>
+              <p className="eyebrow">Посёлки</p>
+              <h2 className="title title--lg">
+                Где вы <em>проснётесь</em>
+              </h2>
+            </div>
+            <div className="v2-head__side">
+              <p className="v2-head__note">
+                {onSale > 0
+                  ? `${onSale} ${plural(onSale, 'посёлок', 'посёлка', 'посёлков')} с домами в продаже. Выбирайте по дороге, дому и бюджету.`
+                  : 'Выбирайте по дороге, дому и бюджету.'}
+              </p>
+              <a className="v2-link" href={mainHref('/locations')}>
+                Все посёлки на карте →
+              </a>
             </div>
           </div>
-        </section>
-      ) : order === 'estates' ? (
-        <>
-          {estatesSection}
-          <Thread from={130} to={1070} />
-          {founderSection}
-        </>
-      ) : (
-        <>
-          {founderSection}
-          <Thread from={130} to={1070} />
-          {estatesSection}
-        </>
-      )}
+        </div>
+        <EstateCovers estates={covers} />
+        <Bridge text="Посёлок нравится — теперь выберем дом" href="#houses" />
+      </section>
 
-      {road.length > 1 && (
-        <>
-          <Thread from={1070} to={130} />
-          <section className="section v2-sec" id="road">
-            <div className="container">
-              <div className="v2-head" data-reveal>
-                <div>
-                  <p className="eyebrow">Дорога</p>
-                  <h2 className="title title--lg">
-                    От дома до города — <em>{road[0].minutes}–{road[road.length - 1].minutes} минут</em>
-                  </h2>
-                </div>
-                <p className="v2-head__note">Сколько ехать от посёлка до города. Время в пути — по данным застройщика.</p>
-              </div>
-              <Road stops={road} />
-            </div>
-          </section>
-        </>
-      )}
-
-      <Thread from={road.length > 1 ? 130 : 1070} to={1070} />
-      {plots.length > 0 && (
-        <section className="section v2-sec" id="plots">
-          <div className="container">
-            <div className="v2-head" data-reveal>
-              <div>
-                <p className="eyebrow">Свободные участки</p>
-                <h2 className="title title--lg">
-                  Выберите <em>свой участок</em> на плане посёлка
-                </h2>
-              </div>
-              <p className="v2-head__note">Дома с ценой свободны. Нажмите на дом, и он откроется.</p>
-            </div>
-            <PlotPicker estates={plots} />
-          </div>
-        </section>
-      )}
-
-      <Thread from={1070} to={130} />
       {film.length > 0 && (
-        <section className="section v2-sec v2-sec--tint" id="houses">
+        <section className="section v2-sec home-step" id="houses">
           <div className="container">
             <div className="v2-head" data-reveal>
               <div>
-                <p className="eyebrow">Дома в продаже</p>
+                <p className="eyebrow">Готовые дома</p>
                 <h2 className="title title--lg">
-                  Готовые дома <em>под ваш бюджет</em>
+                  Выберите готовый дом <em>под свою жизнь</em>
                 </h2>
               </div>
               <p className="v2-head__note">
@@ -221,18 +141,29 @@ export function HomeV2({
             </div>
             <HouseFilm houses={film} catalogHref={mainHref('/catalog')} />
           </div>
+          <Bridge text="Дом приглянулся — посмотрите, где он стоит" href="#plots" />
         </section>
       )}
 
-      <section className="section v2-sec" id="life">
-        <ScrollX track=".v2-story">
-          <LifeScenes />
-          {/* leaves in front of the slides, drifting the other way as the day goes by (ERA: the foliage moves on scroll) */}
-          <img className="v2-life__leaves" src="/design/branches.webp" alt="" aria-hidden decoding="async" />
-        </ScrollX>
-      </section>
+      {plots.length > 0 && (
+        <section className="section v2-sec v2-sec--tint home-step" id="plots">
+          <div className="container">
+            <div className="v2-head" data-reveal>
+              <div>
+                <p className="eyebrow">Генплан в 3D</p>
+                <h2 className="title title--lg">
+                  Выберите дом и <em>место в посёлке</em>
+                </h2>
+              </div>
+              <p className="v2-head__note">Свободные дома подписаны ценой. Нажмите на дом — откроется его страница с записью на показ.</p>
+            </div>
+            <PlotPicker estates={plots} />
+          </div>
+          <Bridge text="Место выбрано — посчитаем, сколько платить" href="#included" />
+        </section>
+      )}
 
-      <section className="section v2-sec v2-sec--tint" id="included">
+      <section className="section v2-sec home-step" id="included">
         <div className="container">
           <Included
             finishing={company.finishing ?? []}
@@ -240,9 +171,33 @@ export function HomeV2({
             mortgageHref={mainHref('/mortgage')}
           />
         </div>
+        <Bridge text="Осталось понять, кому доверить деньги" href="#who" />
       </section>
 
-      <section className="section v2-sec" id="build">
+      <section className="section v2-sec v2-sec--tint home-step" id="who">
+        <div className="container">
+          <Founder
+            f={{ photo: img(f?.photo, 'wide'), name: f?.name, role: f?.role, quote: f?.quote }}
+            facts={facts}
+            title={
+              company.since ? (
+                <>
+                  Строим дома с {company.since} года. <em>Люди уже живут в них</em>
+                </>
+              ) : undefined
+            }
+            action={
+              <a className="btn btn--green v2-founder__go" href="#lead">
+                Приехать на показ
+              </a>
+            }
+          />
+          <Residents />
+        </div>
+        <Bridge text="Нет подходящего готового дома?" href="#build" />
+      </section>
+
+      <section className="section v2-sec home-step" id="build">
         <div className="container">
           <BuildTeaser
             plan={buildPlan}
@@ -251,9 +206,8 @@ export function HomeV2({
             buildHref={mainHref('/build')}
           />
         </div>
+        <Bridge text="А лучше всего — увидеть дом вживую" href="#lead" />
       </section>
-      <BookColophon since={company.since} estates={estates} />
-      <Thread from={130} to={600} end />
     </>
   )
 }
