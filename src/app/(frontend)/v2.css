@@ -864,6 +864,10 @@ html.no-motion .v2-steam { display: none; }/* one line from a book over the morn
 .hn__bar { position: absolute; z-index: 4; left: 0; right: 0; bottom: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding: 0 var(--gutter) 32px; color: #fff; }
 .hn__lead { max-width: 30em; font-size: 17px; line-height: 1.45; text-shadow: 0 1px 12px rgba(0, 0, 0, .45); }
 .hn__cta { flex: none; }
+.hn__text { display: grid; gap: 10px; justify-items: start; min-width: 0; }
+/* the live line from the price list: dark glass, so a fence rail behind it never reads as a strike-through */
+.hn__facts { font-size: 14px; font-weight: 600; letter-spacing: .02em; font-variant-numeric: tabular-nums; padding: 7px 14px; border-radius: 999px;
+  background: rgba(8, 16, 28, .58); border: 1px solid rgba(255, 255, 255, .2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 @media (max-width: 959px) {
   .hn__copy { top: 16cqh; gap: 6px; }
   .hn__windows { display: none; }

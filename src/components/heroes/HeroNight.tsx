@@ -8,8 +8,9 @@ import { mainHref } from '@/lib/site'
  * Sketch «Ночь → рассвет одним кадром» (04.11, /preview/night): one photo, two times of day. A star falls once over the
  * night; the scroll fades the night into the morning photo; the words stay in one place in one font. Until the night
  * picture comes from Nano Banana, `night` is left out and the night is the morning photo darkened by CSS.
+ * Since 08.11 it is the home's first screen; `facts` is the live line from the price list («19 домов в продаже · от 8,3 млн ₽»).
  */
-export function HeroNight({ night, nightPhone }: { night?: string; nightPhone?: string }) {
+export function HeroNight({ night, nightPhone, facts }: { night?: string; nightPhone?: string; facts?: string }) {
   const ref = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -58,7 +59,10 @@ export function HeroNight({ night, nightPhone }: { night?: string; nightPhone?: 
         </div>
 
         <div className="hn__bar">
-          <p className="hn__lead">Готовые кирпичные дома с участком в 15–40 минутах от Краснодара. Выберите свой и приезжайте на показ.</p>
+          <div className="hn__text">
+            {facts && <p className="hn__facts">{facts}</p>}
+            <p className="hn__lead">Готовые кирпичные дома с участком в 15–40 минутах от Краснодара. Выберите свой и приезжайте на показ.</p>
+          </div>
           <a className="btn btn--green hn__cta" href={mainHref('/catalog')}>
             Выбрать дом
           </a>

@@ -11,14 +11,16 @@ import { PlotPicker, type PlotEstate } from '@/components/home/PlotPicker'
 import { Road, type RoadStop } from '@/components/home/Road'
 import { ScrollX } from '@/components/home/ScrollX'
 import { Thread } from '@/components/home/Thread'
-import { HeroOpen } from '@/components/heroes/HeroOpen'
+import { HeroNight } from '@/components/heroes/HeroNight'
 import { img, plural } from '@/lib/data'
+import { formatMillions } from '@/lib/format'
 import { mainHref } from '@/lib/site'
 import { byEstateStatus, estateView, genplanEstate, houseView } from '@/lib/view'
 
 /**
  * Home v2 (29.10, after the call of 27.10): one thought and one action per screen — the house opens to the whole
- * screen (since 03.11: the dream in the clouds and the sunrise) → chapter I, the morning there → who builds → the estates on the client's covers → the road from the city → a free plot on the plan → the houses as a film strip →
+ * screen (since 08.11: one photo of the house from night with a falling star to morning, HeroNight; the clouds and the
+ * moon of 03.11 are back with git tag v2-do-rassveta-na-glavnoy) → chapter I, the morning there → who builds → the estates on the client's covers → the road from the city → a free plot on the plan → the houses as a film strip →
  * life out of town in the client's words → what the price includes and how to buy → build your own (last: the company
  * sells houses first) → «Это место нужно увидеть самому» (the lead form of Shell).
  */
@@ -40,12 +42,11 @@ export function HomeV2({
   const years = company.since ? new Date().getFullYear() - company.since : null
   const homesCount = company.homesBuilt || estates.reduce((s, e) => s + (e.homes || 0), 0)
 
-  // screen 1: the points on the photo come from the admin (project «Тип 5»), not typed into the design
-  const tip5 = projects.find((p) => p.name === 'Тип 5')
-  const points = [
-    { x: 330, y: 425, title: 'Проект «Тип 5»', text: tip5?.area ? `${tip5.area.toLocaleString('ru-RU')} м²${tip5.bedrooms ? ` · ${tip5.bedrooms} ${plural(tip5.bedrooms, 'спальня', 'спальни', 'спален')}` : ''}` : 'кирпичный дом с участком' },
-    { x: 1400, y: 560, title: 'Кирпич и кровля', text: 'только с документами' },
-  ]
+  // screen 1 (08.11, «ночь → рассвет»): the live line from the price list, so it never goes stale after a sale
+  const priceFrom = free.length ? Math.min(...free.map((h) => h.price).filter((p) => p > 0)) : 0
+  const heroFacts = free.length
+    ? `${free.length} ${plural(free.length, 'дом', 'дома', 'домов')} в продаже${Number.isFinite(priceFrom) && priceFrom > 0 ? ` · от ${formatMillions(priceFrom)}` : ''}`
+    : undefined
 
   // screen 2: the founder and three numbers
   const f = company.founder
@@ -136,12 +137,7 @@ export function HomeV2({
 
   return (
     <>
-      <HeroOpen
-        since={company.since}
-        lead="Готовые кирпичные дома с участком в 15–40 минутах от Краснодара. Выберите свой и приезжайте на показ."
-        points={points}
-        catalogHref={mainHref('/catalog')}
-      />
+      <HeroNight facts={heroFacts} />
       <div id="next" />
       <MorningChapter />
       <Thread from={600} to={130} />
