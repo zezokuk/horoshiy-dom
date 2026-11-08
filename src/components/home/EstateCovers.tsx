@@ -37,9 +37,10 @@ export function EstateCovers({ estates, grid = false }: { estates: CoverView[]; 
             <span className="v2-cover__body">
               <span className="v2-cover__place">{e.place}</span>
               <span className="v2-cover__name">{e.name}</span>
+              {/* two parts: v2 reads them as one line «17 домов в продаже · от 8,3 млн ₽», the look «dom» puts the price big */}
               <span className="v2-cover__meta">
-                {estateSale(e)}
-                {e.priceFrom ? ` · от ${formatMillions(e.priceFrom)}` : ''}
+                <span className="v2-cover__sale">{estateSale(e)}</span>
+                {e.priceFrom ? <span className="v2-cover__from">от {formatMillions(e.priceFrom)}</span> : null}
               </span>
               {e.near && <span className="v2-cover__near">{e.near}</span>}
               {/* says what the picture is for: without it the cover read as a book, not as an estate one can open (call of 30.10) */}

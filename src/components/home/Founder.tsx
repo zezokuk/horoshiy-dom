@@ -32,7 +32,7 @@ export function Founder({
 }) {
   return (
     <div className={`v2-founder ${compact ? 'v2-founder--compact' : ''}`}>
-      <figure className="v2-founder__photo" data-reveal>
+      <figure className="v2-founder__photo" data-reveal data-parallax="18">
         {f.photo ? (
           <img src={f.photo} alt={f.name ? `${f.name} на объекте` : 'Основатель «Хорошего дома» на объекте'} loading="lazy" decoding="async" />
         ) : (

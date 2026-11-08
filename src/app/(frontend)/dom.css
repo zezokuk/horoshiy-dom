@@ -66,3 +66,85 @@ html[data-v3="dom"]:active-view-transition-type(page)::view-transition-old(root)
 html[data-v3="dom"]:active-view-transition-type(page)::view-transition-new(root) { animation: 620ms cubic-bezier(.7, 0, .2, 1) both dom-curtain; }
 @keyframes dom-back { to { transform: scale(.94); filter: brightness(.75); border-radius: 24px; } }
 @keyframes dom-curtain { from { clip-path: inset(100% 0 0 0 round 28px 28px 0 0); } to { clip-path: inset(0 0 0 0 round 0); } }
+
+/* ======================= below the first screen (night 09→10.11): the «meat» of the look by the references =======================
+   Samara: the estates as big photos, the caption right on the canvas under them. The1: prices and numbers big, a status as a
+   dot, a hairline over every block. bella: the canvas and a sand step alternate. Phone first; motion in DomMotion.tsx. */
+
+/* surfaces: stone canvas and the sand step, one after another (estates sand · houses canvas · plan sand · …) */
+html[data-v3="dom"] .v2-sec { background: var(--canvas); }
+html[data-v3="dom"] .v2-sec--tint { background: var(--tint); }
+html[data-v3="dom"] .bridge-wrap { background: var(--canvas); }
+
+/* block heads: a full hairline in ink with the label on it (The1); headings a step bigger */
+html[data-v3="dom"] .home-step .v2-head { border-top: 1px solid var(--ink); padding-top: 16px; align-items: flex-start; }
+html[data-v3="dom"] .home-step .eyebrow::before { display: none; }
+html[data-v3="dom"] .home-step .v2-head .eyebrow { margin-bottom: 18px; }
+html[data-v3="dom"] .home-step .title--lg { font-size: clamp(30px, 4.2vw, 64px); line-height: 1; }
+html[data-v3="dom"] .title em { font-style: normal; color: var(--brand-ink); }
+html[data-v3="dom"] .v2-head__note { font-size: 15px; line-height: 1.5; }
+/* lines rise from under a cut (DomMotion); the head keeps its fade, loses its slide */
+html[data-v3="dom"] .home-step .v2-head[data-reveal] { transform: none; }
+
+/* bridges: the hairline in ink, the arrow in a round button (the round button of The1) */
+html[data-v3="dom"] .bridge__line { opacity: .35; background: var(--ink); }
+html[data-v3="dom"] .bridge__text { font-family: var(--font-serif); font-weight: 400; font-size: clamp(16px, 1.4vw, 19px); letter-spacing: -.02em; max-width: 26ch; }
+html[data-v3="dom"] .bridge__arrow { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--ink); border-radius: 50%; color: var(--ink); font-size: 17px; transition: background .25s, color .25s, transform .3s cubic-bezier(.2, .7, .2, 1); }
+html[data-v3="dom"] .bridge:hover .bridge__arrow, html[data-v3="dom"] .bridge:focus-visible .bridge__arrow { background: var(--brand); border-color: var(--brand); color: #fff; transform: translateY(3px); }
+
+/* the estates (Samara): big photos, no white card, the caption on the canvas */
+html[data-v3="dom"] .v2-covers__track { grid-auto-columns: min(84vw, 380px); gap: 14px; }
+@media (min-width: 760px) { html[data-v3="dom"] .v2-covers__track { grid-auto-columns: clamp(340px, 36vw, 520px); gap: 24px; } }
+html[data-v3="dom"] .v2-cover { background: transparent; box-shadow: none; border-radius: 0; overflow: visible; }
+html[data-v3="dom"] .v2-cover:hover { transform: none; }
+html[data-v3="dom"] .v2-cover__poster { border-radius: var(--radius); }
+html[data-v3="dom"] .v2-cover__body { padding: 16px 2px 4px; gap: 6px; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; }
+html[data-v3="dom"] :is(.v2-cover__place, .v2-cover__near, .v2-cover__go, .v2-cover__sale) { grid-column: 1 / -1; }
+html[data-v3="dom"] .v2-cover__name { font-size: clamp(24px, 2.2vw, 32px); }
+html[data-v3="dom"] .v2-cover__meta { display: contents; }
+html[data-v3="dom"] .v2-cover__from { grid-row: 2; grid-column: 2; font-family: var(--font-serif); font-size: clamp(17px, 1.5vw, 22px); letter-spacing: -.03em; color: var(--ink); white-space: nowrap; }
+html[data-v3="dom"] .v2-cover__from::before { content: none; }
+html[data-v3="dom"] .v2-cover__sale { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--ink); }
+/* the status as a dot (The1 «The Green ●»): on sale green, sold grey, soon amber */
+html[data-v3="dom"] .v2-cover__sale::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--free); box-shadow: 0 0 0 3px rgba(2, 123, 73, .16); }
+html[data-v3="dom"] .v2-cover--soldOut .v2-cover__sale::before { background: #9a988f; box-shadow: none; }
+html[data-v3="dom"] .v2-cover--planned .v2-cover__sale::before { background: #d39b1e; box-shadow: 0 0 0 3px rgba(211, 155, 30, .18); }
+html[data-v3="dom"] .v2-cover__go { margin-top: 10px; }
+
+/* the ready houses: the price at the scale of the house */
+html[data-v3="dom"] .v2-frame__price { font-family: var(--font-serif); font-weight: 400; font-size: clamp(22px, 2.2vw, 32px); letter-spacing: -.03em; color: var(--ink); }
+html[data-v3="dom"] .v2-frame__title { font-weight: 600; }
+
+/* the 3D plan's list: rows on hairlines, the price big, a green dot = free */
+html[data-v3="dom"] .v2-plots__list li a { background: transparent; border-radius: 0; border-bottom: 1px solid var(--line); padding-inline: 0; }
+html[data-v3="dom"] .v2-plots__list li:first-child a { border-top: 1px solid var(--line); }
+html[data-v3="dom"] .v2-plots__what b { display: inline-flex; align-items: center; gap: 8px; }
+html[data-v3="dom"] .v2-plots__what b::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--free); }
+html[data-v3="dom"] .v2-plots__price { font-family: var(--font-serif); font-weight: 400; font-size: 19px; letter-spacing: -.03em; }
+
+/* what the price includes / how to buy: hairline lists, no boxes in boxes */
+html[data-v3="dom"] .v2-programs li { background: transparent; border-radius: 0; border-bottom: 1px solid var(--line); padding-inline: 0; }
+
+/* who builds: the numbers big on a hairline, no tiles (The1) */
+html[data-v3="dom"] .v2-facts { gap: 0 20px; }
+html[data-v3="dom"] .v2-facts div { background: transparent; border-radius: 0; border-top: 1px solid var(--ink); padding: 12px 0 8px; }
+html[data-v3="dom"] .v2-facts dt { font-size: clamp(34px, 3.6vw, 54px); letter-spacing: -.04em; color: var(--ink); line-height: 1; }
+html[data-v3="dom"] .v2-founder__quote { border-left-color: var(--ink); }
+html[data-v3="dom"] .v2-resident { border-color: var(--line); background: var(--canvas); }
+
+/* photos drift a little slower than the page (DomMotion → --py); the picture is a touch larger than its frame */
+html[data-v3="dom"] :is(.v2-founder__photo, .v2-build__plan)[data-parallax] img { transform: translateY(var(--py, 0px)) scale(1.08); }
+html[data-v3="dom"] .evf__pane[data-parallax] .evf__frame { transform: translate(-50%, calc(-60% + var(--py, 0px))) scale(1.08); }
+
+/* buttons answer the hand: a lift on hover, a press on click */
+html[data-v3="dom"] .btn { transition: transform .25s cubic-bezier(.2, .7, .2, 1), background-color .2s, color .2s, box-shadow .25s; }
+@media (hover: hover) { html[data-v3="dom"] .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 26px -14px rgba(28, 28, 26, .5); } }
+html[data-v3="dom"] .btn:active { transform: scale(.97); box-shadow: none; transition-duration: .08s; }
+html[data-v3="dom"] .v2-cover:active .v2-cover__go { transform: scale(.97); }
+
+/* the evening finale in the brand's wide voice */
+html[data-v3="dom"] :is(.evf__title, .evf__phone) { letter-spacing: -.04em; }
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-v3="dom"] .btn:hover { transform: none; }
+}

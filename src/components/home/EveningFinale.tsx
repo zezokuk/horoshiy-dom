@@ -35,7 +35,7 @@ export function EveningFinale({
   const real = !!photo
   return (
     <section ref={ref} className={`evf ${real ? 'evf--photo' : 'evf--css'}`} id="lead" aria-labelledby="evf-title">
-      <div className="evf__pane">
+      <div className="evf__pane" data-parallax="28">
         <div className="evf__frame" aria-hidden>
           <picture>
             <source media="(max-width: 759px)" srcSet={phonePhoto ?? (real ? photo : '/design/hero-morning-phone.webp')} />

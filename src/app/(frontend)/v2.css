@@ -972,3 +972,4 @@ html.no-motion .hn__star { display: none; }
     var(--frame); }
 .evf__win--l { --rail: 51%; --gap: 34%; --bar: 9%; --frame: linear-gradient(transparent 15%, rgba(40, 26, 18, .8) 15% 18%, transparent 18%); }
 .evf__win--r { --rail: 52%; --gap: 16%; --bar: 4%; --frame: linear-gradient(90deg, transparent 28.5%, rgba(40, 26, 18, .85) 28.5% 31.5%, transparent 31.5%); }
+.v2-cover__from::before { content: " · "; }
