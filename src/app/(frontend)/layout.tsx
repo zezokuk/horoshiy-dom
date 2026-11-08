@@ -28,7 +28,7 @@ const V2 = ['listva', 'shalfey']
 
 const BASE: Metadata = {
   title: { default: 'Хороший дом — строим и продаём дома для жизни', template: '%s · Хороший дом' },
-  description: 'Строительная компания «Хороший дом»: капитальные кирпичные дома с участком — готовые и под заказ по 12 проектам. Ипотека, гарантия 5 лет.',
+  description: 'Строительная компания «Хороший дом»: готовые кирпичные дома с участком под Краснодаром, в своих посёлках и по своим проектам. Ипотека, гарантия 5 лет.',
   metadataBase: new URL(MAIN_URL),
   openGraph: { siteName: 'Хороший дом', locale: 'ru_RU', type: 'website' },
   // closed from search until launch: set NEXT_PUBLIC_INDEX=1 to open

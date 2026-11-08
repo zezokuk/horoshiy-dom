@@ -79,7 +79,7 @@ export default async function ProjectPage({ params }: Props) {
             </div>
             <div>
               <b>6 мес.</b>
-              <span>стройка под ключ</span>
+              <span>срок стройки</span>
             </div>
           </div>
           {!!p.features?.length && (

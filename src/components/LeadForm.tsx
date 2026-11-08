@@ -55,7 +55,8 @@ export function LeadForm({
 }) {
   const [phone, setPhone] = useState('')
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
-  const [interest, setInterest] = useState<Interest | undefined>(target.interest)
+  // with the choice shown, «Купить готовый» is picked from the start: ready houses are the main product (08.11)
+  const [interest, setInterest] = useState<Interest | undefined>(target.interest ?? (ask ? 'buy' : undefined))
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()

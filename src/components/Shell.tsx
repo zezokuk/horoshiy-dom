@@ -7,22 +7,22 @@ import { Header, type NavItem } from './Header'
 import { FloatingCall, LeadSection } from './LeadForm'
 import { StickyCta } from './StickyCta'
 
-/** Brand site menu: what the company does and where. */
+/** Brand site menu: ready houses first — the company sells them; building (own projects, own land only) goes last (08.11). */
 const brandNav = (): NavItem[] => [
-  { href: mainHref('/build'), label: 'Построить' },
   { href: mainHref('/catalog'), label: 'Готовые дома' },
   { href: mainHref('/locations'), label: 'Локации' },
   { href: mainHref('/mortgage'), label: 'Ипотека' },
   { href: mainHref('/about'), label: 'О компании' },
+  { href: mainHref('/build'), label: 'Построить' },
 ]
 
-/** Region menu: its estates and houses first, company-wide pages after. */
+/** Region menu: its estates and houses first, company-wide pages after, building last. */
 const regionNav = (slug: string): NavItem[] => [
   { href: regionHref(slug, '/#estates'), label: 'Посёлки' },
   { href: regionHref(slug, '/catalog'), label: 'Дома в продаже' },
-  { href: mainHref('/build'), label: 'Построить' },
   { href: mainHref('/mortgage'), label: 'Ипотека' },
   { href: regionHref(slug, '/#office'), label: 'Контакты' },
+  { href: mainHref('/build'), label: 'Построить' },
 ]
 
 /** A region that is not selling yet has no estates, catalog or office: the waitlist, then what exists elsewhere. */

@@ -131,7 +131,7 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
         ? `Проект «${buildProject.name}»${buildProject.area ? ` · ${buildProject.area.toLocaleString('ru-RU')} м²` : ''}`
         : 'Архитектурный проект',
       alt: buildProject ? `Планировка дома по проекту «${buildProject.name}»` : 'Архитектурная схема строительства',
-      kicker: 'Строительство под ключ',
+      kicker: 'Строительство в наших посёлках',
       title: 'Построить',
       accent: 'дом',
       text: 'Выберите проект и посмотрите, как мы строим: от плана и фундамента до кирпича и кровли.',
@@ -262,7 +262,7 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
               </div>
               <div>
                 <b>6 мес.</b>
-                <span>дом под ключ</span>
+                <span>стройка по нашему проекту</span>
               </div>
               <div>
                 <b>5 лет</b>
@@ -281,7 +281,7 @@ export async function HomeView({ hero: variant = 'current' }: { hero?: HeroKind 
             )}
             <div className="hero2__chips">
               <span>Готовые дома</span>
-              <span>Стройка под ключ</span>
+              <span>Стройка в наших посёлках</span>
               <span>Гарантия 5 лет</span>
             </div>
             {company.heroCaption && (
