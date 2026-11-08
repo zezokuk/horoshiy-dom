@@ -21,7 +21,7 @@ for w, h, mob, port in [(1440, 900, False, 9440), (390, 844, True, 9441)]:
         for look in looks:
             for p in paths:
                 sep = "&" if "?" in p else "?"
-                b.go(f"{HOST}{p}{sep}look={look}", 3)
+                b.go(f"{p if p.startswith('http') else HOST + p}{sep}look={look}", 3)
                 b.js("document.querySelector('.cookie button')?.click()")
                 # scroll through the page so every reveal fires and lazy pictures load
                 H = b.js("document.documentElement.scrollHeight") or 0
@@ -50,7 +50,8 @@ for w, h, mob, port in [(1440, 900, False, 9440), (390, 844, True, 9441)]:
                 ph = H
                 b.js("document.getElementById('ns')?.remove()")
                 if im.width > 1440: im = im.resize((1440, int(im.height * 1440 / im.width)))
-                name = f"{tag}_{p.strip('/').replace('/', '-') or 'home'}_{look}_{w}.jpg"
+                path = p.split('localhost:3000', 1)[-1] if p.startswith('http') else p
+                name = f"{tag}_{path.strip('/').replace('/', '-') or 'home'}_{look}_{w}.jpg"
                 im.save(os.path.join(OUT, name), quality=70, optimize=True)
                 flag = (" ОШИБКИ: " + " | ".join(errs[:3])) if errs else ""
                 if side: flag += " ГОРИЗОНТАЛЬНЫЙ СКРОЛЛ"

@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- открыть в браузере; та же страница опубликована ссылкой. Источник для публикации — maket.html -->
+<title>Макет «Хорошего дома» на согласование</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Unbounded:wght@400;500&display=swap">
+<style>
+/* Layout: a working document in the look «dom» itself: stone canvas, ink hairlines over each part, the screens as tall scrollable strips. */
+:root {
+  --bg: #f4f3ee;        /* stone canvas of the site */
+  --panel: #ffffff;
+  --sand: #eae8e0;
+  --ink: #1c1c1a;
+  --muted: #66655f;
+  --line: #d6d3c8;
+  --brand: #027b49;     /* the site's architectural green */
+  --brand-ink: #01633a;
+  --spark: #c8432a;     /* brick coral: only for «not in this round» */
+  --display: "Unbounded", "Segoe UI", system-ui, sans-serif;
+  --text: "Manrope", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #161714; --panel: #1f201c; --sand: #23241f; --ink: #ecebe4; --muted: #a7a59b; --line: #3a3b34; --brand: #3fbf84; --brand-ink: #6fd6a4; --spark: #ef7a5f; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #161714; --panel: #1f201c; --sand: #23241f; --ink: #ecebe4; --muted: #a7a59b; --line: #3a3b34; --brand: #3fbf84; --brand-ink: #6fd6a4; --spark: #ef7a5f; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--text); }
+.wrap { max-width: 1200px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 48px 96px; display: grid; gap: 72px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 400; letter-spacing: -.035em; line-height: 1.05; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(32px, 5.4vw, 64px); }
+h2 { font-size: clamp(24px, 3vw, 36px); }
+h3 { font-size: 19px; letter-spacing: -.02em; }
+p { margin: 0; max-width: 68ch; }
+a { color: var(--brand-ink); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+code { font: 500 .9em/1 ui-monospace, "Cascadia Mono", Consolas, monospace; background: var(--sand); padding: 2px 6px; border-radius: 6px; }
+.label { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.part { display: grid; gap: 24px; border-top: 1px solid var(--ink); padding-top: 16px; }
+.part > header { display: grid; gap: 14px; }
+.lede { font-size: 18px; color: var(--muted); }
+
+/* the opening */
+.top { display: grid; gap: 22px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; color: var(--muted); }
+.meta b { color: var(--ink); font-weight: 600; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--brand); margin-right: 8px; vertical-align: 1px; }
+
+/* what we sign off */
+.agree { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.agree li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 14px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.agree li:first-child { border-top: 1px solid var(--line); }
+.box { width: 22px; height: 22px; border: 1.5px solid var(--ink); border-radius: 6px; margin-top: 2px; }
+.agree h3 { margin-bottom: 6px; }
+.agree p { color: var(--muted); }
+.swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.sw { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.sw i { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line); }
+
+/* the eight screens */
+.table-scroll { overflow-x: auto; }
+table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 15px; }
+th { text-align: left; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: 0 12px 10px 0; border-bottom: 1px solid var(--ink); }
+td { padding: 14px 12px 14px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+td:first-child { font-family: var(--display); letter-spacing: -.02em; width: 30%; }
+td.q { color: var(--muted); }
+.pill { display: inline-block; padding: 4px 12px; border-radius: 999px; background: var(--brand); color: #fff; font-size: 13px; font-weight: 600; white-space: nowrap; }
+:root[data-theme="dark"] .pill { color: #10130f; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pill { color: #10130f; } }
+
+/* two columns of lists */
+.cols { display: grid; gap: 28px; }
+@media (min-width: 820px) { .cols { grid-template-columns: 1fr 1fr; gap: 48px; } }
+.cols > div { display: grid; gap: 12px; align-content: start; min-width: 0; }
+ul.plain { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+ul.plain li { padding-left: 18px; position: relative; }
+ul.plain li::before { content: ""; position: absolute; left: 0; top: .62em; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+ul.later li::before { background: var(--spark); }
+
+/* questions to the designer */
+.qs { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; counter-reset: q; }
+.qs li { counter-increment: q; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; padding: 16px; background: var(--panel); border-radius: 16px; }
+.qs li::before { content: counter(q); font-family: var(--display); font-size: 22px; color: var(--brand-ink); line-height: 1.1; }
+.qs b { display: block; margin-bottom: 4px; }
+.qs span { color: var(--muted); font-size: 15px; }
+
+/* the screens: a computer strip and a phone strip, each scrolls on its own */
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.tabs button { font: 600 14px/1 var(--text); padding: 10px 16px; border-radius: 999px; border: 1px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); }
+.shots { display: grid; gap: 16px; }
+@media (min-width: 820px) { .shots { grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); align-items: start; } }
+figure { margin: 0; display: grid; gap: 8px; min-width: 0; }
+figcaption { font-size: 13px; color: var(--muted); }
+.strip { height: min(78vh, 760px); overflow-y: auto; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); }
+.strip img { display: block; width: 100%; height: auto; }
+.shots--phone .strip { max-width: 300px; }
+.note { font-size: 14px; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .strip { scroll-behavior: smooth; } }
+</style>
+
+<main class="wrap">
+  <section class="top">
+    <p class="label">Хороший дом · дизайн-макет</p>
+    <h1>Согласуем вид сайта и главную</h1>
+    <p class="lede">Это пакет для Александра, Ильи, Игоря и дизайнера Богдана. Макет — сам сайт: ниже снимки главной и ключевых страниц на компьютере и телефоне, список того, что согласуем сейчас, и вопросы дизайнеру.</p>
+    <div class="meta">
+      <span><span class="dot"></span><b>Версия 10.11.2026</b></span>
+      <span>Ветка <code>redesign-v2</code>, метка <code>maket-sogl-10-11</code></span>
+      <span>Вид «dom» (у разработчиков — адрес с <code>?look=dom</code>)</span>
+    </div>
+  </section>
+
+  <section class="part" aria-labelledby="agree">
+    <header>
+      <p class="label">Что согласуем сейчас</p>
+      <h2 id="agree">Пять пунктов на подпись</h2>
+      <p class="lede">Отмечаем каждый. Всё, что не вошло, переносим в следующий этап, и оно не задерживает начало работ.</p>
+    </header>
+    <ul class="agree">
+      <li><span class="box" aria-hidden="true"></span><div><h3>Что продаём</h3><p>Главный продукт — готовые кирпичные дома с участком в своих посёлках. Строительство — дополнительная возможность на свободной земле в посёлке и только по своим типовым проектам.</p></div></li>
+      <li><span class="box" aria-hidden="true"></span><div><h3>Каркас главной: ночь → рассвет → день → вечер</h3><p>Вход ночью с падающей звездой, при прокрутке рассвет над тем же домом, дальше простой продающий сайт, в конце тот же дом вечером со светом в окнах и запись на показ. Восемь экранов, у каждого один вопрос покупателя и одна кнопка (таблица ниже).</p></div></li>
+      <li><span class="box" aria-hidden="true"></span><div><h3>Визуальное направление</h3><p>Широкий гротеск Unbounded для заголовков, цен и цифр, Manrope для текста. Каменный холст и песочная подложка, почти чёрный текст, архитектурный зелёный для кнопок и статуса «свободен», кирпичный коралл только для «Акция». Кнопки-пилюли, фото домов крупно, переход между страницами шторкой. Логотип и обложки посёлков остаются как у компании.</p>
+        <div class="swatches" aria-label="Цвета">
+          <span class="sw"><i style="background:#f4f3ee"></i>холст #F4F3EE</span>
+          <span class="sw"><i style="background:#eae8e0"></i>подложка #EAE8E0</span>
+          <span class="sw"><i style="background:#1c1c1a"></i>текст #1C1C1A</span>
+          <span class="sw"><i style="background:#027b49"></i>зелёный #027B49</span>
+          <span class="sw"><i style="background:#c8432a"></i>акция #C8432A</span>
+        </div></div></li>
+      <li><span class="box" aria-hidden="true"></span><div><h3>Ключевые страницы в том же виде</h3><p>Каталог готовых домов, страница дома, страница посёлка, «Построить». Снимки ниже.</p></div></li>
+      <li><span class="box" aria-hidden="true"></span><div><h3>3D-генплан</h3><p>По умолчанию дневной ландшафт «живой день»; «Утро · День · Вечер · Ночь» — дополнительная возможность, её одобрение не условие согласования. Ценники не налезают друг на друга: на общем плане видны не все, остальные появляются при приближении. Клик по дому открывает его страницу с записью на показ.</p></div></li>
+    </ul>
+  </section>
+
+  <section class="part" aria-labelledby="screens">
+    <header>
+      <p class="label">Главная по экранам</p>
+      <h2 id="screens">Один экран — один вопрос — одна кнопка</h2>
+      <p class="lede">Между экранами короткие мостики с вопросом покупателя («Посёлок нравится — теперь выберем дом»). На телефоне внизу всегда есть «Позвонить» и «Подобрать дом», на компьютере — «Заказать звонок».</p>
+    </header>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th scope="col">Экран</th><th scope="col">Вопрос покупателя</th><th scope="col">Кнопка</th></tr></thead>
+        <tbody>
+          <tr><td>Ночь → рассвет</td><td class="q">Куда я попал? Сколько стоит?</td><td><span class="pill">Выбрать дом</span></td></tr>
+          <tr><td>Где вы проснётесь</td><td class="q">Где это? Какие посёлки?</td><td><span class="pill">Смотреть дома</span></td></tr>
+          <tr><td>Готовые дома</td><td class="q">Какой дом мне подходит?</td><td><span class="pill">Смотреть этот дом</span></td></tr>
+          <tr><td>Генплан в 3D</td><td class="q">Где он стоит в посёлке?</td><td><span class="pill">Весь посёлок и генплан</span></td></tr>
+          <tr><td>Что входит и как купить</td><td class="q">Сколько платить?</td><td><span class="pill">Посчитать платёж</span></td></tr>
+          <tr><td>Кто строит и жильцы</td><td class="q">Кому доверить деньги?</td><td><span class="pill">Приехать на показ</span></td></tr>
+          <tr><td>Строительство</td><td class="q">Нет подходящего готового?</td><td><span class="pill">Как мы строим</span></td></tr>
+          <tr><td>Вечер, свет в окнах</td><td class="q">Как посмотреть вживую?</td><td><span class="pill">Записаться на показ</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="part" aria-labelledby="look">
+    <header>
+      <p class="label">Снимки</p>
+      <h2 id="look">Как это выглядит</h2>
+      <p class="note">Каждая полоса прокручивается отдельно. Снимки склеены по ходу настоящей прокрутки, поэтому первый экран виден дважды: ночью и на рассвете.</p>
+    </header>
+    <div class="tabs" role="tablist" aria-label="Страница">
+      <button type="button" role="tab" id="t-home" aria-selected="true" data-shot="home">Главная</button>
+      <button type="button" role="tab" id="t-catalog" aria-selected="false" data-shot="catalog">Каталог</button>
+      <button type="button" role="tab" id="t-house" aria-selected="false" data-shot="house">Дом</button>
+      <button type="button" role="tab" id="t-estate" aria-selected="false" data-shot="estate">Посёлок</button>
+      <button type="button" role="tab" id="t-build" aria-selected="false" data-shot="build">Построить</button>
+      <button type="button" role="tab" id="t-before" aria-selected="false" data-shot="before-home">Главная до 10.11</button>
+    </div>
+    <div class="shots" role="tabpanel" aria-labelledby="t-home">
+      <figure><div class="strip" tabindex="0" aria-label="Компьютер, 1440 пикселей"><img id="shot-d" src="sogl/home-1440.jpg" alt="Главная на компьютере" loading="lazy"></div><figcaption id="cap-d">Компьютер · 1440</figcaption></figure>
+      <figure class="shots--phone"><div class="strip" tabindex="0" aria-label="Телефон, 390 пикселей"><img id="shot-m" src="sogl/home-390.jpg" alt="Главная на телефоне" loading="lazy"></div><figcaption id="cap-m">Телефон · 390</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="part" aria-labelledby="scope">
+    <header>
+      <p class="label">Границы</p>
+      <h2 id="scope">Что вне этого согласования</h2>
+    </header>
+    <div class="cols">
+      <div>
+        <h3>Ждём от компании, на сайте пока место <code>___</code></h3>
+        <ul class="plain">
+          <li>2–3 истории жильцов: фото, слова семьи, посёлок</li>
+          <li>фото основателя на объекте</li>
+          <li>банки и ставки для расчёта платежа</li>
+          <li>логотип в векторе (AI, EPS или SVG)</li>
+          <li>какой дом на каждом фото фотосессии; интерьеры</li>
+          <li>подтверждённые школы, магазины и расстояния для генплана</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Следующий этап</h3>
+        <ul class="plain later">
+          <li>кадры ночи и вечера тем же ракурсом от нейросети (сейчас ночь и вечер сделаны затемнением фото)</li>
+          <li>сезоны, снег, вид из окна, интерьеры в 3D</li>
+          <li>заявка прямо из карточки дома в 3D</li>
+          <li>карта событий аналитики: от открытия посёлка до записи на показ</li>
+          <li>вариант А (звезда только на входе) против Б (ещё вечерний финал); сейчас на сайте Б</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="part" aria-labelledby="designer">
+    <header>
+      <p class="label">Для Богдана</p>
+      <h2 id="designer">Вопросы дизайнеру</h2>
+      <p class="lede">Короткая консультация: шрифт, цвета, первый экран. Показ клиенту её не ждёт.</p>
+    </header>
+    <ol class="qs">
+      <li><div><b>Unbounded для заголовков и цен</b><span>Широкий гротеск выбрал Илья. Держит ли он длинные русские заголовки и цены вида «8,3 млн ₽» на телефоне? Если нет — какой широкий гротеск с хорошей кириллицей взять вместо.</span></div></li>
+      <li><div><b>Пара с Manrope</b><span>Подходит ли Manrope для текста, форм и фильтров рядом с Unbounded, или нужен гротеск поплотнее?</span></div></li>
+      <li><div><b>Антиква в логотипе и на обложках</b><span>Логотип и обложки посёлков набраны антиквой клиента и остаются. Не спорит ли она с Unbounded? Нужна ли антиква ещё где-то, например в одной строке на раздел?</span></div></li>
+      <li><div><b>Зелёный #027B49 против зелёного клиента</b><span>Архитектурный зелёный взят у девелопера The1, он близок к фирменному. Оставить или вернуться к точному цвету клиента?</span></div></li>
+      <li><div><b>Холст и подложка</b><span>Каменный #F4F3EE и песочный #EAE8E0 чередуются по блокам. Не выглядит ли сайт серым на телефоне на солнце? Хватает ли контраста подписей (#66655F)?</span></div></li>
+      <li><div><b>Первый экран и вечер</b><span>Ночь и вечер — затемнение одного утреннего фото с подсвеченными окнами. Достаточно ли этого для показа, или заказывать отдельные кадры?</span></div></li>
+    </ol>
+  </section>
+</main>
+
+<script>
+(() => {
+  const names = { home: 'Главная', catalog: 'Каталог', house: 'Дом «Тип 5 (В3), уч. 18»', estate: 'Посёлок «Динская»', build: 'Построить', 'before-home': 'Главная до 10.11' }
+  const tabs = [...document.querySelectorAll('.tabs button')]
+  const d = document.getElementById('shot-d'), m = document.getElementById('shot-m')
+  const panel = document.querySelector('.shots')
+  const show = (btn) => {
+    const k = btn.dataset.shot
+    tabs.forEach((t) => t.setAttribute('aria-selected', String(t === btn)))
+    panel.setAttribute('aria-labelledby', btn.id)
+    d.src = `sogl/${k}-1440.jpg`; d.alt = `${names[k]} на компьютере`
+    m.src = `sogl/${k}-390.jpg`; m.alt = `${names[k]} на телефоне`
+    document.querySelectorAll('.strip').forEach((s) => (s.scrollTop = 0))
+  }
+  tabs.forEach((t) => t.addEventListener('click', () => show(t)))
+})()
+</script>
