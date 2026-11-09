@@ -76,12 +76,21 @@ export function HeroNight({ night, nightPhone }: { night?: string; nightPhone?: 
           <p className="hn__slogan">сюда приводят мечты</p>
         </div>
 
-        {/* the house is the «Выбрать дом» button: a breathing glow invites the click, a hover shows the label */}
+        {/* the house is the «Выбрать дом» button: a thin contour traces the real silhouette (roof, walls, door,
+            windows) in the brand font colour; it draws itself after the windows light up, a hover shows the label.
+            The svg uses the same crop math as the photo (xMidY60% slice = object-fit:cover + object-position 50% 60%),
+            so the line sits on the house pixel-perfect at any viewport. The <a> itself stays an invisible hit area. */}
         <a className="hn__house" href={mainHref('/catalog')} aria-label="Выбрать дом — перейти в каталог" onClick={enterCatalog}>
-          <i aria-hidden />
           <span>Выбрать дом →</span>
         </a>
-        <i className="hn__swipe" aria-hidden />
+        <svg className="hn__trace" viewBox="0 0 2528 1696" preserveAspectRatio="xMidY60% slice" aria-hidden>
+          <path className="hn__trace-main" pathLength={1} d="M 778 1438 L 778 1132 L 675 1110 L 850 1028 L 852 990 L 1048 996 L 1062 1040 L 1162 962 L 1402 930 L 1945 1082 L 1930 1100 L 1822 1118 L 1822 1420 Z" />
+          <path className="hn__trace-in" pathLength={1} d="M 1000 1070 L 1945 1084" />
+          <path className="hn__trace-in" pathLength={1} d="M 800 1180 L 870 1180 L 870 1330 L 800 1330 Z" />
+          <path className="hn__trace-in" pathLength={1} d="M 1240 1222 L 1360 1222 M 1240 1222 L 1240 1445 M 1360 1222 L 1360 1445" />
+          <path className="hn__trace-in" pathLength={1} d="M 1525 1170 L 1665 1170 L 1665 1350 L 1525 1350 Z" />
+        </svg>
+        <i className="hn__swipe" aria-hidden><b /></i>
         <i className="hn__flash" aria-hidden />
       </div>
     </section>

@@ -869,28 +869,44 @@ html.no-motion .v2-steam { display: none; }/* one line from a book over the morn
 .hn__slogan { font-family: var(--font-brand); font-size: clamp(18px, 1.8cqw, 26px); letter-spacing: .06em; text-shadow: 0 2px 20px rgba(8, 16, 40, .65); transition: text-shadow .6s; }
 .hn.is-day .hn__copy { color: #14301f; }
 .hn.is-day :is(.hn__title, .hn__slogan) { text-shadow: 0 1px 18px rgba(255, 255, 255, .6); }
-/* the house is the entry: a thin contour in the brand font colour (10.11, Игорь — no breathing halo). The windows
-   light up right after the comet's first fall; the «Выбрать дом» label shows on hover/focus, a click opens the catalog */
+/* the house is the entry: a thin contour in the brand font colour traces the real silhouette (10.11, Игорь — fix:
+   not a rectangle, the actual roofline/walls/door/windows, drawn stroke by stroke after the windows light up).
+   The windows light right after the comet's first fall; the «Выбрать дом» label shows on hover/focus */
 .hn__house { position: absolute; z-index: 4; left: 24%; top: 49%; width: 55%; height: 42%; display: block; }
-.hn__house > i { position: absolute; inset: 0; pointer-events: none; opacity: 0; border: 1px solid rgba(246, 238, 221, .6); border-radius: 28px;
-  animation: hn-glow-in 1.4s 1.1s both; }
-@keyframes hn-glow-in { to { opacity: 1; } }
 .hn__house > span { position: absolute; left: 50%; bottom: 22px; translate: -50% 0; white-space: nowrap; opacity: 0; transition: opacity .25s;
   padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; color: #fff;
   background: rgba(10, 22, 16, .55); border: 1px solid rgba(255, 255, 255, .25); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .hn__house:hover > span, .hn__house:focus-visible > span { opacity: 1; }
 .hn__house:focus-visible { outline: 2px solid rgba(255, 238, 200, .9); outline-offset: 4px; border-radius: 28px; }
+.hn__trace { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; pointer-events: none;
+  opacity: calc(1 - min(1, var(--p) * 1.35)); }
+.hn__trace path { fill: none; stroke: rgba(246, 238, 221, .9); stroke-width: 1.6; vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 4px rgba(246, 238, 221, .3)); }
+.hn__trace-main { stroke-dasharray: 1; stroke-dashoffset: 1; animation: hn-trace 2s 2.6s cubic-bezier(.6, .05, .3, 1) forwards; }
+.hn__trace-in { stroke-dasharray: 1; stroke-dashoffset: 1; opacity: .8; animation: hn-trace 1s ease-out forwards; }
+.hn__trace-in:nth-of-type(2) { animation-delay: 4.1s; }
+.hn__trace-in:nth-of-type(3) { animation-delay: 4.35s; }
+.hn__trace-in:nth-of-type(4) { animation-delay: 4.6s; }
+.hn__trace-in:nth-of-type(5) { animation-delay: 4.85s; }
+@keyframes hn-trace { to { stroke-dashoffset: 0; } }
+.hn__house:hover ~ .hn__trace path, .hn__house:focus-visible ~ .hn__trace path { stroke: #fff; filter: drop-shadow(0 0 6px rgba(246, 238, 221, .5)); }
 /* the click: a slow push into the house and a warm fade, then the catalog opens (HeroNight.enterCatalog) */
-/* the swipe cue: a small line with a chevron drifting down — «keep scrolling», no words (10.11, Игорь) */
-.hn__swipe { position: absolute; z-index: 4; left: 50%; bottom: 26px; translate: -50% 0; width: 2px; height: 42px; border-radius: 2px;
-  background: linear-gradient(transparent, rgba(246, 238, 221, .85)); pointer-events: none;
-  animation: hn-swipe 2.4s ease-in-out infinite; }
-.hn__swipe::after { content: ""; position: absolute; left: 50%; bottom: 1px; width: 9px; height: 9px;
-  border-right: 2px solid rgba(246, 238, 221, .85); border-bottom: 2px solid rgba(246, 238, 221, .85);
-  transform: translateX(-50%) rotate(45deg); }
-@keyframes hn-swipe { 0%, 100% { transform: translateY(0); opacity: .45; } 50% { transform: translateY(9px); opacity: 1; } }
-.hn.is-day .hn__swipe { background: linear-gradient(transparent, rgba(20, 48, 31, .75)); }
-.hn.is-day .hn__swipe::after { border-color: rgba(20, 48, 31, .75); }
+/* the swipe cue: a touch ring, then a dot flicking up, then a chevron — reads as «swipe up» without words (10.11, Игорь).
+   It fades away as soon as the scroll starts */
+.hn__swipe { position: absolute; z-index: 4; left: 50%; bottom: 22px; translate: -50% 0; width: 24px; height: 64px; pointer-events: none;
+  opacity: calc(1 - min(1, var(--p) * 2.2)); }
+.hn__swipe > b { position: absolute; left: 50%; bottom: 7px; width: 9px; height: 9px; margin-left: -4.5px; border-radius: 50%;
+  background: rgba(246, 238, 221, .95); box-shadow: 0 0 10px rgba(246, 238, 221, .6);
+  animation: hn-swipe-dot 2.4s cubic-bezier(.4, .1, .3, 1) infinite; }
+.hn__swipe::before { content: ""; position: absolute; left: 50%; bottom: 2px; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%;
+  border: 1.5px solid rgba(246, 238, 221, .8); opacity: 0; animation: hn-swipe-ring 2.4s ease-out infinite; }
+.hn__swipe::after { content: ""; position: absolute; left: 50%; top: 4px; width: 10px; height: 10px; margin-left: -6px;
+  border-left: 2px solid rgba(246, 238, 221, .9); border-top: 2px solid rgba(246, 238, 221, .9); transform: rotate(45deg); opacity: 0;
+  animation: hn-swipe-chev 2.4s ease-in-out infinite; }
+@keyframes hn-swipe-ring { 0% { transform: scale(.35); opacity: .85; } 22% { transform: scale(1.6); opacity: 0; } 100% { opacity: 0; } }
+@keyframes hn-swipe-dot { 0% { transform: translateY(0); opacity: 0; } 8% { opacity: 1; } 55% { transform: translateY(-34px); opacity: 1; }
+  70%, 100% { transform: translateY(-42px); opacity: 0; } }
+@keyframes hn-swipe-chev { 0%, 45% { opacity: 0; } 60% { opacity: .95; } 78%, 100% { opacity: 0; } }
 .hn__flash { position: absolute; inset: 0; z-index: 6; background: #fbf3e2; opacity: 0; pointer-events: none; transition: opacity .5s ease; }
 .hn__day img, .hn__night img { transition: transform .55s cubic-bezier(.3, .6, .3, 1); }
 .hn.is-leaving .hn__day img, .hn.is-leaving .hn__night img { transform: scale(1.16); }
@@ -903,8 +919,9 @@ html.no-motion .v2-steam { display: none; }/* one line from a book over the morn
   .hn__windows { display: none; }
   .hn__star { width: 34cqw; top: 6%; right: 8%; }
 }
-@media (prefers-reduced-motion: reduce) { .hn__star { display: none; } .hn__day img { transform: none; } .hn__house > i { animation: none; opacity: 1; } .hn__windows { animation: none; opacity: 1; } .hn__swipe { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .hn__star { display: none; } .hn__day img { transform: none; } .hn__trace path { animation: none; stroke-dashoffset: 0; } .hn__windows { animation: none; opacity: 1; } .hn__swipe > b, .hn__swipe::before, .hn__swipe::after { animation: none; opacity: .8; } }
 html.no-motion .hn__star { display: none; }
+html.no-motion .hn__trace path { animation: none; stroke-dashoffset: 0; }
 
 /* просмотр GLB «Тип 5» из Kimi 3D Make (только data-look=v2, тёмные палитры не трогаем) */
 .glb-type5 { max-width: 1100px; margin: 0 auto; padding: 96px 20px 60px; }
