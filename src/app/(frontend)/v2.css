@@ -878,7 +878,12 @@ html.no-motion .v2-steam { display: none; }/* one line from a book over the morn
   background: rgba(10, 22, 16, .55); border: 1px solid rgba(255, 255, 255, .25); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .hn__house:hover > span, .hn__house:focus-visible > span { opacity: 1; }
 .hn__house:focus-visible { outline: 2px solid rgba(255, 238, 200, .9); outline-offset: 4px; border-radius: 28px; }
-.hn__trace { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; pointer-events: none;
+.hn__trace { position: absolute; z-index: 4; pointer-events: none;
+  /* same crop math as the photo (object-fit: cover, object-position 50% 60%): the svg viewport is sized and offset
+     to the displayed image rect, so the contour sits on the house at any viewport (cq units — the pane is a size container) */
+  --s: max(calc(100cqw / 2528), calc(100cqh / 1696));
+  width: calc(2528 * var(--s)); height: calc(1696 * var(--s));
+  left: calc((100cqw - 2528 * var(--s)) * .5); top: calc((100cqh - 1696 * var(--s)) * .6);
   opacity: calc(1 - min(1, var(--p) * 1.35)); }
 .hn__trace path { fill: none; stroke: rgba(246, 238, 221, .9); stroke-width: 1.6; vector-effect: non-scaling-stroke;
   filter: drop-shadow(0 0 4px rgba(246, 238, 221, .3)); }

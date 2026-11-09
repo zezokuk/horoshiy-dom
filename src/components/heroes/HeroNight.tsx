@@ -83,7 +83,7 @@ export function HeroNight({ night, nightPhone }: { night?: string; nightPhone?: 
         <a className="hn__house" href={mainHref('/catalog')} aria-label="Выбрать дом — перейти в каталог" onClick={enterCatalog}>
           <span>Выбрать дом →</span>
         </a>
-        <svg className="hn__trace" viewBox="0 0 2528 1696" preserveAspectRatio="xMidY60% slice" aria-hidden>
+        <svg className="hn__trace" viewBox="0 0 2528 1696" preserveAspectRatio="none" aria-hidden>
           <path className="hn__trace-main" pathLength={1} d="M 778 1438 L 778 1132 L 675 1110 L 850 1028 L 852 990 L 1048 996 L 1062 1040 L 1162 962 L 1402 930 L 1945 1082 L 1930 1100 L 1822 1118 L 1822 1420 Z" />
           <path className="hn__trace-in" pathLength={1} d="M 1000 1070 L 1945 1084" />
           <path className="hn__trace-in" pathLength={1} d="M 800 1180 L 870 1180 L 870 1330 L 800 1330 Z" />
