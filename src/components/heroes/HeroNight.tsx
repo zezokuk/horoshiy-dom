@@ -58,7 +58,6 @@ export function HeroNight({ night, nightPhone }: { night?: string; nightPhone?: 
 
   return (
     <section ref={ref} className="hn">
-      <h1 className="sr-only">Хороший дом — готовые кирпичные дома с участком под Краснодаром</h1>
       <div className="hn__pane">
         <div className="hn__day">
           <Pic src="/design/hero-morning.webp" phone="/design/hero-morning-phone.webp" alt="Кирпичный дом «Тип 5» утром в дымке" priority />
@@ -70,6 +69,12 @@ export function HeroNight({ night, nightPhone }: { night?: string; nightPhone?: 
           <i className="hn__star" />
         </div>
         <i className="hn__scrim" aria-hidden />
+
+        {/* only the brand and its slogan stay over the cinema; the facts and buttons are gone (10.11) */}
+        <div className="hn__copy">
+          <h1 className="hn__title">Хороший дом</h1>
+          <p className="hn__slogan">сюда приводят мечты</p>
+        </div>
 
         {/* the house is the «Выбрать дом» button: a breathing glow invites the click, a hover shows the label */}
         <a className="hn__house" href={mainHref('/catalog')} aria-label="Выбрать дом — перейти в каталог" onClick={enterCatalog}>
