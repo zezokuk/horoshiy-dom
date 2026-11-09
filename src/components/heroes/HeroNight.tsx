@@ -81,6 +81,7 @@ export function HeroNight({ night, nightPhone }: { night?: string; nightPhone?: 
           <i aria-hidden />
           <span>Выбрать дом →</span>
         </a>
+        <i className="hn__swipe" aria-hidden />
         <i className="hn__flash" aria-hidden />
       </div>
     </section>
