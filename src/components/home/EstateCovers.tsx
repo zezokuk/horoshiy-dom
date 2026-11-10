@@ -22,10 +22,13 @@ export function EstateCovers({ estates, grid = false }: { estates: CoverView[]; 
       <div className="v2-covers__track" ref={track}>
         {estates.map((e) => (
           <a key={e.slug} href={e.href} className={`v2-cover v2-cover--${e.status}`}>
-            {/* the cover is the client's own poster (logo, name, «сюда приводят мечты»): shown whole, our facts go under it */}
-            <span className="v2-cover__poster">
+            {/* the cover is the client's own poster (logo, name, «сюда приводят мечты»): shown whole, our facts go under it.
+                data-reveal-photo opens it with the diagonal curtain, the zoom wrapper sails it against the scroll (V2Motion) */}
+            <span className="v2-cover__poster" data-reveal-photo>
               {e.cover ? (
-                <img src={e.cover} srcSet={e.coverCard ? `${e.coverCard} 640w, ${e.cover} 1600w` : undefined} sizes="(min-width: 960px) 420px, 82vw" alt={`Посёлок «${e.name}»`} loading="lazy" decoding="async" />
+                <span className="v2-zoom" data-parallax="15">
+                  <img src={e.cover} srcSet={e.coverCard ? `${e.coverCard} 640w, ${e.cover} 1600w` : undefined} sizes="(min-width: 960px) 420px, 82vw" alt={`Посёлок «${e.name}»`} loading="lazy" decoding="async" />
+                </span>
               ) : (
                 <span className="v2-cover__blank">
                   <span>{e.name}</span>

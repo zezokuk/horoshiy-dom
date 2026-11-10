@@ -139,8 +139,12 @@ export function HouseFilm({ houses, catalogHref }: { houses: HouseView[]; catalo
                 }
               }}
             >
-              <span className="v2-frame__photo">
-                {h.photo && <img src={h.photoCard ?? h.photo} srcSet={h.photoCard ? `${h.photoCard} 640w, ${h.photo} 1600w` : undefined} sizes="(min-width: 960px) 560px, 80vw" alt={h.title} loading="lazy" decoding="async" draggable={false} />}
+              <span className="v2-frame__photo" data-reveal-photo>
+                {h.photo && (
+                  <span className="v2-zoom" data-parallax="15">
+                    <img src={h.photoCard ?? h.photo} srcSet={h.photoCard ? `${h.photoCard} 640w, ${h.photo} 1600w` : undefined} sizes="(min-width: 960px) 560px, 80vw" alt={h.title} loading="lazy" decoding="async" draggable={false} />
+                  </span>
+                )}
                 <span className="v2-frame__estate">{h.estateName}</span>
               </span>
               <span className="v2-frame__body">

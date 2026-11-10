@@ -834,8 +834,10 @@ html.no-motion .v2-steam { display: none; }/* one line from a book over the morn
 .hn__pane { position: sticky; top: 0; height: 100svh; overflow: hidden; container-type: size; }
 .hn__day, .hn__night { position: absolute; inset: 0; }
 .hn__day img, .hn__night img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; }
-.hn__day img { transform: scale(calc(1.06 - .06 * var(--p))); }
-.hn__night { opacity: calc(1 - min(1, var(--p) * 1.35)); }
+/* the camera dive (10.11): the day photo pushes in to ~1.10 by the end of the scroll, and the night layer drifts
+   a little up as it leaves — the first screen gets the depth of the reference */
+.hn__day img { transform: scale(calc(1.02 + .08 * var(--p))); }
+.hn__night { opacity: calc(1 - min(1, var(--p) * 1.35)); transform: translateY(calc(var(--p) * -3%)); }
 .hn__night--css img { filter: brightness(.62) saturate(.35) contrast(1.1); transform: scale(1.06); }
 .hn__night--css::after { content: ""; position: absolute; inset: 0; background: linear-gradient(#0c1a44 0%, #1d3270 40%, #2c3f78 62%, #1a2448 100%); mix-blend-mode: multiply; }
 .hn__windows { position: absolute; inset: 0; z-index: 1; opacity: 0; background:
@@ -906,7 +908,7 @@ html.no-motion .v2-steam { display: none; }/* one line from a book over the morn
   .hn__windows { display: none; }
   .hn__star { width: 34cqw; top: 6%; right: 8%; }
 }
-@media (prefers-reduced-motion: reduce) { .hn__star { display: none; } .hn__day img { transform: none; } .hn__windows { animation: none; opacity: 1; } .hn__swipe > b, .hn__swipe::before, .hn__swipe::after { animation: none; opacity: .8; } }
+@media (prefers-reduced-motion: reduce) { .hn__star { display: none; } .hn__day img, .hn__night { transform: none; } .hn__windows { animation: none; opacity: 1; } .hn__swipe > b, .hn__swipe::before, .hn__swipe::after { animation: none; opacity: .8; } }
 html.no-motion .hn__star { display: none; }
 
 /* просмотр GLB «Тип 5» из Kimi 3D Make (только data-look=v2, тёмные палитры не трогаем) */
@@ -958,16 +960,21 @@ html.no-motion .hn__star { display: none; }
 .evf__pane { position: relative; height: clamp(520px, calc(100svh - var(--header-h, 72px)), 920px); overflow: hidden; container-type: size; }
 .evf__frame { position: absolute; left: 50%; top: 60%; width: max(100cqw, 149.06cqh); aspect-ratio: 2528 / 1696; transform: translate(-50%, -60%); }
 .evf__frame img { display: block; width: 100%; height: 100%; }
-.evf--css .evf__frame img { filter: brightness(calc(.95 - .4 * var(--p))) saturate(calc(1 - .35 * var(--p))) contrast(1.06); }
+/* the evening dim is an overlay now (10.11): a brightness() driven by the scroll repainted the whole photo every frame;
+   a constant filter paints once, the --p-driven dim is a composited opacity */
+.evf--css .evf__frame img { filter: saturate(.8) contrast(1.05); }
+.evf__dim { position: absolute; inset: 0; background: #0b1026; opacity: calc(.42 * var(--p)); pointer-events: none; }
 .evf__sky { position: absolute; inset: 0; mix-blend-mode: multiply; opacity: calc(.3 + .7 * var(--p));
   background: linear-gradient(180deg, #232a63 0%, #4b4378 26%, #a8637e 48%, #f0a66c 61%, #6a4a4a 74%, #2a2128 100%); }
-.evf__win { position: absolute; z-index: 1; border-radius: 1px; opacity: clamp(0, calc(var(--p) * 1.7 - .55), 1);
+/* the windows light one after another (10.11): each has its own scroll threshold --wt — the lamp over the door first,
+   then the left window, then the right one, and the warm spill on the grass last */
+.evf__win { position: absolute; z-index: 1; border-radius: 1px; opacity: clamp(0, calc(var(--p) * 1.8 - var(--wt, .6)), 1);
   background: linear-gradient(#ffe7b0, #ffbf6b 60%, #f4a457); box-shadow: 0 0 1.2cqw .25cqw rgba(255, 184, 96, .55), 0 0 4cqw 1cqw rgba(255, 170, 80, .22); }
-.evf__win--l { left: 31.64%; top: 69.84%; width: 2.49%; height: 9.26%; transition-delay: .1s; }
-.evf__win--r { left: 60.44%; top: 69.19%; width: 5.34%; height: 10.32%; }
+.evf__win--l { --wt: .62; left: 31.64%; top: 69.84%; width: 2.49%; height: 9.26%; }
+.evf__win--r { --wt: .8; left: 60.44%; top: 69.19%; width: 5.34%; height: 10.32%; }
 /* the lamp over the door */
-.evf__win--door { left: 50.4%; top: 69.6%; width: .9%; height: 1.1%; border-radius: 50%; background: #fff1cf; box-shadow: 0 0 1.4cqw .6cqw rgba(255, 210, 140, .7), 0 0 6cqw 2cqw rgba(255, 180, 90, .25); }
-.evf__spill { position: absolute; inset: 0; mix-blend-mode: screen; opacity: clamp(0, calc(var(--p) * 1.5 - .5), 1);
+.evf__win--door { --wt: .45; left: 50.4%; top: 69.6%; width: .9%; height: 1.1%; border-radius: 50%; background: #fff1cf; box-shadow: 0 0 1.4cqw .6cqw rgba(255, 210, 140, .7), 0 0 6cqw 2cqw rgba(255, 180, 90, .25); }
+.evf__spill { position: absolute; inset: 0; mix-blend-mode: screen; opacity: clamp(0, calc(var(--p) * 1.6 - .75), 1);
   background: radial-gradient(9% 7% at 51% 88%, rgba(255, 190, 110, .45), transparent 70%), radial-gradient(14% 9% at 63% 82%, rgba(255, 180, 100, .25), transparent 70%), radial-gradient(9% 7% at 33% 82%, rgba(255, 180, 100, .2), transparent 70%); }
 .evf__scrim { position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(rgba(16, 14, 30, .45) 0%, transparent 32%, transparent 62%, #17141d 100%); }
 .evf__copy { position: absolute; z-index: 3; left: 0; right: 0; top: 13cqh; display: grid; justify-items: center; gap: 12px; padding: 0 var(--gutter); text-align: center; }
@@ -1002,3 +1009,38 @@ html.no-motion .hn__star { display: none; }
 .evf__win--l { --rail: 51%; --gap: 34%; --bar: 9%; --frame: linear-gradient(transparent 15%, rgba(40, 26, 18, .8) 15% 18%, transparent 18%); }
 .evf__win--r { --rail: 52%; --gap: 16%; --bar: 4%; --frame: linear-gradient(90deg, transparent 28.5%, rgba(40, 26, 18, .85) 28.5% 31.5%, transparent 31.5%); }
 .v2-cover__from::before { content: " · "; }
+
+/* ======================================================================
+   The motion pack of the v2 home (10.11, the era-residence.com reference, components/home/V2Motion.tsx).
+   Everything hangs on html.v2m, which the module sets only for the v2 look with motion allowed:
+   the look «dom», the admin's «no-motion» and «reduce motion» never see any of this.
+   ====================================================================== */
+/* 1. the diagonal curtain on the big photos: the frame opens from the left edge on a constant slant (the 14% gap
+   between the top and the bottom points keeps the angle to the very end), the picture settles from scale 1.35
+   with a small sideways drift; «is-done» returns the plain CSS (the hover zoom gets its own ease back) */
+html.v2m [data-reveal-photo] { clip-path: polygon(0% 0%, 14% 0%, 0% 100%, 0% 100%); transition: clip-path 1.15s cubic-bezier(.75, 0, .25, 1); }
+html.v2m [data-reveal-photo].is-in { clip-path: polygon(0% 0%, 114% 0%, 100% 100%, 0% 100%); }
+html.v2m [data-reveal-photo].is-done { clip-path: none; }
+html.v2m [data-reveal-photo]:not(.is-done) img { transform: scale(1.35) translateX(-2.5%); transition: transform 1.2s cubic-bezier(.75, 0, .25, 1); }
+html.v2m [data-reveal-photo].is-in:not(.is-done) img { transform: none; }
+/* the build plan also carries the plain fade ([data-reveal]): the curtain replaces it, so it must not wait for the fade's class */
+html.v2m [data-reveal-photo][data-reveal] { opacity: 1; transform: none; }
+
+/* 2. the drift: the wrapper is a touch larger than its frame (--ps from the drift's range) and sails ±N% of the
+   frame's height against the scroll (--py); without v2m it is a plain box and the photo sits still */
+.v2-zoom { position: absolute; inset: 0; }
+html.v2m .v2-zoom { transform: translateY(var(--py, 0%)) scale(var(--ps, 1.34)); will-change: transform; }
+
+/* 3. the founder's numbers count up (V2Motion); tabular figures keep the card's width steady while they roll */
+html.v2m .v2-facts dt { font-variant-numeric: tabular-nums; }
+
+/* 5. the roll on hover: two copies of the label in a mask, the letters wave a line up, staggered (fine pointers only) */
+@media (hover: hover) and (pointer: fine) {
+  html.v2m .rl { position: relative; display: inline-block; overflow: hidden; }
+  html.v2m .rl__row { display: block; }
+  html.v2m .rl__row--b { position: absolute; left: 0; top: 100%; }
+  html.v2m .rl__ch { display: inline-block; transition: transform .55s cubic-bezier(.75, 0, .25, 1); transition-delay: calc(var(--i) * 22ms); }
+  html.v2m a:hover .rl__ch, html.v2m a:focus-visible .rl__ch { transform: translateY(-100%); }
+  /* the bridge's question is one line for the roll: the 30ch wrap would break the mask */
+  html.v2m .bridge__text.rl { max-width: none; white-space: nowrap; }
+}

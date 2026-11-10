@@ -1,6 +1,7 @@
 import type { Company, Design, Estate, House, Project, Region } from '@/payload-types'
 import { Bridge } from '@/components/home/Bridge'
 import { DomMotion } from '@/components/home/DomMotion'
+import { V2Motion } from '@/components/home/V2Motion'
 import { BuildTeaser } from '@/components/home/BuildTeaser'
 import { EstateCovers, type CoverView } from '@/components/home/EstateCovers'
 import { EveningFinale } from '@/components/home/EveningFinale'
@@ -99,6 +100,7 @@ export function HomeV2({
     <>
       <HeroNight facts={heroFacts} />
       <DomMotion />
+      <V2Motion />
       <div id="next" className="bridge-wrap bridge-wrap--first">
         <Bridge text="Теперь выберем, где именно проснуться" href="#estates" />
       </div>
