@@ -72,7 +72,7 @@ html[data-look="v2"] .btn--line { border-color: var(--brand); color: var(--brand
 html[data-look="v2"] .btn--line:hover { background: var(--tint); }
 
 /* ---------- header: white glass; on the home first screen it waits until the house has opened ---------- */
-html[data-look="v2"] .header { background: rgba(255, 255, 255, .9); border-bottom-color: var(--line); transition: transform .45s cubic-bezier(.2, .7, .2, 1), opacity .3s; }
+html[data-look="v2"] .header { background: rgba(255, 255, 255, .94); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-bottom-color: var(--line); transition: transform .45s cubic-bezier(.2, .7, .2, 1), opacity .3s; }
 html[data-look="v2"] .logo { color: var(--ink); }
 html[data-look="v2"] .logo__name { font-family: var(--font-brand); font-weight: 400; letter-spacing: .08em; }
 html[data-look="v2"] .logo__name small { font-family: var(--font-sans); color: var(--brand-ink); }
