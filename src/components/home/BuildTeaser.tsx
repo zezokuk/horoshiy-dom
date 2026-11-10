@@ -25,7 +25,9 @@ export function BuildTeaser({ plan, planNote, projects, buildHref }: { plan?: st
           </span>
         </div>
       </div>
-      <a className="v2-build__plan" href={buildHref} data-reveal data-parallax="14" style={{ ['--d' as string]: '120ms' }}>
+      {/* data-reveal-photo: in v2 the plan opens with the diagonal curtain (V2Motion) instead of the plain fade; the look
+          «dom» keeps its fade and drift as before */}
+      <a className="v2-build__plan" href={buildHref} data-reveal data-reveal-photo data-parallax="14" style={{ ['--d' as string]: '120ms' }}>
         {plan && <img src={plan} alt={planNote} loading="lazy" decoding="async" />}
         <span>{planNote}</span>
       </a>

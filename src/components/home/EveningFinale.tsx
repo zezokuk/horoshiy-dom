@@ -43,6 +43,8 @@ export function EveningFinale({
           </picture>
           {!real && (
             <>
+              {/* the evening dims with an overlay: a brightness() driven by the scroll repainted the whole photo every frame */}
+              <i className="evf__dim" />
               <i className="evf__sky" />
               <i className="evf__win evf__win--l" />
               <i className="evf__win evf__win--door" />
