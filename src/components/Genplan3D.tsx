@@ -71,7 +71,8 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     hover.current = onHover
     hintRef.current = showHint
   })
-  const coarse = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
+  const coarse =
+    typeof window !== 'undefined' && (window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window)
 
   useEffect(() => {
     const el = box.current
@@ -105,6 +106,8 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     scene.background = new THREE.Color(SKY)
     const fog = new THREE.Fog(SKY, land === 'day' ? 110 : 150, land === 'day' ? 400 : 460)
     scene.fog = fog
+    // базовые дальности тумана: на подлёте масштабируем их по дистанции камеры, иначе дальний старт тонет в молоке
+    const fogBase = { near: fog.near, far: fog.far }
     const pmrem = new THREE.PMREMGenerator(renderer)
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
     scene.environmentIntensity = 0.45
@@ -776,6 +779,8 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
       scene.fog!.color.copy(s.sky)
       fog.near = s.fogNear
       fog.far = s.fogFar
+      fogBase.near = s.fogNear
+      fogBase.far = s.fogFar
       sun.color.copy(s.sun)
       sun.intensity = s.sunI
       sun.position.copy(s.pos)
@@ -809,7 +814,9 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     } else {
       end = new THREE.Vector3(span * 0.22, span * 0.44, span * 0.52)
     }
-    const start = end.clone().multiplyScalar(1.9).add(new THREE.Vector3(-span * 0.8, span * 0.4, 0))
+    const endDist = end.length()
+    // короткий подлёт из ближней точки: прежний дальний старт (×1.9 и смещение) держал посёлок в тумане первые секунды
+    const start = end.clone().multiplyScalar(1.45).add(new THREE.Vector3(-span * 0.35, span * 0.18, 0))
     camera.position.copy(reduce ? end : start)
     camera.lookAt(target)
 
@@ -1013,11 +1020,14 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     io.observe(el)
     let raf = 0
     let last = performance.now()
-    // ценники и «Уже купили» (ночь 09→10.11, Claude по просьбе Ильи): показываем только те, что не налезают друг на друга и
-    // на панель сверху; ближние к камере и цены — первыми, остальные появляются при приближении. Прячем через
-    // object.visible: display CSS2DRenderer сам возвращает каждый кадр (прежнее скрытие по плотности поэтому не работало)
+    // ценники и «Уже купили» (ночь 09→10.11, Claude по просьбе Ильи): показываем только те, что не налезают друг на друга,
+    // на панель сверху и на ленту карточек снизу; ближние к камере и цены — первыми, остальные появляются при приближении.
+    // Прячем через object.visible: display CSS2DRenderer сам возвращает каждый кадр (прежнее скрытие по плотности поэтому не работало)
     const tagAt = new THREE.Vector3()
     const tagRects: { x0: number; y0: number; x1: number; y1: number }[] = []
+    // лента карточек домов (.gr) в режиме сцены лежит поверх низа 3D (design.css:181): метки, попадающие под неё,
+    // прячем тем же правилом, что и наложения друг на друга. На телефоне лента ниже сцены в потоке — не мешает
+    const ribbonEl = el.closest('.genplan__view')?.querySelector('.gr') ?? null
     const placeTags = () => {
       const W = el.clientWidth
       const H = el.clientHeight
@@ -1030,6 +1040,13 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
       })
       cand.sort((a, b) => Number(b.price) - Number(a.price) || a.z - b.z)
       tagRects.length = 0
+      if (ribbonEl) {
+        const er = el.getBoundingClientRect()
+        const rr = ribbonEl.getBoundingClientRect()
+        const y0 = rr.top - er.top
+        const y1 = rr.bottom - er.top
+        if (y1 > 0 && y0 < H) tagRects.push({ x0: rr.left - er.left, y0, x1: rr.right - er.left, y1 })
+      }
       for (const c of cand) {
         const r = { x0: c.x - c.w / 2 - 3, y0: c.y - 15, x1: c.x + c.w / 2 + 3, y1: c.y + 15 }
         const fits = c.z < 1 && r.y0 > top && r.x0 > 0 && r.x1 < W && r.y1 < H && !tagRects.some((q) => r.x0 < q.x1 && r.x1 > q.x0 && r.y0 < q.y1 && r.y1 > q.y0)
@@ -1039,7 +1056,8 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
     }
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop)
-      const dt = Math.min(0.05, (now - last) / 1000)
+      // потолок 0.12, а не 0.05: на слабом железе (10–15 fps) анимации иначе растягиваются вдвое против реального времени
+      const dt = Math.min(0.12, (now - last) / 1000)
       last = now
       if (!visible) return
       if (todAnim) {
@@ -1061,11 +1079,19 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
           done()
         }
       } else if (flyT < 1) {
-        flyT = Math.min(1, flyT + dt / 1.8)
+        flyT = Math.min(1, flyT + dt / 0.8)
         const e = 1 - Math.pow(1 - flyT, 3)
         camera.position.lerpVectors(start, end, e)
         camera.lookAt(target)
-        if (flyT === 1) controls.enabled = true
+        // туман следует за дистанцией подлёта: старт не белый, а к прибытии — обычные near/far
+        const k = THREE.MathUtils.clamp(camera.position.length() / endDist, 0.6, 2.5)
+        fog.near = fogBase.near * k
+        fog.far = fogBase.far * k
+        if (flyT === 1) {
+          controls.enabled = true
+          fog.near = fogBase.near
+          fog.far = fogBase.far
+        }
       } else {
         controls.enabled = true
         controls.update()
@@ -1140,8 +1166,15 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
   return (
     <div className="g3" role="img" aria-label="3D-генплан посёлка. Двигайте двумя пальцами, нажмите на дом.">
       <div ref={box} className="g3__stage" />
-      <span className="g3__hint">
-        {coarse ? 'Двумя пальцами — двигать и приближать · нажмите на дом' : 'Мышью или двумя пальцами на тачпаде — двигать · щипок или Ctrl+колесо — приблизить'}
+      {/* текст под реальные жесты (gestures.ts + controls.touches): палец — вращение, два — сдвиг и щипок-зум;
+          inline-стили против обрезания на узком экране: globals.css держит плашку в одну строку (white-space: nowrap) */}
+      <span
+        className="g3__hint"
+        style={{ whiteSpace: 'normal', maxWidth: 'calc(100% - 24px)', textAlign: 'center', lineHeight: 1.35, borderRadius: 16 }}
+      >
+        {coarse
+          ? '1 палец — вращать · 2 пальца — двигать и приближать'
+          : 'Мышью или двумя пальцами на тачпаде — двигать · щипок или Ctrl+колесо — приблизить'}
       </span>
       <div className={`map-hint ${hintState.on ? 'is-on' : ''}`} aria-hidden>
         {hintState.text}
