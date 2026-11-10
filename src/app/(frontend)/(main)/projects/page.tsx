@@ -10,7 +10,7 @@ export const revalidate = 60
 
 const META: Metadata = {
   title: 'Проекты домов',
-  description: 'Проекты кирпичных домов «Хорошего дома»: площадь, спальни, планировки. Строим под ключ за 6 месяцев.',
+  description: 'Проекты кирпичных домов «Хорошего дома»: площадь, спальни, планировки. Готовые дома этих проектов — в наших посёлках.',
   alternates: { canonical: '/projects' },
 }
 // title and description can be set in the admin: «SEO и поиск» → projects
@@ -28,8 +28,7 @@ export default async function ProjectsPage() {
         </nav>
         <h1 className="title title--lg">{projects.length} проектов домов</h1>
         <p className="lead">
-          {areas.length ? `От ${Math.min(...areas)} до ${Math.max(...areas)} м². ` : ''}Выберите проект — построим капитальный дом под ключ за 6 месяцев
-          или покажем готовый дом этого проекта.
+          {areas.length ? `От ${Math.min(...areas)} до ${Math.max(...areas)} м². ` : ''}Выберите проект — покажем готовый дом этого проекта, а на свободном участке в нашем посёлке построим такой же.
         </p>
         <div className="btns">
           <a href={mainHref('/build')} className="btn btn--green">

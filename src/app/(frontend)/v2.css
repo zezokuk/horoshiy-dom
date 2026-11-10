@@ -1048,3 +1048,7 @@ html.v2m .v2-facts dt { font-variant-numeric: tabular-nums; }
   /* the bridge's question is one line for the roll: the 30ch wrap would break the mask */
   html.v2m .bridge__text:has(.rl) { max-width: none; white-space: nowrap; }
 }
+
+/* the first screen is pure cinema (10.11): the cookie notice waits, like the header and the call button, until the
+   visitor scrolls past the night — it used to pile up over the picture and, on phones, over the bottom bar */
+html:has(.hn):not(.past-hero) .cookie { display: none; }
