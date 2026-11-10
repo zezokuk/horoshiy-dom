@@ -1170,7 +1170,20 @@ export default function Genplan3D({ layout, activeN, onSelect, onHover, onFail, 
           inline-стили против обрезания на узком экране: globals.css держит плашку в одну строку (white-space: nowrap) */}
       <span
         className="g3__hint"
-        style={{ whiteSpace: 'normal', maxWidth: 'calc(100% - 24px)', textAlign: 'center', lineHeight: 1.35, borderRadius: 16 }}
+        style={{
+          // CSS задаёт left: 50% + translateX: при white-space: normal shrink-to-fit жмётся вправо и текст рвётся
+          // на три строки; здесь — bubble по ширине текста, по центру за счёт auto-отступов, с переносом на узких
+          left: 12,
+          right: 12,
+          transform: 'none',
+          width: 'fit-content',
+          margin: '0 auto',
+          whiteSpace: 'normal',
+          maxWidth: 'calc(100% - 24px)',
+          textAlign: 'center',
+          lineHeight: 1.35,
+          borderRadius: 16,
+        }}
       >
         {coarse
           ? '1 палец — вращать · 2 пальца — двигать и приближать'
