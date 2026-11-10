@@ -10,7 +10,7 @@ import { HouseFilm } from '@/components/home/HouseFilm'
 import { Included } from '@/components/home/Included'
 import { PlotPicker, type PlotEstate } from '@/components/home/PlotPicker'
 import { Residents } from '@/components/home/Residents'
-import { HeroNight } from '@/components/heroes/HeroNight'
+import { HeroNight, type HeroSlide } from '@/components/heroes/HeroNight'
 import { img, plural } from '@/lib/data'
 import { formatMillions } from '@/lib/format'
 import { mainHref } from '@/lib/site'
@@ -55,6 +55,20 @@ export function HomeV2({
     ? `${free.length} ${plural(free.length, 'дом', 'дома', 'домов')} в продаже${Number.isFinite(priceFrom) && priceFrom > 0 ? ` · от ${formatMillions(priceFrom)}` : ''}`
     : undefined
 
+  // by day the first screen is a slider of the types on sale: the project's real photo, its area and the lowest price.
+  // «Тип 5» is the cinema frame itself; «Тип 12» has only the client's render — not passed off as a built house
+  const heroSlides: HeroSlide[] = projects
+    .map((p) => {
+      const mine = houses.filter((h) => h.status === 'free' && (typeof h.project === 'object' ? h.project?.id : h.project) === p.id)
+      const from = Math.min(...mine.map((h) => h.price ?? 0).filter((n) => n > 0))
+      const src = img(p.photo, 'wide')
+      if (!mine.length || !src || p.name === 'Тип 5' || p.name === 'Тип 12') return null
+      const meta = [p.area ? `${p.area.toLocaleString('ru-RU')} м²` : null, Number.isFinite(from) ? `от ${formatMillions(from)}` : null].filter(Boolean).join(' · ')
+      return { title: p.name, meta, src, href: mainHref(`/projects/${p.slug}`) }
+    })
+    .filter((s): s is HeroSlide => s !== null)
+    .slice(0, 5)
+
   // the estates: every one on its cover, on sale first, the first «рядом» line as the distance
   const covers: CoverView[] = byEstateStatus(
     estates.map((e) => ({ ...estateView(e, houses), near: e.nearby?.[0] ? `${e.nearby[0].label} — ${e.nearby[0].value}` : null })),
@@ -98,7 +112,7 @@ export function HomeV2({
 
   return (
     <>
-      <HeroNight facts={heroFacts} />
+      <HeroNight facts={heroFacts} slides={heroSlides} />
       <DomMotion />
       <V2Motion />
       <div id="next" className="bridge-wrap bridge-wrap--first">

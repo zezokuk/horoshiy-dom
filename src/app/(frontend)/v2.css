@@ -1052,3 +1052,35 @@ html.v2m .v2-facts dt { font-variant-numeric: tabular-nums; }
 /* the first screen is pure cinema (10.11): the cookie notice waits, like the header and the call button, until the
    visitor scrolls past the night — it used to pile up over the picture and, on phones, over the bottom bar */
 html:has(.hn):not(.past-hero) .cookie { display: none; }
+
+/* ---------- first screen by day: a slider of our house types over the same cinema frame (10.11, Игорь's idea) ----------
+   The photos cross-fade over the morning frame; the house stays the button and names the type on the screen; arrows,
+   dots and swipe appear only by day. */
+.hn__slides { position: absolute; inset: 0; z-index: 0; }
+.hn__slides img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 62%; opacity: 0; transform: scale(1.06); transition: opacity .9s ease, transform 6.5s ease-out; }
+.hn__slides img.is-on { opacity: 1; transform: scale(1); }
+.hn__night { z-index: 1; }
+/* over a real photo the brand needs a quiet veil at the top */
+.hn.is-slide .hn__pane::before { content: ""; position: absolute; inset: 0 0 auto; height: 46%; z-index: 2; pointer-events: none; background: linear-gradient(rgba(255, 255, 255, .8), rgba(255, 255, 255, 0)); }
+.hn.is-day .hn__house > span { opacity: 1; animation: hn-chip .5s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes hn-chip { from { opacity: 0; transform: translateY(8px); } }
+.hn.is-slide .hn__house { left: 12%; width: 76%; top: 40%; height: 50%; }
+.hn__nav { position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0; transition: opacity .6s; }
+.hn.is-day .hn__nav { opacity: 1; }
+.hn.is-day .hn__nav button { pointer-events: auto; }
+.hn__arrow { position: absolute; top: 58%; translate: 0 -50%; width: 52px; height: 52px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .35); background: rgba(10, 22, 16, .45); color: #fff; font-size: 20px; line-height: 1; cursor: pointer;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: background .2s, transform .2s; }
+.hn__arrow:hover { background: rgba(10, 22, 16, .75); transform: scale(1.06); }
+.hn__arrow:focus-visible, .hn__dots button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.hn__arrow--prev { left: max(var(--gutter), 20px); }
+.hn__arrow--next { right: max(var(--gutter), 20px); }
+.hn__dots { position: absolute; left: 50%; bottom: 164px; translate: -50% 0; display: flex; gap: 2px; }
+.hn__dots button { width: 26px; height: 26px; padding: 0; border: 0; background: none; cursor: pointer; position: relative; }
+.hn__dots button::after { content: ""; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px; border-radius: 50%; background: rgba(255, 255, 255, .6); box-shadow: 0 0 0 1px rgba(10, 22, 16, .3); transition: transform .25s, background .25s; }
+.hn__dots button.is-on::after { background: #fff; transform: scale(1.5); }
+@media (max-width: 959px) {
+  .hn__arrow { display: none; } /* phones swipe */
+  .hn__dots { bottom: 84px; }
+  .hn.is-slide .hn__house { left: 3%; width: 94%; }
+}
+@media (prefers-reduced-motion: reduce) { .hn__slides img { transition: opacity .2s; transform: none; } .hn.is-day .hn__house > span { animation: none; } }
