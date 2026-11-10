@@ -135,15 +135,18 @@ export function V2Motion() {
           return row
         }
         rolled.set(el, text)
+        // the mask is a span inside the link, not the link itself: a nav link is flex-stretched taller than its
+        // line, and the mask must shrink-wrap the row exactly, or the incoming copy peeks in at rest
+        const rl = document.createElement('span')
+        rl.className = 'rl'
+        rl.append(mkRow(false), mkRow(true))
         el.textContent = ''
-        el.classList.add('rl')
-        el.append(mkRow(false), mkRow(true))
+        el.append(rl)
       }
       document.querySelectorAll<HTMLElement>('.nav a, .v2-link, .bridge__text').forEach(rollify)
       cleanups.push(() =>
         rolled.forEach((text, el) => {
           el.textContent = text
-          el.classList.remove('rl')
         }),
       )
     }
