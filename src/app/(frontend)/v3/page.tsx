@@ -9,6 +9,7 @@ import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { HeroDawn, type DawnSlide } from '@/v3/home/HeroDawn'
 import { HousePicker, type PickHouse } from '@/v3/home/HousePicker'
 import { StickyCta } from '@/v3/home/StickyCta'
+import { DayStory, type DayStep } from '@/v3/home/DayStory'
 import '@/v3/v3.css'
 
 /**
@@ -31,6 +32,21 @@ const BUY = [
 ]
 // предчистовая отделка — дословно по прайсу клиента 27.10.2026
 const INCLUDED = ['Разводка электричества и отопления', 'Электрический котёл', 'Штукатурка по маякам', 'Ворота: откатные или распашные', 'Отмостка и паркоместо из плитки', 'Скважина', '15 кВт на дом', 'Газ по меже', 'Септик до 9 м³']
+
+// «Один день»: тексты — по «Мыслям о загородной жизни» и «Для кого мы строим» клиента (27.10.2026)
+const DAY: DayStep[] = [
+  { time: '06:40', word: 'Ритм', text: 'Тихий завтрак на воздухе. Кофе на террасе, роса на газоне, и никуда не нужно спешить.', src: '/design/morning-breakfast.webp', cap: 'Иллюстрация' },
+  { time: '15:00', word: 'Чувство', text: 'Дети играют на газоне с поливалкой, собака носится рядом, кот спит на кресле. Своя земля — своё пространство.', src: '/v3/terrace.webp', cap: 'Фото построенного дома' },
+  { time: '20:30', word: 'Воздух', text: 'Мангал, гитара, тёплый свет в окнах и вечер без соседей за стенкой. Тишина здесь — это чувство контроля над своим пространством.', src: '/v3/sunset.webp', cap: 'Фото построенного дома' },
+]
+
+function Bridge({ text, href }: { text: string; href: string }) {
+  return (
+    <a className="v3-bridge" href={href} data-move="up">
+      <span>{text}</span><i aria-hidden>↓</i>
+    </a>
+  )
+}
 
 export default async function V3Home() {
   const [company, estates, houses, projects] = await Promise.all([getCompany(), getEstates(), getHouses(), getProjects()])
@@ -67,9 +83,9 @@ export default async function V3Home() {
   const facts = [
     years ? { v: `с ${company.since}`, l: `строим дома, ${years} ${plural(years, 'год', 'года', 'лет')}` } : null,
     company.homesBuilt ? { v: String(company.homesBuilt), l: plural(company.homesBuilt, 'дом построен', 'дома построено', 'домов построено') } : null,
-    { v: '20+', l: 'планировок под разный уклад' },
+    { v: '20+', n: 20, l: 'планировок под разный уклад' },
     { v: '5 лет', l: 'гарантия на капитальные дефекты' },
-  ].filter((f): f is { v: string; l: string } => f !== null)
+  ].filter((f): f is { v: string; l: string; n?: number } => f !== null)
 
   const menu = [
     { label: 'Дома', href: '#doma' },
@@ -94,29 +110,20 @@ export default async function V3Home() {
           <div className="v3-wrap v3-wrap--wide"><HousePicker houses={pick} catalogHref={mainHref('/catalog')} /></div>
         </section>
 
-        <section className="v3-sec v3-sec--mist" id="zachem">
+        <Bridge text="А теперь — зачем вообще свой дом" href="#zachem" />
+
+        <section className="v3-sec" id="zachem">
           <div className="v3-wrap">
-            <p className="v3-eyebrow">Почему за город</p>
+            <p className="v3-eyebrow">Один день в своём доме</p>
             <h2 className="v3-h2" data-move="lines">Размеренный ритм. <em>Чувство.</em> Воздух.</h2>
-            <p className="v3-lead" data-move="up">Это дом, в который возвращаешься не потому, что нужно, а потому, что хочется.</p>
+            <p className="v3-lead" data-move="up">Вот ради чего меняют квартиру на дом. Не ради метров — ради того, как проходит обычный день.</p>
           </div>
-          <div className="v3-wrap v3-scenes">
-            {[
-              { w: 'Ритм', src: '/design/morning-breakfast.webp', cap: 'Иллюстрация', t: 'Тихий завтрак на воздухе. Утро, в которое никуда не нужно спешить.' },
-              { w: 'Чувство', src: '/v3/terrace.webp', cap: 'Фото построенного дома', t: 'Дети играют на газоне, собака рядом, взрослые жарят шашлык. Вечер без соседей за стенкой.' },
-              { w: 'Воздух', src: '/v3/sunset.webp', cap: 'Фото построенного дома', t: 'Чистый воздух, много пространства и вечерние огни на участке.' },
-            ].map((s) => (
-              <figure key={s.w} className="v3-scene" data-move="up">
-                <div className="v3-scene__img" data-move="roof">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={s.src} alt={s.w} loading="lazy" data-parallax="0.12" />
-                  <span>{s.cap}</span>
-                </div>
-                <figcaption><strong>{s.w}</strong>{s.t}</figcaption>
-              </figure>
-            ))}
+          <div className="v3-wrap">
+            <DayStory steps={DAY} coda="Это дом, в который возвращаешься не потому, что нужно, а потому, что хочется." />
           </div>
         </section>
+
+        <Bridge text="Осталось выбрать, где проснуться" href="#poselki" />
 
         <section className="v3-sec" id="poselki">
           <div className="v3-wrap">
@@ -141,6 +148,8 @@ export default async function V3Home() {
           </div>
         </section>
 
+        <Bridge text="Посмотрите, где именно стоит дом" href="#genplan" />
+
         {plots.length > 0 && (
           <section className="v3-sec v3-sec--sky" id="genplan">
             <div className="v3-wrap">
@@ -151,6 +160,8 @@ export default async function V3Home() {
             </div>
           </section>
         )}
+
+        <Bridge text="Теперь посчитаем, сколько платить" href="#kupit" />
 
         <section className="v3-sec" id="kupit">
           <div className="v3-wrap v3-split">
@@ -170,16 +181,20 @@ export default async function V3Home() {
           </div>
         </section>
 
+        <Bridge text="И о тех, кто строит" href="#kto" />
+
         <section className="v3-sec v3-sec--linen" id="kto">
           <div className="v3-wrap">
             <p className="v3-eyebrow">Кто строит</p>
             <h2 className="v3-h2" data-move="lines">Мы создаём не дома, <em>а образ жизни</em></h2>
             <div className="v3-facts">
-              {facts.map((f) => <div key={f.l} data-move="up"><b>{f.v}</b><span>{f.l}</span></div>)}
+              {facts.map((f) => <div key={f.l} data-move="up"><b data-count={f.n ?? undefined}>{f.v}</b><span>{f.l}</span></div>)}
             </div>
             <p className="v3-lead">В команде — архитекторы и инженеры. Каждый наш дом выглядит по-своему: разные сочетания фактур и цвета, качественные материалы.</p>
           </div>
         </section>
+
+        <Bridge text="Приезжайте посмотреть вживую" href="#evf-form" />
 
         <div id="pokaz">
           <EveningFinale offices={(company.offices ?? []).map((o) => ({ title: o.title, address: o.address, hours: o.hours }))} phone={company.phone} target={{ context: 'Главная v3: вечерний финал' }} />

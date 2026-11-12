@@ -31,6 +31,7 @@ export const useMotion = () => useContext(MotionContext)
 /** Маска «дом из логотипа»: 5 точек, у полного кадра столько же — clip-path плавно перетекает. */
 export const ROOF_CLOSED = 'polygon(50% 34%, 63% 47%, 63% 74%, 37% 74%, 37% 47%)'
 export const ROOF_OPEN = 'polygon(50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%)'
+export const ROOF_EXIT = 'polygon(50% 10%, 90% 42%, 90% 92%, 10% 92%, 10% 42%)'
 
 export function MotionRoot({ children }: { children: ReactNode }) {
   const root = useRef<HTMLDivElement>(null)
@@ -61,8 +62,9 @@ export function MotionRoot({ children }: { children: ReactNode }) {
       // fromTo, а не from: конечное состояние задано явно. React в разработке монтирует эффект дважды,
       // и from() во второй раз запомнил бы «невидимый» остаток первого запуска как конечный (баг 12.11).
       gsap.utils.toArray<HTMLElement>('[data-move="up"]').forEach((node) => {
+        const sib = [...(node.parentElement?.children ?? [])].filter((n) => (n as HTMLElement).dataset.move === 'up')
         gsap.fromTo(node, { y: 28, autoAlpha: 0 }, {
-          y: 0, autoAlpha: 1, duration: 0.8, ease: 'power3.out', clearProps: 'transform',
+          y: 0, autoAlpha: 1, duration: 0.8, ease: 'power3.out', clearProps: 'transform', delay: Math.min(sib.indexOf(node), 6) * 0.07,
           scrollTrigger: { trigger: node, start: 'top 88%', once: true },
         })
       })
@@ -80,6 +82,30 @@ export function MotionRoot({ children }: { children: ReactNode }) {
         gsap.fromTo(node, { clipPath: ROOF_CLOSED }, {
           clipPath: ROOF_OPEN, ease: 'none',
           scrollTrigger: { trigger: node, start: 'top 80%', end: 'top 25%', scrub: 0.6 },
+        })
+      })
+
+      // «Окно-крыша» на выходе из первого экрана: кадр сжимается в силуэт дома из логотипа, вокруг — белый
+      gsap.utils.toArray<HTMLElement>('[data-move="hero-exit"]').forEach((node) => {
+        gsap.fromTo(node, { clipPath: ROOF_OPEN }, {
+          clipPath: ROOF_EXIT, ease: 'none',
+          scrollTrigger: { trigger: node.parentElement ?? node, start: 'top top', end: 'bottom top', scrub: 0.4 },
+        })
+        // white headline over the white page around the roof would vanish untidily — fade it out first
+        const inner = node.parentElement?.querySelector('.v3-hero__inner')
+        if (inner) gsap.to(inner, { autoAlpha: 0, y: -40, ease: 'none', scrollTrigger: { trigger: node.parentElement ?? node, start: 'top top', end: '40% top', scrub: 0.4 } })
+      })
+
+      // счётчики: число в [data-count] набегает от нуля, подпись после числа остаётся
+      gsap.utils.toArray<HTMLElement>('[data-count]').forEach((node) => {
+        const to = Number(node.dataset.count)
+        const tail = (node.textContent ?? '').replace(/^\D*\d+/, '')
+        const n = { v: 0 }
+        gsap.to(n, {
+          v: to, duration: 1.4, ease: 'power2.out', snap: { v: 1 },
+          onUpdate: () => { node.textContent = `${n.v}${tail}` },
+          onComplete: () => { node.textContent = `${to}${tail}` }, // never leave a half-counted fact on the page
+          scrollTrigger: { trigger: node, start: 'top 90%', once: true },
         })
       })
 
@@ -101,10 +127,16 @@ export function MotionRoot({ children }: { children: ReactNode }) {
       })
     }, el)
 
-    // шрифты меняют высоту строк — пересчитать точки срабатывания, когда они загрузятся
+    // шрифты, картинки и 3D-блок меняют высоту страницы — пересчитать точки срабатывания (иначе счётчики и
+    // появления ниже 3D срабатывали не там, браузерный тест 12.11)
     document.fonts?.ready.then(() => ScrollTrigger.refresh())
+    let refreshTimer = 0
+    const ro = new ResizeObserver(() => { clearTimeout(refreshTimer); refreshTimer = window.setTimeout(() => ScrollTrigger.refresh(), 200) })
+    ro.observe(document.body)
 
     return () => {
+      ro.disconnect()
+      clearTimeout(refreshTimer)
       splits.forEach((s) => s.revert())
       ctx.revert()
       if (tick) gsap.ticker.remove(tick)

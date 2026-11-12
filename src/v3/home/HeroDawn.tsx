@@ -33,7 +33,7 @@ export function HeroDawn({ slides, priceLine, phone, menu }: {
 
   return (
     <header className="v3-hero" data-daylight>
-      <a className="v3-hero__media" href={cur.href} aria-label={`Открыть: ${cur.title}`}>
+      <a className="v3-hero__media" href={cur.href} aria-label={`Открыть: ${cur.title}`} data-move="hero-exit">
         {slides.map((s, k) => (
           <picture key={s.src}>
             {s.phone && <source media="(max-width: 700px)" srcSet={s.phone} />}
@@ -45,7 +45,8 @@ export function HeroDawn({ slides, priceLine, phone, menu }: {
         <span className="v3-hero__warm" aria-hidden />
         <span className="v3-hero__mist" aria-hidden />
         <span className="v3-hero__mist v3-hero__mist--2" aria-hidden />
-        <span className="v3-hero__star" aria-hidden />
+        <span className="v3-hero__fall" aria-hidden />
+        <span className="v3-hero__spark" aria-hidden />
       </a>
       <div className="v3-wrap v3-hero__inner">
         <div className="v3-top">
@@ -60,6 +61,7 @@ export function HeroDawn({ slides, priceLine, phone, menu }: {
         </div>
 
         <div className="v3-hero__text">
+          <p className="v3-hero__slogan">Хороший дом · сюда приводят мечты</p>
           <h1 className="v3-hero__title">
             <span className="v3-ln"><span>Дом, в который</span></span>
             <span className="v3-ln"><span><em>хочется</em> возвращаться</span></span>
