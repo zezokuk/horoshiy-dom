@@ -1,12 +1,13 @@
 'use client'
 
 /**
- * v3 · первый экран по референсам Ильи (12.11, после «звезда непонятна, экран перегружен»):
- *  — ERA: на белой странице крупный заголовок и дом в рамке; при прокрутке кадр раскрывается на весь экран;
- *  — Aurus: когда кадр раскрыт, поверх фото выплывают три крупные цифры, свет чуть меняется;
- *  — Lumera: минимум текста — логотип, телефон, одна кнопка, заголовок.
- * Сцена — position: sticky внутри высокого блока, GSAP только тянет значения по прокрутке (без перехвата прокрутки).
- * Телефон и «уменьшить движение»: без сцены — фото, заголовок и цифры просто стоят друг под другом.
+ * v3 · первый экран — ровно по схеме референсов (ERA, Aurus, Lumera), 12.11 после «пересмотри рефы и сделай чётко»:
+ *  — фото на весь экран, дом внизу кадра, заголовок в небе;
+ *  — ERA: название узкой антиквой капителью по центру + строка, разнесённая влево и вправо
+ *    («A place ··· to return to» → «Дом, в который ··· хочется возвращаться», фраза клиента);
+ *  — Lumera: при загрузке буквы поднимаются по очереди, фото чуть отъезжает;
+ *  — при прокрутке заголовок уходит вверх быстрее фото, фото медленно приближается (ERA).
+ * Загрузка — чистый CSS (без мигания), прокрутка — GSAP scrub. «Уменьшить движение» — всё стоит.
  */
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
@@ -14,60 +15,51 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
-export type HeroStat = { value: string; label: string }
+const NAME = 'ХОРОШИЙ ДОМ'
 
-export function HeroScene({ photo, photoPhone, stats, phone }: { photo: string; photoPhone: string; stats: HeroStat[]; phone?: string | null }) {
+export function HeroScene({ photo, photoPhone, priceLine, phone }: { photo: string; photoPhone: string; priceLine: string; phone?: string | null }) {
   const root = useRef<HTMLElement>(null)
 
   useEffect(() => {
     const el = root.current
     if (!el) return
     const mm = gsap.matchMedia()
-    mm.add('(min-width: 861px) and (prefers-reduced-motion: no-preference)', () => {
-      el.classList.add('is-scene')
-      const st = { trigger: el, start: 'top top', end: 'bottom bottom', scrub: 0.5 }
-      const tl = gsap.timeline({ scrollTrigger: { ...st, onUpdate: (s) => el.classList.toggle('is-full', s.progress > 0.42) } })
-      tl.fromTo('.v3-scene__frame', { clipPath: 'inset(40% 20% 5% 20% round 20px)' }, { clipPath: 'inset(0% 0% 0% 0% round 0px)', ease: 'none', duration: 0.55 }, 0)
-        .fromTo('.v3-scene__frame img', { scale: 1.18, filter: 'saturate(.8) brightness(1.04) sepia(.12)' }, { scale: 1, filter: 'saturate(1) brightness(1) sepia(0)', ease: 'none', duration: 0.55 }, 0)
-        .to('.v3-scene__head', { yPercent: -60, autoAlpha: 0, ease: 'none', duration: 0.3 }, 0.05)
-        .fromTo('.v3-scene__shade', { opacity: 0 }, { opacity: 1, ease: 'none', duration: 0.25 }, 0.4)
-        .fromTo('.v3-scene__stat', { y: 60, autoAlpha: 0 }, { y: 0, autoAlpha: 1, stagger: 0.07, ease: 'power2.out', duration: 0.25 }, 0.55)
-        .fromTo('.v3-scene__go', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.15 }, 0.75)
-      return () => { el.classList.remove('is-scene', 'is-full') }
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      const st = { trigger: el, start: 'top top', end: 'bottom top', scrub: 0.4 }
+      gsap.to(el.querySelector('.v3-hero2__title'), { yPercent: -70, ease: 'none', scrollTrigger: st })
+      gsap.to(el.querySelector('.v3-hero2__photo img'), { scale: 1.12, yPercent: 6, ease: 'none', scrollTrigger: st })
     }, el)
     return () => mm.revert()
   }, [])
 
   const tel = phone?.replace(/[^\d+]/g, '')
   return (
-    <header className="v3-scene" ref={root}>
-      <div className="v3-scene__pin">
-        <div className="v3-scene__frame">
-          <picture>
-            <source media="(max-width: 860px)" srcSet={photoPhone} />
-            <img src={photo} alt="Кирпичный дом «Хорошего дома»" fetchPriority="high" />
-          </picture>
-          <span className="v3-scene__shade" aria-hidden />
+    <header className="v3-hero2" ref={root}>
+      <div className="v3-hero2__photo">
+        <picture>
+          <source media="(max-width: 860px)" srcSet={photoPhone} />
+          <img src={photo} alt="Кирпичный дом «Хорошего дома»" fetchPriority="high" />
+        </picture>
+      </div>
+      <div className="v3-wrap v3-hero2__top">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <a href="/v3" aria-label="На главную"><img src="/v3/logo-white.svg" alt="Хороший дом" width={118} height={55} /></a>
+        <div className="v3-row">
+          {tel && <a className="v3-hero2__tel" href={`tel:${tel}`}>{phone}</a>}
+          <a className="v3-btn v3-btn--glass v3-hero2__btn" href="#doma">Выбрать дом</a>
         </div>
-        <div className="v3-wrap v3-scene__top">
-          <a href="/v3" aria-label="Хороший дом — на главную" className="v3-scene__logo">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/v3/logo.svg" alt="Хороший дом" width={128} height={60} className="is-dark" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/v3/logo-white.svg" alt="" width={128} height={60} className="is-light" />
-          </a>
-          <div className="v3-row">
-            {tel && <a className="v3-scene__tel" href={`tel:${tel}`}>{phone}</a>}
-            <a className="v3-btn v3-btn--main v3-scene__topbtn" href="#doma">Выбрать дом</a>
-          </div>
-        </div>
-        <div className="v3-wrap v3-scene__head">
-          <h1 className="v3-scene__title"><span className="v3-ln"><span>Дом, в который</span></span><span className="v3-ln"><span><em>хочется</em> возвращаться</span></span></h1>
-        </div>
-        <div className="v3-wrap v3-scene__stats">
-          {stats.map((s) => <div key={s.label} className="v3-scene__stat"><b>{s.value}</b><span>{s.label}</span></div>)}
-          <a className="v3-btn v3-btn--glass v3-scene__go" href="#doma">Смотреть дома ↓</a>
-        </div>
+      </div>
+      <div className="v3-hero2__title">
+        <h1 aria-label="Хороший дом — дом, в который хочется возвращаться">
+          <span className="v3-hero2__name" aria-hidden>
+            {[...NAME].map((ch, i) => <span key={i} style={{ animationDelay: `${0.25 + i * 0.045}s` }}>{ch === ' ' ? ' ' : ch}</span>)}
+          </span>
+          <span className="v3-hero2__split" aria-hidden><span>Дом, в который</span><i /><span>хочется возвращаться</span></span>
+        </h1>
+      </div>
+      <div className="v3-wrap v3-hero2__bottom">
+        <p>Готовые кирпичные дома под Краснодаром{priceLine ? <> · <b>{priceLine}</b></> : null}</p>
+        <a className="v3-hero2__down" href="#doma" aria-label="Смотреть дома">↓</a>
       </div>
     </header>
   )

@@ -47,13 +47,6 @@ export default async function V3Home() {
   const priceLine = priceFrom ? `от ${formatMillions(priceFrom)}` : ''
 
   // first screen (Aurus-style numbers over the photo): live from the admin, so they never go stale
-  const sellingEstates = estates.filter((e) => e.status !== 'planned' && free.some((h) => h.estateSlug === e.slug)).length
-  const heroStats = [
-    { value: priceLine || '—', label: 'цена дома с участком' },
-    { value: String(free.length), label: `${plural(free.length, 'дом', 'дома', 'домов')} в продаже` },
-    { value: String(sellingEstates), label: `${plural(sellingEstates, 'посёлок', 'посёлка', 'посёлков')} под Краснодаром` },
-  ]
-
   const pick: PickHouse[] = free.map((h) => ({
     code: h.code, title: h.title, area: h.area, plot: h.plot, price: h.price, estate: h.estateName,
     photo: h.photoCard ?? h.photo, href: h.href, caption: 'Изображение проекта',
@@ -83,7 +76,7 @@ export default async function V3Home() {
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
       <link rel="stylesheet" href={NOTO_CSS} precedence="default" />
       <MotionRoot>
-        <HeroScene photo="/v3/hero.webp" photoPhone="/v3/hero-phone.webp" stats={heroStats} phone={company.phone} />
+        <HeroScene photo="/v3/sky.webp" photoPhone="/v3/sky-phone.webp" priceLine={priceLine} phone={company.phone} />
 
         <section className="v3-sec" id="doma">
           <div className="v3-wrap">

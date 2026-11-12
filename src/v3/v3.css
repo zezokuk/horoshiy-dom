@@ -253,3 +253,36 @@
 .v3-offices span { color: var(--moss) }
 .v3-final__tel { margin-top: 22px; font: 400 clamp(26px, 3vw, 38px) var(--f-fact); letter-spacing: -.03em }
 .v3-final__form { background: var(--linen); border-radius: var(--r); padding: clamp(20px, 3vw, 36px); scroll-margin-top: 80px }
+
+/* ---------- первый экран v3.2: ERA / Aurus / Lumera ---------- */
+.v3-hero2 { position: relative; height: 100svh; min-height: 620px; overflow: hidden; color: #fff; background: #9ec3e6 }
+.v3-hero2__photo { position: absolute; inset: 0; overflow: hidden }
+.v3-hero2__photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 78%; transform-origin: 50% 100%; animation: v3-h2-img 2.2s cubic-bezier(.2,.7,.2,1) both }
+@keyframes v3-h2-img { from { transform: scale(1.12); filter: brightness(1.15) saturate(.85) } }
+.v3-hero2__photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8,20,40,.38) 0%, rgba(8,20,40,0) 40%, rgba(8,16,10,0) 65%, rgba(8,16,10,.45) 100%) }
+.v3-hero2__top { position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: flex; justify-content: space-between; align-items: center; padding-block: 20px; animation: v3-fadein 1s ease .9s both }
+.v3-hero2__top img { height: 55px; width: auto }
+.v3-hero2__tel { font: 400 15px var(--f-fact); letter-spacing: -.02em; text-shadow: 0 1px 10px rgba(0,0,0,.3) }
+.v3-hero2__btn { padding: 12px 20px }
+.v3-hero2__title { position: absolute; left: 0; right: 0; top: 13vh; z-index: 2; text-align: center; padding: 0 16px }
+.v3-hero2__name { display: block; font: 400 clamp(64px, 13vw, 210px)/.86 var(--f-emo); font-variation-settings: 'wdth' 62.5; letter-spacing: -.01em; text-shadow: 0 4px 40px rgba(0,0,0,.18); white-space: nowrap; overflow: hidden; padding-bottom: .04em }
+.v3-hero2__name > span { display: inline-block; animation: v3-letter 1s cubic-bezier(.2,.8,.2,1) both }
+@keyframes v3-letter { from { transform: translateY(105%) } }
+.v3-hero2__split { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 14px; font: 600 13px var(--f-ui); letter-spacing: .2em; text-transform: uppercase; text-shadow: 0 1px 12px rgba(0,0,0,.35) }
+.v3-hero2__split i { display: block; width: clamp(40px, 14vw, 220px); height: 1px; background: rgba(255,255,255,.8); transform-origin: 50% 50%; animation: v3-line 1.1s ease 1s both }
+.v3-hero2__split span:first-child { animation: v3-left 1s cubic-bezier(.2,.8,.2,1) 1s both }
+.v3-hero2__split span:last-child { animation: v3-right 1s cubic-bezier(.2,.8,.2,1) 1s both }
+@keyframes v3-line { from { transform: scaleX(0) } }
+@keyframes v3-left { from { opacity: 0; transform: translateX(40px) } }
+@keyframes v3-right { from { opacity: 0; transform: translateX(-40px) } }
+.v3-hero2__bottom { position: absolute; left: 0; right: 0; bottom: 26px; z-index: 2; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; animation: v3-fadein 1s ease 1.4s both }
+.v3-hero2__bottom p { font: 500 16px/1.4 var(--f-ui); text-shadow: 0 1px 12px rgba(0,0,0,.4); max-width: 34ch }
+.v3-hero2__bottom b { font: 400 16px var(--f-fact); white-space: nowrap }
+.v3-hero2__down { width: 52px; height: 52px; flex: 0 0 52px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(255,255,255,.7); font-size: 18px }
+@media (max-width: 860px) {
+  .v3-hero2__title { top: 15vh }
+  .v3-hero2__name { font-size: 14vw }
+  .v3-hero2__split { flex-direction: column; gap: 8px; font-size: 11px }
+  .v3-hero2__split i { width: 40px }
+  .v3-hero2__tel { display: none }
+}
