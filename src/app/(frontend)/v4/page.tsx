@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { LeadForm } from '@/components/LeadForm'
 import { HeroNight, type HeroSlide } from '@/components/heroes/HeroNight'
 import { PlotPicker, type PlotEstate } from '@/components/home/PlotPicker'
@@ -190,7 +190,7 @@ export default async function V4Home() {
                 <div className="v4-hero__title">
                   <h1 aria-label="Хороший дом — дом, в который хочется возвращаться">
                     <span className="v3-hero2__name" aria-hidden>
-                      {[...NAME].map((ch, k) => <span key={k} style={{ animationDelay: `${0.25 + k * 0.045}s` }}>{ch === ' ' ? '\u00a0' : ch}</span>)}
+                      {[...NAME].map((ch, k) => <span key={k} style={{ '--i': k } as CSSProperties}>{ch === ' ' ? '\u00a0' : ch}</span>)}
                     </span>
                     <span className="v3-hero2__split" aria-hidden><span>Дом, в который</span><i /><span>хочется возвращаться</span></span>
                   </h1>
