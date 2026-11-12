@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { EveningFinale } from '@/components/home/EveningFinale'
+import { LeadForm } from '@/components/LeadForm'
 import { PlotPicker, type PlotEstate } from '@/components/home/PlotPicker'
 import { getCompany, getEstates, getHouses, plural } from '@/lib/data'
 import { formatMillions } from '@/lib/format'
@@ -173,9 +173,20 @@ export default async function V3Home() {
         </section>
 
 
-        <div id="pokaz">
-          <EveningFinale offices={(company.offices ?? []).map((o) => ({ title: o.title, address: o.address, hours: o.hours }))} phone={company.phone} target={{ context: 'Главная v3: вечерний финал' }} />
-        </div>
+        <section className="v3-sec v3-final" id="pokaz">
+          <div className="v3-wrap v3-split">
+            <div>
+              <p className="v3-eyebrow">Запись на показ</p>
+              <h2 className="v3-h2" data-move="lines">Приезжайте <em>посмотреть</em></h2>
+              <p className="v3-lead">Покажем дом и посёлок вживую, ответим про участок, документы и ипотеку.</p>
+              <ul className="v3-offices">{(company.offices ?? []).map((o) => <li key={o.title}><b>{o.title}</b><span>{[o.address, o.hours].filter(Boolean).join(' · ')}</span></li>)}</ul>
+              {company.phone && <p className="v3-final__tel">{company.phone}</p>}
+            </div>
+            <div className="v3-final__form" id="evf-form">
+              <LeadForm light cta="Записаться на показ" target={{ interest: 'buy', context: 'Главная v3: запись на показ' }} />
+            </div>
+          </div>
+        </section>
       </MotionRoot>
       <StickyCta phone={company.phone} />
     </div>
