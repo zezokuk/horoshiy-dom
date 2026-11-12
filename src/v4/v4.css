@@ -247,7 +247,8 @@ html .v4 .hn.is-day .v4-hero__title h1.v4-hero__h1 { opacity: 1; transform: none
 .v4-in__mini.is-out img { opacity: .45 }
 .v4-in__cap { position: absolute; z-index: 3; right: max(20px, env(safe-area-inset-right, 0px)); top: 92px; font: 600 11px var(--f-ui); letter-spacing: .06em; background: rgba(255,255,255,.9); color: var(--ink); padding: 5px 10px; border-radius: 999px }
 @media (max-width: 860px) {
-  .v4-in__tabs { top: 70px }
+  .v4-in__tabs { top: 70px; gap: 2px; padding: 6px }
+  .v4-in__tabs button { min-width: 0; padding: 6px 7px; font-size: 11px }
   .v4-in__card { bottom: 86px; padding: 18px } /* над нижней кнопкой «Записаться на показ» */
   .v4-in__mini { width: 112px; bottom: auto; top: 136px; padding: 6px }
   .v4-in__mini span { font-size: 9px }

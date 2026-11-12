@@ -84,7 +84,8 @@ export default async function V4House({ params }: Props) {
           <figure className="v4-dom__photo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             {photo ? <img src={photo} alt={`${h.title}, посёлок «${e.name}»`} fetchPriority="high" /> : <span className="v3-card__noimg">Фото скоро</span>}
-            <figcaption>{h.photo ? 'Фото дома' : 'Изображение проекта'}</figcaption>
+            {/* какой дом на каком фото, клиент ещё не подтвердил — подпись честная для всех (16-Аудит-картинок, п. 5) */}
+            <figcaption>Изображение проекта</figcaption>
           </figure>
           <div className="v4-dom__panel">
             <nav className="v4-dom__crumbs" aria-label="Навигация"><a href="/v4">Главная</a><span aria-hidden>/</span><a href="/v4#doma">Дома в продаже</a></nav>
