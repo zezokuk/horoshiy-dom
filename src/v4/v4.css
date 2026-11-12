@@ -1,0 +1,186 @@
+/* v4 — поверх v3.css (шрифты «Усадьба», палитра брендбука). Начало — из v2 (HeroNight), приёмы «Чехова», движения Aurus,
+   карта с плашками. Всё под .v4, чтобы не задеть v2 и v3. */
+
+/* ---------- первый экран из v2 в шрифтах v3 ---------- */
+.v4 .hn { margin-top: 0 }
+/* текст и шрифт первого экрана — из v3 (Илья 12.11: «типографика была крутая в v3»), сцена — из v2 */
+.v4-hero__top { position: absolute; top: 0; left: 0; right: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; padding-block: 20px; color: #f6eedd; transition: color .6s; animation: v3-fadein 1s ease .9s both }
+.v4-hero__logo { position: relative; display: block; width: 118px; height: 55px }
+.v4-hero__logo img { position: absolute; inset: 0; height: 55px; width: auto; transition: opacity .6s }
+.v4-hero__logo img + img { opacity: 0 }
+.hn.is-day .v4-hero__logo img { opacity: 0 }
+.hn.is-day .v4-hero__logo img + img { opacity: 1 }
+.hn.is-day .v4-hero__top { color: var(--ink) }
+.v4-hero__tel { font: 400 15px var(--f-fact); letter-spacing: -.02em; white-space: nowrap }
+.v4 .v4-hero__btn { padding: 12px 20px; transition: background .6s, border-color .6s }
+.v4 .hn.is-day .v4-hero__btn { background: var(--leaf); border-color: var(--leaf); color: #fff }
+.v4-hero__title { position: absolute; left: 0; right: 0; top: 13cqh; z-index: 4; text-align: center; padding: 0 16px; color: #f6eedd; transition: color .6s; pointer-events: none }
+.hn.is-day .v4-hero__title { color: #14301f }
+.v4-hero__title .v3-hero2__name { font-size: clamp(64px, min(13cqw, 27cqh), 210px); text-shadow: 0 4px 40px rgba(8,16,40,.5); transition: text-shadow .6s }
+.v4-hero__title .v3-hero2__split { text-shadow: 0 1px 14px rgba(8,16,40,.6); transition: text-shadow .6s }
+.v4-hero__title .v3-hero2__split i { transition: background .6s }
+.hn.is-day .v4-hero__title .v3-hero2__name { text-shadow: 0 1px 26px rgba(255,255,255,.75) }
+.hn.is-day .v4-hero__title .v3-hero2__split { text-shadow: 0 1px 12px rgba(255,255,255,.9) }
+.hn.is-day .v4-hero__title .v3-hero2__split i { background: rgba(20,48,31,.65) }
+/* утренняя дымка над кронами: тёмное название читается и поверх деревьев */
+.v4 .hn .hn__pane::before { content: ''; position: absolute; inset: 0 0 auto; height: 56%; z-index: 3; pointer-events: none; background: linear-gradient(rgba(255,255,255,.82), rgba(255,255,255,0)); opacity: 0; transition: opacity 1s }
+.v4 .hn.is-day .hn__pane::before { opacity: 1 }
+@media (max-width: 860px) {
+  .v4-hero__title { top: 15cqh }
+  .v4-hero__title .v3-hero2__name { font-size: 14cqw }
+  .v4-hero__tel { display: none }
+  .v4-hero__logo, .v4-hero__logo img { height: 46px; width: 99px }
+}
+.v4 .hn__star { display: none } /* звезду Илья не понял (12.11) — остаются ночь, окна и рассвет */
+
+/* ---------- шапка: выезжает, когда первый экран пройден ---------- */
+.v4-bar { position: fixed; inset: 0 0 auto; z-index: 60; background: rgba(255,255,255,.88); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); transform: translateY(-101%); transition: transform .5s cubic-bezier(.2,.7,.2,1) }
+html.past-hero .v4-bar { transform: none }
+.v4-bar__in { display: flex; align-items: center; justify-content: space-between; gap: 20px; height: 64px }
+.v4-bar img { height: 40px; width: auto }
+.v4-bar nav { display: flex; gap: 28px; font: 600 14px var(--f-ui) }
+.v4-bar nav a { position: relative; padding: 6px 0 }
+.v4-bar nav a::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform .35s cubic-bezier(.2,.7,.2,1) }
+.v4-bar nav a:hover::after { transform: scaleX(1) }
+.v4-bar__tel { font: 400 14px var(--f-fact); letter-spacing: -.02em; white-space: nowrap }
+.v4 .v4-bar__btn { padding: 12px 18px; font-size: 14px; color: #fff }
+@media (max-width: 860px) { .v4-bar nav, .v4-bar__btn { display: none } .v4-bar__in { height: 56px } .v4-bar img { height: 34px } }
+
+/* ---------- раздел по «Чехову»: номер, огромное слово за заголовком, капитель + курсив ---------- */
+.v4-sec { position: relative; overflow: clip; padding-top: clamp(96px, 13vw, 200px) }
+.v4-sec > .v3-wrap, .v4-head { position: relative; z-index: 1 }
+.v4-ghost { position: absolute; z-index: 0; left: -1vw; top: clamp(10px, 2.4vw, 40px); font: 400 clamp(110px, 25vw, 420px)/.78 var(--f-emo); font-variation-settings: 'wdth' 62.5; text-transform: uppercase; white-space: nowrap; color: #f1f4ef; pointer-events: none; user-select: none; will-change: transform }
+.v3-sec--mist .v4-ghost { color: #eaf0ea }
+.v3-sec--sky .v4-ghost { color: #e8eff3 }
+.v3-sec--linen .v4-ghost { color: #f1eee7 }
+.v4-num { display: flex; align-items: baseline; gap: .55em; font: 600 12px/1.3 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--moss) }
+.v4-num b { font: 400 13px var(--f-fact); letter-spacing: 0; color: var(--brick) }
+.v4 .v3-h2 { text-transform: uppercase; font-size: clamp(38px, 6.2vw, 88px); line-height: .96; font-variation-settings: 'wdth' 64; letter-spacing: 0; max-width: 15ch; margin: 14px 0 22px }
+.v4 .v3-h2 em { text-transform: none; font-style: italic; font-variation-settings: 'wdth' 84; color: var(--leaf) }
+
+/* ---------- Aurus: кадр растёт на весь экран ---------- */
+.v4-grow { position: relative; height: 260vh; background: var(--paper) }
+.v4-grow__pin { position: sticky; top: 0; height: 100svh; overflow: hidden }
+.v4-grow__num { position: absolute; z-index: 3; top: 92px; left: 0; right: 0; justify-content: center }
+.v4 .v4-grow__words { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 4vw; font: 400 clamp(48px, 8vw, 132px)/.9 var(--f-emo); font-variation-settings: 'wdth' 62.5; text-transform: uppercase; color: var(--ink) }
+.v4 .v4-grow__words em { font-style: italic; text-transform: none; font-variation-settings: 'wdth' 84; color: var(--leaf) }
+.v4-grow__frame { position: absolute; inset: 0; z-index: 2; overflow: hidden; will-change: clip-path }
+.v4-grow__frame img { width: 100%; height: 100%; object-fit: cover }
+.v4-grow__scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,24,18,.22), rgba(14,24,18,.66)) }
+.v4-grow__quote { position: absolute; z-index: 4; left: 0; right: 0; bottom: 12vh; margin: 0 auto; max-width: min(92vw, 1040px); padding: 0 20px; color: #fff; text-align: center }
+.v4-grow__quote p { font: 400 clamp(23px, 3.1vw, 46px)/1.14 var(--f-emo); font-variation-settings: 'wdth' 74; text-wrap: balance }
+.v4-grow__quote em { font-style: italic; font-variation-settings: 'wdth' 88 }
+.v4-grow__quote cite { display: block; margin-top: 22px; font: 600 12px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; font-style: normal; opacity: .85 }
+@media (max-width: 860px) {
+  .v4 .v4-grow__words { flex-direction: column; padding: 19svh 0; text-align: center; font-size: 16vw }
+  .v4-grow__num { top: 76px }
+  .v4-grow__quote { bottom: 14vh }
+}
+@media (prefers-reduced-motion: reduce) { .v4-grow { height: 100svh } .v4-grow__num { color: #fff } .v4-grow__num b { color: #fff } }
+
+/* ---------- карта с плашками (рисунок Ильи) ---------- */
+.v4-mapbox { margin-top: 34px }
+.v4-plaques { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px }
+.v4-plaque { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font: 600 14px var(--f-ui); color: var(--ink); white-space: nowrap; transition: background .2s, color .2s, border-color .2s }
+.v4-plaque i { width: 8px; height: 8px; border-radius: 50%; background: var(--leaf) }
+.v4-plaque--soldOut i { background: var(--sold) }
+.v4-plaque--planned i { background: var(--brick) }
+.v4-plaque--all i { display: none }
+.v4-plaque:hover { border-color: var(--ink) }
+.v4-plaque[aria-pressed='true'] { background: var(--forest); color: #fff; border-color: var(--forest) }
+.v4-plaque:focus-visible { outline: 2px solid var(--leaf); outline-offset: 2px }
+.v4-map { position: relative; height: clamp(540px, 76vh, 780px); border-radius: 20px; overflow: hidden; background: #e7ede7; isolation: isolate }
+.v4-map__canvas { position: absolute; inset: 0 }
+.v4-map__canvas iframe { width: 100%; height: 100%; border: 0 }
+.v4-map__canvas [class*='ground-pane'] { filter: saturate(.5) contrast(.96) brightness(1.04) }
+.v4-map__card { position: absolute; z-index: 5; top: 20px; right: 20px; width: min(390px, calc(100% - 40px)); background: var(--forest); color: #fff; border-radius: 18px; padding: 26px 26px 18px; box-shadow: 0 24px 60px rgba(14,30,20,.3) }
+.v4-map__in { animation: v4-card .6s cubic-bezier(.2,.7,.2,1) both }
+@keyframes v4-card { from { opacity: 0; transform: translateY(16px) } }
+.v4-map__status { display: inline-flex; gap: 8px; align-items: center; font: 600 11px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; opacity: .88 }
+.v4-map__status i { width: 8px; height: 8px; border-radius: 50%; background: #8fd3a6 }
+.v4-map__status--soldOut i { background: #b9c2bc }
+.v4-map__status--planned i { background: #f0a98f }
+.v4-map__name { display: flex; gap: 14px; align-items: center; margin: 14px 0 14px }
+.v4-map__name img { width: 60px; height: 80px; object-fit: cover; border-radius: 8px; flex: none }
+.v4 .v4-map__name h3 { font: 400 clamp(28px, 2.8vw, 38px)/1 var(--f-emo); font-variation-settings: 'wdth' 68; text-transform: uppercase; color: #fff }
+.v4-map__name p { font-size: 14px; opacity: .8; margin-top: 5px }
+.v4-map__sale { font: 400 15px/1.4 var(--f-fact); letter-spacing: -.02em; padding: 13px 0; border-top: 1px solid rgba(255,255,255,.16) }
+.v4 .v4-map__card ul { list-style: none; padding: 0; border-top: 1px solid rgba(255,255,255,.16) }
+.v4-map__card li { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.1); font-size: 14px }
+.v4-map__card li b { font: 400 12px var(--f-fact); white-space: nowrap; align-self: center }
+.v4 .v4-map__go { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; background: #fff; color: var(--forest); border-radius: 999px; padding: 14px 20px; font: 600 15px var(--f-ui); transition: transform .2s }
+.v4 .v4-map__go:hover { transform: translateY(-2px) }
+.v4-map__go span { transition: transform .25s }
+.v4-map__go:hover span { transform: translateX(4px) }
+.v4-map__pager { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; font: 400 12px var(--f-fact); opacity: .92 }
+.v4-map__pager button { all: unset; cursor: pointer; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(255,255,255,.32) }
+.v4-map__pager button:hover { background: rgba(255,255,255,.12) }
+.v4-map__pager button:focus-visible { outline: 2px solid #fff; outline-offset: 2px }
+/* плашка на самой карте */
+.v4-pin { position: absolute; transform: translate(-50%, -100%); margin-top: -9px; display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px; border-radius: 999px; background: #fff; color: #17221b; font: 600 13px/1 var(--font-manrope), Arial, sans-serif; white-space: nowrap; box-shadow: 0 6px 18px rgba(14,30,20,.22); cursor: pointer; transition: background .25s, color .25s }
+.v4-pin::after { content: ''; position: absolute; left: 50%; bottom: -6px; width: 12px; height: 12px; background: inherit; transform: translateX(-50%) rotate(45deg); border-radius: 2px }
+.v4-pin i { width: 8px; height: 8px; border-radius: 50%; background: #2e6b45; flex: none }
+.v4-pin--soldOut i { background: #8c958f }
+.v4-pin--planned i { background: #a5482d }
+.v4-pin.is-on { background: #1b3a24; color: #fff }
+.v4-pin.is-on i { background: #8fd3a6 }
+@media (max-width: 860px) {
+  .v4-plaques { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: -20px; padding-inline: 20px }
+  .v4-map { height: auto; overflow: visible; border-radius: 0; background: none }
+  .v4-map__canvas { position: relative; height: 380px; border-radius: 18px; overflow: hidden; background: #e7ede7 }
+  .v4-map__card { position: relative; top: auto; right: auto; width: auto; margin: -30px 10px 0; padding: 22px 20px 16px }
+}
+
+/* ---------- Aurus: цифры выезжают с двух сторон ---------- */
+.v4-nums__rows { margin-top: 44px }
+.v4-nums__row { display: flex; align-items: baseline; gap: clamp(14px, 3vw, 44px); padding: clamp(14px, 2vw, 26px) 0; border-top: 1px solid var(--line) }
+.v4-nums__row:nth-child(even) { flex-direction: row-reverse; text-align: right }
+.v4-nums__row b { font: 400 clamp(50px, 10.5vw, 160px)/.95 var(--f-fact); letter-spacing: -.05em; color: var(--forest); white-space: nowrap }
+.v4-nums__row span { font: 600 12px/1.45 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--moss); max-width: 22ch }
+
+/* ---------- подвал: название во всю ширину (как «ЧЕХОВ») ---------- */
+.v4-foot { background: var(--forest); color: #fff; overflow: hidden; padding-top: clamp(40px, 6vw, 80px) }
+.v4-foot__top { display: flex; flex-wrap: wrap; gap: 16px 40px; justify-content: space-between; font-size: 15px }
+.v4-foot__top p { opacity: .85; max-width: 44ch }
+.v4-foot nav { display: flex; gap: 22px; flex-wrap: wrap; font-weight: 600 }
+.v4-foot__word { font: italic 400 12.4vw/.92 var(--f-emo); font-variation-settings: 'wdth' 80; white-space: nowrap; text-align: center; margin-top: clamp(20px, 4vw, 60px); padding-bottom: .14em; overflow: hidden }
+.v4-foot__word span { display: inline-block }
+@media (max-width: 860px) { .v4-foot { padding-bottom: 84px } }
+
+/* ---------- дома по типам: строки + большое фото ---------- */
+.v4-types { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(24px, 4vw, 64px); align-items: start; margin-top: 30px }
+.v4 .v4-types__list { list-style: none; padding: 0; border-top: 1px solid var(--line) }
+.v4-types__list a { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto 26px; align-items: center; gap: 16px; padding: 15px 4px; border-bottom: 1px solid var(--line); transition: padding .35s cubic-bezier(.2,.7,.2,1), background .25s }
+.v4-types__n { font: 400 11px var(--f-fact); color: var(--moss) }
+.v4 .v4-types__thumb { display: none }
+.v4-types__name b { display: block; font: 400 clamp(26px, 2.6vw, 38px)/1 var(--f-emo); font-variation-settings: 'wdth' 66; text-transform: uppercase; transition: color .25s }
+.v4-types__name i, .v4-types__price i { display: block; font: 500 13px/1.4 var(--f-ui); font-style: normal; color: var(--moss); margin-top: 4px }
+.v4-types__price { text-align: right }
+.v4-types__price b { display: block; font: 400 15px var(--f-fact); letter-spacing: -.03em; white-space: nowrap }
+.v4-types__go { font-size: 18px; opacity: 0; transform: translateX(-8px); transition: opacity .25s, transform .35s cubic-bezier(.2,.7,.2,1) }
+.v4-types__list a.is-on { padding-left: 14px; background: rgba(255,255,255,.7) }
+.v4-types__list a.is-on .v4-types__name b { color: var(--leaf) }
+.v4-types__list a.is-on .v4-types__go { opacity: 1; transform: none }
+.v4-types__view { position: sticky; top: 92px }
+.v4-types__photo { position: relative; aspect-ratio: 4/5; max-height: 76vh; width: 100%; border-radius: 18px; overflow: hidden; background: var(--mist) }
+.v4-types__photo img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; clip-path: inset(0 0 100% 0); transform: scale(1.08); transition: clip-path .8s cubic-bezier(.2,.7,.2,1), transform 1.2s cubic-bezier(.2,.7,.2,1); z-index: 1 }
+.v4-types__photo img.is-on { clip-path: inset(0 0 0 0); transform: none; z-index: 2 }
+.v4-types__photo p { position: absolute; z-index: 3; left: 14px; bottom: 14px; background: rgba(255,255,255,.92); border-radius: 999px; padding: 8px 14px; font: 600 13px var(--f-ui); animation: v4-card .5s cubic-bezier(.2,.7,.2,1) both }
+.v4 .v4-types__all { display: inline-block; margin-top: 16px; font: 600 15px var(--f-ui); border-bottom: 1px solid currentColor; padding-bottom: 2px }
+@media (max-width: 860px) {
+  .v4-types { grid-template-columns: minmax(0, 1fr) }
+  .v4-types__photo { display: none }
+  .v4-types__view { position: static }
+  .v4-types__list a { grid-template-columns: 64px minmax(0, 1fr) auto; gap: 12px; padding: 12px 0 }
+  .v4-types__n, .v4-types__go { display: none }
+  .v4 .v4-types__thumb { display: block; width: 64px; height: 64px; object-fit: cover; border-radius: 10px }
+  .v4-types__list a.is-on { padding-left: 0; background: none }
+  .v4-types__list a.is-on .v4-types__name b { color: inherit }
+  .v4-types__price b { font-size: 13px }
+  .v4-types__price i { font-size: 12px }
+}
+@media (prefers-reduced-motion: reduce) { .v4-types__photo img { transition: none } }
+/* шапка с шестью страницами: на узком компьютере прячем телефон, чтобы меню не ломалось */
+@media (max-width: 1240px) { .v4-bar__tel { display: none } .v4-bar nav { gap: 18px } }
+.v4-foot nav a { opacity: .9 }
+.v4-foot nav a:hover { opacity: 1; text-decoration: underline }

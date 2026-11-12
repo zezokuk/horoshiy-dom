@@ -12,7 +12,7 @@ export function StickyCta({ phone }: { phone?: string | null }) {
   // a plain scroll check, not IntersectionObserver: an edge-touching hero still counts as «intersecting», and the
   // evening finale is a tall scene, so a ratio threshold on it never fires (both caught by the browser test, 12.11)
   useEffect(() => {
-    const hero = document.querySelector('.v3-hero')
+    const hero = document.querySelector('.v3-hero, .v3-hero2, .hn')
     const form = document.querySelector('#pokaz form') ?? document.getElementById('pokaz')
     if (!hero || !form) return
     let raf = 0

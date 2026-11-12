@@ -24,7 +24,7 @@ const AUTO_DELAY = 5200 // the star has fallen and the windows are lit by then
 const AUTO_MS = 3400
 const SLIDE_MS = 6000
 
-export function HeroNight({ night, nightPhone, slides = [] }: { night?: string; nightPhone?: string; facts?: string; slides?: HeroSlide[] }) {
+export function HeroNight({ night, nightPhone, slides = [], copy }: { night?: string; nightPhone?: string; facts?: string; slides?: HeroSlide[]; /** v4: own title block instead of «Хороший дом / сюда приводят мечты» */ copy?: React.ReactNode }) {
   const ref = useRef<HTMLElement>(null)
   const [day, setDay] = useState(false)
   // 0 — the cinema frame itself («Тип 5» in the morning mist), then the types
@@ -147,10 +147,12 @@ export function HeroNight({ night, nightPhone, slides = [] }: { night?: string; 
         </div>
         <i className="hn__scrim" aria-hidden />
 
-        <div className="hn__copy">
-          <h1 className="hn__title">Хороший дом</h1>
-          <p className="hn__slogan">сюда приводят мечты</p>
-        </div>
+        {copy ?? (
+          <div className="hn__copy">
+            <h1 className="hn__title">Хороший дом</h1>
+            <p className="hn__slogan">сюда приводят мечты</p>
+          </div>
+        )}
 
         {/* the house is the button: it opens the catalog, or the type that is on the screen */}
         <a className="hn__house" href={href} aria-label={slide ? `${label} — открыть проект` : 'Выбрать дом — перейти в каталог'} onClick={enter}>
