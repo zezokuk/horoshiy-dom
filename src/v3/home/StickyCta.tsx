@@ -25,10 +25,29 @@ export function StickyCta({ phone }: { phone?: string | null }) {
       setOn(pastHero && !formOnScreen)
     }
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(check) }
+    // every «Записаться на показ» link: centre the form, then correct once more — images and the 3D block above it
+    // finish loading after the jump and push the form down (caught by the browser test on 390 px, 12.11)
+    let fix = 0
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as HTMLElement | null)?.closest?.('a[href="#evf-form"]')
+      const target = document.getElementById('evf-form')
+      if (!a || !target) return
+      e.preventDefault()
+      // instant on purpose: the global `scroll-behavior: smooth` gets cut short on a 10 000 px jump (stopped ~1 500 px
+      // above the form in the test); after «Записаться» the person wants the form now, not a fly-through
+      target.scrollIntoView({ block: 'center', behavior: 'instant' })
+      clearTimeout(fix)
+      fix = window.setTimeout(() => {
+        const r = target.getBoundingClientRect()
+        if (r.top < 0 || r.bottom > innerHeight) target.scrollIntoView({ block: 'center', behavior: 'instant' })
+      }, 500)
+      history.replaceState(null, '', '#evf-form')
+    }
     check()
     addEventListener('scroll', onScroll, { passive: true })
     addEventListener('resize', onScroll)
-    return () => { removeEventListener('scroll', onScroll); removeEventListener('resize', onScroll); if (raf) cancelAnimationFrame(raf) }
+    document.addEventListener('click', onClick)
+    return () => { removeEventListener('scroll', onScroll); removeEventListener('resize', onScroll); document.removeEventListener('click', onClick); clearTimeout(fix); if (raf) cancelAnimationFrame(raf) }
   }, [])
 
   const tel = phone?.replace(/[^\d+]/g, '')
