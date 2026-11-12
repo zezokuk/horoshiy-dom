@@ -8,6 +8,7 @@ import { byEstateStatus, estateSale, estateView, genplanEstate, houseView } from
 import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { HeroDawn, type DawnSlide } from '@/v3/home/HeroDawn'
 import { HousePicker, type PickHouse } from '@/v3/home/HousePicker'
+import { StickyCta } from '@/v3/home/StickyCta'
 import '@/v3/v3.css'
 
 /**
@@ -181,9 +182,10 @@ export default async function V3Home() {
         </section>
 
         <div id="pokaz">
-          <EveningFinale offices={(company.offices ?? []).map((o) => ({ title: o.title, address: o.address, hours: o.hours }))} phone={company.phone} />
+          <EveningFinale offices={(company.offices ?? []).map((o) => ({ title: o.title, address: o.address, hours: o.hours }))} phone={company.phone} target={{ context: 'Главная v3: вечерний финал' }} />
         </div>
       </MotionRoot>
+      <StickyCta phone={company.phone} />
     </div>
   )
 }

@@ -84,7 +84,7 @@ export function EveningFinale({
             </a>
           )}
         </div>
-        <div className="evf__form">
+        <div className="evf__form" id="evf-form">
           <p className="evf__form-title">Записаться на показ</p>
           <LeadForm cta="Записаться на показ" target={{ interest: 'buy', context: 'Главная: вечерний финал', ...target }} />
         </div>

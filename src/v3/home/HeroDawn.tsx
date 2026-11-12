@@ -67,7 +67,7 @@ export function HeroDawn({ slides, priceLine, phone, menu }: {
           <p className="v3-hero__sub">Готовые кирпичные дома на своей земле под Краснодаром{priceLine ? <> · <b>{priceLine}</b></> : null}</p>
           <div className="v3-row">
             <a className="v3-btn v3-btn--main" href="#doma">Выбрать дом</a>
-            <a className="v3-btn v3-btn--glass" href="#pokaz">Записаться на показ</a>
+            <a className="v3-btn v3-btn--glass" href="#evf-form">Записаться на показ</a>
           </div>
         </div>
 

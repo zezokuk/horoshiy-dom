@@ -158,3 +158,14 @@
 .v3-cover__blank img { width: 46%; height: auto; opacity: .9 }
 .v3 .v3-cover__blank b { max-width: 100%; white-space: nowrap; font: 400 clamp(14px, 3.4vw, 30px)/1.05 var(--f-emo); font-variation-settings: 'wdth' 72; color: #fff }
 .v3 .v3-cover__body h3.v3-sr { position: absolute }
+
+/* липкая кнопка: только телефон и планшет; уезжает вниз, пока первый экран на месте или на экране форма */
+.v3-sticky { display: none }
+@media (max-width: 860px) {
+  .v3-sticky { display: flex; gap: 10px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding: 10px max(14px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px)); background: rgba(255,255,255,.94); backdrop-filter: blur(12px); border-top: 1px solid var(--line); transform: translateY(110%); transition: transform .35s cubic-bezier(.2,.8,.2,1) }
+  .v3-sticky[data-on='true'] { transform: none }
+  .v3-sticky__go { flex: 1; justify-content: center }
+  .v3-sticky__tel { width: 50px; flex: 0 0 50px; display: grid; place-items: center; border-radius: 999px; border: 1px solid var(--line); color: var(--ink) }
+}
+
+.v3 #evf-form { scroll-margin-top: 80px; scroll-margin-bottom: 90px }
