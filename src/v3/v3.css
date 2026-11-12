@@ -1,0 +1,160 @@
+/* v3 — брендбук «Утро в своём доме» (11-Хороший-дом-с-нуля/06). Шрифты «Усадьба». Всё под .v3, чтобы не задеть v2. */
+.v3 {
+  --paper: #fff; --linen: #f6f4ef; --mist: #eef3ee; --sky: #e6eef2;
+  --forest: #1b3a24; --leaf: #2e6b45; --leaf-d: #24573a; --brick: #a5482d;
+  --ink: #17221b; --moss: #5e6b62; --line: #e2e6e0; --sold: #8c958f;
+  --f-emo: 'Noto Serif Display', Georgia, serif;
+  --f-fact: var(--font-unbounded), Arial, sans-serif;
+  --f-ui: var(--font-manrope), 'Segoe UI', Arial, sans-serif;
+  --r: 14px;
+  background: var(--paper); color: var(--ink); font: 400 17px/1.6 var(--f-ui);
+  -webkit-font-smoothing: antialiased; overflow-x: clip;
+}
+.v3 *, .v3 *::before, .v3 *::after { box-sizing: border-box }
+.v3 h1, .v3 h2, .v3 h3, .v3 p, .v3 figure, .v3 ul { margin: 0 }
+.v3 img { max-width: 100%; display: block }
+.v3 a { color: inherit; text-decoration: none }
+.v3 :focus-visible { outline: 2px solid var(--leaf); outline-offset: 3px }
+.v3-wrap { max-width: 1240px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)) }
+.v3-wrap--wide { max-width: none; padding-right: 0 }
+.v3-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center }
+.v3-eyebrow { font: 600 12px/1.3 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--moss) }
+.v3-h2 { font: 400 clamp(36px, 5.4vw, 64px)/1.02 var(--f-emo); font-variation-settings: 'wdth' 70; letter-spacing: -.01em; margin: 10px 0 18px; text-wrap: balance; color: var(--ink) }
+.v3-h2 em, .v3-hero__title em { font-style: italic; font-variation-settings: 'wdth' 80 }
+.v3-lead { font-size: 19px; max-width: 60ch }
+.v3-note { font-size: 14px; color: var(--moss); margin-top: 14px; max-width: 62ch }
+.v3-sec { padding-block: clamp(64px, 9vw, 120px) }
+.v3-sec--mist { background: var(--mist) }
+.v3-sec--sky { background: var(--sky) }
+.v3-sec--linen { background: var(--linen) }
+.v3-line { padding-bottom: .06em }
+
+/* buttons */
+.v3-btn { display: inline-flex; align-items: center; gap: 10px; border-radius: 999px; padding: 16px 26px; font: 600 15px/1 var(--f-ui); border: 1px solid transparent; transition: background .2s, transform .15s; cursor: pointer }
+.v3-btn:active { transform: scale(.98) }
+.v3-btn--main { background: var(--leaf); color: #fff }
+.v3-btn--main:hover { background: var(--leaf-d) }
+.v3-btn--glass { background: rgba(255,255,255,.14); color: #fff; border-color: rgba(255,255,255,.55); backdrop-filter: blur(6px) }
+
+/* ---------- hero «Рассвет» ---------- */
+.v3-hero { position: relative; min-height: min(100svh, 920px); color: #fff; background: #0e1712; overflow: hidden; isolation: isolate }
+.v3-hero__media { position: absolute; inset: 0; display: block; z-index: -1 }
+.v3-hero__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 62% 55%; opacity: 0; transform: scale(1.04); transition: opacity 1.2s ease, transform 2.6s cubic-bezier(.2,.7,.2,1), filter 2.4s ease }
+.v3-hero__media img.is-on { opacity: 1; transform: scale(1.01) }
+.v3-hero__tint { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,18,14,.42) 0%, rgba(10,18,14,.12) 38%, rgba(10,18,14,.45) 100%) }
+/* «Рассвет» — чистый CSS: каждое правило анимирует только «из» к обычному дневному виду, поэтому без анимаций виден день */
+.v3-hero__warm { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,160,110,.45) 0%, rgba(255,214,170,.22) 45%, rgba(20,30,50,.38) 100%); opacity: 0; animation: v3-dawn-fade 2.4s ease .1s both }
+.v3-hero__mist { position: absolute; left: -20%; right: -20%; bottom: -6%; height: 55%; background: radial-gradient(60% 60% at 50% 70%, rgba(255,255,255,.8), transparent 70%); filter: blur(8px); opacity: 0; transform: translateX(10%); animation: v3-dawn-mist 2.4s ease .1s both; pointer-events: none }
+.v3-hero__mist--2 { bottom: 14%; height: 40%; transform: translateX(-16%); animation-name: v3-dawn-mist2 }
+.v3-hero__star { position: absolute; top: 15%; left: 13%; width: 5px; height: 5px; border-radius: 50%; background: #fff; box-shadow: 0 0 12px 4px rgba(255,255,255,.75); opacity: 0; animation: v3-dawn-fade 1.8s ease .3s both }
+.v3-hero__media img:first-child { animation: v3-dawn-img 2.4s ease .1s both }
+@keyframes v3-dawn-fade { from { opacity: 1 } to { opacity: 0 } }
+@keyframes v3-dawn-mist { from { opacity: .9; transform: translateX(0) } }
+@keyframes v3-dawn-mist2 { from { opacity: .7; transform: translateX(-6%) } }
+@keyframes v3-dawn-img { from { filter: saturate(.72) brightness(.84) } to { filter: none } }
+.v3-hero__inner { position: relative; min-height: inherit; display: flex; flex-direction: column; justify-content: space-between; gap: 32px; padding-block: 24px 26px; pointer-events: none }
+.v3-hero__inner a, .v3-hero__inner button { pointer-events: auto }
+.v3-top { display: flex; align-items: center; justify-content: space-between; gap: 20px }
+.v3-top__logo img { height: 62px; width: auto; filter: drop-shadow(0 1px 8px rgba(0,0,0,.35)) }
+.v3-top__nav { display: flex; gap: 26px; font: 500 15px var(--f-ui) }
+.v3-top__nav a, .v3-top__tel { text-shadow: 0 1px 10px rgba(0,0,0,.35) }
+.v3-top__tel { font: 400 15px var(--f-fact); letter-spacing: -.02em; white-space: nowrap }
+.v3-hero__title { font: 400 clamp(46px, 7vw, 104px)/.98 var(--f-emo); font-variation-settings: 'wdth' 70; letter-spacing: -.015em; text-shadow: 0 2px 30px rgba(0,0,0,.28) }
+.v3-ln { display: block; overflow: hidden; padding-bottom: .04em }
+.v3-ln > span { display: inline-block; animation: v3-rise .9s cubic-bezier(.2,.8,.2,1) .35s both }
+.v3-ln:nth-child(2) > span { animation-delay: .5s }
+@keyframes v3-rise { from { transform: translateY(105%) } }
+.v3-hero__sub { margin: 18px 0 24px; font: 500 18px/1.5 var(--f-ui); max-width: 48ch; text-shadow: 0 1px 16px rgba(0,0,0,.4) }
+.v3-hero__sub b { font: 400 18px var(--f-fact); letter-spacing: -.02em; white-space: nowrap }
+.v3-hero__bottom { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: flex-end; justify-content: space-between }
+.v3-types { display: flex; gap: 6px; max-width: 100%; overflow-x: auto; scrollbar-width: none; background: rgba(10,20,14,.4); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.18); border-radius: 16px; padding: 6px }
+.v3-types button { all: unset; flex: 0 0 auto; cursor: pointer; padding: 10px 14px; border-radius: 11px; font: 500 13px/1.35 var(--f-ui); color: #fff; opacity: .78 }
+.v3-types button b { display: block; font: 400 14px var(--f-fact); letter-spacing: -.02em }
+.v3-types button[aria-pressed='true'] { background: rgba(255,255,255,.95); color: var(--ink); opacity: 1 }
+.v3-hero__cap { font: 600 11px var(--f-ui); letter-spacing: .1em; text-transform: uppercase; opacity: .8 }
+
+/* ---------- подбор и лента ---------- */
+.v3-pick__bar { display: flex; flex-direction: column; gap: 12px; margin: 8px 0 26px; padding-right: max(20px, env(safe-area-inset-right, 0px)) }
+.v3-chips { display: flex; flex-wrap: wrap; gap: 8px }
+.v3-chip { all: unset; cursor: pointer; padding: 10px 17px; border-radius: 999px; border: 1px solid var(--line); font: 600 14px var(--f-ui); color: var(--ink); transition: background .15s }
+.v3-chip:hover { border-color: var(--ink) }
+.v3-chip[aria-pressed='true'] { background: var(--ink); color: #fff; border-color: var(--ink) }
+.v3-chip:focus-visible { outline: 2px solid var(--leaf); outline-offset: 2px }
+.v3-pick__count { font-size: 15px; color: var(--moss) }
+.v3-pick__count b { font: 400 22px var(--f-fact); color: var(--ink); letter-spacing: -.03em }
+.v3-strip { display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px max(20px, env(safe-area-inset-right, 0px)) 18px 2px; scrollbar-width: thin }
+.v3-card { flex: 0 0 min(78vw, 340px); scroll-snap-align: start; border-radius: var(--r); overflow: hidden; background: var(--paper); border: 1px solid var(--line); display: flex; flex-direction: column; transition: box-shadow .25s }
+.v3-card:hover { box-shadow: 0 12px 34px rgba(23,34,27,.12) }
+.v3-card figure { position: relative; aspect-ratio: 4/3; overflow: hidden; background: var(--linen) }
+.v3-card figure img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s cubic-bezier(.2,.7,.2,1) }
+.v3-card:hover figure img { transform: scale(1.03) }
+.v3-card figcaption { position: absolute; left: 10px; bottom: 10px; font: 600 11px var(--f-ui); letter-spacing: .05em; background: rgba(255,255,255,.9); padding: 5px 9px; border-radius: 999px }
+.v3-card__noimg { display: grid; place-items: center; height: 100%; color: var(--moss); font-size: 14px }
+.v3-card__body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 6px }
+.v3-card__body h3 { font: 600 17px/1.3 var(--f-ui) }
+.v3-card__body p { font-size: 14px; color: var(--moss) }
+.v3-card__body .v3-price { font: 400 22px var(--f-fact); letter-spacing: -.03em; color: var(--ink); margin-top: 4px }
+.v3-card--all { display: grid; place-items: center; text-align: center; font: 400 22px/1.2 var(--f-emo); font-variation-settings: 'wdth' 72; background: var(--linen) }
+.v3-status { align-self: flex-start; display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 999px; background: var(--mist); font: 600 12px var(--f-ui) }
+.v3-status i { width: 8px; height: 8px; border-radius: 50%; background: var(--leaf) }
+.v3-strip__nav { display: flex; gap: 8px; padding-right: max(20px, env(safe-area-inset-right, 0px)); justify-content: flex-end }
+.v3-strip__nav button { all: unset; cursor: pointer; width: 46px; height: 46px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line); font-size: 18px }
+.v3-strip__nav button:hover { border-color: var(--ink) }
+.v3-empty { padding: 30px 0; color: var(--moss) }
+
+/* ---------- почему за город ---------- */
+.v3-scenes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 22px; margin-top: 40px }
+.v3-scene__img { position: relative; aspect-ratio: 4/5; border-radius: var(--r); overflow: hidden; background: var(--linen) }
+.v3-scene__img img { position: absolute; inset: -8% 0; width: 100%; height: 116%; object-fit: cover; max-width: none }
+.v3-scene__img span { position: absolute; left: 10px; bottom: 10px; font: 600 11px var(--f-ui); letter-spacing: .05em; background: rgba(255,255,255,.9); padding: 5px 9px; border-radius: 999px }
+.v3-scene figcaption { padding-top: 16px; font-size: 16px; max-width: 40ch }
+.v3-scene figcaption strong { display: block; font: italic 400 34px/1.05 var(--f-emo); font-variation-settings: 'wdth' 80; color: var(--forest); margin-bottom: 6px }
+
+/* ---------- посёлки ---------- */
+.v3-covers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px 18px; margin-top: 34px }
+@media (max-width: 900px) { .v3-covers { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 12px } }
+.v3-cover { display: flex; flex-direction: column; gap: 10px; color: var(--ink) }
+.v3-cover > img, .v3-cover__blank { aspect-ratio: 3/4; width: 100%; border-radius: var(--r); overflow: hidden }
+.v3-cover > img { object-fit: cover; transition: transform .7s cubic-bezier(.2,.7,.2,1), box-shadow .3s }
+.v3-cover:hover > img { box-shadow: 0 14px 34px rgba(23,34,27,.18) }
+.v3-cover__body { padding: 0 2px }
+.v3-cover__body h3 { font: 400 26px/1.05 var(--f-emo); font-variation-settings: 'wdth' 72; margin-bottom: 2px }
+.v3-cover__body p { font-size: 15px; color: var(--moss) }
+.v3-cover--soldOut img { filter: saturate(.6) }
+
+/* ---------- как купить ---------- */
+.v3-split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 40px; align-items: start }
+.v3-buy { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; margin-top: 18px }
+.v3-buy div { border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: flex; flex-direction: column; gap: 4px }
+.v3-buy b { font: 600 17px var(--f-ui) }
+.v3-buy span { font-size: 14px; color: var(--moss) }
+.v3-included { background: var(--linen); border-radius: var(--r); padding: clamp(22px, 3vw, 36px) }
+.v3-included h3 { font: 400 30px/1.1 var(--f-emo); font-variation-settings: 'wdth' 72; margin-bottom: 14px }
+.v3-included ul { padding-left: 20px; display: flex; flex-direction: column; gap: 6px }
+
+/* ---------- кто строит ---------- */
+.v3-facts { display: flex; flex-wrap: wrap; gap: 28px 56px; margin: 30px 0 28px }
+.v3-facts b { display: block; font: 400 clamp(32px, 4vw, 48px)/1 var(--f-fact); letter-spacing: -.04em }
+.v3-facts span { font: 600 11px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--moss) }
+
+@media (max-width: 860px) {
+  .v3-top__nav { display: none }
+  .v3-top__logo img { height: 48px }
+  .v3-hero__bottom { flex-direction: column; align-items: stretch }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v3 *, .v3 *::before, .v3 *::after { transition-duration: 0s !important; animation: none !important }
+}
+
+/* v2's html[data-look="v2"] h1/h2 (0,1,2) set Forum, upright em and a brand colour — .v3-prefixed rules outrank it */
+.v3 .v3-hero__title, .v3 .v3-h2, .v3 .v3-cover__body h3, .v3 .v3-included h3 { font-family: var(--f-emo); font-weight: 400 }
+.v3 .v3-hero__title { line-height: .98; letter-spacing: -.015em }
+.v3 .v3-h2 { line-height: 1.02; letter-spacing: -.01em }
+.v3 .v3-hero__title em, .v3 .v3-h2 em { font-style: italic; color: inherit; font-variation-settings: 'wdth' 80 }
+.v3 .v3-card__body h3 { font-family: var(--f-ui); font-weight: 600; letter-spacing: 0 }
+
+.v3-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
+.v3-cover__blank { position: relative; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 12px; text-align: center; background: radial-gradient(120% 80% at 50% 0%, #2e6b45, #1b3a24) }
+.v3-cover__blank img { width: 46%; height: auto; opacity: .9 }
+.v3 .v3-cover__blank b { max-width: 100%; white-space: nowrap; font: 400 clamp(14px, 3.4vw, 30px)/1.05 var(--f-emo); font-variation-settings: 'wdth' 72; color: #fff }
+.v3 .v3-cover__body h3.v3-sr { position: absolute }

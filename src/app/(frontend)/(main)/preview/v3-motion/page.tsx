@@ -16,20 +16,20 @@ export default function V3MotionPreview() {
     <MotionRoot>
       <section style={sec}>
         <p>Прокрутите вниз: каждое из движений срабатывает при входе блока в экран.</p>
-        <h1 data-reveal="lines" style={h} data-testid="lines">
+        <h1 data-move="lines" style={h} data-testid="lines">
           Дом, в который хочется возвращаться — строки поднимаются по одной
         </h1>
       </section>
       <section style={{ ...sec, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 20 }}>
         {['Ритм', 'Чувство', 'Воздух'].map((w) => (
-          <div key={w} data-reveal="up" data-testid="up" style={{ background: '#F6F4EF', borderRadius: 14, padding: 28, fontSize: 28 }}>
+          <div key={w} data-move="up" data-testid="up" style={{ background: '#F6F4EF', borderRadius: 14, padding: 28, fontSize: 28 }}>
             {w}
           </div>
         ))}
       </section>
       <section style={{ ...sec, height: '70vh', position: 'relative' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img data-reveal="roof" data-testid="roof" src="/design/hero-morning.webp" alt="Окно-крыша"
+        <img data-move="roof" data-testid="roof" src="/design/hero-morning.webp" alt="Окно-крыша"
           style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 14 }} />
       </section>
       <section data-daylight style={{ ...sec, height: '80vh', overflow: 'hidden', position: 'relative', borderRadius: 14 }}>
@@ -38,7 +38,7 @@ export default function V3MotionPreview() {
           style={{ position: 'absolute', inset: '-10% 0', width: '100%', height: '120%', objectFit: 'cover' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(18,32,70,calc(var(--daylight,0) * .6))' }} />
       </section>
-      <section style={{ ...sec, height: '60vh' }}><p data-reveal="up">Конец проверки.</p></section>
+      <section style={{ ...sec, height: '60vh' }}><p data-move="up">Конец проверки.</p></section>
     </MotionRoot>
   )
 }
