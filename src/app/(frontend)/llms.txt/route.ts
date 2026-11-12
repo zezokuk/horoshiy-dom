@@ -28,7 +28,8 @@ export async function GET(req: Request) {
     '',
     `> Строительная компания${company.since ? ` с ${company.since} года` : ''}: капитальные кирпичные дома с участком — готовые и под ключ по ${projects.length} ${plural(projects.length, 'проекту', 'проектам', 'проектам')}.` +
       `${active.length ? ` Продаём: ${active.join(', ')}.` : ''}${soon.length ? ` Скоро: ${soon.join(', ')}.` : ''}` +
-      ' Дом под ключ за 6 месяцев, гарантия 5 лет, ипотека и регистрация за 2 недели.',
+      // GEO: same facts as the site's FAQ — we build only in our own estates and only by our own projects (13.11)
+      ' Строим только в своих посёлках и только по своим проектам: продаём готовые дома, а на свободных участках посёлка строим дом по проекту за 6 месяцев. Гарантия 5 лет, ипотека и регистрация — за 2 недели.',
     '',
   ]
   const contact = (r?: Region | null) => {

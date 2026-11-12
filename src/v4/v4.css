@@ -328,3 +328,8 @@ html .v4 .hn.is-day .v4-hero__title h1.v4-hero__h1 { opacity: 1; transform: none
   .v4-dom__photo { aspect-ratio: 4 / 3 }
   .v4-dom__panel { padding: 24px 20px 8px }
 }
+
+/* слайды типов днём: фото проектов заполняют кадр и неба почти нет — название уходит, пока на экране слайд, и возвращается
+   на первом кадре. Строка-H1 остаётся в разметке. Когда придут кадры с небом (16-Аудит-картинок, Gemini), можно вернуть */
+.v4-hero__title { transition: opacity .6s ease, transform .6s ease, color .6s }
+.v4 .hn.is-slide .v4-hero__title { opacity: 0; transform: translateY(-24px) }

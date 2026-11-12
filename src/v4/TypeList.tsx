@@ -47,7 +47,7 @@ export function TypeList({ types, allHref }: { types: TypeView[]; allHref: strin
             // eslint-disable-next-line @next/next/no-img-element
             t.photo ? <img key={t.slug} className={k === on ? 'is-on' : ''} src={t.photo} alt="" loading={k === 0 ? 'eager' : 'lazy'} /> : null
           ))}
-          <p key={cur.slug} aria-hidden><b>{cur.name}</b>{cur.area ? ` · ${cur.area.toLocaleString('ru-RU')} м²` : ''}</p>
+          <p key={cur.slug} aria-hidden><b>{cur.name}</b>{cur.area ? ` · ${cur.area.toLocaleString('ru-RU')} м²` : ''} · изображение проекта</p>
         </div>
         <a className="v4-types__all" href={allHref}>Все типы и планировки →</a>
       </div>

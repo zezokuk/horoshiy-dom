@@ -273,7 +273,7 @@ export default async function V4Home() {
             <h2 className="v4-grow__words"><span>Зайдите</span> <span><em>внутрь</em></span></h2>
             <figure className="v4-grow__frame">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/v3/sunset.webp" alt="Построенный дом «Хорошего дома» на закате" loading="lazy" />
+              <img src={img(tip5?.photo, 'wide') ?? '/v3/sunset.webp'} alt="Дом «Тип 5» — в него и заходим" loading="lazy" />
               <i className="v4-grow__scrim" />
             </figure>
             <blockquote className="v4-grow__quote">
