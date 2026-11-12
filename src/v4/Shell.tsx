@@ -1,0 +1,86 @@
+/**
+ * v4 · общий каркас страниц (сайт многостраничный, Илья 12.11): шрифты, шапка, финал с записью на показ, подвал.
+ * Главная v4 и страница дома v4 собираются из одних и тех же кусков, поэтому шапка и форма везде одинаковые.
+ * Шапка на главной выезжает, когда пройден первый экран (html.past-hero ставит HeroNight); на других страницах — всегда.
+ */
+import type { CSSProperties } from 'react'
+import { LeadForm } from '@/components/LeadForm'
+import { mainHref } from '@/lib/site'
+import type { Company } from '@/payload-types'
+
+// Noto Serif Display с осью ширины: next/font (Turbopack) на нём падает — ссылка на Google Fonts; перед запуском — свой сервер
+const NOTO_CSS = 'https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5..100,300..600;1,62.5..100,300..600&display=swap'
+
+export const NAV = [
+  { href: mainHref('/catalog'), label: 'Дома в продаже' },
+  { href: mainHref('/projects'), label: 'Проекты' },
+  { href: mainHref('/locations'), label: 'Посёлки' },
+  { href: mainHref('/mortgage'), label: 'Ипотека' },
+  { href: mainHref('/about'), label: 'О компании' },
+  { href: mainHref('/contacts'), label: 'Контакты' },
+]
+
+export const telOf = (phone?: string | null) => phone?.replace(/[^\d+]/g, '') || null
+
+export function V4Fonts() {
+  return (
+    <>
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+      <link rel="stylesheet" href={NOTO_CSS} precedence="default" />
+    </>
+  )
+}
+
+export function V4Bar({ phone, always = false, home = '/v4' }: { phone?: string | null; always?: boolean; home?: string }) {
+  const tel = telOf(phone)
+  return (
+    <div className={`v4-bar${always ? ' v4-bar--always' : ''}`}>
+      <div className="v3-wrap v4-bar__in">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <a href={home} aria-label="Хороший дом — на главную"><img src="/v3/logo.svg" alt="Хороший дом" width={86} height={40} /></a>
+        <nav aria-label="Разделы сайта">{NAV.map((x) => <a key={x.href} href={x.href}>{x.label}</a>)}</nav>
+        <div className="v3-row">
+          {tel && <a className="v4-bar__tel" href={`tel:${tel}`}>{phone}</a>}
+          <a className="v3-btn v3-btn--main v4-bar__btn" href="#evf-form">Записаться на показ</a>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Финал: «Приезжайте на показ» — офисы, телефон и форма. id="evf-form" — сюда ведут все кнопки «Записаться на показ». */
+export function V4Final({ company, n, context, title = 'Приезжайте', em = 'на показ', lead }: {
+  company: Company; n?: string; context: string; title?: string; em?: string; lead?: string
+}) {
+  return (
+    <section className="v3-sec v3-final v4-sec v4-final" id="pokaz">
+      <span className="v4-ghost" aria-hidden>Показ</span>
+      <div className="v3-wrap v3-split v4-head">
+        <div>
+          {n && <p className="v4-num"><b>{n}</b> / Запись на показ</p>}
+          <h2 className="v3-h2" data-move="lines">{title} <em>{em}</em></h2>
+          <p className="v3-lead">{lead ?? 'Покажем дом и посёлок вживую или по видеосвязи, если вы в другом городе. Ответим про участок, документы и ипотеку.'}</p>
+          <ul className="v3-offices">{(company.offices ?? []).map((o) => <li key={o.title}><b>{o.title}</b><span>{[o.address, o.hours].filter(Boolean).join(' · ')}</span></li>)}</ul>
+          {company.phone && <p className="v3-final__tel">{company.phone}</p>}
+        </div>
+        <div className="v3-final__form" id="evf-form">
+          <LeadForm light cta="Записаться на показ" target={{ interest: 'buy', context }} />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+const FOOT = 'Хороший дом'
+
+export function V4Footer({ since }: { since?: number | null }) {
+  return (
+    <footer className="v4-foot">
+      <div className="v3-wrap v4-foot__top">
+        <p>Строим и продаём кирпичные дома с участком под Краснодаром{since ? ` с ${since} года` : ''}: Динская, Новая Адыгея, Козет.</p>
+        <nav aria-label="Разделы сайта в подвале">{NAV.map((x) => <a key={x.href} href={x.href}>{x.label}</a>)}</nav>
+      </div>
+      <p className="v4-foot__word" aria-hidden>{[...FOOT].map((ch, k) => <span key={k} style={{ '--i': k } as CSSProperties}>{ch === ' ' ? ' ' : ch}</span>)}</p>
+    </footer>
+  )
+}

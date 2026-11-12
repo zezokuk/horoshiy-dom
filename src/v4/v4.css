@@ -197,3 +197,134 @@ html.past-hero .v4-bar { transform: none }
 @media (max-width: 1240px) { .v4-bar__tel { display: none } .v4-bar nav { gap: 18px } }
 .v4-foot nav a { opacity: .9 }
 .v4-foot nav a:hover { opacity: 1; text-decoration: underline }
+
+/* ---------- 13.11: сюжет «от желания до ключей» ---------- */
+/* шапка на страницах без первого экрана — всегда на месте */
+.v4-bar--always { transform: none }
+
+/* H1 с поисковыми словами: проявляется вместе с рассветом, ночью сцена чистая */
+/* html[data-look=v2] h1 и .v3 h1 перебивают шрифт и отступы — поэтому селектор длиннее */
+html .v4 .v4-hero__title h1.v4-hero__h1 { margin: 22px auto 0; font: 600 13px/1.45 var(--f-ui); text-shadow: 0 1px 12px rgba(8,16,40,.55); letter-spacing: .16em; text-transform: uppercase; opacity: 0; transform: translateY(8px); transition: opacity .9s ease .4s, transform .9s ease .4s }
+html .v4 .v4-hero__title h1.v4-hero__h1 b { font: 400 13px var(--f-fact); letter-spacing: .02em; white-space: nowrap }
+html .v4 .hn.is-day .v4-hero__title h1.v4-hero__h1 { opacity: 1; transform: none; text-shadow: 0 1px 12px rgba(255,255,255,.95) }
+@media (max-width: 860px) { html .v4 .v4-hero__title h1.v4-hero__h1 { font-size: 11px; letter-spacing: .12em; max-width: 30ch; margin-top: 16px } }
+@media (prefers-reduced-motion: reduce) { html .v4 .v4-hero__title h1.v4-hero__h1 { opacity: 1; transform: none; transition: none } }
+
+/* заголовок «Внутри» стоит перед закреплённой сценой */
+.v4-sec--in { padding-bottom: 28px }
+
+/* ---------- Внутри: Villa Aurelia «Inside» ---------- */
+.v4-in { position: relative; background: #101511 }
+.v4-in__stage { position: sticky; top: 0; height: 100svh; overflow: hidden; color: #fff }
+.v4-in__shot { position: absolute; inset: 0; margin: 0; opacity: 0; transition: opacity .9s ease }
+.v4-in__shot.is-on { opacity: 1 }
+.v4-in__shot > img { width: 100%; height: 100%; max-width: none; object-fit: cover; transform: scale(1.08); transition: transform 6s cubic-bezier(.2,.7,.2,1) }
+.v4-in__shot.is-on > img { transform: scale(1.0) }
+/* «кукольный домик»: пока нет интерьера, камера наезжает на комнату по виду сверху */
+.v4-in__doll { position: absolute; inset: 0; background: #f2efe8; overflow: hidden }
+/* точка комнаты (--x, --y в процентах картинки) ставится в центр кадра; при показе — медленный наезд на неё */
+.v4-in__doll img { position: absolute; left: 50%; top: 50%; width: 175%; height: auto; max-width: none; transform-origin: calc(var(--x) * 1%) calc(var(--y) * 1%); transform: translate(calc(var(--x) * -1%), calc(var(--y) * -1%)) scale(.92); transition: transform 3s cubic-bezier(.2,.7,.2,1) }
+.v4-in__shot.is-on .v4-in__doll img { transform: translate(calc(var(--x) * -1%), calc(var(--y) * -1%)) scale(1.08) }
+.v4-in__shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(10,16,12,.45) 0%, rgba(10,16,12,0) 26%, rgba(10,16,12,0) 55%, rgba(10,16,12,.6) 100%) }
+.v4-in__tabs { position: absolute; top: 84px; left: max(20px, env(safe-area-inset-left, 0px)); z-index: 3; display: flex; gap: 6px; padding: 8px; border-radius: 14px; background: rgba(16,24,18,.42); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.16); max-width: calc(100% - 40px); overflow-x: auto; scrollbar-width: none }
+.v4-in__tabs button { all: unset; cursor: pointer; display: grid; gap: 6px; min-width: 64px; padding: 6px 8px; border-radius: 9px; font: 400 12px var(--f-fact); color: rgba(255,255,255,.7) }
+.v4-in__tabs button[aria-selected='true'] { color: #fff }
+.v4-in__tabs button:focus-visible { outline: 2px solid #fff; outline-offset: 2px }
+.v4-in__tabs i { display: block; height: 2px; background: rgba(255,255,255,.25); border-radius: 2px; overflow: hidden }
+.v4-in__tabs b { display: block; height: 100%; background: #fff; transform-origin: left; transition: transform .2s linear }
+.v4-in__card { position: absolute; z-index: 3; left: max(20px, env(safe-area-inset-left, 0px)); bottom: 32px; width: min(460px, calc(100% - 40px)); padding: 22px 24px; border-radius: 18px; background: rgba(16,24,18,.5); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.16); animation: v4-card .7s cubic-bezier(.2,.7,.2,1) both }
+.v4-in__time { font: 400 13px var(--f-fact); opacity: .85 }
+.v4-in__time em { font: italic 400 17px var(--f-emo); font-variation-settings: 'wdth' 84 }
+.v4 .v4-in__card h3 { font: 400 clamp(34px, 4vw, 52px)/1 var(--f-emo); font-variation-settings: 'wdth' 64; text-transform: uppercase; margin: 8px 0 4px; color: #fff }
+.v4-in__area { font: 400 15px var(--f-fact); letter-spacing: -.02em; color: #bfe7cb }
+.v4-in__text { margin-top: 10px; font-size: 16px; line-height: 1.5; max-width: 40ch }
+.v4-in__mini { position: absolute; z-index: 3; right: max(20px, env(safe-area-inset-right, 0px)); bottom: 32px; width: 190px; padding: 10px; border-radius: 14px; background: rgba(255,255,255,.92); transition: opacity .4s }
+.v4-in__mini > div { position: relative }
+.v4-in__mini img { width: 100%; height: auto; display: block }
+.v4-in__mini i { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--brick); box-shadow: 0 0 0 4px rgba(165,72,45,.25); transition: left .6s cubic-bezier(.2,.7,.2,1), top .6s cubic-bezier(.2,.7,.2,1); animation: v4-pulse 1.8s ease-in-out infinite }
+@keyframes v4-pulse { 50% { box-shadow: 0 0 0 9px rgba(165,72,45,0) } }
+.v4-in__mini span { display: block; margin-top: 6px; font: 600 11px var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--ink); text-align: center }
+.v4-in__mini.is-out img { opacity: .45 }
+.v4-in__cap { position: absolute; z-index: 3; right: max(20px, env(safe-area-inset-right, 0px)); top: 92px; font: 600 11px var(--f-ui); letter-spacing: .06em; background: rgba(255,255,255,.9); color: var(--ink); padding: 5px 10px; border-radius: 999px }
+@media (max-width: 860px) {
+  .v4-in__tabs { top: 70px }
+  .v4-in__card { bottom: 86px; padding: 18px } /* над нижней кнопкой «Записаться на показ» */
+  .v4-in__mini { width: 112px; bottom: auto; top: 136px; padding: 6px }
+  .v4-in__mini span { font-size: 9px }
+  .v4-in__cap { display: none }
+  .v4-in__doll img { width: auto; height: 150% }
+}
+@media (prefers-reduced-motion: reduce) { .v4-in__shot, .v4-in__shot > img, .v4-in__doll { transition: none } .v4-in__mini i { animation: none } }
+
+/* ---------- Почему у нас ---------- */
+.v4-why { margin-top: 40px }
+.v4 .v4-why h3 { font: 700 18px/1.3 var(--f-ui); margin: 0 0 6px }
+.v4 .v4-why p + h3 { margin-top: 24px }
+.v4-why p { max-width: 52ch }
+
+/* ---------- Пять шагов ---------- */
+.v4 .v4-steps { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 0; margin-top: 34px }
+.v4-steps li { position: relative; padding: 22px 22px 22px 0; border-top: 1px solid var(--ink) }
+.v4-steps li span { font: 400 12px var(--f-fact); color: var(--brick) }
+.v4-steps li b { display: block; margin: 10px 0 8px; font: 400 32px/1 var(--f-emo); font-variation-settings: 'wdth' 64; text-transform: uppercase }
+.v4-steps li p { font-size: 15px; color: var(--moss); max-width: 26ch }
+
+/* ---------- Ипотека ---------- */
+.v4-mort { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 18px; margin-top: 30px }
+.v4-mort__in, .v4-mort__out { border-radius: 18px; padding: clamp(20px, 3vw, 32px) }
+.v4-mort__in { background: #fff; border: 1px solid var(--line); display: grid; gap: 10px; align-content: start }
+.v4-mort__in label { font: 600 14px var(--f-ui) }
+.v4-mort__in label b { font: 400 15px var(--f-fact) }
+.v4-mort__in select { font: 500 16px var(--f-ui); padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: #fff; color: var(--ink); max-width: 100%; min-width: 0 }
+.v4-mort__in input[type='range'] { width: 100%; accent-color: var(--leaf) }
+.v4-mort__out { background: var(--forest); color: #fff }
+.v4-mort__label { font: 600 12px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; opacity: .85 }
+.v4-mort__pay { font: 400 clamp(40px, 6vw, 64px)/1.05 var(--f-fact); letter-spacing: -.04em; margin: 10px 0 18px }
+.v4-mort__out dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 14px; border-top: 1px solid rgba(255,255,255,.18); padding-top: 14px }
+.v4-mort__out dt { font: 600 11px var(--f-ui); letter-spacing: .12em; text-transform: uppercase; opacity: .75 }
+.v4-mort__out dd { margin: 4px 0 0; font: 400 15px var(--f-fact) }
+.v4-mort__out .v3-note { color: rgba(255,255,255,.75) }
+.v4 .v4-progs { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px; margin-top: 22px }
+.v4-progs li { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: grid; gap: 4px }
+.v4-progs b { font: 600 16px var(--f-ui) }
+.v4-progs span { font-size: 14px; color: var(--moss) }
+
+/* ---------- Частые вопросы ---------- */
+.v4-faq { margin-top: 26px; border-top: 1px solid var(--line) }
+.v4-faq details { border-bottom: 1px solid var(--line) }
+.v4-faq summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 20px; padding: 20px 0; font: 400 clamp(20px, 2.2vw, 26px)/1.25 var(--f-emo); font-variation-settings: 'wdth' 80 }
+.v4-faq summary::-webkit-details-marker { display: none }
+.v4-faq summary::after { content: '+'; font: 400 22px var(--f-ui); transition: transform .3s }
+.v4-faq details[open] summary::after { transform: rotate(45deg) }
+.v4-faq summary:focus-visible { outline: 2px solid var(--leaf); outline-offset: 4px }
+.v4-faq details p { padding: 0 0 22px; max-width: 70ch; color: var(--ink) }
+
+/* ---------- страница дома v4 ---------- */
+.v4-dom { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(320px, 1fr); min-height: min(100svh, 860px); padding-top: 64px }
+.v4-dom__photo { position: relative; margin: 0; overflow: hidden; background: var(--linen) }
+.v4-dom__photo img { width: 100%; height: 100%; max-width: none; object-fit: cover; animation: v3-h2-img 1.8s cubic-bezier(.2,.7,.2,1) both }
+.v4-dom__photo figcaption { position: absolute; left: 14px; bottom: 14px; font: 600 11px var(--f-ui); letter-spacing: .05em; background: rgba(255,255,255,.9); padding: 5px 9px; border-radius: 999px }
+.v4-dom__panel { display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: clamp(28px, 4vw, 64px) }
+.v4-dom__crumbs { display: flex; gap: 8px; font: 600 12px var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--moss) }
+.v4-dom__crumbs a:hover { color: var(--ink) }
+.v4 .v4-dom__status { margin-top: 18px }
+.v4-dom__status--reserved i { background: #c9922a }
+.v4-dom__status--sold i { background: var(--sold) }
+.v4 .v4-dom h1 { font: 400 clamp(44px, 5.4vw, 80px)/.95 var(--f-emo); font-variation-settings: 'wdth' 62.5; text-transform: uppercase; letter-spacing: .01em; color: var(--ink); margin: 6px 0 0 }
+.v4-dom__where { font-size: 16px; color: var(--moss) }
+.v4 .v4-dom__price { font: 400 clamp(36px, 4vw, 52px)/1 var(--f-fact); letter-spacing: -.04em; color: var(--forest); margin-top: 18px }
+.v4-dom__cta { margin-top: 18px }
+.v4 .v4-btn--line { border-color: var(--line); color: var(--ink); font-family: var(--f-fact); font-weight: 400; letter-spacing: -.02em }
+.v4 .v4-btn--line:hover { border-color: var(--ink) }
+.v4-dom__facts { padding-top: clamp(40px, 6vw, 80px) }
+.v4-dom__facts .v4-nums__rows { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 0; margin-top: 0 }
+.v4 .v4-dom__facts .v4-nums__row, .v4 .v4-dom__facts .v4-nums__row:nth-child(even) { flex-direction: column; align-items: flex-start; text-align: left; gap: 6px; padding: 18px 18px 18px 0 }
+.v4-dom__facts .v4-nums__row b { font-size: clamp(34px, 3.6vw, 52px) }
+.v4-dom__plan { width: 100%; border-radius: 14px; border: 1px solid var(--line); background: #fff }
+.v4-dom__similar { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 18px }
+.v4-dom__similar .v3-card { flex: none }
+@media (max-width: 960px) {
+  .v4-dom { grid-template-columns: minmax(0, 1fr); min-height: 0; padding-top: 56px }
+  .v4-dom__photo { aspect-ratio: 4 / 3 }
+  .v4-dom__panel { padding: 24px 20px 8px }
+}
