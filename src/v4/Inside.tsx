@@ -77,9 +77,9 @@ export function Inside({ stops, plan }: { stops: InsideStop[]; plan?: string }) 
         ))}
         <i className="v4-in__shade" aria-hidden />
 
-        <div className="v4-in__tabs" role="tablist" aria-label="Остановки">
+        <div className="v4-in__tabs" role="group" aria-label="Остановки дня">
           {stops.map((s, k) => (
-            <button key={s.title} type="button" role="tab" aria-selected={k === i} onClick={() => go(k)}>
+            <button key={s.title} type="button" aria-current={k === i ? 'step' : undefined} aria-label={`${s.time} — ${s.title}`} onClick={() => go(k)}>
               <span>{s.time}</span>
               <i><b style={{ transform: `scaleX(${k < i ? 1 : k === i ? Math.max(0.04, local) : 0})` }} /></i>
             </button>

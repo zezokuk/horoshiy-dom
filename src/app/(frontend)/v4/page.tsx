@@ -240,7 +240,7 @@ export default async function V4Home() {
           <section className="v3-sec v3-sec--linen v4-sec" id="tipy">
             <Head n="02" label="09:00 · Проекты домов" ghost="Проекты"
               lead="Одноэтажные, с мансардой и двухэтажные. У каждого своя планировка и своя страница с домами, которые продаются сейчас.">
-              {types.length} {plural(types.length, 'проект', 'проекта', 'проектов')}: <em>от {Math.min(...areas).toLocaleString('ru-RU')} до {Math.max(...areas).toLocaleString('ru-RU')} м²</em>
+              {`${types.length} ${plural(types.length, 'проект', 'проекта', 'проектов')}:`} <em>{`от ${Math.min(...areas).toLocaleString('ru-RU')} до ${Math.max(...areas).toLocaleString('ru-RU')} м²`}</em>
             </Head>
             <div className="v3-wrap"><TypeList types={types} allHref={mainHref('/projects')} /></div>
           </section>
