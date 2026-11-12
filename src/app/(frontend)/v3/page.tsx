@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
 import { EveningFinale } from '@/components/home/EveningFinale'
 import { PlotPicker, type PlotEstate } from '@/components/home/PlotPicker'
-import { getCompany, getEstates, getHouses, getProjects, img, plural } from '@/lib/data'
+import { getCompany, getEstates, getHouses, plural } from '@/lib/data'
 import { formatMillions } from '@/lib/format'
 import { mainHref } from '@/lib/site'
 import { byEstateStatus, estateSale, estateView, genplanEstate, houseView } from '@/lib/view'
 import { MotionRoot } from '@/v3/motion/MotionRoot'
-import { HeroDawn, type DawnSlide } from '@/v3/home/HeroDawn'
+import { HeroScene } from '@/v3/home/HeroScene'
 import { HousePicker, type PickHouse } from '@/v3/home/HousePicker'
 import { StickyCta } from '@/v3/home/StickyCta'
 import { DayStory, type DayStep } from '@/v3/home/DayStory'
@@ -40,28 +40,19 @@ const DAY: DayStep[] = [
   { time: '20:30', word: 'Воздух', text: 'Мангал, гитара, тёплый свет в окнах и вечер без соседей за стенкой. Тишина здесь — это чувство контроля над своим пространством.', src: '/v3/sunset.webp', cap: 'Фото построенного дома' },
 ]
 
-function Bridge({ text, href }: { text: string; href: string }) {
-  return (
-    <a className="v3-bridge" href={href} data-move="up">
-      <span>{text}</span><i aria-hidden>↓</i>
-    </a>
-  )
-}
-
 export default async function V3Home() {
-  const [company, estates, houses, projects] = await Promise.all([getCompany(), getEstates(), getHouses(), getProjects()])
+  const [company, estates, houses] = await Promise.all([getCompany(), getEstates(), getHouses()])
   const free = houses.filter((h) => h.status === 'free').map(houseView).sort((a, b) => a.price - b.price)
   const priceFrom = free.find((h) => h.price > 0)?.price
   const priceLine = priceFrom ? `от ${formatMillions(priceFrom)}` : ''
 
-  // first screen: the built house in the morning, then the types on sale with their own picture, area and lowest price
-  const slides: DawnSlide[] = [{ src: '/v3/hero.webp', phone: '/v3/hero-phone.webp', title: 'Наш дом', meta: 'построен', href: '#doma', caption: 'Фото построенного дома' }]
-  for (const p of projects) {
-    const mine = free.filter((h) => h.title.startsWith(p.name))
-    const src = img(p.photo, 'wide')
-    if (!mine.length || !src || p.name === 'Тип 12') continue // «Тип 12» — только рендер с бассейном, на первый экран не ставим
-    slides.push({ src, title: p.name, meta: `${p.area ? `${p.area.toLocaleString('ru-RU')} м² · ` : ''}от ${formatMillions(mine[0].price)}`, href: mainHref(`/projects/${p.slug}`), caption: 'Изображение проекта' })
-  }
+  // first screen (Aurus-style numbers over the photo): live from the admin, so they never go stale
+  const sellingEstates = estates.filter((e) => e.status !== 'planned' && free.some((h) => h.estateSlug === e.slug)).length
+  const heroStats = [
+    { value: priceLine || '—', label: 'цена дома с участком' },
+    { value: String(free.length), label: `${plural(free.length, 'дом', 'дома', 'домов')} в продаже` },
+    { value: String(sellingEstates), label: `${plural(sellingEstates, 'посёлок', 'посёлка', 'посёлков')} под Краснодаром` },
+  ]
 
   const pick: PickHouse[] = free.map((h) => ({
     code: h.code, title: h.title, area: h.area, plot: h.plot, price: h.price, estate: h.estateName,
@@ -87,20 +78,12 @@ export default async function V3Home() {
     { v: '5 лет', l: 'гарантия на капитальные дефекты' },
   ].filter((f): f is { v: string; l: string; n?: number } => f !== null)
 
-  const menu = [
-    { label: 'Дома', href: '#doma' },
-    { label: 'Посёлки', href: '#poselki' },
-    { label: 'Как купить', href: '#kupit' },
-    { label: 'О компании', href: mainHref('/about') },
-    { label: 'Контакты', href: mainHref('/contacts') },
-  ]
-
   return (
     <div className="v3">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
       <link rel="stylesheet" href={NOTO_CSS} precedence="default" />
       <MotionRoot>
-        <HeroDawn slides={slides} priceLine={priceLine} phone={company.phone} menu={menu} />
+        <HeroScene photo="/v3/hero.webp" photoPhone="/v3/hero-phone.webp" stats={heroStats} phone={company.phone} />
 
         <section className="v3-sec" id="doma">
           <div className="v3-wrap">
@@ -110,7 +93,6 @@ export default async function V3Home() {
           <div className="v3-wrap v3-wrap--wide"><HousePicker houses={pick} catalogHref={mainHref('/catalog')} /></div>
         </section>
 
-        <Bridge text="А теперь — зачем вообще свой дом" href="#zachem" />
 
         <section className="v3-sec" id="zachem">
           <div className="v3-wrap">
@@ -123,7 +105,6 @@ export default async function V3Home() {
           </div>
         </section>
 
-        <Bridge text="Осталось выбрать, где проснуться" href="#poselki" />
 
         <section className="v3-sec" id="poselki">
           <div className="v3-wrap">
@@ -134,7 +115,7 @@ export default async function V3Home() {
             {covers.map((c) => (
               <a key={c.slug} href={c.href} className={`v3-cover v3-cover--${c.status}`} data-move="up">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                {c.coverCard || c.cover ? <img src={c.coverCard || c.cover} alt={c.name} loading="lazy" /> : (
+                {c.coverCard || c.cover ? <img src={c.coverCard || c.cover} alt={c.name} loading="lazy" data-move="reveal" /> : (
                   // eslint-disable-next-line @next/next/no-img-element
                   <span className="v3-cover__blank"><img src="/v3/logo-white.svg" alt="" width={140} height={65} /><b>{c.name}</b></span>
                 )}
@@ -148,7 +129,6 @@ export default async function V3Home() {
           </div>
         </section>
 
-        <Bridge text="Посмотрите, где именно стоит дом" href="#genplan" />
 
         {plots.length > 0 && (
           <section className="v3-sec v3-sec--sky" id="genplan">
@@ -161,7 +141,6 @@ export default async function V3Home() {
           </section>
         )}
 
-        <Bridge text="Теперь посчитаем, сколько платить" href="#kupit" />
 
         <section className="v3-sec" id="kupit">
           <div className="v3-wrap v3-split">
@@ -181,7 +160,6 @@ export default async function V3Home() {
           </div>
         </section>
 
-        <Bridge text="И о тех, кто строит" href="#kto" />
 
         <section className="v3-sec v3-sec--linen" id="kto">
           <div className="v3-wrap">
@@ -194,7 +172,6 @@ export default async function V3Home() {
           </div>
         </section>
 
-        <Bridge text="Приезжайте посмотреть вживую" href="#evf-form" />
 
         <div id="pokaz">
           <EveningFinale offices={(company.offices ?? []).map((o) => ({ title: o.title, address: o.address, hours: o.hours }))} phone={company.phone} target={{ context: 'Главная v3: вечерний финал' }} />

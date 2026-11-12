@@ -45,7 +45,7 @@ export function HousePicker({ houses, catalogHref }: { houses: PickHouse[]; cata
           <div className="v3-strip" ref={strip}>
             {list.map((h) => (
               <a key={h.code} className="v3-card" href={h.href} data-move="up">
-                <figure>
+                <figure data-move="reveal">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   {h.photo ? <img src={h.photo} alt={h.title} loading="lazy" /> : <span className="v3-card__noimg">Фото скоро</span>}
                   <figcaption>{h.caption}</figcaption>

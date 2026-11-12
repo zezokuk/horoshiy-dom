@@ -85,6 +85,16 @@ export function MotionRoot({ children }: { children: ReactNode }) {
         })
       })
 
+      // картинка раскрывается при входе в экран (ERA, Aurus): рамка расходится к краям, фото чуть отъезжает
+      gsap.utils.toArray<HTMLElement>('[data-move="reveal"]').forEach((node) => {
+        const sib = [...(node.closest('.v3-strip, .v3-covers')?.children ?? [])]
+        const i = Math.max(0, sib.findIndex((c) => c.contains(node)))
+        gsap.fromTo(node, { clipPath: 'inset(12% 12% 12% 12% round 14px)' }, {
+          clipPath: 'inset(0% 0% 0% 0% round 14px)', duration: 1.1, ease: 'power3.out', delay: Math.min(i, 5) * 0.08,
+          scrollTrigger: { trigger: node, start: 'top 90%', once: true },
+        })
+      })
+
       // «Окно-крыша» на выходе из первого экрана: кадр сжимается в силуэт дома из логотипа, вокруг — белый
       gsap.utils.toArray<HTMLElement>('[data-move="hero-exit"]').forEach((node) => {
         gsap.fromTo(node, { clipPath: ROOF_OPEN }, {
