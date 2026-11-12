@@ -38,7 +38,7 @@ export default async function V3Home() {
   const priceLine = priceFrom ? `от ${formatMillions(priceFrom)}` : ''
 
   // first screen: the built house in the morning, then the types on sale with their own picture, area and lowest price
-  const slides: DawnSlide[] = [{ src: '/v3/hero.webp', title: 'Наш дом', meta: 'построен', href: '#doma', caption: 'Фото построенного дома' }]
+  const slides: DawnSlide[] = [{ src: '/v3/hero.webp', phone: '/v3/hero-phone.webp', title: 'Наш дом', meta: 'построен', href: '#doma', caption: 'Фото построенного дома' }]
   for (const p of projects) {
     const mine = free.filter((h) => h.title.startsWith(p.name))
     const src = img(p.photo, 'wide')

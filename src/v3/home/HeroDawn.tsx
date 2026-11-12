@@ -8,7 +8,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 
-export type DawnSlide = { src: string; title: string; meta: string; href: string; caption: string }
+export type DawnSlide = { src: string; phone?: string; title: string; meta: string; href: string; caption: string }
 
 export function HeroDawn({ slides, priceLine, phone, menu }: {
   slides: DawnSlide[]
@@ -35,9 +35,11 @@ export function HeroDawn({ slides, priceLine, phone, menu }: {
     <header className="v3-hero" data-daylight>
       <a className="v3-hero__media" href={cur.href} aria-label={`Открыть: ${cur.title}`}>
         {slides.map((s, k) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img key={s.src} src={s.src} alt={s.title} className={k === i ? 'is-on' : ''} fetchPriority={k === 0 ? 'high' : 'low'}
-            loading={k === 0 ? 'eager' : 'lazy'} />
+          <picture key={s.src}>
+            {s.phone && <source media="(max-width: 700px)" srcSet={s.phone} />}
+            <img src={s.src} alt={s.title} className={k === i ? 'is-on' : ''} fetchPriority={k === 0 ? 'high' : 'low'}
+              loading={k === 0 ? 'eager' : 'lazy'} />
+          </picture>
         ))}
         <span className="v3-hero__tint" aria-hidden />
         <span className="v3-hero__warm" aria-hidden />

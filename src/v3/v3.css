@@ -47,7 +47,7 @@
 .v3-hero__mist { position: absolute; left: -20%; right: -20%; bottom: -6%; height: 55%; background: radial-gradient(60% 60% at 50% 70%, rgba(255,255,255,.8), transparent 70%); filter: blur(8px); opacity: 0; transform: translateX(10%); animation: v3-dawn-mist 2.4s ease .1s both; pointer-events: none }
 .v3-hero__mist--2 { bottom: 14%; height: 40%; transform: translateX(-16%); animation-name: v3-dawn-mist2 }
 .v3-hero__star { position: absolute; top: 15%; left: 13%; width: 5px; height: 5px; border-radius: 50%; background: #fff; box-shadow: 0 0 12px 4px rgba(255,255,255,.75); opacity: 0; animation: v3-dawn-fade 1.8s ease .3s both }
-.v3-hero__media img:first-child { animation: v3-dawn-img 2.4s ease .1s both }
+.v3-hero__media picture:first-child img { animation: v3-dawn-img 2.4s ease .1s both }
 @keyframes v3-dawn-fade { from { opacity: 1 } to { opacity: 0 } }
 @keyframes v3-dawn-mist { from { opacity: .9; transform: translateX(0) } }
 @keyframes v3-dawn-mist2 { from { opacity: .7; transform: translateX(-6%) } }
