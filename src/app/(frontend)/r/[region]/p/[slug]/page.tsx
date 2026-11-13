@@ -162,17 +162,10 @@ export default async function LandingPage({ params }: Props) {
                 <span>строим дома{company.since ? `, с ${company.since} года` : ''}</span>
               </li>
             )}
-            <li>
-              <b>6 мес.</b>
-              <span>дом под ключ</span>
-            </li>
+            {/* «6 мес. под ключ» и «2 недели ипотека» сняты 13.11: без условий клиента не обещаем (11-…/01, раздел 4) */}
             <li>
               <b>5 лет</b>
               <span>гарантия на дом</span>
-            </li>
-            <li>
-              <b>2 недели</b>
-              <span>ипотека и регистрация</span>
             </li>
           </ul>
         </div>
