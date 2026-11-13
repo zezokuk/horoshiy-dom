@@ -5,21 +5,20 @@
  */
 import type { CSSProperties } from 'react'
 import { LeadForm } from '@/components/LeadForm'
-import { mainHref } from '@/lib/site'
 import type { Company } from '@/payload-types'
 
 // Noto Serif Display с осью ширины: next/font (Turbopack) на нём падает — ссылка на Google Fonts; перед запуском — свой сервер
 const NOTO_CSS = 'https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5..100,300..600;1,62.5..100,300..600&display=swap'
 
-// черновик v4 ведёт на свои страницы; «О компании» и «Контакты» пока v2 (ждём фото основателя и юрлицо).
-// При переезде v4 на «/» адреса станут /catalog, /projects, /locations, /mortgage — как сейчас у v2.
+// черновик v4 ведёт на свои страницы. При переезде v4 на «/» адреса станут /catalog, /projects, /locations, /mortgage,
+// /about, /contacts — как сейчас у v2 (тогда здесь — mainHref(...)).
 export const NAV = [
   { href: '/v4/doma', label: 'Дома в продаже' },
   { href: '/v4/proekty', label: 'Проекты' },
   { href: '/v4/poselki', label: 'Посёлки' },
   { href: '/v4/ipoteka', label: 'Ипотека' },
-  { href: mainHref('/about'), label: 'О компании' },
-  { href: mainHref('/contacts'), label: 'Контакты' },
+  { href: '/v4/o-kompanii', label: 'О компании' },
+  { href: '/v4/kontakty', label: 'Контакты' },
 ]
 
 export const telOf = (phone?: string | null) => phone?.replace(/[^\d+]/g, '') || null
