@@ -122,7 +122,7 @@ async function seedLandings(payload: Payload, region: number, dinskaya: number, 
       estate: novo,
       offer: 'Старт продаж скоро. Оставьте телефон — сообщим первыми и пришлём проекты домов с ценами.',
       facts: [
-        { value: '6 мес.', label: 'дом под ключ' },
+        { value: 'с 2014', label: 'строим свои посёлки' },
         { value: '5 лет', label: 'гарантия на дом' },
         { value: '12', label: 'проектов домов' },
       ],
