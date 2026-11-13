@@ -11,11 +11,13 @@ import type { Company } from '@/payload-types'
 // Noto Serif Display с осью ширины: next/font (Turbopack) на нём падает — ссылка на Google Fonts; перед запуском — свой сервер
 const NOTO_CSS = 'https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5..100,300..600;1,62.5..100,300..600&display=swap'
 
+// черновик v4 ведёт на свои страницы; «О компании» и «Контакты» пока v2 (ждём фото основателя и юрлицо).
+// При переезде v4 на «/» адреса станут /catalog, /projects, /locations, /mortgage — как сейчас у v2.
 export const NAV = [
-  { href: mainHref('/catalog'), label: 'Дома в продаже' },
-  { href: mainHref('/projects'), label: 'Проекты' },
-  { href: mainHref('/locations'), label: 'Посёлки' },
-  { href: mainHref('/mortgage'), label: 'Ипотека' },
+  { href: '/v4/doma', label: 'Дома в продаже' },
+  { href: '/v4/proekty', label: 'Проекты' },
+  { href: '/v4/poselki', label: 'Посёлки' },
+  { href: '/v4/ipoteka', label: 'Ипотека' },
   { href: mainHref('/about'), label: 'О компании' },
   { href: mainHref('/contacts'), label: 'Контакты' },
 ]
@@ -82,5 +84,19 @@ export function V4Footer({ since }: { since?: number | null }) {
       </div>
       <p className="v4-foot__word" aria-hidden>{[...FOOT].map((ch, k) => <span key={k} style={{ '--i': k } as CSSProperties}>{ch === ' ' ? ' ' : ch}</span>)}</p>
     </footer>
+  )
+}
+
+/** Шапка внутренней страницы v4: подпись, огромное бледное слово, заголовок капителью с курсивным словом, подзаголовок. */
+export function V4PageHead({ eyebrow, ghost, title, em, lead }: { eyebrow: string; ghost: string; title: string; em?: string; lead?: string }) {
+  return (
+    <section className="v3-sec v4-sec v4-page-head">
+      <span className="v4-ghost" aria-hidden>{ghost}</span>
+      <div className="v3-wrap v4-head">
+        <nav className="v4-dom__crumbs" aria-label="Навигация"><a href="/v4">Главная</a><span aria-hidden>/</span><span>{eyebrow}</span></nav>
+        <h1 className="v3-h2 v4-page-head__h1" data-move="lines">{title}{em ? <> <em>{em}</em></> : null}</h1>
+        {lead && <p className="v3-lead" data-move="up">{lead}</p>}
+      </div>
+    </section>
   )
 }

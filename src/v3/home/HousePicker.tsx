@@ -18,7 +18,7 @@ const BUDGETS = [
 const mln = (p: number) => `${(p / 1e6).toLocaleString('ru-RU', { maximumFractionDigits: 2 })} млн ₽`
 const word = (n: number) => (n % 10 === 1 && n % 100 !== 11 ? 'дом' : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? 'дома' : 'домов')
 
-export function HousePicker({ houses, catalogHref }: { houses: PickHouse[]; catalogHref: string }) {
+export function HousePicker({ houses, catalogHref, grid = false }: { houses: PickHouse[]; catalogHref: string; /** v4-каталог: сетка вместо ленты вправо */ grid?: boolean }) {
   const estates = useMemo(() => [...new Set(houses.map((h) => h.estate))], [houses])
   const [estate, setEstate] = useState<string>('all')
   const [budget, setBudget] = useState('all')
@@ -42,7 +42,7 @@ export function HousePicker({ houses, catalogHref }: { houses: PickHouse[]; cata
 
       {list.length > 0 ? (
         <div className="v3-strip-wrap">
-          <div className="v3-strip" ref={strip}>
+          <div className={`v3-strip${grid ? ' v3-strip--grid' : ''}`} ref={strip}>
             {list.map((h) => (
               <a key={h.code} className="v3-card" href={h.href} data-move="up">
                 <figure data-move="reveal">
@@ -58,12 +58,12 @@ export function HousePicker({ houses, catalogHref }: { houses: PickHouse[]; cata
                 </div>
               </a>
             ))}
-            <a className="v3-card v3-card--all" href={catalogHref}>Все дома<br />в каталоге →</a>
+            {!grid && <a className="v3-card v3-card--all" href={catalogHref}>Все дома<br />в каталоге →</a>}
           </div>
-          <div className="v3-strip__nav">
+          {!grid && <div className="v3-strip__nav">
             <button type="button" onClick={() => scroll(-1)} aria-label="Назад">←</button>
             <button type="button" onClick={() => scroll(1)} aria-label="Дальше">→</button>
-          </div>
+          </div>}
         </div>
       ) : (
         <p className="v3-empty">Под этот выбор свободных домов сейчас нет. Оставьте телефон в конце страницы — подберём из новых.</p>

@@ -95,7 +95,7 @@ async function run(browser, tag, opts) {
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/v4test-${tag}-dom.jpg`, quality: 65, type: 'jpeg', fullPage: false })
   }
 
-  for (const path of ['/v4/poselok/dinskaya', '/v4/proekt/tip-5']) {
+  for (const path of ['/v4/poselok/dinskaya', '/v4/proekt/tip-5', '/v4/doma', '/v4/proekty', '/v4/poselki', '/v4/ipoteka']) {
     const r2 = await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle', timeout: 120000 })
     ok(`${tag}: ${path} открывается`, r2 && r2.status() === 200)
     ok(`${tag}: ${path} — один H1 и форма, без прокрутки вбок`, await page.evaluate(() => document.querySelectorAll('h1').length === 1 && !!document.querySelector('#evf-form') && document.documentElement.scrollWidth <= innerWidth))

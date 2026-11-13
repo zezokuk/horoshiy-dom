@@ -16,7 +16,7 @@ export type TypeView = {
 const mln = (p: number) => `${(p / 1e6).toLocaleString('ru-RU', { maximumFractionDigits: 2 })} млн ₽`
 const word = (n: number, a: string, b: string, c: string) => (n % 10 === 1 && n % 100 !== 11 ? a : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? b : c)
 
-export function TypeList({ types, allHref }: { types: TypeView[]; allHref: string }) {
+export function TypeList({ types, allHref, allLabel = 'Все проекты и планировки →' }: { types: TypeView[]; allHref?: string; allLabel?: string }) {
   const [on, setOn] = useState(0)
   const cur = types[on]
   if (!cur) return null
@@ -49,7 +49,7 @@ export function TypeList({ types, allHref }: { types: TypeView[]; allHref: strin
           ))}
           <p key={cur.slug} aria-hidden><b>{cur.name}</b>{cur.area ? ` · ${cur.area.toLocaleString('ru-RU')} м²` : ''} · изображение проекта</p>
         </div>
-        <a className="v4-types__all" href={allHref}>Все типы и планировки →</a>
+        {allHref && <a className="v4-types__all" href={allHref}>{allLabel}</a>}
       </div>
     </div>
   )

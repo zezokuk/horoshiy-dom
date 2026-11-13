@@ -346,3 +346,9 @@ html .v4 .hn.is-day .v4-hero__title h1.v4-hero__h1 { opacity: 1; transform: none
 .v4-near b { font: 400 15px var(--f-fact); white-space: nowrap }
 .v4 .v4-chips-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px }
 .v4-chips-list li { padding: 6px 12px; border-radius: 999px; background: var(--mist); font: 600 13px var(--f-ui) }
+
+/* каталог v4: дома сеткой, без ленты вправо */
+.v4 .v3-strip--grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 22px 18px; overflow: visible; scroll-snap-type: none; padding-right: max(20px, env(safe-area-inset-right, 0px)) }
+.v4 .v3-strip--grid .v3-card { flex: none }
+/* шапка внутренних страниц v4 */
+.v4-page-head { padding-top: calc(64px + clamp(48px, 7vw, 100px)) }

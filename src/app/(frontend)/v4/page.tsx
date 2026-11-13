@@ -5,7 +5,6 @@ import { PlotPicker, type PlotEstate } from '@/components/home/PlotPicker'
 import { getCompany, getEstates, getHouses, getProjects, getRegions, img, plural } from '@/lib/data'
 import { formatMillions } from '@/lib/format'
 import { JsonLd, faqLd, organizationLd } from '@/lib/seo'
-import { mainHref } from '@/lib/site'
 import { byEstateStatus, estateSale, estateView, genplanEstate, houseView } from '@/lib/view'
 import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { HousePicker, type PickHouse } from '@/v3/home/HousePicker'
@@ -233,7 +232,7 @@ export default async function V4Home() {
             lead={`${free.length} ${plural(free.length, 'кирпичный дом', 'кирпичных дома', 'кирпичных домов')} в ${placesOnSale.length > 1 ? 'посёлках ' : ''}${placesOnSale.join(', ')}. Цены и статусы — из прайса застройщика.`}>
             Готовые дома <em>в продаже</em>
           </Head>
-          <div className="v3-wrap v3-wrap--wide"><HousePicker houses={pick} catalogHref={mainHref('/catalog')} /></div>
+          <div className="v3-wrap v3-wrap--wide"><HousePicker houses={pick} catalogHref="/v4/doma" /></div>
         </section>
 
         {types.length > 0 && (
@@ -242,7 +241,7 @@ export default async function V4Home() {
               lead="Одноэтажные, с мансардой и двухэтажные. У каждого своя планировка и своя страница с домами, которые продаются сейчас.">
               {`${types.length} ${plural(types.length, 'проект', 'проекта', 'проектов')}:`} <em>{`от ${Math.min(...areas).toLocaleString('ru-RU')} до ${Math.max(...areas).toLocaleString('ru-RU')} м²`}</em>
             </Head>
-            <div className="v3-wrap"><TypeList types={types} allHref={mainHref('/projects')} /></div>
+            <div className="v3-wrap"><TypeList types={types} allHref="/v4/proekty" /></div>
           </section>
         )}
 
