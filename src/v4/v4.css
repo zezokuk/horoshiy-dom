@@ -352,3 +352,9 @@ html .v4 .hn.is-day .v4-hero__title h1.v4-hero__h1 { opacity: 1; transform: none
 .v4 .v3-strip--grid .v3-card { flex: none }
 /* шапка внутренних страниц v4 */
 .v4-page-head { padding-top: calc(64px + clamp(48px, 7vw, 100px)) }
+
+/* баннер cookie на страницах v4: шрифт и кнопка из брендбука, на компьютере — компактно слева */
+html:has(.v4) .cookie { font-family: var(--font-manrope), 'Segoe UI', Arial, sans-serif; color: #17221b; border: 1px solid #e2e6e0; box-shadow: 0 14px 40px rgba(23,34,27,.14); border-radius: 16px }
+html:has(.v4) .cookie .btn { background: #2e6b45; border-color: #2e6b45; color: #fff; border-radius: 999px; font: 600 14px var(--font-manrope), Arial, sans-serif }
+html:has(.v4) .cookie .btn:hover { background: #24573a }
+@media (min-width: 861px) { html:has(.v4) .cookie { right: auto; max-width: 440px; bottom: 20px; left: 20px } }
