@@ -358,3 +358,15 @@ html:has(.v4) .cookie { font-family: var(--font-manrope), 'Segoe UI', Arial, san
 html:has(.v4) .cookie .btn { background: #2e6b45; border-color: #2e6b45; color: #fff; border-radius: 999px; font: 600 14px var(--font-manrope), Arial, sans-serif }
 html:has(.v4) .cookie .btn:hover { background: #24573a }
 @media (min-width: 861px) { html:has(.v4) .cookie { right: auto; max-width: 440px; bottom: 20px; left: 20px } }
+
+/* картинки из Gemini (tools/v4images.py): слайды с небом — название остаётся; финал на фоне вечера */
+.v4 .v4-top--sky .hn.is-slide .v4-hero__title { opacity: 1; transform: none }
+.v4-final--bg { position: relative; color: #fff; background: #101511 }
+.v4-final--bg::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10,16,12,.82) 0%, rgba(10,16,12,.45) 55%, rgba(10,16,12,.2) 100%), var(--final-bg) center / cover no-repeat }
+.v4-final--bg > * { position: relative }
+.v4 .v4-final--bg .v3-h2, .v4 .v4-final--bg .v3-lead, .v4 .v4-final--bg .v3-final__tel, .v4 .v4-final--bg .v3-offices { color: #fff }
+.v4 .v4-final--bg .v3-h2 em { color: #bfe7cb }
+.v4-final--bg .v4-ghost { display: none }
+.v4 .v4-final--bg .v4-num, .v4 .v4-final--bg .v4-num b, .v4 .v4-final--bg .v3-offices span { color: rgba(255,255,255,.82) }
+.v4 .v4-final--bg .v3-offices li { border-color: rgba(255,255,255,.5) }
+@media (max-width: 860px) { .v4-final--bg::before { background: linear-gradient(180deg, rgba(10,16,12,.86) 0%, rgba(10,16,12,.72) 60%, rgba(10,16,12,.55) 100%), var(--final-bg) center / cover no-repeat } }

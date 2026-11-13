@@ -10,6 +10,7 @@ import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { HousePicker, type PickHouse } from '@/v3/home/HousePicker'
 import { StickyCta } from '@/v3/home/StickyCta'
 import { Mortgage } from '@/v4/Mortgage'
+import { v4img } from '@/v4/images'
 import { V4Bar, V4Final, V4Fonts, V4Footer } from '@/v4/Shell'
 import '@/v3/v3.css'
 import '@/v4/v4.css'
@@ -42,7 +43,7 @@ export default async function V4Project({ params }: Props) {
   const [company, all] = await Promise.all([getCompany(), getHouses({ status: 'free' })])
   const mine = all.filter((h) => (typeof h.project === 'object' ? h.project?.id : h.project) === p.id).map(houseView).sort((a, b) => a.price - b.price)
   const photo = img(p.photo, 'wide')
-  const render = img(p.render, 'wide')
+  const render = (p.slug === 'tip-5' ? v4img('П1')?.src : undefined) ?? img(p.render, 'wide')
   const plan = img(p.plan, 'wide')
   const rooms = render ? roomsView(p) : []
   const fam = { rate: company.family?.rate ?? 6, years: company.family?.years ?? 30, minDown: company.family?.minDown ?? 20, limit: company.family?.limit ?? 6_000_000 }

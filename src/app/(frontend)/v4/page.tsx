@@ -15,6 +15,7 @@ import { Mortgage, type MortgageHouse } from '@/v4/Mortgage'
 import { TypeList, type TypeView } from '@/v4/TypeList'
 import { V4Bar, V4Final, V4Fonts, V4Footer, telOf } from '@/v4/Shell'
 import { V4Motion } from '@/v4/V4Motion'
+import { SLIDE_CODE, v4img } from '@/v4/images'
 import '@/v3/v3.css'
 import '@/v4/v4.css'
 
@@ -90,7 +91,8 @@ export default async function V4Home() {
     .map((p) => {
       const mine = houses.filter((h) => h.status === 'free' && projectOf(h) === p.id)
       const from = Math.min(...mine.map((h) => h.price ?? 0).filter((x) => x > 0))
-      const src = img(p.photo, 'wide')
+      // кадр с небом из Gemini (С1–С5), если уже есть, иначе фото проекта
+      const src = v4img(SLIDE_CODE[p.slug] ?? '')?.src ?? img(p.photo, 'wide')
       if (!mine.length || !src || p.name === 'Тип 5' || p.name === 'Тип 12') return null
       const meta = [p.area ? `${p.area.toLocaleString('ru-RU')} м²` : null, Number.isFinite(from) ? `от ${formatMillions(from)}` : null].filter(Boolean).join(' · ')
       return { title: p.name, meta, src, href: `/v4/proekt/${p.slug}` }
@@ -143,7 +145,7 @@ export default async function V4Home() {
 
   // 05 · внутри «Типа 5»: площади и точки комнат — из планировки проекта в админке
   const tip5 = projects.find((p) => p.slug === 'tip-5')
-  const plan = img(tip5?.render, 'wide')
+  const plan = v4img('П1')?.src ?? img(tip5?.render, 'wide')
   const room = (name: string, nth = 0) => {
     const r = (tip5?.rooms ?? []).filter((x) => x.name === name)[nth]
     return r ? { x: r.x, y: r.y, area: r.area } : undefined
@@ -156,16 +158,17 @@ export default async function V4Home() {
   const guest = room('Гостевая')
   const tip5Plot = houses.find((h) => h.status === 'free' && projectOf(h) === tip5?.id)?.plot?.replace(/\s*сот\.?$/, ' сотки')
   const stops: InsideStop[] = [
-    { time: '07:30', word: 'ритм', title: 'Кухня-гостиная', area: m2(kitchen?.area), room: kitchen, cap: 'Вид сверху по планировке «Тип 5», мебель для примера',
+    // картинки из Gemini (И1–И4) встают сами, когда появляются в манифесте; до тех пор — вид сверху и иллюстрации
+    { time: '07:30', word: 'ритм', title: 'Кухня-гостиная', area: m2(kitchen?.area), room: kitchen, src: v4img('И1')?.src, cap: v4img('И1') ? 'Визуализация по планировке «Тип 5»' : 'Вид сверху по планировке «Тип 5», мебель для примера',
       text: 'Кухня и гостиная — одно пространство. Пока варится кофе, видно и стол, и детей на диване.' },
-    { time: '08:30', title: 'Терраса', area: m2(terrace?.area), room: terrace, src: '/design/morning-breakfast.webp', cap: 'Иллюстрация',
+    { time: '08:30', title: 'Терраса', area: m2(terrace?.area), room: terrace, src: v4img('И2')?.src ?? '/design/morning-breakfast.webp', cap: v4img('И2') ? 'Визуализация' : 'Иллюстрация',
       text: 'Тихий завтрак на воздухе — на своей террасе, а не на общем балконе.' },
     { time: '15:00', word: 'чувство', title: 'Свой газон', area: tip5Plot ? `участок ${tip5Plot}` : undefined, src: '/design/scenes/lawn.webp', cap: 'Иллюстрация',
       text: 'Дети с поливалкой, собака рядом. Ворота и паркоместо из плитки уже сделаны.' },
-    { time: '20:30', word: 'воздух', title: 'Вечер на участке', src: '/v3/sunset.webp', cap: 'Фото построенного дома',
+    { time: '20:30', word: 'воздух', title: 'Вечер на участке', src: v4img('И4')?.src ?? '/v3/sunset.webp', cap: v4img('И4') ? 'Визуализация на основе фото дома' : 'Фото построенного дома',
       text: 'Мангал на газоне, тёплый свет в окнах. Вечер без соседей за стенкой.' },
     { time: '22:00', title: 'Спальни', area: [bed1, bed2].every(Boolean) ? `${m2(bed1!.area)} и ${m2(bed2!.area)}${guest ? ` + гостевая ${m2(guest.area)}` : ''}` : undefined,
-      room: bed1, cap: 'Вид сверху по планировке «Тип 5», мебель для примера',
+      room: bed1, src: v4img('И3')?.src, cap: v4img('И3') ? 'Визуализация по планировке «Тип 5»' : 'Вид сверху по планировке «Тип 5», мебель для примера',
       text: 'Тишина здесь — это чувство контроля над своим пространством.' },
   ]
 
@@ -198,9 +201,12 @@ export default async function V4Home() {
       <MotionRoot>
         <V4Motion />
         {/* ночь → звезда → окна → название → строка клиента → рассвет; H1 — строка с поисковыми словами, она проявляется с рассветом */}
-        <div id="top">
+        {/* слайды с небом (С1–С5) — название можно не прятать; ночь из Gemini (НОЧЬ) — вместо затемнённого утра */}
+        <div id="top" className={heroSlides.length && heroSlides.every((s) => s.src.startsWith('/v4/img/')) ? 'v4-top--sky' : undefined}>
           <HeroNight
             slides={heroSlides}
+            night={v4img('НОЧЬ')?.src}
+            nightPhone={v4img('НОЧЬ')?.phone}
             copy={
               <>
                 <div className="v3-wrap v4-hero__top">
@@ -351,7 +357,7 @@ export default async function V4Home() {
           </div>
         </section>
 
-        <V4Final company={company} n="09" context="Главная v4: запись на показ" />
+        <V4Final company={company} n="09" context="Главная v4: запись на показ" bg={v4img('И4')?.src} />
         <V4Footer since={company.since} />
       </MotionRoot>
       <StickyCta phone={company.phone} />

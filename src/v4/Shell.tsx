@@ -51,11 +51,13 @@ export function V4Bar({ phone, always = false, home = '/v4' }: { phone?: string 
 }
 
 /** Финал: «Приезжайте на показ» — офисы, телефон и форма. id="evf-form" — сюда ведут все кнопки «Записаться на показ». */
-export function V4Final({ company, n, context, title = 'Приезжайте', em = 'на показ', lead }: {
+export function V4Final({ company, n, context, title = 'Приезжайте', em = 'на показ', lead, bg }: {
   company: Company; n?: string; context: string; title?: string; em?: string; lead?: string
+  /** вечер с огнями в окнах (И4) — по сюжету финал это вечер; без картинки — белый финал */
+  bg?: string
 }) {
   return (
-    <section className="v3-sec v3-final v4-sec v4-final" id="pokaz">
+    <section className={`v3-sec v3-final v4-sec v4-final${bg ? ' v4-final--bg' : ''}`} id="pokaz" style={bg ? ({ '--final-bg': `url(${bg})` } as CSSProperties) : undefined}>
       <span className="v4-ghost" aria-hidden>Показ</span>
       <div className="v3-wrap v3-split v4-head">
         <div>

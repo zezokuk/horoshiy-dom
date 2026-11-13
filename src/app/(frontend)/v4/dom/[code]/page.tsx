@@ -9,6 +9,7 @@ import { houseView, roomsView } from '@/lib/view'
 import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { StickyCta } from '@/v3/home/StickyCta'
 import { Mortgage } from '@/v4/Mortgage'
+import { v4img } from '@/v4/images'
 import { V4Bar, V4Final, V4Fonts, V4Footer, telOf } from '@/v4/Shell'
 import type { Estate, Project, Region } from '@/payload-types'
 import '@/v3/v3.css'
@@ -57,7 +58,7 @@ export default async function V4House({ params }: Props) {
   // вид сверху с мебелью — только если у дома планировка самого проекта (варианты В2, В3 — со своей)
   const mediaId = (m: unknown) => (m && typeof m === 'object' ? (m as { id?: unknown }).id : m)
   const samePlan = !house.plan || mediaId(house.plan) === mediaId(project?.plan)
-  const render = samePlan ? img(project?.render, 'wide') : undefined
+  const render = samePlan ? ((project?.slug === 'tip-5' ? v4img('П1')?.src : undefined) ?? img(project?.render, 'wide')) : undefined
   const rooms = render ? roomsView(project) : []
   const photo = h.photo ?? img(project?.photo, 'wide')
   const rough = h.features.includes('Черновая отделка')
