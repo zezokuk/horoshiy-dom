@@ -1,0 +1,23 @@
+# Vercel CLI: что НЕ загружать. platform.db и media/ загружаются намеренно (витрина v4 читает их, см. payload.config.ts)
+node_modules
+.next
+.git
+*.log
+tools/__pycache__
+test-results
+playwright-report
+.env.local
+platform.db-shm
+platform.db-wal
+backups
+seed-assets
+platform.db.before-*
+3D-задание-Игорю
+задание-Игорю-08-11
+задание-Игорю-10-11
+ночь-09-11
+показ
+tests
+tools
+*.md
+!README.md

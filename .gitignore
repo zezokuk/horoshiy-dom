@@ -59,3 +59,6 @@ __pycache__/
 
 # personal Claude Code files: the send commits everything that isn't ignored
 /.claude/
+
+.vercel
+.env*
