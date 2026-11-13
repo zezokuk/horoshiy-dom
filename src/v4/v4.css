@@ -334,3 +334,15 @@ html .v4 .hn.is-day .v4-hero__title h1.v4-hero__h1 { opacity: 1; transform: none
    на первом кадре. Строка-H1 остаётся в разметке. Когда придут кадры с небом (16-Аудит-картинок, Gemini), можно вернуть */
 .v4-hero__title { transition: opacity .6s ease, transform .6s ease, color .6s }
 .v4 .hn.is-slide .v4-hero__title { opacity: 0; transform: translateY(-24px) }
+
+/* ---------- страницы посёлка и проекта v4 ---------- */
+.v4-place__cover img { object-position: 50% 30% }
+.v4-place__status--soldOut i { background: var(--sold) }
+.v4-place__status--planned i { background: var(--brick) }
+.v4 .v4-place__tag { margin-top: 10px; font-size: 18px }
+.v4-place__text { color: var(--moss); max-width: 52ch }
+.v4 .v4-near { list-style: none; padding: 0; margin-top: 18px; border-top: 1px solid var(--line) }
+.v4-near li { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line) }
+.v4-near b { font: 400 15px var(--f-fact); white-space: nowrap }
+.v4 .v4-chips-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px }
+.v4-chips-list li { padding: 6px 12px; border-radius: 999px; background: var(--mist); font: 600 13px var(--f-ui) }

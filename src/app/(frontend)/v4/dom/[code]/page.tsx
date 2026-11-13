@@ -88,10 +88,10 @@ export default async function V4House({ params }: Props) {
             <figcaption>Изображение проекта</figcaption>
           </figure>
           <div className="v4-dom__panel">
-            <nav className="v4-dom__crumbs" aria-label="Навигация"><a href="/v4">Главная</a><span aria-hidden>/</span><a href="/v4#doma">Дома в продаже</a></nav>
+            <nav className="v4-dom__crumbs" aria-label="Навигация"><a href="/v4">Главная</a><span aria-hidden>/</span><a href={`/v4/poselok/${e.slug}`}>{e.name}</a></nav>
             <p className={`v3-status v4-dom__status v4-dom__status--${h.status}`}><i />{STATUS_LABEL[h.status]}</p>
             <h1>{h.title}</h1>
-            <p className="v4-dom__where">Посёлок «{e.name}» · {e.place}</p>
+            <p className="v4-dom__where">Посёлок <a href={`/v4/poselok/${e.slug}`}>«{e.name}»</a> · {e.place}{project ? <> · проект <a href={`/v4/proekt/${project.slug}`}>{project.name}</a></> : null}</p>
             <p className="v4-price v4-dom__price">{formatMillions(h.price)}</p>
             <p className="v3-note">{rough ? 'В черновой отделке.' : 'В предчистовой отделке, коммуникации на участке.'} Бронь — 100 000 ₽.</p>
             <div className="v3-row v4-dom__cta">

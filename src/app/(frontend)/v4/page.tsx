@@ -94,7 +94,7 @@ export default async function V4Home() {
       const src = img(p.photo, 'wide')
       if (!mine.length || !src || p.name === 'Тип 5' || p.name === 'Тип 12') return null
       const meta = [p.area ? `${p.area.toLocaleString('ru-RU')} м²` : null, Number.isFinite(from) ? `от ${formatMillions(from)}` : null].filter(Boolean).join(' · ')
-      return { title: p.name, meta, src, href: mainHref(`/projects/${p.slug}`) }
+      return { title: p.name, meta, src, href: `/v4/proekt/${p.slug}` }
     })
     .filter((s): s is HeroSlide => s !== null)
     .slice(0, 5)
@@ -107,7 +107,7 @@ export default async function V4Home() {
       return {
         slug: p.slug, name: p.name, area: p.area ?? null, storeys: p.storeys ?? null, bedrooms: p.bedrooms ?? null,
         photo: img(p.photo, 'wide'), thumb: img(p.photo, 'card'), free: mine.length, from: prices.length ? Math.min(...prices) : null,
-        href: mainHref(`/projects/${p.slug}`),
+        href: `/v4/proekt/${p.slug}`,
       }
     })
     .filter((t) => t.photo)
@@ -126,7 +126,7 @@ export default async function V4Home() {
   const mapEstates: MapEstate[] = byEstateStatus(estates.map((e) => estateView(e, houses)))
     .filter((c) => c.lat !== null && c.lng !== null)
     .map((c) => ({
-      slug: c.slug, name: c.name, place: c.place, lat: c.lat!, lng: c.lng!, status: c.status, href: c.href, cover: c.coverCard || c.cover,
+      slug: c.slug, name: c.name, place: c.place, lat: c.lat!, lng: c.lng!, status: c.status, href: `/v4/poselok/${c.slug}`, cover: c.coverCard || c.cover,
       sale: `${estateSale(c)}${c.priceFrom && c.status === 'selling' ? ` · от ${formatMillions(c.priceFrom)}` : ''}`,
       nearby: nearby.get(c.slug) ?? [],
     }))

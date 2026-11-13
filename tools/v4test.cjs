@@ -47,7 +47,7 @@ async function run(browser, tag, opts) {
   await scrollTo(page, '#tipy')
   const rows = await page.locator('.v4-types__list a').count()
   ok(`${tag}: в «Домах по типам» 12 строк`, rows === 12, `строк ${rows}`)
-  const typeLinks = await page.evaluate(() => [...document.querySelectorAll('.v4-types__list a')].every((a) => /\/projects\//.test(a.getAttribute('href') || '')))
+  const typeLinks = await page.evaluate(() => [...document.querySelectorAll('.v4-types__list a')].every((a) => /\/v4\/proekt\//.test(a.getAttribute('href') || '')))
   ok(`${tag}: строки типов ведут на страницы типов`, typeLinks)
 
   // карта: плашка меняет карточку
@@ -94,6 +94,11 @@ async function run(browser, tag, opts) {
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/v4test-${tag}-dom.jpg`, quality: 65, type: 'jpeg', fullPage: false })
   }
 
+  for (const path of ['/v4/poselok/dinskaya', '/v4/proekt/tip-5']) {
+    const r2 = await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle', timeout: 120000 })
+    ok(`${tag}: ${path} открывается`, r2 && r2.status() === 200)
+    ok(`${tag}: ${path} — один H1 и форма, без прокрутки вбок`, await page.evaluate(() => document.querySelectorAll('h1').length === 1 && !!document.querySelector('#evf-form') && document.documentElement.scrollWidth <= innerWidth))
+  }
   ok(`${tag}: нет ошибок в консоли`, errors.length === 0, errors.slice(0, 3).join(' | '))
   await ctx.close()
 }
