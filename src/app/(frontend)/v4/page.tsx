@@ -10,12 +10,11 @@ import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { HousePicker, type PickHouse } from '@/v3/home/HousePicker'
 import { StickyCta } from '@/v3/home/StickyCta'
 import { EstateMap, type MapEstate } from '@/v4/EstateMap'
-import { Inside, type InsideStop } from '@/v4/Inside'
 import { Mortgage, type MortgageHouse } from '@/v4/Mortgage'
 import { TypeList, type TypeView } from '@/v4/TypeList'
 import { V4Bar, V4Final, V4Fonts, V4Footer, telOf } from '@/v4/Shell'
 import { V4Motion } from '@/v4/V4Motion'
-import { SLIDE_CODE, v4img } from '@/v4/images'
+import { SLIDE_CODE, WALK, v4img } from '@/v4/images'
 import '@/v3/v3.css'
 import '@/v4/v4.css'
 
@@ -145,42 +144,30 @@ export default async function V4Home() {
 
   // 05 · внутри «Типа 5»: площади и точки комнат — из планировки проекта в админке
   const tip5 = projects.find((p) => p.slug === 'tip-5')
-  // пролёт на пороге: кадры Gemini по плану «Типа 5», точка входа — дверь в следующий кадр (замерено по кадрам 14.11)
-  const flight = ([
-    { code: 'К1', alt: 'Крыльцо «Типа 5»: входная дверь открыта, за ней светлый холл', fx: '51%', fy: '60%', pfx: '53%', pfy: '58%' },
-    { code: 'К2', alt: 'Холл: шкафы вдоль стены, впереди проход в кухню-гостиную', fx: '65%', fy: '47%', pfx: '92%', pfy: '48%' },
-    { code: 'И1', alt: 'Кухня-гостиная утром: диван, стол на шестерых, кухня вдоль стены', fx: '50%', fy: '50%', pfx: '50%', pfy: '50%' },
-  ] as const)
+  // 05 · Внутри: прогулка по «Типу 5» от крыльца до террасы (14.11, Илья: один раз «внутри», без часов, конец на террасе).
+  // Кадры Gemini по плану; точка входа — дверь в следующий кадр (замерено по кадрам 14.11). Нет кадра — комната пропускается.
+  const room = (name: string) => (tip5?.rooms ?? []).find((x) => x.name === name)
+  const m2 = (a?: number) => (a ? `${a.toLocaleString('ru-RU')} м²` : undefined)
+  const walkAll = [
+    { code: 'К1', title: 'Крыльцо', text: 'Крыльцо под навесом, входная дверь — сразу в холл.',
+      alt: 'Крыльцо «Типа 5»: входная дверь открыта, за ней светлый холл', fx: '51%', fy: '60%', pfx: '53%', pfy: '58%' },
+    { code: 'К2', title: 'Холл', text: 'Встроенные шкафы, двери в спальни и санузлы. Впереди — кухня-гостиная.',
+      alt: 'Холл: шкафы вдоль стены, впереди проход в кухню-гостиную', fx: '65%', fy: '47%', pfx: '92%', pfy: '48%' },
+    { code: 'И1', title: 'Кухня-гостиная', area: m2(room('Кухня-гостиная')?.area), text: 'Кухня и гостиная — одно пространство. Пока варится кофе, видно и стол, и детей на диване.',
+      alt: 'Кухня-гостиная утром: диван, стол на шестерых, кухня вдоль стены', fx: '21%', fy: '47%', pfx: '8%', pfy: '45%' },
+    { code: 'И2', title: 'Терраса', area: m2(room('Терраса')?.area), text: 'Из кухни-гостиной — на свою террасу: завтрак на воздухе, газон за ступенями.',
+      alt: 'Терраса: стол для завтрака, газон за ступенями', fx: '50%', fy: '50%', pfx: '50%', pfy: '50%' },
+  ]
+  const flight = walkAll
     .map((f) => ({ ...f, ...v4img(f.code) }))
     .filter((f): f is typeof f & { src: string } => !!f.src)
-    // пролёт начинается с крыльца: без К1 остаётся прежний кадр дома
+    // прогулка начинается с крыльца: без К1 остаётся прежний кадр дома
     .filter((_, i, all) => all[0]?.code === 'К1')
-  const plan = v4img('П1')?.src ?? img(tip5?.render, 'wide')
-  const room = (name: string, nth = 0) => {
-    const r = (tip5?.rooms ?? []).filter((x) => x.name === name)[nth]
-    return r ? { x: r.x, y: r.y, area: r.area } : undefined
-  }
-  const m2 = (a?: number) => (a ? `${a.toLocaleString('ru-RU')} м²` : undefined)
-  const kitchen = room('Кухня-гостиная')
-  const terrace = room('Терраса')
-  const bed1 = room('Спальня', 1) ?? room('Спальня')
-  const bed2 = room('Спальня', 0)
-  const guest = room('Гостевая')
-  const tip5Plot = houses.find((h) => h.status === 'free' && projectOf(h) === tip5?.id)?.plot?.replace(/\s*сот\.?$/, ' сотки')
-  const stops: InsideStop[] = [
-    // картинки из Gemini (И1–И4) встают сами, когда появляются в манифесте; до тех пор — вид сверху и иллюстрации
-    { time: '07:30', word: 'ритм', title: 'Кухня-гостиная', area: m2(kitchen?.area), room: kitchen, src: v4img('И1')?.src, cap: v4img('И1') ? 'Визуализация по планировке «Тип 5»' : 'Вид сверху по планировке «Тип 5», мебель для примера',
-      text: 'Кухня и гостиная — одно пространство. Пока варится кофе, видно и стол, и детей на диване.' },
-    { time: '08:30', title: 'Терраса', area: m2(terrace?.area), room: terrace, src: v4img('И2')?.src ?? '/design/morning-breakfast.webp', cap: v4img('И2') ? 'Визуализация' : 'Иллюстрация',
-      text: 'Тихий завтрак на воздухе — на своей террасе, а не на общем балконе.' },
-    { time: '15:00', word: 'чувство', title: 'Свой газон', area: tip5Plot ? `участок ${tip5Plot}` : undefined, src: '/design/scenes/lawn.webp', cap: 'Иллюстрация',
-      text: 'Дети с поливалкой, собака рядом. Ворота и паркоместо из плитки уже сделаны.' },
-    { time: '20:30', word: 'воздух', title: 'Вечер на участке', src: v4img('И4')?.src ?? '/v3/sunset.webp', cap: v4img('И4') ? 'Визуализация на основе фото дома' : 'Фото построенного дома',
-      text: 'Мангал на газоне, тёплый свет в окнах. Вечер без соседей за стенкой.' },
-    { time: '22:00', title: 'Спальни', area: [bed1, bed2].every(Boolean) ? `${m2(bed1!.area)} и ${m2(bed2!.area)}${guest ? ` + гостевая ${m2(guest.area)}` : ''}` : undefined,
-      room: bed1, src: v4img('И3')?.src, cap: v4img('И3') ? 'Визуализация по планировке «Тип 5»' : 'Вид сверху по планировке «Тип 5», мебель для примера',
-      text: 'Тишина здесь — это чувство контроля над своим пространством.' },
-  ]
+  const walkVideo = WALK.src ? WALK : undefined
+  // подписи: при видео — все комнаты, что в нём есть (walk.json → at), иначе — по кадрам
+  const walkRooms = walkVideo ? walkAll.slice(0, walkVideo.at.length) : flight
+  const walking = !!walkVideo || flight.length > 1
+  const walkVh = walkVideo ? Math.round(220 + walkVideo.duration * 45) : 260 + 170 * (flight.length - 1)
 
   // 06 · цифры: только то, что есть в админке
   const facts = [
@@ -281,14 +268,19 @@ export default async function V4Home() {
           </section>
         )}
 
-        {/* порог: из выбора — в жизнь. Кадр растёт, слова расходятся, поверх — Чехов о том, почему тянет из города.
-            Есть кадры пролёта (К1 крыльцо → К2 холл → И1 кухня) — дальше камера идёт через двери; в каждом кадре дверь
-            в следующий — точка, в которую «въезжаем» (fx/fy — компьютер, pfx/pfy — телефон, в % кадра) */}
-        <section className={`v4-grow${flight.length > 1 ? ' v4-grow--fly' : ''}`} id="zachem">
+        {/* 05 · Внутри — один раздел (14.11, Илья): кадр крыльца растёт, Чехов о том, почему тянет из города, потом прогулка
+            по дому до террасы, как у Villa Aurelia. Есть видео прогулки (walk.json, tools/v4walk.py) — оно проматывается
+            прокруткой; нет — камера «въезжает» в дверь каждого кадра (fx/fy — компьютер, pfx/pfy — телефон, в % кадра) */}
+        <section className={`v4-grow${walking ? ' v4-grow--fly' : ''}`} id="vnutri" style={walking ? { height: `${walkVh}vh` } : undefined}>
+          <span id="zachem" />
           <div className="v4-grow__pin">
             <p className="v4-num v4-grow__num"><b>05</b> / Внутри</p>
             <h2 className="v4-grow__words"><span>Зайдите</span> <span><em>внутрь</em></span></h2>
             <figure className="v4-grow__frame">
+              {walkVideo && (
+                <video className="v4-walk__video" muted playsInline preload="auto" poster={walkVideo.poster}
+                  data-src={walkVideo.src} data-phone={walkVideo.phone ?? walkVideo.src} data-duration={walkVideo.duration} data-at={walkVideo.at.join(',')} aria-hidden="true" />
+              )}
               {flight.length ? (
                 flight.map((f) => (
                   <picture key={f.code} className="v4-fly" style={{ '--fx': f.fx, '--fy': f.fy, '--pfx': f.pfx, '--pfy': f.pfy } as CSSProperties}>
@@ -308,16 +300,26 @@ export default async function V4Home() {
               {/* сверено 13.11 по ПСС, «Наука», 1977, т. 10 (Викитека): фраза в оригинале начинается «А вы знаете, кто…» */}
               <cite>А. П. Чехов · «Крыжовник», 1898</cite>
             </blockquote>
+            {walking && (
+              <>
+                <div className="v4-walk__ui" aria-hidden="true">
+                  <p className="v4-walk__chip"><b>05</b> Внутри «Типа 5»</p>
+                  <ol className="v4-walk__bars">
+                    {walkRooms.map((r) => <li key={r.title}><i><s /></i>{r.title}</li>)}
+                  </ol>
+                </div>
+                <ol className="v4-walk__cards">
+                  {walkRooms.map((r) => (
+                    <li key={r.title} className="v4-walk__card">
+                      <h3>{r.title}{r.area && <small> · {r.area}</small>}</h3>
+                      <p>{r.text}</p>
+                    </li>
+                  ))}
+                </ol>
+              </>
+            )}
           </div>
         </section>
-
-        <section className="v3-sec v4-sec v4-sec--in" id="vnutri">
-          <Head n="05" label="07:30 → 22:00 · Внутри «Типа 5»" ghost="Внутри"
-            lead="Это тот дом, что вы видели ночью на первом экране. Пройдите по нему так, как будете жить: с утра до ночи. Площади — по планировке проекта; у домов в продаже варианты от 94 до 110 м².">
-            Один день <em>внутри</em>
-          </Head>
-        </section>
-        <Inside stops={stops} plan={plan} />
 
         <section className="v3-sec v3-sec--linen v4-sec v4-nums" id="kto">
           <Head n="06" label="Почему покупают у нас" ghost="Доверие"

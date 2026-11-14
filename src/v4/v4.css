@@ -90,13 +90,37 @@ html.past-hero .v4-bar { transform: none }
   .v4-grow__quote { bottom: 14vh }
 }
 /* пролёт: кадры лежат стопкой, камера «въезжает» в точку двери (--fx/--fy), следующий кадр проявляется поверх */
-.v4-grow--fly { height: 560vh }
+.v4-grow--fly { height: 560vh } /* точную высоту ставит страница (walkVh) */
 .v4 .v4-fly { display: block; position: absolute; inset: 0; overflow: hidden } /* globals.css делает picture «прозрачным» (display: contents) — здесь он нужен коробкой */
 .v4-fly img { transform-origin: var(--fx, 50%) var(--fy, 50%) }
 .v4-fly + .v4-fly { opacity: 0; visibility: hidden }
 .v4-grow__cap { position: absolute; z-index: 3; left: 20px; bottom: 16px; font: 600 11px var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: #fff; opacity: .78; text-shadow: 0 1px 6px rgba(0,0,0,.45) }
 @media (max-width: 860px) { .v4-fly img { transform-origin: var(--pfx, 50%) var(--pfy, 50%) } }
-@media (prefers-reduced-motion: reduce) { .v4-grow--fly { height: 100svh } }
+/* прогулка «Внутри» (как у Villa Aurelia): видео поверх кадров, сверху — комнаты полосками, снизу — подпись комнаты */
+.v4-walk__video { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: cover; opacity: 0; visibility: hidden }
+.v4-walk__ui { position: absolute; z-index: 5; top: 84px; left: 24px; padding: 12px 14px; border-radius: 14px; background: rgba(20, 24, 21, .42); backdrop-filter: blur(10px); color: #fff; opacity: 0; visibility: hidden }
+.v4-walk__chip { margin: 0 0 10px; font: 600 11px var(--f-ui); letter-spacing: .14em; text-transform: uppercase }
+.v4-walk__chip b { font: 400 12px var(--f-fact); letter-spacing: 0; margin-right: 8px; opacity: .8 }
+.v4-walk__bars { display: flex; gap: 10px; margin: 0; padding: 0; list-style: none; font: 500 12px var(--f-ui) }
+.v4-walk__bars li { min-width: 92px }
+.v4-walk__bars i { display: block; height: 2px; margin-bottom: 6px; background: rgba(255,255,255,.3); border-radius: 2px; overflow: hidden }
+.v4-walk__bars s { display: block; height: 100%; background: #fff; transform: scaleX(0); transform-origin: left }
+.v4-walk__cards { position: absolute; z-index: 5; left: 24px; bottom: 28px; margin: 0; padding: 0; list-style: none; width: min(460px, calc(100% - 48px)) }
+.v4-walk__card { position: absolute; left: 0; bottom: 0; width: 100%; padding: 20px 22px; border-radius: 16px; background: rgba(20, 24, 21, .5); backdrop-filter: blur(12px); color: #fff; opacity: 0; visibility: hidden }
+.v4 .v4-walk__card h3 { margin: 0 0 8px; font: 400 clamp(28px, 2.6vw, 38px)/1.05 var(--f-emo); font-variation-settings: 'wdth' 74 }
+.v4-walk__card h3 small { font: 400 15px var(--f-fact); letter-spacing: -.02em; opacity: .85 }
+.v4-walk__card p { margin: 0; font: 400 15px/1.5 var(--f-ui); opacity: .92 }
+.v4-grow--fly .v4-grow__cap { left: auto; right: 20px }
+@media (max-width: 860px) {
+  .v4-walk__ui { top: 64px; left: 12px; right: 12px; padding: 10px 12px }
+  .v4-walk__bars { gap: 6px; font-size: 10px }
+  .v4-walk__bars li { min-width: 0; flex: 1 }
+  .v4-walk__cards { left: 12px; bottom: 96px; width: calc(100% - 24px) }
+  .v4-walk__card { padding: 16px 18px }
+  .v4-grow--fly .v4-grow__cap { top: 150px; bottom: auto; right: 14px }
+}
+@media (prefers-reduced-motion: reduce) { .v4-walk__ui, .v4-walk__cards { display: none } }
+@media (prefers-reduced-motion: reduce) { .v4-grow--fly { height: 100svh !important } }
 @media (prefers-reduced-motion: reduce) { .v4-grow { height: 100svh } .v4-grow__num { color: #fff } .v4-grow__num b { color: #fff } }
 
 /* ---------- карта с плашками (рисунок Ильи) ---------- */
@@ -396,3 +420,6 @@ html:has(.v4) .cookie .btn:hover { background: #24573a }
 .v4 .v4-contacts__card--main .v4-num { color: rgba(255,255,255,.8) }
 .v4 .v4-contacts__tel { font: 400 clamp(22px, 2.2vw, 30px)/1.1 var(--f-fact); letter-spacing: -.03em; white-space: nowrap }
 .v4-contacts__card--main a:hover { text-decoration: underline }
+/* пока висит плашка cookie (первый визит), подпись комнаты в прогулке стоит выше неё */
+html:has(.cookie) .v4-walk__cards { bottom: 112px }
+@media (max-width: 860px) { html:has(.cookie) .v4-walk__cards { bottom: 200px } }
