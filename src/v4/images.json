@@ -1,1 +1,20 @@
-{}
+{
+  "К1": {
+    "src": "/v4/img/in-porch.webp",
+    "w": 1376,
+    "h": 768,
+    "phone": "/v4/img/in-porch-phone.webp"
+  },
+  "К2": {
+    "src": "/v4/img/in-hall.webp",
+    "w": 1376,
+    "h": 768,
+    "phone": "/v4/img/in-hall-phone.webp"
+  },
+  "И1": {
+    "src": "/v4/img/in-kitchen.webp",
+    "w": 1376,
+    "h": 768,
+    "phone": "/v4/img/in-kitchen-phone.webp"
+  }
+}

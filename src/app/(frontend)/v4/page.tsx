@@ -145,6 +145,16 @@ export default async function V4Home() {
 
   // 05 · внутри «Типа 5»: площади и точки комнат — из планировки проекта в админке
   const tip5 = projects.find((p) => p.slug === 'tip-5')
+  // пролёт на пороге: кадры Gemini по плану «Типа 5», точка входа — дверь в следующий кадр (замерено по кадрам 14.11)
+  const flight = ([
+    { code: 'К1', alt: 'Крыльцо «Типа 5»: входная дверь открыта, за ней светлый холл', fx: '51%', fy: '60%', pfx: '53%', pfy: '58%' },
+    { code: 'К2', alt: 'Холл: шкафы вдоль стены, впереди проход в кухню-гостиную', fx: '65%', fy: '47%', pfx: '92%', pfy: '48%' },
+    { code: 'И1', alt: 'Кухня-гостиная утром: диван, стол на шестерых, кухня вдоль стены', fx: '50%', fy: '50%', pfx: '50%', pfy: '50%' },
+  ] as const)
+    .map((f) => ({ ...f, ...v4img(f.code) }))
+    .filter((f): f is typeof f & { src: string } => !!f.src)
+    // пролёт начинается с крыльца: без К1 остаётся прежний кадр дома
+    .filter((_, i, all) => all[0]?.code === 'К1')
   const plan = v4img('П1')?.src ?? img(tip5?.render, 'wide')
   const room = (name: string, nth = 0) => {
     const r = (tip5?.rooms ?? []).filter((x) => x.name === name)[nth]
@@ -271,15 +281,27 @@ export default async function V4Home() {
           </section>
         )}
 
-        {/* порог: из выбора — в жизнь. Кадр растёт, слова расходятся, поверх — Чехов о том, почему тянет из города */}
-        <section className="v4-grow" id="zachem">
+        {/* порог: из выбора — в жизнь. Кадр растёт, слова расходятся, поверх — Чехов о том, почему тянет из города.
+            Есть кадры пролёта (К1 крыльцо → К2 холл → И1 кухня) — дальше камера идёт через двери; в каждом кадре дверь
+            в следующий — точка, в которую «въезжаем» (fx/fy — компьютер, pfx/pfy — телефон, в % кадра) */}
+        <section className={`v4-grow${flight.length > 1 ? ' v4-grow--fly' : ''}`} id="zachem">
           <div className="v4-grow__pin">
             <p className="v4-num v4-grow__num"><b>05</b> / Внутри</p>
             <h2 className="v4-grow__words"><span>Зайдите</span> <span><em>внутрь</em></span></h2>
             <figure className="v4-grow__frame">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={img(tip5?.photo, 'wide') ?? '/v3/sunset.webp'} alt="Дом «Тип 5» — в него и заходим" loading="lazy" />
+              {flight.length ? (
+                flight.map((f) => (
+                  <picture key={f.code} className="v4-fly" style={{ '--fx': f.fx, '--fy': f.fy, '--pfx': f.pfx, '--pfy': f.pfy } as CSSProperties}>
+                    {f.phone && <source media="(max-width: 860px)" srcSet={f.phone} />}
+                    <img src={f.src} alt={f.alt} loading="lazy" />
+                  </picture>
+                ))
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={img(tip5?.photo, 'wide') ?? '/v3/sunset.webp'} alt="Дом «Тип 5» — в него и заходим" loading="lazy" />
+              )}
               <i className="v4-grow__scrim" />
+              {flight.length > 0 && <span className="v4-grow__cap">Визуализация по проекту «Тип 5»</span>}
             </figure>
             <blockquote className="v4-grow__quote">
               <p>«…кто хоть раз в жизни поймал ерша или видел осенью перелётных дроздов, как они в ясные, прохладные дни носятся стаями над деревней, тот уже не городской житель, и его до самой смерти будет <em>потягивать на волю</em>».</p>

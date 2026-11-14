@@ -34,7 +34,7 @@ export function V4Motion() {
         const [w1, w2] = gsap.utils.toArray<HTMLElement>('.v4-grow__words span', g)
         const away = (dir: number) => (wide ? { xPercent: dir * 70 } : { yPercent: dir * 160 })
         const home = wide ? { xPercent: 0 } : { yPercent: 0 }
-        gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: g, start: 'top top', end: 'bottom bottom', scrub: 0.5 } })
+        const tl = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: g, start: 'top top', end: 'bottom bottom', scrub: 0.5 } })
           .fromTo(g.querySelector('.v4-grow__frame'), { clipPath: wide ? 'inset(25% 35% 25% 35% round 18px)' : 'inset(35% 14% 35% 14% round 14px)' }, { clipPath: 'inset(0% 0% 0% 0% round 0px)', duration: 0.55 }, 0)
           .fromTo(g.querySelector('.v4-grow__frame img'), { scale: 1.16 }, { scale: 1, duration: 0.55 }, 0)
           .fromTo(w1, { autoAlpha: 1, ...home }, { autoAlpha: 0, ...away(-1), duration: 0.34 }, 0.04)
@@ -43,6 +43,20 @@ export function V4Motion() {
           .fromTo(g.querySelector('.v4-grow__scrim'), { opacity: 0 }, { opacity: 1, duration: 0.2 }, 0.48)
           .fromTo(g.querySelector('.v4-grow__quote'), { autoAlpha: 0, y: 46 }, { autoAlpha: 1, y: 0, duration: 0.24 }, 0.54)
           .to({}, { duration: 0.2 })
+
+        // пролёт: цитата уходит, камера въезжает в дверь кадра, следующий кадр проявляется из приближения
+        const fly = gsap.utils.toArray<HTMLElement>('.v4-fly', g)
+        if (fly.length > 1) {
+          tl.to(g.querySelector('.v4-grow__quote'), { autoAlpha: 0, y: -30, duration: 0.18 })
+            .to(g.querySelector('.v4-grow__scrim'), { opacity: 0, duration: 0.18 }, '<')
+          fly.slice(1).forEach((next, k) => {
+            const cur = fly[k]
+            tl.to(cur.querySelector('img'), { scale: 2.6, duration: 0.6, ease: 'power1.in' })
+              .fromTo(next, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.22 }, '-=0.22')
+              .fromTo(next.querySelector('img'), { scale: 1.35 }, { scale: 1, duration: 0.5, ease: 'power1.out' }, '<')
+              .to({}, { duration: 0.18 })
+          })
+        }
       }
 
       gsap.utils.toArray<HTMLElement>('.v4-nums__row').forEach((n, k) => {
