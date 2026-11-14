@@ -262,7 +262,7 @@ async function run() {
   }
 
   // The new project from the meeting (14.10): sales start later, so only the place — no houses, prices or numbers.
-  // Coordinates are the stanitsa centre; the exact plot goes in when the client sends it.
+  // Coordinates: the client's point (14.11).
   const novo = await payload.create({
     collection: 'estates',
     data: {
@@ -273,8 +273,8 @@ async function run() {
       order: ESTATES.length + 1,
       place: 'ст. Нововеличковская',
       kind: 'Новый посёлок',
-      lat: 45.2774,
-      lng: 38.8378,
+      lat: 45.264268, // точка от Александра 14.11
+      lng: 38.829164,
     },
   })
   await seedLandings(payload, krd.id, estates.get('dinskaya')!, novo.id as number)
