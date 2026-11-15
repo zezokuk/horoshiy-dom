@@ -54,13 +54,13 @@ def size(f: pathlib.Path) -> tuple[int, int]:
     return int(w), int(h)
 
 
-def encode(fs: list[pathlib.Path], out: pathlib.Path, vf: str) -> None:
+def encode(fs: list[pathlib.Path], out: pathlib.Path, vf: str, crf: int = 24) -> None:
     # склейка через concat-фильтр (клипы могут быть разного размера и частоты кадров), 30 к/с, ключевой кадр каждые 4 кадра
     inputs = sum((['-i', str(f)] for f in fs), [])
     chain = ''.join(f'[{i}:v]{vf},fps=30,format=yuv420p,setsar=1[v{i}];' for i in range(len(fs)))
     chain += ''.join(f'[v{i}]' for i in range(len(fs))) + f'concat=n={len(fs)}:v=1:a=0[out]'
     subprocess.run(['ffmpeg', '-v', 'error', '-y', *inputs, '-filter_complex', chain, '-map', '[out]', '-an',
-                    '-c:v', 'libx264', '-preset', 'slow', '-crf', '24', '-g', '4', '-keyint_min', '4', '-sc_threshold', '0',
+                    '-c:v', 'libx264', '-preset', 'slow', '-crf', str(crf), '-g', '4', '-keyint_min', '4', '-sc_threshold', '0',
                     '-movflags', '+faststart', str(out)], check=True)
 
 
@@ -82,9 +82,9 @@ def main() -> None:
     encode(wide, OUT / 'walk.mp4', f'scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H}')
     phone = clips(True)
     if phone and len(phone) == len(wide):
-        encode(phone, OUT / 'walk-phone.mp4', 'scale=720:1280:force_original_aspect_ratio=increase,crop=720:1280')
+        encode(phone, OUT / 'walk-phone.mp4', 'scale=720:1280:force_original_aspect_ratio=increase,crop=720:1280', crf=28)  # телефон: мобильный интернет, экран меньше
     else:  # середина широкого кадра
-        encode(wide, OUT / 'walk-phone.mp4', 'scale=-2:1280,crop=720:1280')
+        encode(wide, OUT / 'walk-phone.mp4', 'scale=-2:1280,crop=720:1280', crf=28)
     subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', str(OUT / 'walk.mp4'), '-frames:v', '1', '-q:v', '80', str(OUT / 'walk-poster.webp')], check=True)
     total = duration(OUT / 'walk.mp4')
     at, t = [], 0.0
