@@ -16,5 +16,36 @@
     "w": 1376,
     "h": 768,
     "phone": "/v4/img/in-kitchen-phone.webp"
+  },
+  "И2": {
+    "src": "/v4/img/in-terrace.webp",
+    "w": 2560,
+    "h": 1429,
+    "phone": "/v4/img/in-terrace-phone.webp"
+  },
+  "С1": {
+    "src": "/v4/img/slide-tip-1.webp",
+    "w": 2560,
+    "h": 1429
+  },
+  "С2": {
+    "src": "/v4/img/slide-tip-2.webp",
+    "w": 2560,
+    "h": 1429
+  },
+  "С3": {
+    "src": "/v4/img/slide-tip-3.webp",
+    "w": 2560,
+    "h": 1429
+  },
+  "С4": {
+    "src": "/v4/img/slide-tip-6.webp",
+    "w": 2560,
+    "h": 1429
+  },
+  "С5": {
+    "src": "/v4/img/slide-tip-10.webp",
+    "w": 2560,
+    "h": 1429
   }
 }

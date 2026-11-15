@@ -1,7 +1,8 @@
 """
 Прогулка «Внутри» (как у Villa Aurelia): клипы из видео-нейросети → одно видео, которое сайт проматывает прокруткой.
 
-Клипы кладутся в `БАЗА/11-Хороший-дом-с-нуля/картинки/результаты/v4/прогулка/` с номером в начале имени:
+Клипы кладутся в `БАЗА/11-Хороший-дом-с-нуля/картинки/результаты/v4/прогулка/` (или прямо в `v4/`) с номером в начале имени
+(можно с буквой впереди: «а 1 …»; из нескольких клипов с одним номером берётся самый новый):
     1 … .mp4 — крыльцо → холл        (первый кадр К1, последний К2)
     2 … .mp4 — холл → кухня-гостиная (первый К2, последний И1)
     3 … .mp4 — кухня → терраса       (первый И1, последний И2)
@@ -31,9 +32,26 @@ def duration(f: pathlib.Path) -> float:
     return float(r.stdout.strip())
 
 
+NUM = re.compile(r'^(?:[^\W\d_]\s+)?(\d+)(?!\d)')  # «1 крыльцо-холл», «а 1 крыльцо-холл» (буква-вариант впереди)
+
+
 def clips(phone: bool) -> list[pathlib.Path]:
-    fs = [f for f in SRC.glob('*') if f.suffix.lower() in VIDEO and re.match(r'^\d+', f.stem) and (('9x16' in f.stem) == phone)]
-    return sorted(fs, key=lambda f: int(re.match(r'^\d+', f.stem).group()))
+    # ищем в «прогулка/» и рядом, в «v4/»; из нескольких клипов с одним номером берётся самый новый
+    fs = [f for d in (SRC, SRC.parent) if d.exists() for f in d.glob('*')
+          if f.suffix.lower() in VIDEO and NUM.match(f.name) and (('9x16' in f.name) == phone)]
+    best: dict[int, pathlib.Path] = {}
+    for f in fs:
+        n = int(NUM.match(f.name).group(1))
+        if n not in best or f.stat().st_mtime > best[n].stat().st_mtime:
+            best[n] = f
+    return [best[n] for n in sorted(best)]
+
+
+def size(f: pathlib.Path) -> tuple[int, int]:
+    r = subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=p=0', str(f)],
+                       capture_output=True, text=True, check=True)
+    w, h = r.stdout.strip().split(',')[:2]
+    return int(w), int(h)
 
 
 def encode(fs: list[pathlib.Path], out: pathlib.Path, vf: str) -> None:
@@ -58,7 +76,10 @@ def main() -> None:
         return
     OUT.mkdir(parents=True, exist_ok=True)
     durs = [duration(f) for f in wide]
-    encode(wide, OUT / 'walk.mp4', 'scale=1600:900:force_original_aspect_ratio=increase,crop=1600:900')
+    # размер — по самому мелкому клипу (Flow/Kling дают 720p): растягивать дальше — только раздувать файл
+    W = 1920 if min(size(f)[0] for f in wide) >= 1920 else 1600 if min(size(f)[0] for f in wide) >= 1600 else 1280
+    H = W * 9 // 16
+    encode(wide, OUT / 'walk.mp4', f'scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H}')
     phone = clips(True)
     if phone and len(phone) == len(wide):
         encode(phone, OUT / 'walk-phone.mp4', 'scale=720:1280:force_original_aspect_ratio=increase,crop=720:1280')

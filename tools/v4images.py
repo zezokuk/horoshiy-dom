@@ -13,6 +13,7 @@
     С1…С5 — слайды первого экрана с небом   → Тип 1, 2, 3, 6, 10 (в этом порядке)
     НОЧЬ — ночной кадр первого экрана        → ночь вместо затемнённого утра
 Телефонная версия того же кадра — тот же код и «9x16» в имени (например «И1 9x16.png»).
+Регистр кода не важен («с1 нов.jfif» = С1), .jfif — это jpg из браузера.
 Из нескольких файлов с одним кодом берётся самый новый.
 
 Скрипт: webp 2560 px (телефон — 1170 px) в `public/v4/img/`, манифест `src/v4/images.json`, отчёт по размерам.
@@ -29,7 +30,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 SRC = ROOT.parents[1] / '11-Хороший-дом-с-нуля' / 'картинки' / 'результаты' / 'v4'
 OUT = ROOT / 'public' / 'v4' / 'img'
 MANIFEST = ROOT / 'src' / 'v4' / 'images.json'
-CODES = ['П1', 'К1', 'К2', 'И1', 'И2', 'И3', 'И4', 'С1', 'С2', 'С3', 'С4', 'С5', 'НОЧЬ']
+CODES = ['П1', 'К1', 'К2', 'И1', 'И2', 'И4',  # И3 (спальня) убрана 15.11: прогулка кончается на террасе
+          'С1', 'С2', 'С3', 'С4', 'С5', 'НОЧЬ']
 SLUG = {'П1': 'plan-tip5', 'К1': 'in-porch', 'К2': 'in-hall', 'И1': 'in-kitchen', 'И2': 'in-terrace', 'И3': 'in-bedroom', 'И4': 'in-evening',
         'С1': 'slide-tip-1', 'С2': 'slide-tip-2', 'С3': 'slide-tip-3', 'С4': 'slide-tip-6', 'С5': 'slide-tip-10', 'НОЧЬ': 'hero-night'}
 MIN_LONG = 2400  # меньше — на экране 1440–2560 px будет мыло
@@ -38,11 +40,11 @@ MIN_LONG = 2400  # меньше — на экране 1440–2560 px будет 
 def main():
     sys.stdout.reconfigure(encoding='utf-8')
     OUT.mkdir(parents=True, exist_ok=True)
-    files = [f for f in SRC.glob('*') if f.suffix.lower() in ('.png', '.jpg', '.jpeg', '.webp')] if SRC.exists() else []
+    files = [f for f in SRC.glob('*') if f.suffix.lower() in ('.png', '.jpg', '.jpeg', '.jfif', '.webp')] if SRC.exists() else []
     manifest, report = {}, []
     for code in CODES:
         for phone in (False, True):
-            mine = [f for f in files if re.match(rf'^{code}(?![0-9А-Яа-я])', f.stem) and (('9x16' in f.stem) == phone)]
+            mine = [f for f in files if re.match(rf'^{code}(?![0-9А-Яа-я])', f.stem, re.I) and (('9x16' in f.stem) == phone)]
             if not mine:
                 continue
             f = max(mine, key=lambda x: x.stat().st_mtime)

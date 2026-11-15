@@ -57,11 +57,24 @@ export function V4Motion() {
             .fromTo(g.querySelector('.v4-walk__ui'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.12 }, '<')
           const start = tl.duration()
           const arrive: number[] = [start] // момент, когда камера «пришла» в комнату k (в долях таймлайна)
+          // въезд по кадрам: камера уходит в дверь кадра, следующий проявляется из приближения
+          const flyThrough = (list: HTMLElement[]) => {
+            list.slice(1).forEach((next, k) => {
+              const cur = list[k]
+              tl.to(cur.querySelector('img'), { scale: 2.6, duration: 0.6, ease: 'power1.in' })
+                .fromTo(next, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.22 }, '-=0.22')
+                .fromTo(next.querySelector('img'), { scale: 1.35 }, { scale: 1, duration: 0.5, ease: 'power1.out' }, '<')
+              arrive.push(tl.duration())
+              tl.to({}, { duration: 0.18 })
+            })
+            tl.to(list[list.length - 1].querySelector('img'), { scale: 1.08, duration: 0.5, ease: 'none' }) // последняя комната — лёгкий шаг вперёд
+            arrive.push(tl.duration())
+          }
           if (video) {
             const dur = Number(video.dataset.duration) || 1
             const at = (video.dataset.at || '0').split(',').map(Number)
             video.src = wide ? video.dataset.src! : video.dataset.phone!
-            const W = 1.1 * at.length // длина прогулки на таймлайне ~ как у кадров
+            const W = Math.max(1.1, 0.2 * dur) // длина видео на таймлайне — по секундам: 10 с ≈ 3 экрана прокрутки
             const head = { t: 0 }
             let shown = 0
             const tick = () => { // мягко догоняем нужную секунду: перемотка видео не дёргается
@@ -72,19 +85,18 @@ export function V4Motion() {
             cleanups.push(() => gsap.ticker.remove(tick))
             tl.fromTo(video, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.1 }, start)
               .to(head, { t: dur - 0.05, duration: W, ease: 'none' }, start)
-            at.slice(1).forEach((s) => arrive.push(start + (s / dur) * W))
-            arrive.push(start + W)
+            // клип k ведёт из комнаты k в k+1; порог камера проходит примерно на середине клипа — тогда и меняем подпись
+            const ends = [...at.slice(1), dur]
+            ends.forEach((e, i) => arrive.push(start + ((at[i] + 0.55 * (e - at[i])) / dur) * W))
+            // клипов меньше, чем комнат: последний кадр видео сменяется снимком той же комнаты, дальше — въезд по кадрам
+            const tail = fly.filter((f) => f.hasAttribute('data-tail'))
+            if (tail.length > 1) {
+              tl.fromTo(tail[0], { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.12 }, start + W)
+              tl.to({}, { duration: 0.12 })
+              flyThrough(tail)
+            }
           } else {
-            fly.slice(1).forEach((next, k) => {
-              const cur = fly[k]
-              tl.to(cur.querySelector('img'), { scale: 2.6, duration: 0.6, ease: 'power1.in' })
-                .fromTo(next, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.22 }, '-=0.22')
-                .fromTo(next.querySelector('img'), { scale: 1.35 }, { scale: 1, duration: 0.5, ease: 'power1.out' }, '<')
-              arrive.push(tl.duration())
-              tl.to({}, { duration: 0.18 })
-            })
-            tl.to(fly[fly.length - 1].querySelector('img'), { scale: 1.08, duration: 0.5, ease: 'none' }) // последняя комната — лёгкий шаг вперёд
-            arrive.push(tl.duration())
+            flyThrough(fly)
           }
           // комната k: её полоска заполняется, пока идём к следующей; подпись видна от прихода до ухода
           cards.forEach((card, k) => {

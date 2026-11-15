@@ -94,6 +94,7 @@ html.past-hero .v4-bar { transform: none }
 .v4 .v4-fly { display: block; position: absolute; inset: 0; overflow: hidden } /* globals.css делает picture «прозрачным» (display: contents) — здесь он нужен коробкой */
 .v4-fly img { transform-origin: var(--fx, 50%) var(--fy, 50%) }
 .v4-fly + .v4-fly { opacity: 0; visibility: hidden }
+.v4 .v4-fly[data-tail] { z-index: 1 } /* кадры после видео (клипов ещё не на все комнаты) — поверх видео: оно стоит раньше в разметке */
 .v4-grow__cap { position: absolute; z-index: 3; left: 20px; bottom: 16px; font: 600 11px var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: #fff; opacity: .78; text-shadow: 0 1px 6px rgba(0,0,0,.45) }
 @media (max-width: 860px) { .v4-fly img { transform-origin: var(--pfx, 50%) var(--pfy, 50%) } }
 /* прогулка «Внутри» (как у Villa Aurelia): видео поверх кадров, сверху — комнаты полосками, снизу — подпись комнаты */

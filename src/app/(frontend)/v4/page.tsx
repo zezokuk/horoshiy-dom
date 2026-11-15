@@ -164,10 +164,14 @@ export default async function V4Home() {
     // прогулка начинается с крыльца: без К1 остаётся прежний кадр дома
     .filter((_, i, all) => all[0]?.code === 'К1')
   const walkVideo = WALK.src ? WALK : undefined
-  // подписи: при видео — все комнаты, что в нём есть (walk.json → at), иначе — по кадрам
-  const walkRooms = walkVideo ? walkAll.slice(0, walkVideo.at.length) : flight
+  // клип k ведёт из комнаты k в k+1, значит видео проходит at.length + 1 комнат. Клипов меньше, чем кадров (15.11: есть только
+  // крыльцо → холл) — с комнаты, где видео кончилось, дальше идём кадрами; каждый новый клип заменяет кусок без правок кода
+  const vidEnd = walkVideo ? walkVideo.at.length : -1 // индекс комнаты в walkAll, где кончается видео
+  const roomAt = (code: string) => walkAll.findIndex((w) => w.code === code)
+  const tail = walkVideo && flight.some((f) => roomAt(f.code) === vidEnd) ? flight.filter((f) => roomAt(f.code) >= vidEnd) : []
+  const walkRooms = walkVideo ? [...walkAll.slice(0, vidEnd + 1), ...tail.slice(1)] : flight
   const walking = !!walkVideo || flight.length > 1
-  const walkVh = walkVideo ? Math.round(220 + walkVideo.duration * 45) : 260 + 170 * (flight.length - 1)
+  const walkVh = walkVideo ? Math.round(220 + walkVideo.duration * 45 + 170 * Math.max(0, tail.length - 1)) : 260 + 170 * (flight.length - 1)
 
   // 06 · цифры: только то, что есть в админке
   const facts = [
@@ -283,7 +287,8 @@ export default async function V4Home() {
               )}
               {flight.length ? (
                 flight.map((f) => (
-                  <picture key={f.code} className="v4-fly" style={{ '--fx': f.fx, '--fy': f.fy, '--pfx': f.pfx, '--pfy': f.pfy } as CSSProperties}>
+                  <picture key={f.code} className="v4-fly" data-tail={tail.length > 1 && tail.includes(f) ? '' : undefined}
+                    style={{ '--fx': f.fx, '--fy': f.fy, '--pfx': f.pfx, '--pfy': f.pfy } as CSSProperties}>
                     {f.phone && <source media="(max-width: 860px)" srcSet={f.phone} />}
                     <img src={f.src} alt={f.alt} loading="lazy" />
                   </picture>
