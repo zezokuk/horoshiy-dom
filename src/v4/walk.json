@@ -2,8 +2,10 @@
   "src": "/v4/walk/walk.mp4",
   "phone": "/v4/walk/walk-phone.mp4",
   "poster": "/v4/walk/walk-poster.webp",
-  "duration": 10.0,
+  "duration": 30.0,
   "at": [
-    0.0
+    0.0,
+    10.0,
+    20.0
   ]
 }

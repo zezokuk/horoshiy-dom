@@ -7,7 +7,7 @@
     2 … .mp4 — холл → кухня-гостиная (первый К2, последний И1)
     3 … .mp4 — кухня → терраса       (первый И1, последний И2)
 Клип N начинается в комнате N из списка на странице (Крыльцо, Холл, Кухня-гостиная, Терраса).
-Телефонные клипы (9:16) — с «9x16» в имени; нет их — телефон получает середину кадра 16:9.
+Телефонные клипы (9:16) — с «9x16» в имени; нет такого для клипа — телефон получает вырез из 16:9, от двери к центру.
 
 Что делает: склеивает клипы по порядку, кодирует для перемотки (ключевой кадр каждые 4 кадра, без звука),
 пишет `public/v4/walk/walk.mp4`, `walk-phone.mp4`, `walk-poster.webp` и `src/v4/walk.json` (длительность и секунды комнат).
@@ -47,6 +47,10 @@ def clips(phone: bool) -> list[pathlib.Path]:
     return [best[n] for n in sorted(best)]
 
 
+def num(f: pathlib.Path) -> int:
+    return int(NUM.match(f.name).group(1))
+
+
 def size(f: pathlib.Path) -> tuple[int, int]:
     r = subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=p=0', str(f)],
                        capture_output=True, text=True, check=True)
@@ -54,14 +58,27 @@ def size(f: pathlib.Path) -> tuple[int, int]:
     return int(w), int(h)
 
 
-def encode(fs: list[pathlib.Path], out: pathlib.Path, vf: str, crf: int = 24) -> None:
+def encode(fs: list[pathlib.Path], out: pathlib.Path, vf: str | list[str], crf: int = 24) -> None:
     # склейка через concat-фильтр (клипы могут быть разного размера и частоты кадров), 30 к/с, ключевой кадр каждые 4 кадра
+    vfs = vf if isinstance(vf, list) else [vf] * len(fs)
     inputs = sum((['-i', str(f)] for f in fs), [])
-    chain = ''.join(f'[{i}:v]{vf},fps=30,format=yuv420p,setsar=1[v{i}];' for i in range(len(fs)))
+    chain = ''.join(f'[{i}:v]{vfs[i]},fps=30,format=yuv420p,setsar=1[v{i}];' for i in range(len(fs)))
     chain += ''.join(f'[v{i}]' for i in range(len(fs))) + f'concat=n={len(fs)}:v=1:a=0[out]'
     subprocess.run(['ffmpeg', '-v', 'error', '-y', *inputs, '-filter_complex', chain, '-map', '[out]', '-an',
                     '-c:v', 'libx264', '-preset', 'slow', '-crf', str(crf), '-g', '4', '-keyint_min', '4', '-sc_threshold', '0',
                     '-movflags', '+faststart', str(out)], check=True)
+
+
+# нет телефонного клипа — вырез 9:16 из широкого: в начале на двери, к середине клипа — в центре.
+# Доля ширины кадра, где дверь в первой комнате клипа (те же fx, что у кадров на странице: крыльцо, холл, кухня)
+DOOR = {1: 0.51, 2: 0.65, 3: 0.21}
+PHONE_VF = 'scale=720:1280:force_original_aspect_ratio=increase,crop=720:1280'
+
+
+def phone_crop(n: int, dur: float) -> str:
+    d = DOOR.get(n, 0.5)
+    x = rf"max(0\,min(iw-720\,({d}+{0.5 - d}*min(t/{dur * 0.45:.2f}\,1))*iw-360))"
+    return f"scale=-2:1280,crop=720:1280:x='{x}':y=0"
 
 
 def main() -> None:
@@ -80,11 +97,15 @@ def main() -> None:
     W = 1920 if min(size(f)[0] for f in wide) >= 1920 else 1600 if min(size(f)[0] for f in wide) >= 1600 else 1280
     H = W * 9 // 16
     encode(wide, OUT / 'walk.mp4', f'scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H}')
-    phone = clips(True)
-    if phone and len(phone) == len(wide):
-        encode(phone, OUT / 'walk-phone.mp4', 'scale=720:1280:force_original_aspect_ratio=increase,crop=720:1280', crf=28)  # телефон: мобильный интернет, экран меньше
-    else:  # середина широкого кадра
-        encode(wide, OUT / 'walk-phone.mp4', 'scale=-2:1280,crop=720:1280', crf=28)
+    # телефон: свой клип 9:16, где он есть; где нет — вырез из широкого, который ведёт от двери к центру
+    phone = {num(f): f for f in clips(True)}
+    pf, pv = [], []
+    for f, d in zip(wide, durs):
+        p = phone.get(num(f))
+        pf.append(p or f)
+        pv.append(PHONE_VF if p else phone_crop(num(f), d))
+    encode(pf, OUT / 'walk-phone.mp4', pv, crf=28)  # телефон: мобильный интернет, экран меньше
+    print('Телефон:', ', '.join(f"{num(f)} — {'свой 9x16' if f in phone.values() else 'вырез из 16:9'}" for f in pf))
     subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', str(OUT / 'walk.mp4'), '-frames:v', '1', '-q:v', '80', str(OUT / 'walk-poster.webp')], check=True)
     total = duration(OUT / 'walk.mp4')
     at, t = [], 0.0

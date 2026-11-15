@@ -171,7 +171,7 @@ export default async function V4Home() {
   const tail = walkVideo && flight.some((f) => roomAt(f.code) === vidEnd) ? flight.filter((f) => roomAt(f.code) >= vidEnd) : []
   const walkRooms = walkVideo ? [...walkAll.slice(0, vidEnd + 1), ...tail.slice(1)] : flight
   const walking = !!walkVideo || flight.length > 1
-  const walkVh = walkVideo ? Math.round(220 + walkVideo.duration * 45 + 170 * Math.max(0, tail.length - 1)) : 260 + 170 * (flight.length - 1)
+  const walkVh = walkVideo ? Math.round(220 + walkVideo.duration * 35 + 170 * Math.max(0, tail.length - 1)) : 260 + 170 * (flight.length - 1)
 
   // 06 · цифры: только то, что есть в админке
   const facts = [
@@ -201,7 +201,7 @@ export default async function V4Home() {
 
       <MotionRoot>
         <V4Motion />
-        {/* ночь → звезда → окна → название → строка клиента → рассвет; H1 — строка с поисковыми словами, она проявляется с рассветом */}
+        {/* ночь → звезда → окна → название → рассвет; H1 — строка с поисковыми словами, скрыта с экрана (15.11) */}
         {/* слайды с небом (С1–С5) — название можно не прятать; ночь из Gemini (НОЧЬ) — вместо затемнённого утра */}
         <div id="top" className={heroSlides.length && heroSlides.every((s) => s.src.startsWith('/v4/img/')) ? 'v4-top--sky' : undefined}>
           <HeroNight
@@ -226,8 +226,9 @@ export default async function V4Home() {
                   <p className="v3-hero2__name" aria-label="Хороший дом">
                     {[...NAME].map((ch, k) => <span key={k} aria-hidden style={{ '--i': k } as CSSProperties}>{ch === ' ' ? ' ' : ch}</span>)}
                   </p>
-                  <p className="v3-hero2__split"><span>Дом, в который</span><i aria-hidden /><span>хочется возвращаться</span></p>
-                  <h1 className="v4-hero__h1">Готовые кирпичные дома с участком под Краснодаром{priceFrom ? <> · <b>от {formatMillions(priceFrom)}</b></> : null}</h1>
+                  {/* 15.11, Илья: на первом экране только название, минимализм. Строка с поисковыми словами остаётся заголовком
+                      страницы для поисковиков и читалок экрана, но на экране её нет */}
+                  <h1 className="v4-hero__h1 v3-sr">Готовые кирпичные дома с участком под Краснодаром{priceFrom ? <> · <b>от {formatMillions(priceFrom)}</b></> : null}</h1>
                 </div>
               </>
             }
