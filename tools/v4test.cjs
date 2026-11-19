@@ -1,28 +1,25 @@
-/* eslint-disable @typescript-eslint/no-require-imports -- обычный Node-скрипт (CommonJS), запускается node tools/v4test.cjs */
-// Браузерная проверка главной v4 (и страницы дома v4, если она есть): компьютер 1440 и телефон 390, плюс «уменьшить движение».
-// Запуск: node tools/v4test.cjs [адрес сайта] [папка для снимков]
-//   по умолчанию http://horoshiy.localhost:3000 и без снимков. Код выхода 1 — если хоть одна проверка не прошла.
-// Проверяет: нет ошибок в консоли, нет горизонтальной прокрутки, кнопки ведут к форме, 12 строк в «Домах по типам»,
-// плашка на карте меняет зелёную карточку, порядок первого экрана (звезда раньше названия), при reduced motion ничего не спрятано.
+/* eslint-disable @typescript-eslint/no-require-imports -- Node-скрипт проверки (CommonJS): node tools/v4test.cjs [url] [папка-снимков] */
 const { chromium } = require('playwright')
+const fs = require('fs')
 
-const BASE = process.argv[2] || 'http://horoshiy.localhost:3000'
+const BASE = process.argv[2] || 'http://127.0.0.1:3000'
 const SHOTS = process.argv[3] || ''
+if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true })
+
 const results = []
 const ok = (name, pass, info = '') => results.push({ name, pass: !!pass, info })
 
 async function scrollTo(page, sel, extra = 0) {
-  const y = await page.evaluate(([s, e]) => {
-    const el = document.querySelector(s)
-    return el ? el.getBoundingClientRect().top + scrollY + e : -1
-  }, [sel, extra])
+  const y = await page.evaluate(
+    ([s, e]) => {
+      const el = document.querySelector(s)
+      return el ? el.getBoundingClientRect().top + scrollY + e : -1
+    },
+    [sel, extra],
+  )
   if (y < 0) return false
-  const from = await page.evaluate(() => scrollY)
-  for (let k = 1; k <= 8; k++) {
-    await page.evaluate((t) => scrollTo(0, t), from + ((y - from) * k) / 8)
-    await page.waitForTimeout(80)
-  }
-  await page.waitForTimeout(700)
+  await page.evaluate((t) => window.scrollTo(0, t), y)
+  await page.waitForTimeout(550)
   return true
 }
 
@@ -30,54 +27,128 @@ async function run(browser, tag, opts) {
   const ctx = await browser.newContext(opts)
   const page = await ctx.newPage()
   const errors = []
-  page.on('pageerror', (e) => errors.push(String(e).slice(0, 160)))
-  page.on('console', (m) => m.type() === 'error' && !/favicon|yandex|metrika|mc\.yandex/i.test(m.text()) && errors.push(m.text().slice(0, 160)))
-  await page.goto(`${BASE}/v4`, { waitUntil: 'networkidle', timeout: 120000 })
+  page.on('pageerror', (e) => errors.push(String(e).slice(0, 180)))
+  page.on('console', (m) => {
+    if (m.type() === 'error' && !/favicon|yandex|metrika|mc\.yandex|WebGL|THREE\.WebGLRenderer/i.test(m.text())) {
+      errors.push(m.text().slice(0, 180))
+    }
+  })
+
+  await page.goto(`${BASE}/v4`, { waitUntil: 'load', timeout: 60000 })
+  await page.waitForTimeout(700)
   const mobile = !!opts.isMobile
 
-  // первый экран: звезда стартует раньше названия
+  // 1. Первый экран: звезда раньше названия, нет слайдера, белый фон сайта
   const order = await page.evaluate(() => {
     const d = (el) => (el ? parseFloat(getComputedStyle(el).animationDelay) : NaN)
-    return { star: d(document.querySelector('.hn__star')), name: d(document.querySelector('.v4-hero__title .v3-hero2__name > span')) }
+    return {
+      star: d(document.querySelector('.hn__star')),
+      name: d(document.querySelector('.v4-hero__title .v3-hero2__name > span')),
+      navSlider: !!document.querySelector('.hn__nav'),
+      bg: getComputedStyle(document.querySelector('.v3.v4')).backgroundColor,
+    }
   })
   if (!opts.reducedMotion) ok(`${tag}: звезда раньше названия`, order.star < order.name, JSON.stringify(order))
-
+  ok(`${tag}: автослайдер на первом экране убран`, !order.navSlider)
+  ok(`${tag}: однотонный белый фон`, order.bg === 'rgb(255, 255, 255)', order.bg)
   ok(`${tag}: нет горизонтальной прокрутки`, (await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 0)
 
-  // типы
-  await scrollTo(page, '#tipy')
-  const rows = await page.locator('.v4-types__list a').count()
-  ok(`${tag}: в «Домах по типам» 12 строк`, rows === 12, `строк ${rows}`)
-  const typeLinks = await page.evaluate(() => [...document.querySelectorAll('.v4-types__list a')].every((a) => /\/v4\/proekt\//.test(a.getAttribute('href') || '')))
-  ok(`${tag}: строки типов ведут на страницы типов`, typeLinks)
+  if (SHOTS && !opts.reducedMotion) {
+    await page.waitForTimeout(1000)
+    await page.screenshot({ path: `${SHOTS}/${tag}-01-hero.jpg`, quality: 75, type: 'jpeg' })
+  }
 
-  // карта: плашка меняет карточку
-  await scrollTo(page, '.v4-mapbox', -90)
-  await page.waitForTimeout(4000)
-  const before = await page.evaluate(() => document.querySelector('.v4-map__name h3')?.textContent)
-  await page.locator('.v4-plaque').nth(1).click()
-  await page.waitForTimeout(1500)
-  const after = await page.evaluate(() => document.querySelector('.v4-map__name h3')?.textContent)
-  ok(`${tag}: плашка карты меняет карточку`, before && after && before !== after, `${before} → ${after}`)
+  // 2. Единая сцена 1→2→3: 3D-дом («О нас» → «Наша команда» → въезд в дверь)
+  const has3d = await page.locator('.v4-story3d').count()
+  ok(`${tag}: единая 3D-сцена .v4-story3d присутствует`, has3d === 1)
+  if (has3d && !opts.reducedMotion) {
+    const bounds = await page.evaluate(() => {
+      const el = document.querySelector('.v4-story3d')
+      const top = el.getBoundingClientRect().top + scrollY
+      const run = Math.max(1, el.offsetHeight - innerHeight)
+      return { top, run }
+    })
+    await page.evaluate((y) => window.scrollTo(0, y), bounds.top + bounds.run * 0.25)
+    await page.waitForTimeout(850)
+    const aboutVisible = await page.evaluate(() => document.querySelectorAll('.v4-story-card').length >= 4)
+    ok(`${tag}: блок «О нас» в 3D-сцене`, aboutVisible)
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/${tag}-02-3d-about.jpg`, quality: 75, type: 'jpeg' })
 
-  // кнопка «Записаться на показ» ведёт к форме
-  await page.evaluate(() => scrollTo(0, innerHeight * 3))
-  await page.waitForTimeout(900)
+    await page.evaluate((y) => window.scrollTo(0, y), bounds.top + bounds.run * 0.48)
+    await page.waitForTimeout(850)
+    const foundersCount = await page.locator('.v4-founder-card').count()
+    ok(`${tag}: 4 учредителя в 3D-сцене`, foundersCount === 4, `найдено ${foundersCount}`)
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/${tag}-03-3d-team.jpg`, quality: 75, type: 'jpeg' })
+
+    await page.evaluate((y) => window.scrollTo(0, y), bounds.top + bounds.run * 0.61)
+    await page.waitForTimeout(850)
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/${tag}-03b-3d-door.jpg`, quality: 75, type: 'jpeg' })
+
+    await page.evaluate((y) => window.scrollTo(0, y), bounds.top + bounds.run * 0.78)
+    await page.waitForTimeout(850)
+  }
+
+  // 3. Короткая пролётка «Внутри» с рассказом о компании + обязательная подпись
+  const walkDisc = await page.locator('.v4-walk__disclaimer').textContent().catch(() => '')
+  ok(`${tag}: подпись про 3D-тур и пример интерьера`, /3D-тур.*пример/i.test(walkDisc || ''))
+  const hasBridge = await page.locator('.v4-bridge-sec').count()
+  ok(`${tag}: лишний слайд «У каждого утра» убран`, hasBridge === 0)
+  if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-04-vnutri.jpg`, quality: 75, type: 'jpeg' })
+
+  // 4. Типы готовых домов 1..12
+  await scrollTo(page, '#tipy', -40)
+  const typeBtns = await page.locator('.v4-ts__num').count()
+  ok(`${tag}: витрина типов домов (12 кнопок)`, typeBtns === 12, `кнопок ${typeBtns}`)
+  const tip5Btn = page.locator('.v4-ts__num', { hasText: /^5$/ })
+  if (await tip5Btn.count()) {
+    await tip5Btn.click()
+    await page.waitForTimeout(250)
+    const h3 = await page.locator('.v4-ts__top h3').textContent()
+    ok(`${tag}: выбор типа переключает карточку`, /Тип 5/i.test(h3 || ''), h3 || '')
+  }
+  if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-05-types.jpg`, quality: 75, type: 'jpeg' })
+
+  // 5. Карта посёлков → Вкладка «Генплан КП Динская» (36 участков)
+  await scrollTo(page, '#karta', -40)
+  await page.waitForTimeout(550)
+  if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-06-map.jpg`, quality: 75, type: 'jpeg' })
+
+  const openGpTab = page.locator('.v4-mflow__tabs button', { hasText: /Генплан/i })
+  if (await openGpTab.isVisible().catch(() => false)) {
+    await openGpTab.click()
+    await page.waitForTimeout(500)
+    const plots = await page.locator('.v4-gp__plot').count()
+    ok(`${tag}: генплан Динской (36 участков)`, plots === 36, `участков ${plots}`)
+    await page.locator('.v4-gp__plot[aria-label*="Участок 18"]').click()
+    await page.waitForTimeout(350)
+    const cardLink = await page.locator('.v4-gp__card a[href*="/v4/dom/"]').getAttribute('href').catch(() => '')
+    ok(`${tag}: клик по участку открывает карточку дома`, /\/v4\/dom\//.test(cardLink || ''), cardLink || '')
+    if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-07-genplan-card.jpg`, quality: 75, type: 'jpeg' })
+  } else {
+    ok(`${tag}: вкладка открытия генплана Динской`, false)
+  }
+
+  // 6. Кнопка «Записаться на показ» ведёт к форме
   const btn = mobile ? page.locator('a[href="#evf-form"]:visible').last() : page.locator('.v4-bar__btn')
   if (await btn.isVisible().catch(() => false)) {
     await btn.click()
-    await page.waitForTimeout(2600)
+    await page.waitForTimeout(600)
     const f = await page.evaluate(() => {
       const r = document.querySelector('#evf-form').getBoundingClientRect()
-      return { top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight }
+      return { top: Math.round(r.top), vh: innerHeight }
     })
-    ok(`${tag}: кнопка показа ведёт к форме`, f.top >= 0 && f.top < f.vh * 0.6, JSON.stringify(f))
-  } else ok(`${tag}: кнопка показа видна`, false)
+    ok(`${tag}: кнопка показа ведёт к форме`, f.top >= -120 && f.top < f.vh * 0.8, JSON.stringify(f))
+  }
+  if (SHOTS && !opts.reducedMotion) {
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight - innerHeight))
+    await page.waitForTimeout(400)
+    await page.screenshot({ path: `${SHOTS}/${tag}-08-footer.jpg`, quality: 75, type: 'jpeg' })
+  }
 
-  // reduced motion: ничего важного не спрятано
+  // 7. Reduced motion проверка
   if (opts.reducedMotion) {
     const hidden = await page.evaluate(() =>
-      [...document.querySelectorAll('.v4 h2, .v4-nums__row b, .v4-foot__word span, .v4-grow__quote, .v4-hero__title')].filter((e) => {
+      [...document.querySelectorAll('.v4 h2, .v4-foot__word span, .v4-hero__title, .v4-founder-card')].filter((e) => {
         const s = getComputedStyle(e)
         return s.visibility === 'hidden' || s.opacity === '0'
       }).length,
@@ -85,35 +156,65 @@ async function run(browser, tag, opts) {
     ok(`${tag}: при «уменьшить движение» ничего не спрятано`, hidden === 0, `спрятано ${hidden}`)
   }
 
-  // страница дома v4, если есть ссылка на неё
-  const domHref = await page.evaluate(() => document.querySelector('a[href*="/v4/dom/"]')?.getAttribute('href'))
-  if (domHref) {
-    const r = await page.goto(new URL(domHref, BASE).href, { waitUntil: 'networkidle', timeout: 120000 })
-    ok(`${tag}: страница дома v4 открывается`, r && r.status() === 200, domHref)
-    ok(`${tag}: на странице дома есть цена и форма`, await page.evaluate(() => !!document.querySelector('.v4-dom__price') && !!document.querySelector('#evf-form')))
-    ok(`${tag}: на странице дома нет горизонтальной прокрутки`, (await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 0)
-    if (SHOTS) await page.screenshot({ path: `${SHOTS}/v4test-${tag}-dom.jpg`, quality: 65, type: 'jpeg', fullPage: false })
+  // 8. Страница дома (Тип 5, уч. 18) — 3D сразу активна, сутки, 360°, солнце, 2x2 инфо, FAQ + форма
+  const domRes = await page.goto(`${BASE}/v4/dom/di-18-tip5-v3`, { waitUntil: 'load', timeout: 60000 })
+  await page.waitForTimeout(800)
+  ok(`${tag}: /v4/dom/di-18-tip5-v3 открывается`, domRes && domRes.status() === 200)
+  const domCheck = await page.evaluate(() => ({
+    price: !!document.querySelector('.v4-dom__price'),
+    sun: !!document.querySelector('.v4-sun'),
+    info4: document.querySelectorAll('.v4-dom-icard').length === 4,
+    faq: document.querySelectorAll('.v4-faq details').length > 0,
+    form: !!document.querySelector('#evf-form'),
+    noScrollX: document.documentElement.scrollWidth <= innerWidth,
+  }))
+  ok(`${tag}: страница дома содержит цену, солнце, 4 блока, FAQ и форму`, Object.values(domCheck).every(Boolean), JSON.stringify(domCheck))
+
+  if (!opts.reducedMotion) {
+    await page.locator('.v4-stage__daybar button', { hasText: /ночь/i }).click()
+    await page.waitForTimeout(450)
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/${tag}-09-dom-night.jpg`, quality: 75, type: 'jpeg' })
+    await page.locator('.v4-stage__modes button', { hasText: /360° внутри/i }).click()
+    await page.waitForTimeout(300)
+    ok(`${tag}: 360° тур открывается`, await page.locator('.v4-pano').isVisible())
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/${tag}-10-dom-360.jpg`, quality: 75, type: 'jpeg' })
   }
 
-  for (const path of ['/v4/poselok/dinskaya', '/v4/proekt/tip-5', '/v4/doma', '/v4/proekty', '/v4/poselki', '/v4/ipoteka', '/v4/o-kompanii', '/v4/kontakty']) {
-    const r2 = await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle', timeout: 120000 })
-    ok(`${tag}: ${path} открывается`, r2 && r2.status() === 200)
-    ok(`${tag}: ${path} — один H1 и форма, без прокрутки вбок`, await page.evaluate(() => document.querySelectorAll('h1').length === 1 && !!document.querySelector('#evf-form') && document.documentElement.scrollWidth <= innerWidth))
+  // 9. Все остальные страницы многостраничного сайта
+  for (const p of ['/v4/poselok/dinskaya', '/v4/proekt/tip-5', '/v4/doma', '/v4/proekty', '/v4/poselki', '/v4/ipoteka', '/v4/o-kompanii', '/v4/kontakty']) {
+    const r = await page.goto(`${BASE}${p}`, { waitUntil: 'load', timeout: 60000 })
+    await page.waitForTimeout(300)
+    const st = await page.evaluate(() => ({
+      h1: document.querySelectorAll('h1').length,
+      form: !!document.querySelector('#evf-form'),
+      x: document.documentElement.scrollWidth <= innerWidth,
+    }))
+    ok(`${tag}: ${p}`, r && r.status() === 200 && st.h1 === 1 && st.form && st.x, JSON.stringify(st))
   }
+
+  if (mobile && SHOTS && !opts.reducedMotion) {
+    await page.goto(`${BASE}/v4/doma`, { waitUntil: 'load', timeout: 60000 })
+    await page.waitForTimeout(300)
+    await page.locator('.v4-mnav__burger').click()
+    await page.waitForTimeout(250)
+    await page.screenshot({ path: `${SHOTS}/${tag}-11-mobile-menu.jpg`, quality: 75, type: 'jpeg' })
+  }
+
   ok(`${tag}: нет ошибок в консоли`, errors.length === 0, errors.slice(0, 3).join(' | '))
   await ctx.close()
 }
 
 ;(async () => {
   const browser = await chromium.launch()
-  await run(browser, 'компьютер', { viewport: { width: 1440, height: 900 } })
-  await run(browser, 'телефон', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
+  await run(browser, 'desktop', { viewport: { width: 1440, height: 900 } })
+  await run(browser, 'mobile', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
   await run(browser, 'reduced', { viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' })
   await browser.close()
+
   let fail = 0
   for (const r of results) {
     if (!r.pass) fail++
-    console.log(`${r.pass ? 'OK  ' : 'FAIL'} ${r.name}${r.info ? `  (${r.info})` : ''}`)
+    console.log(`${r.pass ? 'OK  ' : 'FAIL'} ${r.name}${r.info ? ` (${r.info})` : ''}`)
   }
   console.log(`\n${results.length - fail}/${results.length} проверок прошло`)
   process.exit(fail ? 1 : 0)

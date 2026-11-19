@@ -66,7 +66,7 @@ export default async function V4Project({ params }: Props) {
       <V4Fonts />
       <JsonLd data={breadcrumbsLd([{ name: 'Главная', url: mainHref('/') }, { name: 'Проекты', url: mainHref('/projects') }, { name: p.name, url: mainHref(`/projects/${p.slug}`) }])} />
       <V4Bar phone={company.phone} always />
-      <MotionRoot>
+      <MotionRoot smooth={false}>
         <header className="v4-dom">
           <figure className="v4-dom__photo">
             {/* eslint-disable-next-line @next/next/no-img-element */}

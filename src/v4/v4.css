@@ -1,9 +1,55 @@
-/* v4 — поверх v3.css (шрифты «Усадьба», палитра брендбука). Начало — из v2 (HeroNight), приёмы «Чехова», движения Aurus,
-   карта с плашками. Всё под .v4, чтобы не задеть v2 и v3. */
+/* v4 — Финальная дизайн-система по макету Figma «задача» (19.11.2026):
+   шрифты Cormorant (Regular/Medium/Italic) + Onest; тёплый беж #f8f2ea, лес #1b3a24, листва #2e6b45,
+   чернила #17221b, тёплый тёмно-ореховый #4c3d26, кирпич #a5482d. Все стили изолированы под .v4. */
 
-/* ---------- первый экран из v2 в шрифтах v3 ---------- */
+.v3.v4 {
+  --paper: #ffffff;
+  --linen: #f7f7f5;
+  --stone: #ffffff;
+  --card: #ffffff;
+  --mist: #f3f7f4;
+  --sky: #f5f8fa;
+  --forest: #1b3a24;
+  --leaf: #2e6b45;
+  --leaf-d: #225436;
+  --brick: #a5482d;
+  --ink: #17221b;
+  --moss: #5d5e56;
+  --umber: #4c3d26;
+  --line: #e6e6e1;
+  --sold: #8c958f;
+  --f-emo: var(--font-cormorant-display), 'Cormorant', Georgia, serif;
+  --f-ui: var(--font-onest), var(--font-manrope), 'Segoe UI', Arial, sans-serif;
+  --f-fact: var(--font-onest), var(--font-manrope), Arial, sans-serif;
+  --r: 20px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 16px/1.6 var(--f-ui);
+  overflow-x: visible;
+}
+html:has(.v4) { overflow-x: clip }
+
+.v4 .v3-sec { background: var(--paper); padding-block: clamp(56px, 7.5vw, 108px) }
+.v4 .v3-sec--linen { background: var(--paper) }
+.v4 .v3-sec--mist { background: var(--paper) }
+.v4 .v3-sec--sky { background: var(--paper) }
+.v4 .v3-btn { font-family: var(--f-ui); font-weight: 600 }
+.v4 .v3-btn--main { background: var(--leaf); color: #fff }
+.v4 .v3-btn--main:hover { background: var(--leaf-d) }
+.v4 .form .btn--gold { background: var(--leaf); border-color: var(--leaf); color: #fff; border-radius: 999px; font-family: var(--f-ui); font-weight: 600 }
+.v4 .form .btn--gold:hover { background: var(--leaf-d) }
+.v4 .form input[type='text'],
+.v4 .form input[type='tel'],
+.v4 .form input[type='email'] { background: #fff; border-radius: 12px; border: 1px solid var(--line); padding: 14px 16px; color: var(--ink) }
+.v4 .v3-final__form { background: var(--linen); border: 1px solid var(--line); border-radius: 22px }
+.v4 .v3-status { background: #e8f1eb; color: var(--forest) }
+.v4 .v3-status--off { background: #efebe3; color: var(--moss) }
+.v4 .v3-status--off i { background: var(--sold) }
+.v4 .v3-card { border-radius: 20px; border-color: var(--line) }
+.v4 .v3-card__body .v3-price { font-weight: 700; color: var(--forest) }
+
+/* ---------- Первый экран: Ночь → звезда → рассвет (HeroNight) ---------- */
 .v4 .hn { margin-top: 0 }
-/* текст и шрифт первого экрана — из v3 (Илья 12.11: «типографика была крутая в v3»), сцена — из v2 */
 .v4-hero__top { position: absolute; top: 0; left: 0; right: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; padding-block: 20px; color: #f6eedd; transition: color .6s; animation: v3-fadein 1s ease .9s both }
 .v4-hero__logo { position: relative; display: block; width: 118px; height: 55px }
 .v4-hero__logo img { position: absolute; inset: 0; height: 55px; width: auto; transition: opacity .6s }
@@ -11,416 +57,682 @@
 .hn.is-day .v4-hero__logo img { opacity: 0 }
 .hn.is-day .v4-hero__logo img + img { opacity: 1 }
 .hn.is-day .v4-hero__top { color: var(--ink) }
-.v4-hero__tel { font: 400 15px var(--f-fact); letter-spacing: -.02em; white-space: nowrap }
-.v4 .v4-hero__btn { padding: 12px 20px; transition: background .6s, border-color .6s }
+.v4-hero__tel { font: 500 15px var(--f-fact); white-space: nowrap }
+.v4 .v4-hero__btn { padding: 12px 22px; transition: background .6s, border-color .6s }
 .v4 .hn.is-day .v4-hero__btn { background: var(--leaf); border-color: var(--leaf); color: #fff }
-.v4-hero__title { position: absolute; left: 0; right: 0; top: 13cqh; z-index: 4; text-align: center; padding: 0 16px; color: #f6eedd; transition: color .6s; pointer-events: none }
+.v4-hero__title { position: absolute; left: 0; right: 0; top: 13cqh; z-index: 4; text-align: center; padding: 0 16px; color: #f6eedd; transition: opacity .6s ease, transform .6s ease, color .6s; pointer-events: none }
 .hn.is-day .v4-hero__title { color: #14301f }
-.v4-hero__title .v3-hero2__name { font-size: clamp(44px, min(8.6cqw, 18cqh), 140px); letter-spacing: .03em; text-shadow: 0 4px 40px rgba(8,16,40,.5); transition: text-shadow .6s }
-.v4-hero__title .v3-hero2__split { text-shadow: 0 1px 14px rgba(8,16,40,.6); transition: text-shadow .6s }
-.v4-hero__title .v3-hero2__split i { transition: background .6s }
-.hn.is-day .v4-hero__title .v3-hero2__name { text-shadow: 0 1px 26px rgba(255,255,255,.75) }
-.hn.is-day .v4-hero__title .v3-hero2__split { text-shadow: 0 1px 12px rgba(255,255,255,.9) }
-.hn.is-day .v4-hero__title .v3-hero2__split i { background: rgba(20,48,31,.65) }
-/* утренняя дымка над кронами: тёмное название читается и поверх деревьев */
-.v4 .hn .hn__pane::before { content: ''; position: absolute; inset: 0 0 auto; height: 56%; z-index: 3; pointer-events: none; background: linear-gradient(rgba(255,255,255,.82), rgba(255,255,255,0)); opacity: 0; transition: opacity 1s }
+.v4-hero__title .v3-hero2__name { font-family: var(--f-emo); font-weight: 500; font-size: clamp(44px, min(8.6cqw, 18cqh), 136px); letter-spacing: .04em; text-shadow: 0 4px 40px rgba(8,16,40,.5); transition: text-shadow .6s }
+.hn.is-day .v4-hero__title .v3-hero2__name { text-shadow: 0 1px 26px rgba(255,255,255,.8) }
+.v4 .hn .hn__pane::before { content: ''; position: absolute; inset: 0 0 auto; height: 56%; z-index: 3; pointer-events: none; background: linear-gradient(rgba(255,255,255,.84), rgba(255,255,255,0)); opacity: 0; transition: opacity 1s }
 .v4 .hn.is-day .hn__pane::before { opacity: 1 }
+.v4 .hn__star { --a: -22deg; --d: -44cqw; top: 31%; right: 7%; width: 22cqw; height: 2.5px; transform-origin: left center; background: linear-gradient(270deg, transparent, rgba(255,244,214,.95) 75%, #fff); filter: drop-shadow(0 0 8px rgba(255,232,180,.9)); animation: v4-star 2.1s .5s cubic-bezier(.25,.1,.25,1) both }
+.v4 .hn__star::after { content: ''; position: absolute; left: -4px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: #fff; box-shadow: 0 0 22px 7px rgba(255,236,195,.98), 0 0 40px 14px rgba(255,210,130,.65) }
+@keyframes v4-star { 0% { opacity: 0; transform: rotate(var(--a)) translateX(0) scaleX(.12) } 14% { opacity: 1 } 82% { opacity: 1 } 100% { opacity: 0; transform: rotate(var(--a)) translateX(var(--d)) scaleX(1.05) } }
+.v4 .hn__windows, .v4 .v4-hero__lights {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    radial-gradient(2.2% 3.2% at 50.4% 71.5%, rgba(255, 224, 155, .98), rgba(255, 175, 75, .52) 48%, transparent 78%),
+    radial-gradient(6.4% 8.5% at 63.3% 75.5%, rgba(255, 212, 132, .88), rgba(255, 162, 64, .38) 56%, transparent 82%),
+    radial-gradient(4.2% 7.4% at 31.4% 76.2%, rgba(255, 210, 128, .82), rgba(255, 158, 60, .34) 55%, transparent 82%),
+    radial-gradient(15% 14% at 53% 76%, rgba(255, 176, 84, .26), transparent 72%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: v4-lights-on 1.4s ease 1.7s forwards;
+}
+@keyframes v4-lights-on { to { opacity: 1 } }
+.v4-hero__title .v3-hero2__name > span { animation: v4-letter 1.1s cubic-bezier(.2,.8,.2,1) calc(2.1s + var(--i, 0) * .045s) both }
+@keyframes v4-letter { from { transform: translateY(70%); opacity: 0; filter: blur(6px) } }
 @media (max-width: 860px) {
   .v4-hero__title { top: 15cqh }
-  .v4-hero__title .v3-hero2__name { font-size: 11.5cqw }
+  .v4-hero__title .v3-hero2__name { font-size: 11cqw }
   .v4-hero__tel { display: none }
   .v4-hero__logo, .v4-hero__logo img { height: 46px; width: 99px }
+  .v4 .hn__star { --a: -52deg; --d: -84cqw; top: 26%; right: 4%; width: 30cqw }
 }
-/* звезда вернулась (Илья 12.11, ночь): «это как желание». Падает один раз, когда название уже встало, в чистом небе
-   под ним — прямо к дому, и сразу после неё в окнах загорается свет: желание сбылось. Голова звезды впереди. */
-.v4 .hn__star { --a: -24deg; --d: -37cqw; top: 36%; right: 6%; width: 15cqw; height: 2px; transform-origin: left center; background: linear-gradient(270deg, transparent, rgba(255,240,210,.9) 80%, #fff); animation: v4-star 1.7s 2.1s cubic-bezier(.3,.1,.3,1) both }
-.v4 .hn__star::after { content: ''; position: absolute; left: -3px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: #fff; box-shadow: 0 0 14px 4px rgba(255,236,200,.9) }
-@keyframes v4-star { 0% { opacity: 0; transform: rotate(var(--a)) translateX(0) scaleX(.15) } 12% { opacity: 1 } 80% { opacity: 1 } 100% { opacity: 0; transform: rotate(var(--a)) translateX(var(--d)) scaleX(1) } }
-.v4 .hn__windows { animation-delay: 2.1s }
-/* порядок первого экрана (Илья 12.11, ночь): пустое ночное небо → падает звезда → загораются окна → проявляется
-   название → строка клиента → сам наступает рассвет (HeroNight, 5,2 с). Название меньше, чем в v3: оно подпись к сцене, а не стена */
-.v4 .hn__star { animation-delay: .7s; animation-duration: 1.6s }
-.v4-hero__title .v3-hero2__name > span { animation: v4-letter 1.1s cubic-bezier(.2,.8,.2,1) calc(2.4s + var(--i, 0) * .05s) both }
-@keyframes v4-letter { from { transform: translateY(70%); opacity: 0; filter: blur(6px) } }
-.v4-hero__title .v3-hero2__split span:first-child, .v4-hero__title .v3-hero2__split span:last-child, .v4-hero__title .v3-hero2__split i { animation-delay: 3.3s }
 @media (prefers-reduced-motion: reduce) { .v4-hero__title *, .v4 .hn__star { animation: none !important } .v4 .hn__star { display: none } }
-@media (max-width: 959px) { .v4 .hn__star { --a: -52deg; --d: -84cqw; top: 26%; right: 4%; width: 30cqw } }
 
-/* ---------- шапка: выезжает, когда первый экран пройден ---------- */
-.v4-bar { position: fixed; inset: 0 0 auto; z-index: 60; background: rgba(255,255,255,.88); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); transform: translateY(-101%); transition: transform .5s cubic-bezier(.2,.7,.2,1) }
-html.past-hero .v4-bar { transform: none }
-.v4-bar__in { display: flex; align-items: center; justify-content: space-between; gap: 20px; height: 64px }
-.v4-bar img { height: 40px; width: auto }
-.v4-bar nav { display: flex; gap: 28px; font: 600 14px var(--f-ui) }
-.v4-bar nav a { position: relative; padding: 6px 0 }
-.v4-bar nav a::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform .35s cubic-bezier(.2,.7,.2,1) }
+/* ---------- Шапка и мобильное меню (Figma) ---------- */
+.v4-bar { position: fixed; inset: 0 0 auto; z-index: 60; background: rgba(255,255,255,.94); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); transform: translateY(-101%); transition: transform .45s cubic-bezier(.2,.7,.2,1) }
+html.past-hero .v4-bar, .v4-bar--always { transform: none }
+.v4-bar__in { display: flex; align-items: center; justify-content: space-between; gap: 18px; height: 68px }
+.v4-bar__logo img { height: 42px; width: auto }
+.v4-bar nav { display: flex; gap: 24px; font: 500 15px var(--f-ui); color: var(--forest) }
+.v4-bar nav a { position: relative; padding: 6px 0; white-space: nowrap }
+.v4-bar nav a::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform .3s }
 .v4-bar nav a:hover::after { transform: scaleX(1) }
-.v4-bar__tel { font: 400 14px var(--f-fact); letter-spacing: -.02em; white-space: nowrap }
-.v4 .v4-bar__btn { padding: 12px 18px; font-size: 14px; color: #fff }
-@media (max-width: 860px) { .v4-bar nav, .v4-bar__btn { display: none } .v4-bar__in { height: 56px } .v4-bar img { height: 34px } }
-
-/* ---------- раздел по «Чехову»: номер, огромное слово за заголовком, капитель + курсив ---------- */
-.v4-sec { position: relative; overflow: clip; padding-top: clamp(96px, 13vw, 200px) }
-.v4-sec > .v3-wrap, .v4-head { position: relative; z-index: 1 }
-.v4-ghost { position: absolute; z-index: 0; left: -1vw; top: clamp(10px, 2.4vw, 40px); font: 400 clamp(110px, 25vw, 420px)/.78 var(--f-emo); font-variation-settings: 'wdth' 62.5; text-transform: uppercase; white-space: nowrap; color: #f1f4ef; pointer-events: none; user-select: none; will-change: transform }
-.v3-sec--mist .v4-ghost { color: #eaf0ea }
-.v3-sec--sky .v4-ghost { color: #e8eff3 }
-.v3-sec--linen .v4-ghost { color: #f1eee7 }
-.v4-num { display: flex; align-items: baseline; gap: .55em; font: 600 12px/1.3 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--moss) }
-.v4-num b { font: 400 13px var(--f-fact); letter-spacing: 0; color: var(--brick) }
-.v4 .v3-h2 { text-transform: uppercase; font-size: clamp(38px, 6.2vw, 88px); line-height: .96; font-variation-settings: 'wdth' 64; letter-spacing: 0; max-width: 15ch; margin: 14px 0 22px }
-.v4 .v3-h2 em { text-transform: none; font-style: italic; font-variation-settings: 'wdth' 84; color: var(--leaf) }
-
-/* ---------- Aurus: кадр растёт на весь экран ---------- */
-.v4-grow { position: relative; height: 260vh; background: var(--paper) }
-.v4-grow__pin { position: sticky; top: 0; height: 100svh; overflow: hidden }
-.v4-grow__num { position: absolute; z-index: 3; top: 92px; left: 0; right: 0; justify-content: center }
-.v4 .v4-grow__words { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 4vw; font: 400 clamp(48px, 8vw, 132px)/.9 var(--f-emo); font-variation-settings: 'wdth' 62.5; text-transform: uppercase; color: var(--ink) }
-.v4 .v4-grow__words em { font-style: italic; text-transform: none; font-variation-settings: 'wdth' 84; color: var(--leaf) }
-.v4-grow__frame { position: absolute; inset: 0; z-index: 2; overflow: hidden; will-change: clip-path }
-.v4-grow__frame img { width: 100%; height: 100%; object-fit: cover }
-.v4-grow__scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,24,18,.22), rgba(14,24,18,.66)) }
-.v4-grow__quote { position: absolute; z-index: 4; left: 0; right: 0; bottom: 12vh; margin: 0 auto; max-width: min(92vw, 1040px); padding: 0 20px; color: #fff; text-align: center }
-.v4-grow__quote p { font: 400 clamp(23px, 3.1vw, 46px)/1.14 var(--f-emo); font-variation-settings: 'wdth' 74; text-wrap: balance }
-.v4-grow__quote em { font-style: italic; font-variation-settings: 'wdth' 88 }
-.v4-grow__quote cite { display: block; margin-top: 22px; font: 600 12px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; font-style: normal; opacity: .85 }
+.v4-bar__actions { gap: 14px; flex-wrap: nowrap }
+.v4-bar__tel { font: 500 14px var(--f-fact); color: var(--forest); white-space: nowrap }
+.v4 .v4-bar__btn { background: var(--forest); padding: 12px 20px; font-size: 14px; color: #fff; white-space: nowrap }
+.v4 .v4-bar__btn:hover { background: var(--leaf) }
+.v4-mnav { display: none }
+.v4-mnav__burger { all: unset; cursor: pointer; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; font-size: 18px; color: var(--forest); background: #fff }
+.v4-mnav__backdrop { position: fixed; inset: 0; z-index: 90; background: rgba(23,34,27,.45); display: flex; justify-content: flex-end }
+.v4-mnav__drawer { width: min(320px, 86vw); height: 100%; background: var(--paper); padding: 20px 22px 28px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: -12px 0 36px rgba(0,0,0,.18) }
+.v4-mnav__head { display: flex; justify-content: space-between; align-items: center; font: 600 14px var(--f-ui); text-transform: uppercase; letter-spacing: .1em; color: var(--moss); border-bottom: 1px solid var(--line); padding-bottom: 14px }
+.v4-mnav__head button { all: unset; cursor: pointer; font-size: 20px; padding: 4px 8px }
+.v4-mnav__links { display: flex; flex-direction: column; gap: 6px; margin-block: 18px auto }
+.v4-mnav__links a { font: 500 22px/1.35 var(--f-emo); color: var(--ink); padding: 10px 0; border-bottom: 1px solid var(--line) }
+.v4-mnav__foot { display: grid; gap: 12px }
+.v4-mnav__tel { font: 600 18px var(--f-fact); color: var(--forest); text-align: center }
+.v4-mnav__cta { justify-content: center }
+@media (max-width: 1180px) { .v4-bar__tel { display: none } .v4-bar nav { gap: 16px; font-size: 14px } }
 @media (max-width: 860px) {
-  .v4 .v4-grow__words { flex-direction: column; padding: 19svh 0; text-align: center; font-size: 16vw }
-  .v4-grow__num { top: 76px }
-  .v4-grow__quote { bottom: 14vh }
+  .v4-bar nav, .v4-bar__btn { display: none }
+  .v4-bar__in { height: 58px }
+  .v4-bar__logo img { height: 34px }
+  .v4-mnav { display: block }
 }
-/* пролёт: кадры лежат стопкой, камера «въезжает» в точку двери (--fx/--fy), следующий кадр проявляется поверх */
-.v4-grow--fly { height: 560vh } /* точную высоту ставит страница (walkVh) */
-.v4 .v4-fly { display: block; position: absolute; inset: 0; overflow: hidden } /* globals.css делает picture «прозрачным» (display: contents) — здесь он нужен коробкой */
+
+/* ---------- Типографика разделов и огромные фоновые слова ---------- */
+.v4-sec { position: relative; overflow: clip; padding-top: clamp(72px, 9vw, 148px) }
+.v4-sec > .v3-wrap, .v4-head { position: relative; z-index: 1 }
+.v4-ghost { position: absolute; z-index: 0; left: max(12px, 2vw); top: clamp(8px, 1.5vw, 24px); font: italic 500 clamp(96px, 21vw, 330px)/.82 var(--f-emo); text-transform: lowercase; white-space: nowrap; color: rgba(147, 115, 63, .14); pointer-events: none; user-select: none; will-change: transform }
+.v4-num { display: flex; align-items: baseline; gap: .55em; font: 600 12px/1.3 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--moss) }
+.v4-num b { font: 600 13px var(--f-fact); letter-spacing: 0; color: var(--brick) }
+.v4 .v3-h2 { font-family: var(--f-emo); font-weight: 500; text-transform: uppercase; font-size: clamp(36px, 5.4vw, 76px); line-height: .96; letter-spacing: -.01em; color: var(--umber); max-width: 16ch; margin: 12px 0 18px }
+.v4 .v3-h2 em { text-transform: none; font-style: italic; font-weight: 500; color: var(--leaf) }
+.v4-page-head { padding-top: calc(68px + clamp(40px, 6vw, 88px)) }
+
+/* ---------- Единая бесшовная сцена 1 → 2 → 3 (Ночь/Утро → 3D-дом на белом → вход в дверь + пролётка «про нас») ---------- */
+.v4-story3d { position: relative; height: 340vh; background: #ffffff }
+.v4-story3d.hn { margin-top: 0; height: 340vh }
+.v4-story3d__anchor { position: absolute; top: 18%; left: 0; width: 1px; height: 1px; pointer-events: none }
+.v4-story3d__anchor-walk { position: absolute; top: 72%; left: 0; width: 1px; height: 1px; pointer-events: none }
+.v4-story3d__pin { position: sticky; top: 0; height: 100svh; min-height: 620px; overflow: hidden; container-type: size; background: #ffffff }
+.v4-story3d__bg { position: absolute; inset: 0; background: #ffffff }
+.v4-story3d__canvas { position: absolute; inset: 0; z-index: 1 }
+.v4-story3d__canvas canvas { width: 100%; height: 100%; display: block }
+.v4-story3d__loader { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; pointer-events: none }
+.v4-story3d__loader img { width: min(720px, 80vw); height: auto; border-radius: 20px; opacity: .92 }
+
+/* Слой 1 (Ночь → звезда → Утро) поверх 3D-дома; при прокрутке фон мягко растворяется белой виньеткой */
+.v4-story3d__hero { position: absolute; inset: 0; z-index: 5; overflow: hidden; will-change: opacity, transform; transform-origin: 50% 64% }
+.v4-story3d__day { position: absolute; inset: 0 }
+.v4-story3d__day picture, .v4-story3d__day img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 62% }
+.v4-story3d__hero .hn__night { position: absolute; inset: 0; transition: opacity .25s linear }
+.v4-story3d__hero .hn__night picture, .v4-story3d__hero .hn__night img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 62% }
+.v4-story3d__vignette { position: absolute; inset: 0; z-index: 4; pointer-events: none; opacity: 0; will-change: opacity }
+.v4-story3d__hero-ui { position: absolute; inset: 0; z-index: 6; will-change: opacity, transform }
+.v4-story3d.is-day .v4-story3d__hero::before { content: ''; position: absolute; inset: 0 0 auto; height: 50%; z-index: 3; pointer-events: none; background: linear-gradient(rgba(255,255,255,.78), rgba(255,255,255,0)) }
+
+/* Слои 2А («О нас») и 2Б («Наша команда») вокруг 3D-дома на чистом белом фоне */
+.v4-story3d__layer { position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; will-change: opacity }
+.v4-story3d__about { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 350px); justify-content: space-between; gap: 24px; align-items: center; width: 100%; padding-top: 52px }
+.v4-story3d__col-l { display: flex; flex-direction: column; gap: 10px; max-width: 380px }
+.v4-story3d__title-box { background: rgba(255,255,255,.94); backdrop-filter: blur(14px); border: 1px solid var(--line); border-radius: 18px; padding: 14px 18px; box-shadow: 0 10px 28px rgba(23,34,27,.06) }
+.v4-story3d__h2 { font: 500 clamp(26px, 2.8vw, 40px)/.98 var(--f-emo); text-transform: uppercase; color: var(--ink); margin-top: 6px }
+.v4-story3d__h2 em { font-style: italic; text-transform: none; color: var(--leaf); display: block }
+.v4-story3d__glass-list { display: grid; gap: 8px }
+.v4-story-card { background: rgba(255,255,255,.95); backdrop-filter: blur(12px); border: 1px solid var(--line); border-radius: 16px; padding: 12px 16px; box-shadow: 0 10px 28px rgba(23,34,27,.06) }
+.v4-story-card b { display: block; font: 600 14px var(--f-ui); color: var(--leaf); margin-bottom: 3px }
+.v4-story-card p { font-size: 13px; line-height: 1.38; color: var(--ink) }
+.v4-story3d__col-r { display: grid; gap: 9px; justify-self: end; width: min(350px, 100%) }
+.v4-story-stat { background: rgba(255,255,255,.95); backdrop-filter: blur(12px); border: 1px solid var(--line); border-radius: 16px; padding: 12px 16px; display: flex; align-items: baseline; gap: 14px; box-shadow: 0 10px 28px rgba(23,34,27,.06) }
+.v4-story-stat b { font: 600 24px/1 var(--f-fact); color: var(--forest); white-space: nowrap }
+.v4-story-stat span { font: 500 12px/1.3 var(--f-ui); color: var(--moss); text-transform: uppercase; letter-spacing: .04em }
+
+.v4-story3d__team { display: flex; flex-direction: column; gap: 18px; width: 100%; padding-top: 52px }
+.v4-story3d__team-head { max-width: 52ch; background: rgba(255,255,255,.95); backdrop-filter: blur(12px); border: 1px solid var(--line); padding: 16px 20px; border-radius: 18px; box-shadow: 0 10px 28px rgba(23,34,27,.06) }
+.v4-story3d__team-sub { margin-top: 8px; font-size: 14px; color: var(--ink) }
+.v4-founders { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px }
+.v4-founder-card { background: rgba(255,255,255,.96); backdrop-filter: blur(12px); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 12px 32px rgba(23,34,27,.06) }
+.v4-founder-card__ava { width: 44px; height: 44px; border-radius: 12px; background: var(--forest); color: #fff; font: 600 14px var(--f-ui); display: grid; place-items: center; letter-spacing: .04em }
+.v4-founder-card h3 { font: 600 15px/1.25 var(--f-ui); color: var(--ink) }
+.v4-founder-card__role { font: 500 12px/1.3 var(--f-ui); color: var(--leaf); margin-top: 3px }
+.v4-founder-card__q { font: italic 500 15px/1.35 var(--f-emo); color: var(--moss); margin-top: 6px }
+
+/* Приглашение «приглашаем вас в гости ↓» перед въездом в дверь (Figma 278-1816) */
+.v4-story3d__invite { position: absolute; left: 50%; bottom: 64px; transform: translateX(-50%); z-index: 4; display: inline-flex; align-items: center; gap: 10px; padding: 10px 22px; border-radius: 999px; background: rgba(255,255,255,.95); border: 1px solid var(--line); color: var(--forest); box-shadow: 0 10px 28px rgba(23,34,27,.1); pointer-events: none }
+.v4-story3d__invite em { font: italic 500 clamp(20px, 2.2vw, 28px)/1 var(--f-emo) }
+.v4-story3d__invite span { font: 600 18px var(--f-ui) }
+
+/* Слой 3: Встроенная пролётка «про нас» сразу при въезде в дверь (без лишнего пустого кадра) */
+.v4-story3d__walk { position: absolute; inset: 0; z-index: 6; overflow: hidden; background: #141916; will-change: opacity }
+.v4-story3d__walk-media { position: absolute; inset: 0 }
+.v4-story3d__walk-slide { position: absolute; inset: 0; overflow: hidden; will-change: opacity }
+.v4-story3d__walk-slide img { width: 100%; height: 100%; object-fit: cover; will-change: transform }
+.v4-story3d__walk-video { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; object-fit: cover; opacity: 0; pointer-events: none }
+.v4-walk__ui--inline { opacity: 1 !important; visibility: visible !important }
+
+.v4-story3d__foot { position: absolute; left: 24px; right: 24px; bottom: 18px; z-index: 7; display: flex; justify-content: space-between; align-items: center; gap: 12px; font: 500 12px var(--f-ui); color: var(--moss); pointer-events: none }
+.v4-story3d__foot a { pointer-events: auto; padding: 8px 16px; border-radius: 999px; background: rgba(255,255,255,.94); color: var(--ink); border: 1px solid var(--line); font-weight: 600 }
+.v4-story3d__foot a:hover { border-color: var(--ink) }
+
+/* Reduced motion: чистый вертикальный показ без скрытых элементов */
+.v4-story3d--fallback, .v4-story3d--fallback.hn { height: auto }
+.v4-story3d--fallback .v4-story3d__pin { position: relative; height: auto; min-height: 0; overflow: visible; container-type: normal }
+.v4-story3d--fallback .v4-story3d__hero { position: relative; height: 82svh; min-height: 520px }
+.v4-story3d--fallback .v4-story3d__canvas, .v4-story3d--fallback .v4-story3d__loader, .v4-story3d--fallback .v4-story3d__walk, .v4-story3d--fallback .v4-story3d__invite, .v4-story3d--fallback .v4-story3d__foot { display: none }
+.v4-story3d--fallback .v4-story3d__layer { position: relative; opacity: 1 !important; pointer-events: auto !important; padding-block: 48px }
+
+@media (max-width: 1024px) { .v4-founders { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+@media (max-width: 860px) {
+  .v4-story3d, .v4-story3d.hn { height: 290vh }
+  .v4-story3d__about { grid-template-columns: 1fr; padding-top: 64px; gap: 10px }
+  .v4-story3d__col-r { justify-self: stretch; width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  .v4-story3d__glass-list { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  .v4-story3d__glass-list .v4-story-card:nth-child(n+3) { display: none }
+  .v4-story-stat { padding: 10px 12px }
+  .v4-story-stat b { font-size: 18px }
+  .v4-founders--compact { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px }
+  .v4-founders--compact .v4-founder-card { padding: 12px }
+  .v4-founders--compact .v4-founder-card__q { display: none }
+}
+@media (max-width: 520px) {
+  .v4-founders { grid-template-columns: 1fr }
+  .v4-founders--compact { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  .v4-story3d__col-r { grid-template-columns: 1fr }
+}
+
+/* ---------- Экран 3: Короткая пролётка «Внутри» с рассказом о компании (Figma 278-829) ---------- */
+.v4-grow { position: relative; height: 220vh; background: #141916 }
+.v4-grow__pin { position: sticky; top: 0; height: 100svh; overflow: hidden }
+.v4-grow__frame { position: absolute; inset: 0; z-index: 2; overflow: hidden }
+.v4-grow__frame img { width: 100%; height: 100%; object-fit: cover }
+.v4-grow__scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,24,18,.32), rgba(14,24,18,.18) 45%, rgba(14,24,18,.72)) }
+.v4 .v4-fly { display: block; position: absolute; inset: 0; overflow: hidden }
 .v4-fly img { transform-origin: var(--fx, 50%) var(--fy, 50%) }
 .v4-fly + .v4-fly { opacity: 0; visibility: hidden }
-.v4 .v4-fly[data-tail] { z-index: 1 } /* кадры после видео (клипов ещё не на все комнаты) — поверх видео: оно стоит раньше в разметке */
-.v4-grow__cap { position: absolute; z-index: 3; left: 20px; bottom: 16px; font: 600 11px var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: #fff; opacity: .78; text-shadow: 0 1px 6px rgba(0,0,0,.45) }
-@media (max-width: 860px) { .v4-fly img { transform-origin: var(--pfx, 50%) var(--pfy, 50%) } }
-/* прогулка «Внутри» (как у Villa Aurelia): видео поверх кадров, сверху — комнаты полосками, снизу — подпись комнаты */
+.v4 .v4-fly[data-tail] { z-index: 1 }
 .v4-walk__video { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: cover; opacity: 0; visibility: hidden }
-.v4-walk__ui { position: absolute; z-index: 5; top: 84px; left: 24px; padding: 12px 14px; border-radius: 14px; background: rgba(20, 24, 21, .42); backdrop-filter: blur(10px); color: #fff; opacity: 0; visibility: hidden }
-.v4-walk__chip { margin: 0 0 10px; font: 600 11px var(--f-ui); letter-spacing: .14em; text-transform: uppercase }
-.v4-walk__chip b { font: 400 12px var(--f-fact); letter-spacing: 0; margin-right: 8px; opacity: .8 }
+.v4-walk__brand { position: absolute; z-index: 4; left: clamp(20px, 4vw, 56px); top: clamp(132px, 16vh, 178px); font: italic 500 clamp(64px, 11vw, 152px)/.86 var(--f-emo); color: rgba(255,255,255,.32); pointer-events: none; user-select: none }
+.v4-walk__ui { position: absolute; z-index: 5; top: 82px; left: 24px; padding: 11px 14px; border-radius: 14px; background: rgba(20, 24, 21, .52); backdrop-filter: blur(10px); color: #fff; opacity: 0; visibility: hidden }
+.v4-walk__chip { margin: 0 0 8px; font: 600 11px var(--f-ui); letter-spacing: .14em; text-transform: uppercase }
+.v4-walk__chip b { font: 600 12px var(--f-fact); margin-right: 8px; opacity: .85 }
 .v4-walk__bars { display: flex; gap: 10px; margin: 0; padding: 0; list-style: none; font: 500 12px var(--f-ui) }
-.v4-walk__bars li { min-width: 92px }
-.v4-walk__bars i { display: block; height: 2px; margin-bottom: 6px; background: rgba(255,255,255,.3); border-radius: 2px; overflow: hidden }
+.v4-walk__bars li { min-width: 96px }
+.v4-walk__bars i { display: block; height: 2px; margin-bottom: 5px; background: rgba(255,255,255,.3); border-radius: 2px; overflow: hidden }
 .v4-walk__bars s { display: block; height: 100%; background: #fff; transform: scaleX(0); transform-origin: left }
-.v4-walk__cards { position: absolute; z-index: 5; left: 24px; bottom: 28px; margin: 0; padding: 0; list-style: none; width: min(460px, calc(100% - 48px)) }
-.v4-walk__card { position: absolute; left: 0; bottom: 0; width: 100%; padding: 20px 22px; border-radius: 16px; background: rgba(20, 24, 21, .5); backdrop-filter: blur(12px); color: #fff; opacity: 0; visibility: hidden }
-.v4 .v4-walk__card h3 { margin: 0 0 8px; font: 400 clamp(28px, 2.6vw, 38px)/1.05 var(--f-emo); font-variation-settings: 'wdth' 74 }
-.v4-walk__card h3 small { font: 400 15px var(--f-fact); letter-spacing: -.02em; opacity: .85 }
-.v4-walk__card p { margin: 0; font: 400 15px/1.5 var(--f-ui); opacity: .92 }
-.v4-grow--fly .v4-grow__cap { left: auto; right: 20px }
+.v4-walk__cards { position: absolute; z-index: 5; right: clamp(20px, 4vw, 56px); bottom: 86px; margin: 0; padding: 0; list-style: none; width: min(540px, calc(100% - 48px)) }
+.v4-walk__card { position: absolute; right: 0; bottom: 0; width: 100%; padding: 22px 26px; border-radius: 20px; background: rgba(16, 22, 18, .66); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.16); color: #fff; opacity: 0; visibility: hidden }
+.v4 .v4-walk__card h3 { margin: 0 0 8px; font: 500 clamp(26px, 2.5vw, 36px)/1.08 var(--f-emo) }
+.v4-walk__card h3 small { font: 500 15px var(--f-fact); opacity: .88 }
+.v4-walk__card p { margin: 0; font: 400 15px/1.55 var(--f-ui); opacity: .95 }
+.v4-walk__disclaimer { position: absolute; z-index: 6; right: clamp(20px, 4vw, 56px); bottom: 20px; font: 500 12px/1.4 var(--f-ui); color: rgba(255,255,255,.94); background: rgba(16,21,17,.62); backdrop-filter: blur(8px); width: fit-content; max-width: calc(100% - 48px); padding: 7px 14px; border-radius: 999px }
+.v4-walk__exit { position: absolute; inset: 0; z-index: 7; background: #ffffff; opacity: 0; pointer-events: none }
 @media (max-width: 860px) {
-  .v4-walk__ui { top: 64px; left: 12px; right: 12px; padding: 10px 12px }
+  .v4-walk__brand { top: 122px; font-size: 62px }
+  .v4-walk__ui { top: 68px; left: 12px; right: 12px; padding: 10px 12px }
   .v4-walk__bars { gap: 6px; font-size: 10px }
   .v4-walk__bars li { min-width: 0; flex: 1 }
-  .v4-walk__cards { left: 12px; bottom: 96px; width: calc(100% - 24px) }
-  .v4-walk__card { padding: 16px 18px }
-  .v4-grow--fly .v4-grow__cap { top: 150px; bottom: auto; right: 14px }
+  .v4-walk__cards { left: 12px; right: 12px; bottom: 132px; width: calc(100% - 24px) }
+  .v4-walk__disclaimer { left: 12px; right: 12px; bottom: 72px; border-radius: 12px; font-size: 11px }
+  .v4-fly img { transform-origin: var(--pfx, 50%) var(--pfy, 50%) }
 }
-@media (prefers-reduced-motion: reduce) { .v4-walk__ui, .v4-walk__cards { display: none } }
-@media (prefers-reduced-motion: reduce) { .v4-grow--fly { height: 100svh !important } }
-@media (prefers-reduced-motion: reduce) { .v4-grow { height: 100svh } .v4-grow__num { color: #fff } .v4-grow__num b { color: #fff } }
+@media (prefers-reduced-motion: reduce) { .v4-walk__ui, .v4-walk__cards, .v4-walk__exit { display: none } .v4-grow--fly { height: 78svh !important } }
 
-/* ---------- карта с плашками (рисунок Ильи) ---------- */
-.v4-mapbox { margin-top: 34px }
-.v4-plaques { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px }
-.v4-plaque { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font: 600 14px var(--f-ui); color: var(--ink); white-space: nowrap; transition: background .2s, color .2s, border-color .2s }
-.v4-plaque i { width: 8px; height: 8px; border-radius: 50%; background: var(--leaf) }
-.v4-plaque--soldOut i { background: var(--sold) }
-.v4-plaque--planned i { background: var(--brick) }
-.v4-plaque--all i { display: none }
-.v4-plaque:hover { border-color: var(--ink) }
-.v4-plaque[aria-pressed='true'] { background: var(--forest); color: #fff; border-color: var(--forest) }
-.v4-plaque:focus-visible { outline: 2px solid var(--leaf); outline-offset: 2px }
-.v4-map { position: relative; height: clamp(540px, 76vh, 780px); border-radius: 20px; overflow: hidden; background: #e7ede7; isolation: isolate }
-.v4-map__canvas { position: absolute; inset: 0 }
-.v4-map__canvas iframe { width: 100%; height: 100%; border: 0 }
-.v4-map__canvas [class*='ground-pane'] { filter: saturate(.5) contrast(.96) brightness(1.04) }
-.v4-map__card { position: absolute; z-index: 5; top: 20px; right: 20px; width: min(390px, calc(100% - 40px)); background: var(--forest); color: #fff; border-radius: 18px; padding: 26px 26px 18px; box-shadow: 0 24px 60px rgba(14,30,20,.3) }
-.v4-map__in { animation: v4-card .6s cubic-bezier(.2,.7,.2,1) both }
-@keyframes v4-card { from { opacity: 0; transform: translateY(16px) } }
-.v4-map__status { display: inline-flex; gap: 8px; align-items: center; font: 600 11px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; opacity: .88 }
-.v4-map__status i { width: 8px; height: 8px; border-radius: 50%; background: #8fd3a6 }
-.v4-map__status--soldOut i { background: #b9c2bc }
-.v4-map__status--planned i { background: #f0a98f }
-.v4-map__name { display: flex; gap: 14px; align-items: center; margin: 14px 0 14px }
-.v4-map__name img { width: 60px; height: 80px; object-fit: cover; border-radius: 8px; flex: none }
-.v4 .v4-map__name h3 { font: 400 clamp(28px, 2.8vw, 38px)/1 var(--f-emo); font-variation-settings: 'wdth' 68; text-transform: uppercase; color: #fff }
-.v4-map__name p { font-size: 14px; opacity: .8; margin-top: 5px }
-.v4-map__sale { font: 400 15px/1.4 var(--f-fact); letter-spacing: -.02em; padding: 13px 0; border-top: 1px solid rgba(255,255,255,.16) }
-.v4 .v4-map__card ul { list-style: none; padding: 0; border-top: 1px solid rgba(255,255,255,.16) }
-.v4-map__card li { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.1); font-size: 14px }
-.v4-map__card li b { font: 400 12px var(--f-fact); white-space: nowrap; align-self: center }
-.v4 .v4-map__go { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; background: #fff; color: var(--forest); border-radius: 999px; padding: 14px 20px; font: 600 15px var(--f-ui); transition: transform .2s }
-.v4 .v4-map__go:hover { transform: translateY(-2px) }
-.v4-map__go span { transition: transform .25s }
-.v4-map__go:hover span { transform: translateX(4px) }
-.v4-map__pager { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; font: 400 12px var(--f-fact); opacity: .92 }
-.v4-map__pager button { all: unset; cursor: pointer; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(255,255,255,.32) }
-.v4-map__pager button:hover { background: rgba(255,255,255,.12) }
-.v4-map__pager button:focus-visible { outline: 2px solid #fff; outline-offset: 2px }
-/* плашка на самой карте */
-.v4-pin { position: absolute; transform: translate(-50%, -100%); margin-top: -9px; display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px; border-radius: 999px; background: #fff; color: #17221b; font: 600 13px/1 var(--font-manrope), Arial, sans-serif; white-space: nowrap; box-shadow: 0 6px 18px rgba(14,30,20,.22); cursor: pointer; transition: background .25s, color .25s }
-.v4-pin::after { content: ''; position: absolute; left: 50%; bottom: -6px; width: 12px; height: 12px; background: inherit; transform: translateX(-50%) rotate(45deg); border-radius: 2px }
-.v4-pin i { width: 8px; height: 8px; border-radius: 50%; background: #2e6b45; flex: none }
-.v4-pin--soldOut i { background: #8c958f }
-.v4-pin--planned i { background: #a5482d }
-.v4-pin.is-on { background: #1b3a24; color: #fff }
-.v4-pin.is-on i { background: #8fd3a6 }
+/* ---------- Смысловой мостик и 4 ценности ---------- */
+.v4-bridge-sec { padding-bottom: clamp(28px, 4vw, 48px) }
+.v4-values { list-style: none; padding: 0; margin: 30px 0 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px }
+.v4-values li { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 6px }
+.v4-values span { font: 600 12px var(--f-fact); color: var(--brick) }
+.v4-values b { font: 500 28px/1.05 var(--f-emo); color: var(--forest) }
+.v4-values p { font-size: 14px; color: var(--moss); line-height: 1.45 }
+@media (max-width: 960px) { .v4-values { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+@media (max-width: 520px) { .v4-values { grid-template-columns: 1fr } }
+
+/* ---------- Экран 4: Типы готовых домов 1..12 (Figma 278-904) ---------- */
+.v4-ts { margin-top: 28px; display: grid; gap: 14px }
+.v4-ts__bar { background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 8px 10px 8px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap }
+.v4-ts__bar-label { font: 500 14px var(--f-ui); color: var(--moss); white-space: nowrap }
+.v4-ts__nums { display: flex; flex-wrap: wrap; gap: 6px }
+.v4-ts__num { all: unset; cursor: pointer; position: relative; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font: 500 15px var(--f-ui); color: var(--ink); transition: background .2s, color .2s }
+.v4-ts__num:hover { background: var(--linen) }
+.v4-ts__num.is-on { background: var(--forest); color: #fff; font-weight: 600 }
+.v4-ts__num.is-dim { opacity: .4 }
+.v4-ts__num.has-free::after { content: ''; position: absolute; bottom: 3px; width: 4px; height: 4px; border-radius: 50%; background: var(--leaf) }
+.v4-ts__num.is-on.has-free::after { background: #9ad4ab }
+
+.v4-ts__filters { display: flex; flex-wrap: wrap; gap: 10px }
+.v4-ts__pill { background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; display: inline-flex; align-items: center; gap: 12px; font: 500 13px var(--f-ui); color: var(--moss) }
+.v4-ts__range-wrap { display: inline-flex; align-items: center; gap: 8px }
+.v4-ts__range-wrap small { font: 600 13px var(--f-fact); color: var(--ink); min-width: 64px }
+.v4-ts__range-wrap input { width: 110px; accent-color: var(--leaf) }
+.v4-ts__seg { display: inline-flex; gap: 4px }
+.v4-ts__seg button { all: unset; cursor: pointer; padding: 5px 10px; border-radius: 999px; font: 500 13px var(--f-ui); color: var(--ink) }
+.v4-ts__seg button[aria-pressed='true'] { background: var(--forest); color: #fff }
+.v4-ts__pill--toggle { cursor: pointer; font: 500 13px var(--f-ui) }
+.v4-ts__pill--toggle i { font-style: normal; font-weight: 700; color: var(--leaf) }
+.v4-ts__pill--toggle.is-on { border-color: var(--forest); color: var(--forest) }
+
+.v4-ts__card { background: #fff; border: 1px solid var(--line); border-radius: 26px; padding: clamp(18px, 2.5vw, 28px); display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr) minmax(0, 1.1fr); gap: clamp(18px, 2.6vw, 32px); align-items: center; animation: v4-card .35s ease both }
+.v4-ts__photo { position: relative; aspect-ratio: 4 / 3; border-radius: 18px; overflow: hidden; background: var(--linen) }
+.v4-ts__photo img { width: 100%; height: 100%; object-fit: cover }
+.v4-ts__photo figcaption { position: absolute; left: 10px; bottom: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.92); font: 600 11px var(--f-ui); color: var(--ink) }
+.v4-ts__plan { display: grid; place-items: center; padding: 8px; background: #fff; border-radius: 16px }
+.v4-ts__plan img { max-height: 290px; width: auto; object-fit: contain }
+.v4-ts__info { display: flex; flex-direction: column; gap: 10px }
+.v4-ts__top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap }
+.v4-ts__top h3 { font: 500 clamp(32px, 3vw, 44px)/1 var(--f-emo); text-transform: uppercase; color: var(--ink) }
+.v4-ts__specs { font: 500 15px var(--f-ui); color: var(--moss) }
+.v4-ts__price { font: 700 clamp(28px, 2.8vw, 38px)/1.05 var(--f-fact); color: var(--forest); margin-top: 2px }
+.v4-ts__desc { font-size: 14px; color: var(--moss); line-height: 1.45 }
+.v4-ts__actions { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 8px }
+.v4-ts__cta { background: var(--forest); padding: 15px 26px; font-size: 15px }
+.v4-ts__all-link { font: 600 14px var(--f-ui); color: var(--leaf); border-bottom: 1px solid currentColor }
+.v4-ts__bridge { text-align: center; margin-top: 16px }
+.v4-ts__bridge-link { display: inline-flex; flex-direction: column; align-items: center; gap: 10px; color: var(--umber) }
+.v4-ts__bridge-link em { font: italic 500 clamp(24px, 2.8vw, 34px)/1 var(--f-emo) }
+.v4-ts__bridge-link span { width: 46px; height: 46px; border-radius: 50%; background: #fff; border: 1px solid var(--line); display: grid; place-items: center; font-size: 18px; transition: transform .2s }
+.v4-ts__bridge-link:hover span { transform: translateY(3px); border-color: var(--ink) }
+@media (max-width: 960px) {
+  .v4-ts__bar { border-radius: 20px; padding: 14px }
+  .v4-ts__card { grid-template-columns: 1fr }
+}
+
+/* ---------- Экран 5: Карта посёлков + Генплан Динской (Figma 278-948..1246) ---------- */
+.v4-mflow { margin-top: 24px }
+.v4-mflow__tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px }
+.v4-mflow__tabs button { all: unset; cursor: pointer; padding: 12px 20px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font: 600 14px var(--f-ui); color: var(--ink); transition: background .2s, color .2s, border-color .2s }
+.v4-mflow__tabs button:hover { border-color: var(--forest) }
+.v4-mflow__tabs button[aria-selected='true'] { background: var(--forest); border-color: var(--forest); color: #fff }
+.v4-mflow__box { position: relative; height: clamp(460px, 64vh, 640px); border-radius: 26px; overflow: hidden; background: #2f4638; border: 1px solid var(--line) }
+.v4-mflow__ymap { position: absolute; inset: 0 }
+.v4-mflow__ymap [class*='ground-pane'] { filter: saturate(.55) contrast(.96) brightness(1.03) }
+.v4-mflow__vec { position: absolute; inset: 0; background: radial-gradient(90% 80% at 50% 45%, #3b5846 0%, #24392c 100%) }
+.v4-mflow__river { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none }
+.v4-mflow__wm { position: absolute; right: 7%; top: 14%; display: flex; flex-direction: column; text-align: right; font: italic 500 clamp(44px, 6vw, 86px)/.88 var(--f-emo); color: rgba(255,255,255,.16); pointer-events: none; user-select: none }
+.v4-ypin { all: unset; cursor: pointer; position: absolute; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 9px; padding: 8px 14px 8px 10px; border-radius: 999px; background: #fff; color: var(--ink); box-shadow: 0 10px 28px rgba(10,22,14,.28); transition: transform .2s, background .2s, color .2s; z-index: 2; white-space: nowrap }
+.v4-ypin:hover, .v4-ypin.is-on { background: var(--forest); color: #fff; transform: translate(-50%, -54%) scale(1.04); z-index: 4 }
+.v4-ypin i { width: 10px; height: 10px; border-radius: 50%; background: var(--leaf); flex: none }
+.v4-ypin--soldOut i { background: var(--sold) }
+.v4-ypin--planned i { background: var(--brick) }
+.v4-ypin.is-on i { background: #9ad4ab }
+.v4-ypin b { display: block; font: 600 13px/1.1 var(--f-ui) }
+.v4-ypin span { display: block; font: 400 11px/1.15 var(--f-ui); opacity: .75; margin-top: 2px }
+.v4-mflow__hint { position: absolute; left: 18px; bottom: 14px; z-index: 5; font: 500 12px var(--f-ui); color: rgba(255,255,255,.88); background: rgba(16,24,18,.48); padding: 6px 12px; border-radius: 999px; backdrop-filter: blur(8px) }
+
+.v4-mflow__strip { margin-top: 16px; background: #fff; border: 1px solid var(--line); border-radius: 24px; padding: clamp(20px, 3vw, 30px); display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .95fr); gap: 24px; align-items: center }
+.v4-mflow__stitle { display: flex; align-items: center; gap: 12px; flex-wrap: wrap }
+.v4-mflow__stitle h3 { font: 500 clamp(28px, 3vw, 40px)/1 var(--f-emo); color: var(--forest) }
+.v4-mflow__smeta { font-size: 15px; color: var(--moss); margin-top: 8px }
+.v4-mflow__stypes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px }
+.v4-mflow__stypes span { padding: 5px 12px; border-radius: 999px; background: var(--linen); font: 600 12px var(--f-ui); color: var(--ink) }
+.v4-mflow__sright { display: flex; flex-direction: column; gap: 14px }
+.v4-mflow__snear { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line) }
+.v4-mflow__snear li { display: flex; justify-content: space-between; gap: 14px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px }
+.v4-mflow__snear b { font: 600 13px var(--f-fact); color: var(--ink); white-space: nowrap }
+.v4-mflow__scta { display: flex; justify-content: flex-end }
+
+/* Генплан Динской (36 участков, спутник/схема, стеклянная карточка) */
+.v4-gp { display: grid; gap: 14px }
+.v4-gp__toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap }
+.v4-gp__streets { display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
+.v4-gp__back, .v4-gp__stab { all: unset; cursor: pointer; padding: 8px 14px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font: 500 13px var(--f-ui); color: var(--ink); white-space: nowrap }
+.v4-gp__back { background: var(--linen); font-weight: 600 }
+.v4-gp__stab.is-on { background: var(--forest); border-color: var(--forest); color: #fff }
+.v4-gp__stab b { font-weight: 700 }
+.v4-gp__mode { display: inline-flex; background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 3px }
+.v4-gp__mode button { all: unset; cursor: pointer; padding: 6px 14px; border-radius: 999px; font: 600 13px var(--f-ui); color: var(--moss) }
+.v4-gp__mode button[aria-pressed='true'] { background: var(--forest); color: #fff }
+
+.v4-gp__stage { position: relative; border-radius: 24px; overflow: hidden; border: 1px solid var(--line); background: #dce5dc; aspect-ratio: 2 / 1; min-height: 400px }
+.v4-gp__svg { width: 100%; height: 100%; display: block }
+.v4-gp__plot { cursor: pointer; transition: opacity .2s }
+.v4-gp__plot polygon:first-child { stroke-width: .7; transition: fill-opacity .2s, stroke-width .2s }
+.v4-gp__plot--free polygon:first-child { fill: #2e6b45; fill-opacity: .52; stroke: #ffffff }
+.v4-gp__plot--free:hover polygon:first-child, .v4-gp__plot--free.is-sel polygon:first-child { fill: #1b3a24; fill-opacity: .84; stroke-width: 1.4 }
+.v4-gp__plot--reserved polygon:first-child { fill: #c9862c; fill-opacity: .52; stroke: #ffffff }
+.v4-gp__plot--sold polygon:first-child { fill: #6c736f; fill-opacity: .56; stroke: rgba(255,255,255,.7) }
+.v4-gp__plot--pending polygon:first-child { fill: #ffffff; fill-opacity: .42; stroke: #5d5e56 }
+.v4-gp__svg--scheme .v4-gp__plot--free polygon:first-child { fill-opacity: .86 }
+.v4-gp__svg--scheme .v4-gp__plot--sold polygon:first-child { fill-opacity: .72 }
+.v4-gp__roof { fill: #26292e; fill-opacity: .78; stroke: rgba(255,255,255,.5); stroke-width: .35; pointer-events: none }
+.v4-gp__pno { font: 700 4.2px var(--f-ui); fill: #ffffff; pointer-events: none; paint-order: stroke; stroke: rgba(20,30,24,.75); stroke-width: .9px }
+.v4-gp__plot--pending .v4-gp__pno { fill: var(--ink); stroke: rgba(255,255,255,.85) }
+.v4-gp__glabel rect { fill: rgba(255,255,255,.94); stroke: rgba(23,34,27,.15); stroke-width: .35 }
+.v4-gp__glabel text { font: 600 3.2px var(--f-ui); fill: var(--ink) }
+
+.v4-gp__zoom { position: absolute; left: 16px; bottom: 16px; z-index: 4; display: flex; gap: 6px }
+.v4-gp__zoom button { all: unset; cursor: pointer; width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.94); border: 1px solid var(--line); display: grid; place-items: center; font: 600 18px var(--f-ui); color: var(--ink); box-shadow: 0 4px 12px rgba(0,0,0,.1) }
+.v4-gp__zoom button:hover { border-color: var(--ink) }
+
+.v4-gp__card { position: absolute; top: 16px; right: 16px; bottom: 16px; z-index: 6; width: min(350px, calc(100% - 32px)); background: rgba(255,255,255,.94); backdrop-filter: blur(18px); border: 1px solid #fff; border-radius: 22px; overflow-y: auto; display: flex; flex-direction: column; box-shadow: 0 22px 60px rgba(14,24,18,.26); animation: v4-card .28s ease both }
+.v4-gp__close { all: unset; cursor: pointer; position: absolute; top: 10px; right: 10px; z-index: 2; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.92); display: grid; place-items: center; font-size: 14px; color: var(--ink) }
+.v4-gp__cimg { position: relative; aspect-ratio: 16 / 10; background: var(--linen); flex: none }
+.v4-gp__cimg img { width: 100%; height: 100%; object-fit: cover }
+.v4-gp__cimg--empty { display: grid; place-items: center; padding: 16px; font: 600 14px var(--f-ui); color: var(--moss) }
+.v4-gp__3dtag { position: absolute; left: 10px; bottom: 10px; padding: 6px 13px; border-radius: 999px; background: rgba(23,34,27,.86); color: #ffffff !important; font: 600 12px var(--f-ui); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.22) }
+.v4-gp__cbody { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 6px }
+.v4-gp__cbody h4 { font: 600 20px/1.2 var(--f-ui); color: var(--ink); margin-top: 2px }
+.v4-gp__cmeta { font-size: 13px; color: var(--moss) }
+.v4-gp__cprice { font: 700 28px/1.1 var(--f-fact); color: var(--forest); margin-top: 4px }
+.v4-gp__cmort { font-size: 12px; color: var(--moss); line-height: 1.4 }
+.v4-gp__cbtns { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap }
+.v4-gp__cbtns .v3-btn { padding: 12px 18px; font-size: 13px; flex: 1; justify-content: center }
+.v4-gp__cmp { all: unset; cursor: pointer; padding: 11px 16px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font: 600 13px var(--f-ui); color: var(--ink) }
+.v4-gp__cmp.is-on { border-color: var(--leaf); color: var(--leaf); background: var(--mist) }
+
+.v4-gp__foot { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap }
+.v4-gp__legend { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 14px; font: 500 13px var(--f-ui); color: var(--ink) }
+.v4-gp__legend li { display: inline-flex; align-items: center; gap: 6px }
+.v4-gp__legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block }
+.v4-gp__legend .is-free { background: var(--leaf) }
+.v4-gp__legend .is-res { background: #c9862c }
+.v4-gp__legend .is-sold { background: var(--sold) }
+.v4-gp__legend .is-pend { background: #fff; border: 1px solid var(--moss) }
+.v4-gp__infra { display: flex; flex-wrap: wrap; gap: 8px }
+.v4-gp__infra span { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font: 500 12px var(--f-ui); color: var(--ink) }
+.v4-gp__infra i { font-style: normal }
+.v4-gp__summary { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap }
+.v4-gp__summary h3 { font: 500 clamp(22px, 2.4vw, 30px)/1.1 var(--f-emo); color: var(--forest) }
+.v4-gp__summary p { font-size: 14px; color: var(--moss); margin-top: 4px; max-width: 62ch }
+.v4-gp__compare { background: var(--forest); color: #fff; border-radius: 18px; padding: 16px 20px; display: grid; gap: 12px }
+.v4-gp__cmp-head { display: flex; justify-content: space-between; align-items: center; font: 600 14px var(--f-ui) }
+.v4-gp__cmp-head button { all: unset; cursor: pointer; font-size: 13px; text-decoration: underline; opacity: .85 }
+.v4-gp__cmp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px }
+.v4-gp__cmp-item { background: rgba(255,255,255,.1); border-radius: 12px; padding: 12px 14px; display: grid; gap: 4px }
+.v4-gp__cmp-item b { font: 600 15px var(--f-ui) }
+.v4-gp__cmp-item span { font-size: 13px; opacity: .88 }
 @media (max-width: 860px) {
-  .v4-plaques { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: -20px; padding-inline: 20px }
-  .v4-map { height: auto; overflow: visible; border-radius: 0; background: none }
-  .v4-map__canvas { position: relative; height: 380px; border-radius: 18px; overflow: hidden; background: #e7ede7 }
-  .v4-map__card { position: relative; top: auto; right: auto; width: auto; margin: -30px 10px 0; padding: 22px 20px 16px }
+  .v4-mflow__strip { grid-template-columns: 1fr }
+  .v4-mflow__scta { justify-content: stretch }
+  .v4-mflow__scta .v3-btn { width: 100%; justify-content: center }
+  .v4-gp__stage { aspect-ratio: 4 / 3; min-height: 300px }
+  .v4-gp__card { position: static; width: 100%; margin-top: 10px; box-shadow: none }
 }
 
-/* ---------- Aurus: цифры выезжают с двух сторон ---------- */
-.v4-nums__rows { margin-top: 44px }
-.v4-nums__row { display: flex; align-items: baseline; gap: clamp(14px, 3vw, 44px); padding: clamp(14px, 2vw, 26px) 0; border-top: 1px solid var(--line) }
-.v4-nums__row:nth-child(even) { flex-direction: row-reverse; text-align: right }
-.v4-nums__row b { font: 400 clamp(50px, 10.5vw, 160px)/.95 var(--f-fact); letter-spacing: -.05em; color: var(--forest); white-space: nowrap }
-.v4-nums__row span { font: 600 12px/1.45 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--moss); max-width: 22ch }
+/* ---------- Ипотека, 5 шагов, FAQ ---------- */
+.v4-mort { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 18px; margin-top: 28px }
+.v4-mort__in, .v4-mort__out { border-radius: 22px; padding: clamp(22px, 3vw, 32px) }
+.v4-mort__in { background: #fff; border: 1px solid var(--line); display: grid; gap: 10px; align-content: start }
+.v4-mort__in label { font: 600 14px var(--f-ui) }
+.v4-mort__in select { font: 500 15px var(--f-ui); padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: #fff; color: var(--ink) }
+.v4-mort__in input[type='range'] { width: 100%; accent-color: var(--leaf) }
+.v4-mort__out { background: var(--forest); color: #fff }
+.v4-mort__label { font: 600 12px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; opacity: .85 }
+.v4-mort__pay { font: 700 clamp(38px, 5.5vw, 56px)/1.05 var(--f-fact); letter-spacing: -.03em; margin: 10px 0 18px }
+.v4-mort__out dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 14px; border-top: 1px solid rgba(255,255,255,.18); padding-top: 14px }
+.v4-mort__out dt { font: 600 11px var(--f-ui); letter-spacing: .12em; text-transform: uppercase; opacity: .75 }
+.v4-mort__out dd { margin: 4px 0 0; font: 600 15px var(--f-fact) }
+.v4-mort__out .v3-note { color: rgba(255,255,255,.78) }
+.v4-mort-more { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px }
+.v4 .v4-progs { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 12px; margin-top: 20px }
+.v4-progs li { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 4px }
+.v4-progs b { font: 600 16px var(--f-ui); color: var(--ink) }
+.v4-progs span { font-size: 14px; color: var(--moss) }
+.v4-steps-wrap { margin-top: clamp(44px, 6vw, 76px) }
+.v4 .v4-steps { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 0; margin-top: 26px }
+.v4-steps li { padding: 20px 20px 20px 0; border-top: 1px solid var(--ink) }
+.v4-steps li span { font: 600 12px var(--f-fact); color: var(--brick) }
+.v4-steps li b { display: block; margin: 8px 0 6px; font: 500 28px/1 var(--f-emo); text-transform: uppercase; color: var(--forest) }
+.v4-steps li p { font-size: 14px; color: var(--moss); max-width: 26ch }
 
-/* ---------- подвал: название во всю ширину (как «ЧЕХОВ») ---------- */
-.v4-foot { background: var(--forest); color: #fff; overflow: hidden; padding-top: clamp(40px, 6vw, 80px) }
-.v4-foot__top { display: flex; flex-wrap: wrap; gap: 16px 40px; justify-content: space-between; font-size: 15px }
+.v4-faq { margin-top: 22px; border-top: 1px solid var(--line) }
+.v4-faq details { border-bottom: 1px solid var(--line) }
+.v4-faq summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 20px; padding: 18px 0; font: 500 clamp(19px, 2vw, 24px)/1.25 var(--f-emo); color: var(--ink) }
+.v4-faq summary::-webkit-details-marker { display: none }
+.v4-faq summary::after { content: '+'; font: 400 22px var(--f-ui); transition: transform .25s }
+.v4-faq details[open] summary::after { transform: rotate(45deg) }
+.v4-faq details p { padding: 0 0 18px; max-width: 70ch; font-size: 15px; color: var(--moss) }
+
+/* ---------- Финал с контактами и футер (Figma 278-1658, 278-1791) ---------- */
+.v4-final { border-top: 1px solid var(--line) }
+.v4-final__contacts { margin-top: clamp(44px, 6vw, 72px); position: relative }
+.v4-final__chead { position: relative; margin-bottom: 22px }
+.v4-ghost--inline { top: -32px; left: -6px; font-size: clamp(72px, 14vw, 190px) }
+.v4-final__ctitle { position: relative; z-index: 1; margin-top: 8px }
+.v4-contacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px }
+.v4-contacts__card { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: clamp(20px, 2.6vw, 28px); display: grid; gap: 8px; align-content: start }
+.v4-contacts__card h2, .v4-contacts__card h4 { font: 500 clamp(24px, 2.2vw, 30px)/1.05 var(--f-emo); text-transform: uppercase; margin: 2px 0; color: var(--ink) }
+.v4-contacts__card--main { background: var(--forest); color: #fff; border-color: var(--forest) }
+.v4 .v4-contacts__card--main .v4-num { color: rgba(255,255,255,.78) }
+.v4 .v4-contacts__tel { font: 700 clamp(22px, 2vw, 28px)/1.1 var(--f-fact); white-space: nowrap }
+.v4-contacts__card--main a:hover { text-decoration: underline }
+
+.v4-foot { background: var(--forest); color: #fff; overflow: hidden; padding-top: clamp(40px, 5vw, 72px) }
+.v4-foot__top { display: flex; flex-wrap: wrap; gap: 16px 40px; justify-content: space-between; font-size: 14px }
 .v4-foot__top p { opacity: .85; max-width: 44ch }
-.v4-foot nav { display: flex; gap: 22px; flex-wrap: wrap; font-weight: 600 }
-.v4-foot__word { font: italic 400 12.4vw/.92 var(--f-emo); font-variation-settings: 'wdth' 80; white-space: nowrap; text-align: center; margin-top: clamp(20px, 4vw, 60px); padding-bottom: .14em; overflow: hidden }
+.v4-foot nav { display: flex; gap: 22px; flex-wrap: wrap; font-weight: 500 }
+.v4-foot nav a { opacity: .9 }
+.v4-foot nav a:hover { opacity: 1; text-decoration: underline }
+.v4-foot__word { font: italic 500 12.2vw/.9 var(--f-emo); white-space: nowrap; text-align: center; margin-top: clamp(18px, 3.5vw, 48px); padding-bottom: .14em; overflow: hidden }
 .v4-foot__word span { display: inline-block }
 @media (max-width: 860px) { .v4-foot { padding-bottom: 84px } }
 
-/* ---------- дома по типам: строки + большое фото ---------- */
+/* ---------- Страница дома v4: 3D-сцена, 360°, солнце, 2x2 инфо (Figma 278-1609 / 278-1430) ---------- */
+.v4-dom-hero { position: relative; overflow: clip; padding: calc(68px + clamp(28px, 4vw, 56px)) 0 clamp(44px, 6vw, 72px) }
+.v4-dom-hero .v3-wrap { position: relative; z-index: 1 }
+.v4-dom__crumbs { display: flex; gap: 8px; flex-wrap: wrap; font: 600 12px var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--moss); margin-bottom: 18px }
+.v4-dom__crumbs a:hover { color: var(--ink) }
+.v4-dom-grid { display: grid; grid-template-columns: minmax(0, 1.32fr) minmax(320px, 1fr); gap: clamp(22px, 3vw, 44px); align-items: start }
+.v4-dom-grid__left { display: grid; gap: 14px }
+.v4-dom-widgets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px }
+
+.v4-stage { border-radius: 24px; overflow: hidden; border: 1px solid var(--line); background: #dce8f2; position: relative }
+.v4-stage__media { position: relative; aspect-ratio: 16 / 11; min-height: 360px }
+.v4-stage__sky { position: absolute; inset: 0; transition: background .6s ease; background: linear-gradient(180deg, #cce0f0 0%, #eaf2f7 70%, #f5efe6 100%) }
+.v4-stage--evening .v4-stage__sky { background: linear-gradient(180deg, #322a45 0%, #985e54 62%, #d4966a 100%) }
+.v4-stage--night .v4-stage__sky { background: radial-gradient(circle at 78% 22%, rgba(160,192,240,.22), transparent 36%), linear-gradient(180deg, #091120 0%, #162238 72%, #1d2732 100%) }
+.v4-stage__moon { position: absolute; top: 18%; right: 16%; width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fffef4, #e5d8a8); box-shadow: 0 0 28px 6px rgba(235,222,175,.35) }
+.v4-stage__canvas { position: absolute; inset: 0; z-index: 1 }
+.v4-stage__canvas canvas { width: 100%; height: 100%; display: block }
+.v4-stage__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 2 }
+.v4-stage__photo { position: absolute; inset: 0 }
+.v4-stage__photo img { width: 100%; height: 100%; object-fit: cover; transition: filter .5s ease }
+.v4-stage__photo--evening img { filter: sepia(.22) saturate(1.15) brightness(.86) }
+.v4-stage__photo--night img { filter: brightness(.56) saturate(.75) hue-rotate(190deg) contrast(1.08) }
+
+.v4-stage__top { position: absolute; top: 14px; left: 14px; right: 14px; z-index: 4; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap }
+.v4-stage__modes { display: inline-flex; background: rgba(255,255,255,.92); backdrop-filter: blur(10px); border-radius: 999px; padding: 3px; gap: 2px }
+.v4-stage__modes button { all: unset; cursor: pointer; padding: 7px 14px; border-radius: 999px; font: 600 12px var(--f-ui); color: var(--ink) }
+.v4-stage__modes button[aria-selected='true'] { background: var(--forest); color: #fff }
+.v4-stage__roof-btn { all: unset; cursor: pointer; padding: 9px 16px; border-radius: 999px; background: rgba(255,255,255,.94); backdrop-filter: blur(10px); font: 600 12px var(--f-ui); color: var(--ink); box-shadow: 0 4px 16px rgba(0,0,0,.12) }
+.v4-stage__roof-btn:hover { background: #fff }
+.v4-stage__3d-tools { position: absolute; right: 14px; bottom: 48px; z-index: 4; display: flex; gap: 6px }
+.v4-stage__3d-tools button { all: unset; cursor: pointer; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.9); font: 600 12px var(--f-ui); color: var(--ink) }
+.v4-stage__daybar { position: absolute; left: 14px; bottom: 14px; z-index: 4; display: inline-flex; gap: 4px; background: rgba(255,255,255,.92); backdrop-filter: blur(10px); padding: 4px; border-radius: 999px }
+.v4-stage__daybar button { all: unset; cursor: pointer; padding: 7px 13px; border-radius: 999px; font: 600 12px var(--f-ui); color: var(--ink); white-space: nowrap }
+.v4-stage__daybar button[aria-pressed='true'] { background: var(--forest); color: #fff }
+.v4-stage__cap { position: absolute; right: 14px; bottom: 16px; z-index: 4; padding: 4px 10px; border-radius: 999px; background: rgba(23,34,27,.65); color: #fff; font: 500 11px var(--f-ui); backdrop-filter: blur(6px); pointer-events: none }
+@media (max-width: 720px) { .v4-stage__cap { display: none } }
+
+/* ---------- Кнопки-капсулы и панель фильтров в стиле ПИК (референс) ---------- */
+.v4-pik-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px }
+.v4-pik-seg { display: inline-flex; gap: 6px; flex-wrap: wrap }
+.v4-pik-rooms { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap }
+.v4-pik-circle { all: unset; cursor: pointer; min-width: 42px; height: 42px; padding: 0 12px; box-sizing: border-box; border-radius: 999px; border: 1px solid var(--line); background: #ffffff; display: inline-flex; align-items: center; justify-content: center; font: 500 14px var(--f-ui); color: var(--ink); transition: border-color .2s, background .2s, color .2s }
+.v4-pik-circle--wide { padding: 0 16px }
+.v4-pik-circle:hover { border-color: var(--forest) }
+.v4-pik-circle.is-on { background: var(--forest); border-color: var(--forest); color: #ffffff; font-weight: 600 }
+
+.v4-pik-btn { all: unset; cursor: pointer; height: 42px; padding: 0 18px; box-sizing: border-box; border-radius: 999px; border: 1px solid var(--line); background: #ffffff; display: inline-flex; align-items: center; justify-content: center; gap: 10px; font: 500 14px var(--f-ui); color: var(--ink); white-space: nowrap; transition: border-color .2s, background .2s, color .2s }
+.v4-pik-btn:hover { border-color: var(--forest) }
+.v4-pik-btn.is-dark { background: #5d5e56; border-color: #5d5e56; color: #ffffff; font-weight: 600 }
+.v4-pik-btn--accent { background: var(--leaf); border-color: var(--leaf); color: #ffffff; font-weight: 600 }
+.v4-pik-btn--accent:hover { background: var(--leaf-d); border-color: var(--leaf-d) }
+.v4-pik-btn--map { padding-right: 7px }
+.v4-pik-mapdot { width: 28px; height: 28px; border-radius: 50%; flex: none; background: radial-gradient(circle at 35% 35%, #a8e4b1 0%, #58b368 48%, #2e6b45 100%); border: 1.5px solid #e6e6e1; position: relative; overflow: hidden }
+.v4-pik-mapdot::after { content: ''; position: absolute; inset: 4px; border-radius: 50%; border: 1.5px dashed rgba(255,255,255,.85) }
+
+.v4-pik-pricepill { height: 42px; padding: 0 18px; box-sizing: border-box; border-radius: 999px; border: 1px solid var(--line); background: #ffffff; display: inline-flex; align-items: center; gap: 14px; font: 500 14px var(--f-fact); color: var(--ink) }
+.v4-pik-pricepill__half { display: inline-flex; align-items: baseline; gap: 6px; white-space: nowrap }
+.v4-pik-pricepill__half small { font: 400 13px var(--f-ui); color: var(--moss) }
+.v4-pik-pricepill__half b { font-weight: 600; color: var(--moss) }
+.v4-pik-pricepill__div { width: 1px; height: 18px; background: var(--line) }
+
+.v4-type-banner { margin-top: 14px; padding: 14px 20px; border-radius: 20px; border: 1px solid var(--line); background: var(--linen); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap }
+.v4-type-banner__plan { width: 72px; height: 54px; object-fit: contain; background: #fff; border-radius: 10px; padding: 4px; border: 1px solid var(--line) }
+.v4-type-banner__info { display: grid; gap: 2px; margin-right: auto }
+.v4-type-banner__info b { font: 600 16px var(--f-ui); color: var(--ink) }
+.v4-type-banner__info span { font-size: 13px; color: var(--moss) }
+
+/* ---------- Компактная страница посёлка без старых обложек (генплан сразу на 1 экране) ---------- */
+.v4-estate-hero { position: relative; overflow: clip; padding: calc(68px + clamp(24px, 3.5vw, 44px)) 0 28px; background: #ffffff }
+.v4-estate-hero .v3-wrap { position: relative; z-index: 1 }
+.v4-estate-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; margin-bottom: 18px }
+.v4-estate-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px }
+.v4-estate-fact { background: var(--linen); border: 1px solid var(--line); border-radius: 16px; padding: 14px 18px; display: flex; align-items: baseline; gap: 12px }
+.v4-estate-fact b { font: 700 clamp(22px, 2.4vw, 30px)/1 var(--f-fact); color: var(--forest); white-space: nowrap }
+.v4-estate-fact span { font: 500 12px/1.3 var(--f-ui); color: var(--moss) }
+.v4-estate-gp { margin-top: 8px }
+.v4-estate-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 18px }
+.v4-estate-box { background: #ffffff; border: 1px solid var(--line); border-radius: 20px; padding: 22px 24px }
+.v4-estate-box h3 { font: 500 clamp(24px, 2.4vw, 32px)/1.05 var(--f-emo); text-transform: uppercase; color: var(--ink); margin: 6px 0 12px }
+
+.v4-estates-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px }
+.v4-estate-card { background: #ffffff; border: 1px solid var(--line); border-radius: 22px; padding: 22px 24px; display: flex; flex-direction: column; gap: 10px; transition: border-color .2s, box-shadow .2s }
+.v4-estate-card:hover { border-color: var(--forest); box-shadow: 0 12px 32px rgba(23,34,27,.07) }
+.v4-estate-card__top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap }
+.v4-estate-card__price { font: 700 18px var(--f-fact); color: var(--forest) }
+.v4-estate-card h2 { font: 500 clamp(28px, 2.8vw, 38px)/1 var(--f-emo); text-transform: uppercase; color: var(--ink); margin-top: 2px }
+.v4-estate-card__place { font-size: 14px; color: var(--moss) }
+.v4-estate-card__cta { margin-top: auto; width: fit-content }
+
+.v4-pano { position: absolute; inset: 0; overflow: hidden; cursor: grab; user-select: none; background: #101511 }
+.v4-pano:active { cursor: grabbing }
+.v4-pano img { width: 100%; height: 100%; object-fit: cover; transition: transform .08s linear }
+.v4-pano__overlay { position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 5; display: grid; gap: 8px }
+.v4-pano__rooms { display: flex; flex-wrap: wrap; gap: 6px }
+.v4-pano__rooms button { all: unset; cursor: pointer; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.9); font: 600 12px var(--f-ui); color: var(--ink) }
+.v4-pano__rooms button[aria-pressed='true'] { background: var(--forest); color: #fff }
+.v4-pano__hint { font: 500 11px var(--f-ui); color: #fff; background: rgba(16,21,17,.6); padding: 5px 12px; border-radius: 999px; width: fit-content }
+
+.v4-sun { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 16px 18px; display: grid; gap: 8px }
+.v4-sun__head { display: flex; justify-content: space-between; align-items: center; font: 600 13px var(--f-ui); color: var(--ink) }
+.v4-sun__head b { color: var(--brick); font-family: var(--f-fact) }
+.v4-sun__svg { width: 100%; height: auto }
+.v4-sun__n { font: 700 10px var(--f-ui); fill: var(--moss) }
+.v4-sun input[type='range'] { width: 100%; accent-color: #d98a3c }
+.v4-sun__cap { font-size: 12px; color: var(--moss) }
+
+.v4-dom-paycard { background: var(--forest); color: #fff; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px }
+.v4-dom-paycard__lbl { font: 600 11px var(--f-ui); letter-spacing: .12em; text-transform: uppercase; opacity: .8 }
+.v4-dom-paycard__val { font: 700 clamp(30px, 3vw, 40px)/1 var(--f-fact) }
+.v4-dom-paycard__meta { font-size: 13px; opacity: .88; line-height: 1.45 }
+.v4-dom-paycard__meta a { color: #9ad4ab; text-decoration: underline }
+
+.v4-dom-h1 { font: 500 clamp(36px, 4.4vw, 62px)/.96 var(--f-emo); text-transform: uppercase; color: var(--umber); margin: 10px 0 8px }
+.v4-dom__where { font-size: 15px; color: var(--moss) }
+.v4-dom__where a { color: var(--leaf); text-decoration: underline }
+.v4 .v4-dom__price { font: 700 clamp(34px, 3.6vw, 46px)/1 var(--f-fact); color: var(--forest); margin-top: 14px }
+.v4-dom-estates { margin-top: 14px; display: grid; gap: 6px }
+.v4-dom-estates span { font-size: 13px; color: var(--moss) }
+.v4-dom-estates div { display: flex; flex-wrap: wrap; gap: 6px }
+.v4-dom-estates a { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font: 500 13px var(--f-ui); color: var(--ink) }
+.v4-dom-estates a.is-on { border-color: var(--leaf); background: var(--mist); color: var(--forest); font-weight: 600 }
+.v4-dom__cta { margin-top: 16px }
+.v4 .v4-btn--line { border-color: var(--line); background: #fff; color: var(--ink); font-family: var(--f-fact); font-weight: 500 }
+
+.v4-dom-info2x2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 18px }
+.v4-dom-icard { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: grid; gap: 4px; align-content: start }
+.v4-dom-icard b { font: 600 14px var(--f-ui); color: var(--ink) }
+.v4-dom-icard p { font-size: 13px; line-height: 1.4; color: var(--moss) }
+.v4-dom-icard--link:hover { border-color: var(--leaf) }
+.v4-dom-moreplots { margin-top: 14px; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: grid; gap: 8px }
+.v4-dom-moreplots b { font: 600 14px var(--f-ui) }
+.v4-dom-moreplots__links { display: flex; flex-wrap: wrap; gap: 6px }
+.v4-dom-moreplots__links a { padding: 6px 12px; border-radius: 999px; background: var(--linen); font: 500 12px var(--f-ui); color: var(--ink) }
+.v4-dom-moreplots__links a:hover { background: var(--forest); color: #fff }
+
+.v4-dom-planbox { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 16px }
+.v4-dom__plan { width: 100%; border-radius: 12px }
+.v4-dom-two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: start }
+.v4-dom-filtershead { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 24px }
+.v4-dom-filtershead__btns { display: flex; flex-wrap: wrap; gap: 8px }
+.v4-pill-btn { padding: 11px 18px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font: 500 14px var(--f-ui); color: var(--ink) }
+.v4-pill-btn:hover { border-color: var(--ink) }
+.v4-dom__similar { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 18px }
+.v4-dom__similar .v3-card { flex: none }
+@media (max-width: 980px) {
+  .v4-dom-grid { grid-template-columns: 1fr }
+  .v4-dom-two { grid-template-columns: 1fr }
+}
+@media (max-width: 600px) {
+  .v4-dom-widgets, .v4-dom-info2x2 { grid-template-columns: 1fr }
+  .v4-stage__media { min-height: 290px }
+}
+
+/* ---------- Внутренние страницы: Проекты, Посёлки, О компании, Каталог ---------- */
 .v4-types { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(24px, 4vw, 64px); align-items: start; margin-top: 30px }
 .v4 .v4-types__list { list-style: none; padding: 0; border-top: 1px solid var(--line) }
-.v4-types__list a { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto 26px; align-items: center; gap: 16px; padding: 15px 4px; border-bottom: 1px solid var(--line); transition: padding .35s cubic-bezier(.2,.7,.2,1), background .25s }
-.v4-types__n { font: 400 11px var(--f-fact); color: var(--moss) }
+.v4-types__list a { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto 26px; align-items: center; gap: 16px; padding: 15px 4px; border-bottom: 1px solid var(--line); transition: padding .3s, background .25s }
+.v4-types__n { font: 600 12px var(--f-fact); color: var(--moss) }
 .v4 .v4-types__thumb { display: none }
-.v4-types__name b { display: block; font: 400 clamp(26px, 2.6vw, 38px)/1 var(--f-emo); font-variation-settings: 'wdth' 66; text-transform: uppercase; transition: color .25s }
+.v4-types__name b { display: block; font: 500 clamp(24px, 2.5vw, 34px)/1 var(--f-emo); text-transform: uppercase }
 .v4-types__name i, .v4-types__price i { display: block; font: 500 13px/1.4 var(--f-ui); font-style: normal; color: var(--moss); margin-top: 4px }
 .v4-types__price { text-align: right }
-.v4-types__price b { display: block; font: 400 15px var(--f-fact); letter-spacing: -.03em; white-space: nowrap }
-.v4-types__go { font-size: 18px; opacity: 0; transform: translateX(-8px); transition: opacity .25s, transform .35s cubic-bezier(.2,.7,.2,1) }
-.v4-types__list a.is-on { padding-left: 14px; background: rgba(255,255,255,.7) }
+.v4-types__price b { display: block; font: 700 15px var(--f-fact); color: var(--forest); white-space: nowrap }
+.v4-types__go { font-size: 18px; opacity: 0; transition: opacity .25s }
+.v4-types__list a.is-on { padding-left: 14px; background: rgba(255,255,255,.75) }
 .v4-types__list a.is-on .v4-types__name b { color: var(--leaf) }
-.v4-types__list a.is-on .v4-types__go { opacity: 1; transform: none }
+.v4-types__list a.is-on .v4-types__go { opacity: 1 }
 .v4-types__view { position: sticky; top: 92px }
-.v4-types__photo { position: relative; aspect-ratio: 4/5; max-height: 76vh; width: 100%; border-radius: 18px; overflow: hidden; background: var(--mist) }
-.v4-types__photo img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; clip-path: inset(0 0 100% 0); transform: scale(1.08); transition: clip-path .8s cubic-bezier(.2,.7,.2,1), transform 1.2s cubic-bezier(.2,.7,.2,1); z-index: 1 }
-.v4-types__photo img.is-on { clip-path: inset(0 0 0 0); transform: none; z-index: 2 }
-.v4-types__photo p { position: absolute; z-index: 3; left: 14px; bottom: 14px; background: rgba(255,255,255,.92); border-radius: 999px; padding: 8px 14px; font: 600 13px var(--f-ui); animation: v4-card .5s cubic-bezier(.2,.7,.2,1) both }
-.v4 .v4-types__all { display: inline-block; margin-top: 16px; font: 600 15px var(--f-ui); border-bottom: 1px solid currentColor; padding-bottom: 2px }
+.v4-types__photo { position: relative; aspect-ratio: 4/5; max-height: 76vh; width: 100%; border-radius: 20px; overflow: hidden; background: var(--linen) }
+.v4-types__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; clip-path: inset(0 0 100% 0); transition: clip-path .7s cubic-bezier(.2,.7,.2,1); z-index: 1 }
+.v4-types__photo img.is-on { clip-path: inset(0 0 0 0); z-index: 2 }
+.v4-types__photo p { position: absolute; z-index: 3; left: 14px; bottom: 14px; background: rgba(255,255,255,.94); border-radius: 999px; padding: 8px 14px; font: 600 13px var(--f-ui) }
+.v4 .v4-types__all { display: inline-block; margin-top: 14px; font: 600 14px var(--f-ui); border-bottom: 1px solid currentColor; padding-bottom: 2px; color: var(--leaf) }
 @media (max-width: 860px) {
-  .v4-types { grid-template-columns: minmax(0, 1fr) }
+  .v4-types { grid-template-columns: 1fr }
   .v4-types__photo { display: none }
   .v4-types__view { position: static }
   .v4-types__list a { grid-template-columns: 64px minmax(0, 1fr) auto; gap: 12px; padding: 12px 0 }
   .v4-types__n, .v4-types__go { display: none }
   .v4 .v4-types__thumb { display: block; width: 64px; height: 64px; object-fit: cover; border-radius: 10px }
-  .v4-types__list a.is-on { padding-left: 0; background: none }
-  .v4-types__list a.is-on .v4-types__name b { color: inherit }
-  .v4-types__price b { font-size: 13px }
-  .v4-types__price i { font-size: 12px }
-}
-@media (prefers-reduced-motion: reduce) { .v4-types__photo img { transition: none } }
-/* шапка с шестью страницами: на узком компьютере прячем телефон, чтобы меню не ломалось */
-@media (max-width: 1240px) { .v4-bar__tel { display: none } .v4-bar nav { gap: 18px } }
-.v4-foot nav a { opacity: .9 }
-.v4-foot nav a:hover { opacity: 1; text-decoration: underline }
-
-/* ---------- 13.11: сюжет «от желания до ключей» ---------- */
-/* шапка на страницах без первого экрана — всегда на месте */
-.v4-bar--always { transform: none }
-
-/* H1 с поисковыми словами: проявляется вместе с рассветом, ночью сцена чистая */
-/* html[data-look=v2] h1 и .v3 h1 перебивают шрифт и отступы — поэтому селектор длиннее */
-html .v4 .v4-hero__title h1.v4-hero__h1 { margin: 22px auto 0; font: 600 13px/1.45 var(--f-ui); text-shadow: 0 1px 12px rgba(8,16,40,.55); letter-spacing: .16em; text-transform: uppercase; opacity: 0; transform: translateY(8px); transition: opacity .9s ease .4s, transform .9s ease .4s }
-html .v4 .v4-hero__title h1.v4-hero__h1 b { font: 400 13px var(--f-fact); letter-spacing: .02em; white-space: nowrap }
-html .v4 .hn.is-day .v4-hero__title h1.v4-hero__h1 { opacity: 1; transform: none; text-shadow: 0 1px 12px rgba(255,255,255,.95) }
-@media (max-width: 860px) { html .v4 .v4-hero__title h1.v4-hero__h1 { font-size: 11px; letter-spacing: .12em; max-width: 30ch; margin-top: 16px } }
-@media (prefers-reduced-motion: reduce) { html .v4 .v4-hero__title h1.v4-hero__h1 { opacity: 1; transform: none; transition: none } }
-
-/* заголовок «Внутри» стоит перед закреплённой сценой */
-.v4-sec--in { padding-bottom: 28px }
-
-/* ---------- Внутри: Villa Aurelia «Inside» ---------- */
-.v4-in { position: relative; background: #101511 }
-.v4-in__stage { position: sticky; top: 0; height: 100svh; overflow: hidden; color: #fff }
-.v4-in__shot { position: absolute; inset: 0; margin: 0; opacity: 0; transition: opacity .9s ease }
-.v4-in__shot.is-on { opacity: 1 }
-.v4-in__shot > img { width: 100%; height: 100%; max-width: none; object-fit: cover; transform: scale(1.08); transition: transform 6s cubic-bezier(.2,.7,.2,1) }
-.v4-in__shot.is-on > img { transform: scale(1.0) }
-/* «кукольный домик»: пока нет интерьера, камера наезжает на комнату по виду сверху */
-.v4-in__doll { position: absolute; inset: 0; background: #f2efe8; overflow: hidden }
-/* точка комнаты (--x, --y в процентах картинки) ставится в центр кадра; при показе — медленный наезд на неё */
-.v4-in__doll img { position: absolute; left: 50%; top: 50%; width: 175%; height: auto; max-width: none; transform-origin: calc(var(--x) * 1%) calc(var(--y) * 1%); transform: translate(calc(var(--x) * -1%), calc(var(--y) * -1%)) scale(.92); transition: transform 3s cubic-bezier(.2,.7,.2,1) }
-.v4-in__shot.is-on .v4-in__doll img { transform: translate(calc(var(--x) * -1%), calc(var(--y) * -1%)) scale(1.08) }
-.v4-in__shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(10,16,12,.45) 0%, rgba(10,16,12,0) 26%, rgba(10,16,12,0) 55%, rgba(10,16,12,.6) 100%) }
-.v4-in__tabs { position: absolute; top: 84px; left: max(20px, env(safe-area-inset-left, 0px)); z-index: 3; display: flex; gap: 6px; padding: 8px; border-radius: 14px; background: rgba(16,24,18,.42); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.16); max-width: calc(100% - 40px); overflow-x: auto; scrollbar-width: none }
-.v4-in__tabs button { all: unset; cursor: pointer; display: grid; gap: 6px; min-width: 64px; padding: 6px 8px; border-radius: 9px; font: 400 12px var(--f-fact); color: rgba(255,255,255,.7) }
-.v4-in__tabs button[aria-current='step'] { color: #fff }
-.v4-in__tabs button:focus-visible { outline: 2px solid #fff; outline-offset: 2px }
-.v4-in__tabs i { display: block; height: 2px; background: rgba(255,255,255,.25); border-radius: 2px; overflow: hidden }
-.v4-in__tabs b { display: block; height: 100%; background: #fff; transform-origin: left; transition: transform .2s linear }
-.v4-in__card { position: absolute; z-index: 3; left: max(20px, env(safe-area-inset-left, 0px)); bottom: 32px; width: min(460px, calc(100% - 40px)); padding: 22px 24px; border-radius: 18px; background: rgba(16,24,18,.5); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.16); animation: v4-card .7s cubic-bezier(.2,.7,.2,1) both }
-.v4-in__time { font: 400 13px var(--f-fact); opacity: .85 }
-.v4-in__time em { font: italic 400 17px var(--f-emo); font-variation-settings: 'wdth' 84 }
-.v4 .v4-in__card h3 { font: 400 clamp(34px, 4vw, 52px)/1 var(--f-emo); font-variation-settings: 'wdth' 64; text-transform: uppercase; margin: 8px 0 4px; color: #fff }
-.v4-in__area { font: 400 15px var(--f-fact); letter-spacing: -.02em; color: #bfe7cb }
-.v4-in__text { margin-top: 10px; font-size: 16px; line-height: 1.5; max-width: 40ch }
-.v4-in__mini { position: absolute; z-index: 3; right: max(20px, env(safe-area-inset-right, 0px)); bottom: 32px; width: 190px; padding: 10px; border-radius: 14px; background: rgba(255,255,255,.92); transition: opacity .4s }
-.v4-in__mini > div { position: relative }
-.v4-in__mini img { width: 100%; height: auto; display: block }
-.v4-in__mini i { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--brick); box-shadow: 0 0 0 4px rgba(165,72,45,.25); transition: left .6s cubic-bezier(.2,.7,.2,1), top .6s cubic-bezier(.2,.7,.2,1); animation: v4-pulse 1.8s ease-in-out infinite }
-@keyframes v4-pulse { 50% { box-shadow: 0 0 0 9px rgba(165,72,45,0) } }
-.v4-in__mini span { display: block; margin-top: 6px; font: 600 11px var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--ink); text-align: center }
-.v4-in__mini.is-out img { opacity: .45 }
-.v4-in__cap { position: absolute; z-index: 3; right: max(20px, env(safe-area-inset-right, 0px)); top: 92px; font: 600 11px var(--f-ui); letter-spacing: .06em; background: rgba(255,255,255,.9); color: var(--ink); padding: 5px 10px; border-radius: 999px }
-@media (max-width: 860px) {
-  .v4-in__tabs { top: 70px; gap: 2px; padding: 6px }
-  .v4-in__tabs button { min-width: 0; padding: 6px 7px; font-size: 11px }
-  .v4-in__card { bottom: 86px; padding: 18px } /* над нижней кнопкой «Записаться на показ» */
-  .v4-in__mini { width: 112px; bottom: auto; top: 136px; padding: 6px }
-  .v4-in__mini span { font-size: 9px }
-  .v4-in__cap { display: none }
-  .v4-in__doll img { width: auto; height: 150% }
-}
-@media (prefers-reduced-motion: reduce) { .v4-in__shot, .v4-in__shot > img, .v4-in__doll { transition: none } .v4-in__mini i { animation: none } }
-
-/* ---------- Почему у нас ---------- */
-.v4-why { margin-top: 40px }
-.v4 .v4-why h3 { font: 700 18px/1.3 var(--f-ui); margin: 0 0 6px }
-.v4 .v4-why p + h3 { margin-top: 24px }
-.v4-why p { max-width: 52ch }
-
-/* ---------- Пять шагов ---------- */
-.v4 .v4-steps { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 0; margin-top: 34px }
-.v4-steps li { position: relative; padding: 22px 22px 22px 0; border-top: 1px solid var(--ink) }
-.v4-steps li span { font: 400 12px var(--f-fact); color: var(--brick) }
-.v4-steps li b { display: block; margin: 10px 0 8px; font: 400 32px/1 var(--f-emo); font-variation-settings: 'wdth' 64; text-transform: uppercase }
-.v4-steps li p { font-size: 15px; color: var(--moss); max-width: 26ch }
-
-/* ---------- Ипотека ---------- */
-.v4-mort { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 18px; margin-top: 30px }
-.v4-mort__in, .v4-mort__out { border-radius: 18px; padding: clamp(20px, 3vw, 32px) }
-.v4-mort__in { background: #fff; border: 1px solid var(--line); display: grid; gap: 10px; align-content: start }
-.v4-mort__in label { font: 600 14px var(--f-ui) }
-.v4-mort__in label b { font: 400 15px var(--f-fact) }
-.v4-mort__in select { font: 500 16px var(--f-ui); padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: #fff; color: var(--ink); max-width: 100%; min-width: 0 }
-.v4-mort__in input[type='range'] { width: 100%; accent-color: var(--leaf) }
-.v4-mort__out { background: var(--forest); color: #fff }
-.v4-mort__label { font: 600 12px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; opacity: .85 }
-.v4-mort__pay { font: 400 clamp(40px, 6vw, 64px)/1.05 var(--f-fact); letter-spacing: -.04em; margin: 10px 0 18px }
-.v4-mort__out dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 14px; border-top: 1px solid rgba(255,255,255,.18); padding-top: 14px }
-.v4-mort__out dt { font: 600 11px var(--f-ui); letter-spacing: .12em; text-transform: uppercase; opacity: .75 }
-.v4-mort__out dd { margin: 4px 0 0; font: 400 15px var(--f-fact) }
-.v4-mort__out .v3-note { color: rgba(255,255,255,.75) }
-.v4 .v4-progs { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px; margin-top: 22px }
-.v4-progs li { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: grid; gap: 4px }
-.v4-progs b { font: 600 16px var(--f-ui) }
-.v4-progs span { font-size: 14px; color: var(--moss) }
-
-/* ---------- Частые вопросы ---------- */
-.v4-faq { margin-top: 26px; border-top: 1px solid var(--line) }
-.v4-faq details { border-bottom: 1px solid var(--line) }
-.v4-faq summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 20px; padding: 20px 0; font: 400 clamp(20px, 2.2vw, 26px)/1.25 var(--f-emo); font-variation-settings: 'wdth' 80 }
-.v4-faq summary::-webkit-details-marker { display: none }
-.v4-faq summary::after { content: '+'; font: 400 22px var(--f-ui); transition: transform .3s }
-.v4-faq details[open] summary::after { transform: rotate(45deg) }
-.v4-faq summary:focus-visible { outline: 2px solid var(--leaf); outline-offset: 4px }
-.v4-faq details p { padding: 0 0 22px; max-width: 70ch; color: var(--ink) }
-
-/* ---------- страница дома v4 ---------- */
-.v4-dom { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(320px, 1fr); min-height: min(100svh, 860px); padding-top: 64px }
-.v4-dom__photo { position: relative; margin: 0; overflow: hidden; background: var(--linen) }
-.v4-dom__photo img { width: 100%; height: 100%; max-width: none; object-fit: cover; animation: v3-h2-img 1.8s cubic-bezier(.2,.7,.2,1) both }
-.v4-dom__photo figcaption { position: absolute; left: 14px; bottom: 14px; font: 600 11px var(--f-ui); letter-spacing: .05em; background: rgba(255,255,255,.9); padding: 5px 9px; border-radius: 999px }
-.v4-dom__panel { display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: clamp(28px, 4vw, 64px) }
-.v4-dom__crumbs { display: flex; gap: 8px; font: 600 12px var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--moss) }
-.v4-dom__crumbs a:hover { color: var(--ink) }
-.v4 .v4-dom__status { margin-top: 18px }
-.v4-dom__status--reserved i { background: #c9922a }
-.v4-dom__status--sold i { background: var(--sold) }
-.v4 .v4-dom h1 { font: 400 clamp(44px, 5.4vw, 80px)/.95 var(--f-emo); font-variation-settings: 'wdth' 62.5; text-transform: uppercase; letter-spacing: .01em; color: var(--ink); margin: 6px 0 0 }
-.v4-dom__where { font-size: 16px; color: var(--moss) }
-.v4 .v4-dom__price { font: 400 clamp(36px, 4vw, 52px)/1 var(--f-fact); letter-spacing: -.04em; color: var(--forest); margin-top: 18px }
-.v4-dom__cta { margin-top: 18px }
-.v4 .v4-btn--line { border-color: var(--line); color: var(--ink); font-family: var(--f-fact); font-weight: 400; letter-spacing: -.02em }
-.v4 .v4-btn--line:hover { border-color: var(--ink) }
-.v4-dom__facts { padding-top: clamp(40px, 6vw, 80px) }
-.v4-dom__facts .v4-nums__rows { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 0; margin-top: 0 }
-.v4 .v4-dom__facts .v4-nums__row, .v4 .v4-dom__facts .v4-nums__row:nth-child(even) { flex-direction: column; align-items: flex-start; text-align: left; gap: 6px; padding: 18px 18px 18px 0 }
-.v4-dom__facts .v4-nums__row b { font-size: clamp(34px, 3.6vw, 52px) }
-.v4-dom__plan { width: 100%; border-radius: 14px; border: 1px solid var(--line); background: #fff }
-.v4-dom__similar { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 18px }
-.v4-dom__similar .v3-card { flex: none }
-@media (max-width: 960px) {
-  .v4-dom { grid-template-columns: minmax(0, 1fr); min-height: 0; padding-top: 56px }
-  .v4-dom__photo { aspect-ratio: 4 / 3 }
-  .v4-dom__panel { padding: 24px 20px 8px }
 }
 
-/* слайды типов днём: фото проектов заполняют кадр и неба почти нет — название уходит, пока на экране слайд, и возвращается
-   на первом кадре. Строка-H1 остаётся в разметке. Когда придут кадры с небом (16-Аудит-картинок, Gemini), можно вернуть */
-.v4-hero__title { transition: opacity .6s ease, transform .6s ease, color .6s }
-.v4 .hn.is-slide .v4-hero__title { opacity: 0; transform: translateY(-24px) }
-
-/* ---------- страницы посёлка и проекта v4 ---------- */
-.v4-place__cover img { object-position: 50% 30% }
-.v4-place__status--soldOut i { background: var(--sold) }
-.v4-place__status--planned i { background: var(--brick) }
-.v4 .v4-place__tag { margin-top: 10px; font-size: 18px }
-.v4-place__text { color: var(--moss); max-width: 52ch }
-.v4 .v4-near { list-style: none; padding: 0; margin-top: 18px; border-top: 1px solid var(--line) }
-.v4-near li { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line) }
-.v4-near b { font: 400 15px var(--f-fact); white-space: nowrap }
-.v4 .v4-chips-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px }
-.v4-chips-list li { padding: 6px 12px; border-radius: 999px; background: var(--mist); font: 600 13px var(--f-ui) }
-
-/* каталог v4: дома сеткой, без ленты вправо */
 .v4 .v3-strip--grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 22px 18px; overflow: visible; scroll-snap-type: none; padding-right: max(20px, env(safe-area-inset-right, 0px)) }
 .v4 .v3-strip--grid .v3-card { flex: none }
-/* шапка внутренних страниц v4 */
-.v4-page-head { padding-top: calc(64px + clamp(48px, 7vw, 100px)) }
+.v4-dom { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, 1fr); min-height: min(92svh, 780px); padding-top: 68px }
+.v4-dom__photo { position: relative; margin: 0; overflow: hidden; background: var(--linen) }
+.v4-dom__photo img { width: 100%; height: 100%; object-fit: cover }
+.v4-dom__photo figcaption { position: absolute; left: 14px; bottom: 14px; font: 600 11px var(--f-ui); background: rgba(255,255,255,.9); padding: 5px 10px; border-radius: 999px }
+.v4-dom__panel { display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: clamp(24px, 4vw, 56px) }
+.v4-dom__panel h1 { font: 500 clamp(38px, 4.5vw, 68px)/.96 var(--f-emo); text-transform: uppercase; color: var(--umber) }
+.v4-dom__facts .v4-nums__rows { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 16px; margin-top: 0 }
+.v4-nums__row { display: flex; align-items: baseline; gap: clamp(14px, 3vw, 44px); padding: clamp(14px, 2vw, 24px) 0; border-top: 1px solid var(--line) }
+.v4-nums__row b { font: 600 clamp(40px, 8vw, 110px)/.95 var(--f-fact); color: var(--forest); white-space: nowrap }
+.v4-nums__row span { font: 600 12px/1.4 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--moss); max-width: 24ch }
+.v4 .v4-dom__facts .v4-nums__row { flex-direction: column; align-items: flex-start; text-align: left; gap: 6px; padding: 16px 16px 16px 0 }
+.v4-dom__facts .v4-nums__row b { font-size: clamp(32px, 3.4vw, 48px) }
+@media (max-width: 960px) { .v4-dom { grid-template-columns: 1fr; min-height: 0 } .v4-dom__photo { aspect-ratio: 4 / 3 } }
 
-/* баннер cookie на страницах v4: шрифт и кнопка из брендбука, на компьютере — компактно слева */
-html:has(.v4) .cookie { font-family: var(--font-manrope), 'Segoe UI', Arial, sans-serif; color: #17221b; border: 1px solid #e2e6e0; box-shadow: 0 14px 40px rgba(23,34,27,.14); border-radius: 16px }
-html:has(.v4) .cookie .btn { background: #2e6b45; border-color: #2e6b45; color: #fff; border-radius: 999px; font: 600 14px var(--font-manrope), Arial, sans-serif }
-html:has(.v4) .cookie .btn:hover { background: #24573a }
-@media (min-width: 861px) { html:has(.v4) .cookie { right: auto; max-width: 440px; bottom: 20px; left: 20px } }
-
-/* картинки из Gemini (tools/v4images.py): слайды с небом — название остаётся; финал на фоне вечера */
-.v4 .v4-top--sky .hn.is-slide .v4-hero__title { opacity: 1; transform: none }
-.v4-final--bg { position: relative; color: #fff; background: #101511 }
-.v4-final--bg::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10,16,12,.82) 0%, rgba(10,16,12,.45) 55%, rgba(10,16,12,.2) 100%), var(--final-bg) center / cover no-repeat }
-.v4-final--bg > * { position: relative }
-.v4 .v4-final--bg .v3-h2, .v4 .v4-final--bg .v3-lead, .v4 .v4-final--bg .v3-final__tel, .v4 .v4-final--bg .v3-offices { color: #fff }
-.v4 .v4-final--bg .v3-h2 em { color: #bfe7cb }
-.v4-final--bg .v4-ghost { display: none }
-.v4 .v4-final--bg .v4-num, .v4 .v4-final--bg .v4-num b, .v4 .v4-final--bg .v3-offices span { color: rgba(255,255,255,.82) }
-.v4 .v4-final--bg .v3-offices li { border-color: rgba(255,255,255,.5) }
-@media (max-width: 860px) { .v4-final--bg::before { background: linear-gradient(180deg, rgba(10,16,12,.86) 0%, rgba(10,16,12,.72) 60%, rgba(10,16,12,.55) 100%), var(--final-bg) center / cover no-repeat } }
-
-/* ---------- О компании и Контакты v4 ---------- */
-.v4 .v4-progs--wide { margin-top: 30px }
-.v4-near--estates a { font: 400 clamp(22px, 2.4vw, 30px)/1.1 var(--f-emo); font-variation-settings: 'wdth' 68; text-transform: uppercase }
+.v4 .v4-near { list-style: none; padding: 0; margin-top: 18px; border-top: 1px solid var(--line) }
+.v4-near li { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line) }
+.v4-near b { font: 600 15px var(--f-fact); white-space: nowrap }
+.v4 .v4-chips-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px }
+.v4-chips-list li { padding: 6px 12px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font: 600 13px var(--f-ui) }
+.v4-near--estates a { font: 500 clamp(22px, 2.4vw, 30px)/1.1 var(--f-emo); text-transform: uppercase }
 .v4-near--estates a:hover { color: var(--leaf) }
-.v4-near--estates li { align-items: baseline }
 .v4-founder { align-items: center }
 .v4-founder img { width: 100%; max-width: 420px; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 18px }
-.v4-founder blockquote { margin: 0 }
-.v4-founder blockquote p { font: 400 clamp(24px, 2.6vw, 36px)/1.2 var(--f-emo); font-variation-settings: 'wdth' 78 }
-.v4-founder cite { display: block; margin-top: 18px; font: 600 12px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; font-style: normal; color: var(--moss) }
-.v4-contacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 18px }
-.v4-contacts__card { border: 1px solid var(--line); border-radius: 18px; padding: clamp(20px, 2.6vw, 30px); display: grid; gap: 8px; align-content: start }
-.v4 .v4-contacts__card h2 { font: 400 clamp(26px, 2.6vw, 34px)/1.05 var(--f-emo); font-variation-settings: 'wdth' 66; text-transform: uppercase; margin: 4px 0 4px }
-.v4-contacts__card--main { background: var(--forest); color: #fff; border-color: var(--forest) }
-.v4 .v4-contacts__card--main .v4-num { color: rgba(255,255,255,.8) }
-.v4 .v4-contacts__tel { font: 400 clamp(22px, 2.2vw, 30px)/1.1 var(--f-fact); letter-spacing: -.03em; white-space: nowrap }
-.v4-contacts__card--main a:hover { text-decoration: underline }
-/* пока висит плашка cookie (первый визит), подпись комнаты в прогулке стоит выше неё */
-html:has(.cookie) .v4-walk__cards { bottom: 112px }
-@media (max-width: 860px) { html:has(.cookie) .v4-walk__cards { bottom: 200px } }
+.v4-founder blockquote p { font: 500 clamp(24px, 2.6vw, 34px)/1.2 var(--f-emo) }
+
+/* Карта на /v4/poselki */
+.v4-mapbox { margin-top: 28px }
+.v4-plaques { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px }
+.v4-plaque { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font: 600 14px var(--f-ui); color: var(--ink) }
+.v4-plaque i { width: 8px; height: 8px; border-radius: 50%; background: var(--leaf) }
+.v4-plaque--soldOut i { background: var(--sold) }
+.v4-plaque--planned i { background: var(--brick) }
+.v4-plaque--all i { display: none }
+.v4-plaque[aria-pressed='true'] { background: var(--forest); color: #fff; border-color: var(--forest) }
+.v4-map { position: relative; height: clamp(500px, 72vh, 740px); border-radius: 22px; overflow: hidden; background: #e7ede7 }
+.v4-map__canvas { position: absolute; inset: 0 }
+.v4-map__canvas iframe { width: 100%; height: 100%; border: 0 }
+.v4-map__card { position: absolute; z-index: 5; top: 20px; right: 20px; width: min(390px, calc(100% - 40px)); background: var(--forest); color: #fff; border-radius: 18px; padding: 24px }
+.v4-map__name { display: flex; gap: 14px; align-items: center; margin: 12px 0 }
+.v4-map__name img { width: 60px; height: 80px; object-fit: cover; border-radius: 8px; flex: none }
+.v4-map__name h3 { font: 500 clamp(26px, 2.6vw, 36px)/1 var(--f-emo); text-transform: uppercase; color: #fff }
+.v4-map__sale { font: 500 15px var(--f-fact); padding: 12px 0; border-top: 1px solid rgba(255,255,255,.16) }
+.v4 .v4-map__card ul { list-style: none; padding: 0; border-top: 1px solid rgba(255,255,255,.16) }
+.v4-map__card li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.1); font-size: 14px }
+.v4 .v4-map__go { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; background: #fff; color: var(--forest); border-radius: 999px; padding: 13px 18px; font: 600 14px var(--f-ui) }
+.v4-map__pager { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; font: 500 12px var(--f-fact) }
+.v4-map__pager button { all: unset; cursor: pointer; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(255,255,255,.32) }
+.v4-pin { position: absolute; transform: translate(-50%, -100%); display: inline-flex; align-items: center; gap: 7px; padding: 8px 13px; border-radius: 999px; background: #fff; color: #17221b; font: 600 13px var(--f-ui); white-space: nowrap; box-shadow: 0 6px 18px rgba(14,30,20,.22) }
+.v4-pin i { width: 8px; height: 8px; border-radius: 50%; background: var(--leaf) }
+.v4-pin.is-on { background: var(--forest); color: #fff }
+@media (max-width: 860px) {
+  .v4-map { height: auto; overflow: visible; background: none }
+  .v4-map__canvas { position: relative; height: 360px; border-radius: 18px; overflow: hidden }
+  .v4-map__card { position: relative; top: auto; right: auto; width: auto; margin: -24px 8px 0 }
+}
+
+/* баннер cookie */
+html:has(.v4) .cookie { font-family: var(--font-onest), var(--font-manrope), Arial, sans-serif; color: #17221b; border: 1px solid #e4dccf; box-shadow: 0 14px 40px rgba(23,34,27,.14); border-radius: 16px }
+html:has(.v4) .cookie .btn { background: #2e6b45; border-color: #2e6b45; color: #fff; border-radius: 999px; font-weight: 600 }
+html:has(.v4) .cookie .btn:hover { background: #225436 }
+@media (min-width: 861px) { html:has(.v4) .cookie { right: auto; max-width: 440px; bottom: 20px; left: 20px } }

@@ -72,7 +72,7 @@ export const Houses: CollectionConfig = {
         { label: 'Бронь', value: 'reserved' },
         { label: 'Продан', value: 'sold' },
       ],
-      admin: { position: 'sidebar' },
+      admin: { position: 'sidebar', components: { Cell: '/components/admin/StatusCell#StatusCell' } },
     },
     {
       name: 'price',

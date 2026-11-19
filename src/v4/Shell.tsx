@@ -1,20 +1,14 @@
 /**
- * v4 · общий каркас страниц (сайт многостраничный, Илья 12.11): шрифты, шапка, финал с записью на показ, подвал.
- * Главная v4 и страница дома v4 собираются из одних и тех же кусков, поэтому шапка и форма везде одинаковые.
- * Шапка на главной выезжает, когда пройден первый экран (html.past-hero ставит HeroNight); на других страницах — всегда.
+ * v4 · общий каркас страниц (сайт многостраничный, 19.11 — дизайн-система Figma «задача»):
+ * шрифты Cormorant + Onest (из layout.tsx), шапка с мобильным меню, финал с записью на показ, подвал.
  */
 import type { CSSProperties } from 'react'
 import { LeadForm } from '@/components/LeadForm'
 import type { Company } from '@/payload-types'
+import { V4MobileNav } from '@/v4/V4MobileNav'
 
-// Noto Serif Display с осью ширины: next/font (Turbopack) на нём падает — ссылка на Google Fonts; перед запуском — свой сервер
-const NOTO_CSS = 'https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5..100,300..600;1,62.5..100,300..600&display=swap'
-
-// черновик v4 ведёт на свои страницы. При переезде v4 на «/» адреса станут /catalog, /projects, /locations, /mortgage,
-// /about, /contacts — как сейчас у v2 (тогда здесь — mainHref(...)).
 export const NAV = [
   { href: '/v4/doma', label: 'Дома в продаже' },
-  { href: '/v4/proekty', label: 'Проекты' },
   { href: '/v4/poselki', label: 'Посёлки' },
   { href: '/v4/ipoteka', label: 'Ипотека' },
   { href: '/v4/o-kompanii', label: 'О компании' },
@@ -24,52 +18,81 @@ export const NAV = [
 export const telOf = (phone?: string | null) => phone?.replace(/[^\d+]/g, '') || null
 
 export function V4Fonts() {
-  return (
-    <>
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-      <link rel="stylesheet" href={NOTO_CSS} precedence="default" />
-    </>
-  )
+  return null
 }
 
 export function V4Bar({ phone, always = false, home = '/v4' }: { phone?: string | null; always?: boolean; home?: string }) {
   const tel = telOf(phone)
   return (
-    <div className={`v4-bar${always ? ' v4-bar--always' : ''}`}>
+    <header className={`v4-bar${always ? ' v4-bar--always' : ''}`}>
       <div className="v3-wrap v4-bar__in">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <a href={home} aria-label="Хороший дом — на главную"><img src="/v3/logo.svg" alt="Хороший дом" width={86} height={40} /></a>
+        <a href={home} className="v4-bar__logo" aria-label="Хороший дом — на главную"><img src="/v3/logo.svg" alt="Хороший дом" width={86} height={40} /></a>
         <nav aria-label="Разделы сайта">{NAV.map((x) => <a key={x.href} href={x.href}>{x.label}</a>)}</nav>
-        <div className="v3-row">
+        <div className="v3-row v4-bar__actions">
           {tel && <a className="v4-bar__tel" href={`tel:${tel}`}>{phone}</a>}
           <a className="v3-btn v3-btn--main v4-bar__btn" href="#evf-form">Записаться на показ</a>
+          <V4MobileNav nav={NAV} phone={phone} tel={tel} />
         </div>
       </div>
-    </div>
+    </header>
   )
 }
 
-/** Финал: «Приезжайте на показ» — офисы, телефон и форма. id="evf-form" — сюда ведут все кнопки «Записаться на показ». */
-export function V4Final({ company, n, context, title = 'Приезжайте', em = 'на показ', lead, bg }: {
+const mapRoute = (address: string) => `https://yandex.ru/maps/?text=${encodeURIComponent(address)}`
+
+/** Финал: «Приезжайте на показ» — форма, офисы (опционально карточками как в Figma), телефон. */
+export function V4Final({ company, n, context, title = 'Приезжайте', em = 'на показ', lead, bg, showContacts = false }: {
   company: Company; n?: string; context: string; title?: string; em?: string; lead?: string
-  /** вечер с огнями в окнах (И4) — по сюжету финал это вечер; без картинки — белый финал */
-  bg?: string
+  bg?: string; showContacts?: boolean
 }) {
+  const tel = telOf(company.phone)
   return (
     <section className={`v3-sec v3-final v4-sec v4-final${bg ? ' v4-final--bg' : ''}`} id="pokaz" style={bg ? ({ '--final-bg': `url(${bg})` } as CSSProperties) : undefined}>
-      <span className="v4-ghost" aria-hidden>Показ</span>
+      <span className="v4-ghost" aria-hidden>показ</span>
       <div className="v3-wrap v3-split v4-head">
         <div>
           {n && <p className="v4-num"><b>{n}</b> / Запись на показ</p>}
           <h2 className="v3-h2" data-move="lines">{title} <em>{em}</em></h2>
           <p className="v3-lead">{lead ?? 'Покажем дом и посёлок вживую или по видеосвязи, если вы в другом городе. Ответим про участок, документы и ипотеку.'}</p>
-          <ul className="v3-offices">{(company.offices ?? []).map((o) => <li key={o.title}><b>{o.title}</b><span>{[o.address, o.hours].filter(Boolean).join(' · ')}</span></li>)}</ul>
-          {company.phone && <p className="v3-final__tel">{company.phone}</p>}
+          {!showContacts && (
+            <>
+              <ul className="v3-offices">{(company.offices ?? []).map((o) => <li key={o.title}><b>{o.title}</b><span>{[o.address, o.hours].filter(Boolean).join(' · ')}</span></li>)}</ul>
+              {company.phone && <p className="v3-final__tel">{company.phone}</p>}
+            </>
+          )}
         </div>
         <div className="v3-final__form" id="evf-form">
-          <LeadForm light cta="Записаться на показ" target={{ interest: 'buy', context }} />
+          <LeadForm light cta="Записаться на показ" target={{ interest: 'buy', context, phone: company.phone }} />
         </div>
       </div>
+
+      {showContacts && (
+        <div className="v3-wrap v4-final__contacts">
+          <div className="v4-final__chead">
+            <span className="v4-ghost v4-ghost--inline" aria-hidden>связь</span>
+            <p className="v4-num">Наши контакты</p>
+            <h3 className="v3-h2 v4-final__ctitle">Наши <em>контакты</em></h3>
+          </div>
+          <div className="v4-contacts">
+            {(company.offices ?? []).map((o) => (
+              <div key={o.title} className="v4-contacts__card" data-move="up">
+                <p className="v4-num">Офис продаж</p>
+                <h4>{o.title}</h4>
+                <p>{o.address}</p>
+                {o.hours && <p className="v3-note">{o.hours}</p>}
+                <a className="v4-types__all" href={mapRoute(o.address)} target="_blank" rel="noreferrer">Маршрут в Яндекс Картах →</a>
+              </div>
+            ))}
+            <div className="v4-contacts__card v4-contacts__card--main" data-move="up">
+              <p className="v4-num">Отдел продаж</p>
+              {company.phone && <a className="v4-contacts__tel" href={tel ? `tel:${tel}` : undefined}>{company.phone}</a>}
+              {company.email && <p><a href={`mailto:${company.email}`}>{company.email}</a></p>}
+              {company.telegram && <p><a href={company.telegram} target="_blank" rel="noreferrer">Telegram-канал →</a></p>}
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
@@ -88,11 +111,11 @@ export function V4Footer({ since }: { since?: number | null }) {
   )
 }
 
-/** Шапка внутренней страницы v4: подпись, огромное бледное слово, заголовок капителью с курсивным словом, подзаголовок. */
+/** Шапка внутренней страницы v4: подпись, огромное бледное слово, заголовок с курсивом, подзаголовок. */
 export function V4PageHead({ eyebrow, ghost, title, em, lead }: { eyebrow: string; ghost: string; title: string; em?: string; lead?: string }) {
   return (
     <section className="v3-sec v4-sec v4-page-head">
-      <span className="v4-ghost" aria-hidden>{ghost}</span>
+      <span className="v4-ghost" aria-hidden>{ghost.toLowerCase()}</span>
       <div className="v3-wrap v4-head">
         <nav className="v4-dom__crumbs" aria-label="Навигация"><a href="/v4">Главная</a><span aria-hidden>/</span><span>{eyebrow}</span></nav>
         <h1 className="v3-h2 v4-page-head__h1" data-move="lines">{title}{em ? <> <em>{em}</em></> : null}</h1>

@@ -3,6 +3,7 @@ import { getCompany, getEstates, getHouses, getProjects, img, plural } from '@/l
 import { estateView } from '@/lib/view'
 import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { StickyCta } from '@/v3/home/StickyCta'
+import { BRAND_VALUES, FOUNDERS } from '@/v4/founders'
 import { V4Bar, V4Final, V4Fonts, V4Footer, V4PageHead } from '@/v4/Shell'
 import '@/v3/v3.css'
 import '@/v4/v4.css'
@@ -45,9 +46,38 @@ export default async function V4About() {
     <div className="v3 v4">
       <V4Fonts />
       <V4Bar phone={company.phone} always />
-      <MotionRoot>
+      <MotionRoot smooth={false}>
         <V4PageHead eyebrow="О компании" ghost="2014" title="Строим дома" em={company.since ? `с ${company.since} года` : 'под Краснодаром'}
           lead="Начинали с одного таунхауса. Сегодня строим посёлки в Адыгее и Динской — только на своей земле и только по своим проектам. В команде — архитекторы и инженеры." />
+
+        <section className="v3-sec v4-sec">
+          <div className="v3-wrap v4-head">
+            <p className="v4-num">Команда</p>
+            <h2 className="v3-h2" data-move="lines">Четыре фамилии <em>под каждым домом</em></h2>
+            <p className="v3-lead">Мы сами выбираем участки, проектируем дома и следим за стройкой — поэтому отвечаем лично, а не прячемся за вывеской.</p>
+          </div>
+          <div className="v3-wrap v4-founders" style={{ marginTop: 28 }}>
+            {FOUNDERS.map((person) => (
+              <article key={person.id} className="v4-founder-card" data-move="up">
+                <div className="v4-founder-card__ava" aria-hidden>{person.initials}</div>
+                <div>
+                  <h3>{person.name}</h3>
+                  <p className="v4-founder-card__role">{person.role}</p>
+                  <p className="v4-founder-card__q">«{person.quote}»</p>
+                </div>
+              </article>
+            ))}
+          </div>
+          <ul className="v3-wrap v4-values" style={{ marginTop: 32 }}>
+            {BRAND_VALUES.map((v) => (
+              <li key={v.n} data-move="up">
+                <span>{v.n}</span>
+                <b>{v.title}</b>
+                <p>{v.text}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         <section className="v3-sec v3-sec--linen v4-sec v4-nums" style={{ paddingTop: 40 }}>
           <div className="v3-wrap v4-nums__rows">

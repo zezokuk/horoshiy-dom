@@ -33,7 +33,7 @@ export const ROOF_CLOSED = 'polygon(50% 34%, 63% 47%, 63% 74%, 37% 74%, 37% 47%)
 export const ROOF_OPEN = 'polygon(50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%)'
 export const ROOF_EXIT = 'polygon(50% 10%, 90% 42%, 90% 92%, 10% 92%, 10% 42%)'
 
-export function MotionRoot({ children }: { children: ReactNode }) {
+export function MotionRoot({ children, smooth = true }: { children: ReactNode; smooth?: boolean }) {
   const root = useRef<HTMLDivElement>(null)
   const [state, setState] = useState<Motion>({ gsap, ScrollTrigger, lenis: null, reduced: false })
 
@@ -46,7 +46,7 @@ export function MotionRoot({ children }: { children: ReactNode }) {
 
     let lenis: Lenis | null = null
     let tick: ((time: number) => void) | null = null
-    if (!reduced && finePointer) {
+    if (!reduced && finePointer && smooth) {
       lenis = new Lenis({ autoRaf: false, lerp: 0.1, smoothWheel: true })
       lenis.on('scroll', ScrollTrigger.update)
       tick = (time: number) => lenis?.raf(time * 1000)
@@ -57,7 +57,8 @@ export function MotionRoot({ children }: { children: ReactNode }) {
 
     const splits: SplitText[] = []
     const ctx = gsap.context(() => {
-      if (reduced) return
+      // На v4 (smooth === false) не запускаем тяжёлые SplitText и массовые ScrollTrigger, чтобы прокрутка не лагала
+      if (reduced || !smooth) return
 
       // fromTo, а не from: конечное состояние задано явно. React в разработке монтирует эффект дважды,
       // и from() во второй раз запомнил бы «невидимый» остаток первого запуска как конечный (баг 12.11).
@@ -141,11 +142,16 @@ export function MotionRoot({ children }: { children: ReactNode }) {
     // появления ниже 3D срабатывали не там, браузерный тест 12.11)
     document.fonts?.ready.then(() => ScrollTrigger.refresh())
     let refreshTimer = 0
-    const ro = new ResizeObserver(() => { clearTimeout(refreshTimer); refreshTimer = window.setTimeout(() => ScrollTrigger.refresh(), 200) })
-    ro.observe(document.body)
+    const ro = smooth
+      ? new ResizeObserver(() => {
+          clearTimeout(refreshTimer)
+          refreshTimer = window.setTimeout(() => ScrollTrigger.refresh(), 200)
+        })
+      : null
+    ro?.observe(document.body)
 
     return () => {
-      ro.disconnect()
+      ro?.disconnect()
       clearTimeout(refreshTimer)
       splits.forEach((s) => s.revert())
       ctx.revert()

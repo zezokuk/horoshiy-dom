@@ -36,7 +36,7 @@ export default async function V4Projects() {
     <div className="v3 v4">
       <V4Fonts />
       <V4Bar phone={company.phone} always />
-      <MotionRoot>
+      <MotionRoot smooth={false}>
         <V4PageHead eyebrow="Проекты" ghost="Проекты" title={`${types.length} ${plural(types.length, 'проект', 'проекта', 'проектов')}:`}
           em={areas.length ? `от ${Math.min(...areas).toLocaleString('ru-RU')} до ${Math.max(...areas).toLocaleString('ru-RU')} м²` : undefined}
           lead="Одноэтажные, с мансардой и двухэтажные. Строим только по своим проектам и только в своих посёлках. Наведите на строку — покажем дом." />

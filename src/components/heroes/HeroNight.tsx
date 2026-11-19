@@ -24,7 +24,7 @@ const AUTO_DELAY = 5200 // the star has fallen and the windows are lit by then
 const AUTO_MS = 3400
 const SLIDE_MS = 6000
 
-export function HeroNight({ night, nightPhone, slides = [], copy }: { night?: string; nightPhone?: string; facts?: string; slides?: HeroSlide[]; /** v4: own title block instead of «Хороший дом / сюда приводят мечты» */ copy?: React.ReactNode }) {
+export function HeroNight({ night, nightPhone, slides = [], copy, ctaHref, ctaLabel }: { night?: string; nightPhone?: string; facts?: string; slides?: HeroSlide[]; /** v4: own title block instead of «Хороший дом / сюда приводят мечты» */ copy?: React.ReactNode; ctaHref?: string; ctaLabel?: string }) {
   const ref = useRef<HTMLElement>(null)
   const [day, setDay] = useState(false)
   // 0 — the cinema frame itself («Тип 5» in the morning mist), then the types
@@ -113,6 +113,15 @@ export function HeroNight({ night, nightPhone, slides = [], copy }: { night?: st
   const enter = (e: React.MouseEvent<HTMLAnchorElement>) => {
     // reduced motion or a modified click (new tab etc.): a plain link, no zoom detour
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    const rawHref = e.currentTarget.getAttribute('href') || ''
+    if (rawHref.startsWith('#')) {
+      const target = document.querySelector(rawHref)
+      if (target) {
+        e.preventDefault()
+        target.scrollIntoView({ behavior: 'smooth' })
+        return
+      }
+    }
     if (matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('no-motion')) return
     e.preventDefault()
     const href = e.currentTarget.href
@@ -121,8 +130,8 @@ export function HeroNight({ night, nightPhone, slides = [], copy }: { night?: st
   }
 
   const slide = day && idx > 0 ? slides[idx - 1] : null
-  const href = slide ? slide.href : mainHref('/catalog')
-  const label = slide ? `${slide.title} · ${slide.meta}` : 'Выбрать дом'
+  const href = slide ? slide.href : (ctaHref ?? mainHref('/catalog'))
+  const label = slide ? `${slide.title} · ${slide.meta}` : (ctaLabel ?? 'Выбрать дом')
 
   return (
     <section ref={ref} className={`hn${day ? ' is-day' : ''}${slide ? ' is-slide' : ''}`}>

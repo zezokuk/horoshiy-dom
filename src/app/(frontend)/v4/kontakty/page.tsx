@@ -29,7 +29,7 @@ export default async function V4Contacts() {
     <div className="v3 v4">
       <V4Fonts />
       <V4Bar phone={company.phone} always />
-      <MotionRoot>
+      <MotionRoot smooth={false}>
         <V4PageHead eyebrow="Контакты" ghost="Связь" title="Контакты" em="и офисы"
           lead="Покажем дома вживую в посёлке или по видеосвязи, если вы в другом городе. Позвоните или оставьте телефон — перезвоним." />
         <section className="v3-sec v4-sec" style={{ paddingTop: 20 }}>

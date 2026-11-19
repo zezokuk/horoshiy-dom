@@ -49,7 +49,7 @@ export default async function V4Mortgage() {
       <V4Fonts />
       {faqLd(faq) && <JsonLd data={faqLd(faq)!} />}
       <V4Bar phone={company.phone} always />
-      <MotionRoot>
+      <MotionRoot smooth={false}>
         <V4PageHead eyebrow="Ипотека" ghost="Ипотека" title="Ипотека" em="на дом"
           lead={first ? `Дом за ${formatMillions(first.price)} — платёж около ${pay.toLocaleString('ru-RU')} ₽ в месяц по семейной ипотеке (${fam.rate.toLocaleString('ru-RU')} %, ${fam.years} лет, взнос ${share} % — ${down.toLocaleString('ru-RU')} ₽). Посчитайте для любого дома из каталога.` : undefined} />
         <section className="v3-sec v3-sec--sky v4-sec" style={{ paddingTop: 40 }}>

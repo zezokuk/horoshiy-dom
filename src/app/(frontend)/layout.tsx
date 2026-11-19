@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Cormorant_Garamond, Forum, Golos_Text, Manrope, Unbounded } from 'next/font/google'
+import { Cormorant, Cormorant_Garamond, Forum, Golos_Text, Manrope, Onest, Unbounded } from 'next/font/google'
 import { CookieNotice } from '@/components/CookieNotice'
 import { Metrika } from '@/components/Metrika'
 import { MorphLayer } from '@/components/MorphLayer'
@@ -27,6 +27,20 @@ const cormorant = Cormorant_Garamond({
 })
 // look «dom» (09.11, dom.css): the wide grotesk Илья picked; loaded only when ?look=dom switches the look on
 const unbounded = Unbounded({ variable: '--font-unbounded', subsets: ['latin', 'cyrillic'], weight: ['400', '600'], preload: false })
+// v4 (Figma «задача», 19.11): Cormorant для заголовков и акцентов, Onest для интерфейса и цифр
+const cormorantDisplay = Cormorant({
+  variable: '--font-cormorant-display',
+  subsets: ['latin', 'cyrillic'],
+  weight: ['400', '500', '600'],
+  style: ['normal', 'italic'],
+  preload: false,
+})
+const onest = Onest({
+  variable: '--font-onest',
+  subsets: ['latin', 'cyrillic'],
+  weight: ['400', '500', '600', '700'],
+  preload: false,
+})
 const V2 = ['listva', 'shalfey']
 
 const BASE: Metadata = {
@@ -65,7 +79,7 @@ export default async function FrontendLayout({ children }: { children: React.Rea
       data-scroll-behavior="smooth"
       data-palette={design.palette && design.palette !== 'forest' ? design.palette : undefined}
       data-look={v2 ? 'v2' : undefined}
-      className={[forum.variable, golos.variable, manrope.variable, cormorant.variable, unbounded.variable, motion ? '' : 'no-motion'].filter(Boolean).join(' ')}
+      className={[forum.variable, golos.variable, manrope.variable, cormorant.variable, unbounded.variable, cormorantDisplay.variable, onest.variable, motion ? '' : 'no-motion'].filter(Boolean).join(' ')}
       style={v2 ? undefined : paletteStyle(design)}
       suppressHydrationWarning
     >
