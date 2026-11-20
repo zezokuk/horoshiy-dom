@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import { getCompany, getEstates, getHouses, getProjects } from '@/lib/data'
 import { formatMillions } from '@/lib/format'
-import { byEstateStatus, estateSale, estateView, houseView } from '@/lib/view'
+import { byEstateStatus, estateSale, estateView } from '@/lib/view'
 import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { StickyCta } from '@/v3/home/StickyCta'
 import { MapGenplanFlow, type FlowEstate } from '@/v4/MapGenplanFlow'
 import { V4Bar, V4Final, V4Fonts, V4Footer, V4PageHead } from '@/v4/Shell'
+import { v4img } from '@/v4/images'
 import '@/v3/v3.css'
 import '@/v4/v4.css'
 
@@ -48,6 +49,8 @@ export default async function V4Places() {
       const est = estates.find((x) => x.slug === c.slug)
       const tNames = (est ? typesByEstate.get(est.id) : undefined) ?? []
       tNames.sort((a, b) => (Number(a.match(/\d+/)?.[0]) || 99) - (Number(b.match(/\d+/)?.[0]) || 99))
+      const freeMine = est ? houses.filter((h) => estateOf(h) === est.id && h.status === 'free') : []
+      const single = c.status === 'selling' && c.free === 1 && c.slug !== 'dinskaya' && freeMine[0] ? freeMine[0] : undefined
       return {
         slug: c.slug,
         name: c.name,
@@ -62,28 +65,34 @@ export default async function V4Places() {
         href: `/v4/poselok/${c.slug}`,
         types: tNames,
         nearby: nearby.get(c.slug) ?? [],
+        singleHouse: single
+          ? {
+              code: single.code,
+              title: single.title,
+              area: single.area,
+              plot: single.plot ?? null,
+              price: single.price,
+              href: `/v4/dom/${single.code}`,
+            }
+          : undefined,
       }
     })
-
-  const dinskayaEstate = estates.find((e) => e.slug === 'dinskaya')
-  const dinskayaHouses = dinskayaEstate ? houses.filter((h) => estateOf(h) === dinskayaEstate.id).map(houseView) : []
-  const fam = { rate: company.family?.rate ?? 6, years: company.family?.years ?? 30, minDown: company.family?.minDown ?? 20, limit: company.family?.limit ?? 6_000_000 }
 
   return (
     <div className="v3 v4">
       <V4Fonts />
       <V4Bar phone={company.phone} always />
-      <MotionRoot smooth={false}>
+      <MotionRoot>
         <V4PageHead
-          eyebrow="Посёлки и генпланы"
+          eyebrow="Посёлки"
           ghost="Посёлки"
           title="Посёлки"
           em="под Краснодаром"
-          lead="Динская, Новая Адыгея и Козет. Переключайтесь между картой посёлков и спутниковым генпланом Динской (36 участков)."
+          lead="Динская, Новая Адыгея и Козет. Наведите на посёлок для справки, нажмите — карта приблизится, и откройте страницу посёлка с генпланом и типами домов."
         />
         <section className="v3-sec v4-sec" style={{ paddingTop: 12 }}>
           <div className="v3-wrap">
-            <MapGenplanFlow estates={flowEstates} dinskayaHouses={dinskayaHouses} family={fam} />
+            <MapGenplanFlow estates={flowEstates} />
           </div>
         </section>
 
@@ -115,7 +124,7 @@ export default async function V4Places() {
                     </div>
                   )}
                   <span className="v4-pik-btn v4-estate-card__cta">
-                    <span>{c.slug === 'dinskaya' ? 'Открыть генплан и дома →' : 'Подробнее о посёлке →'}</span>
+                    <span>Смотреть посёлок →</span>
                   </span>
                 </a>
               )
@@ -123,7 +132,7 @@ export default async function V4Places() {
           </div>
         </section>
 
-        <V4Final company={company} context="Посёлки v4: запись на показ" />
+        <V4Final company={company} context="Посёлки v4: запись на показ" bg={v4img('И4')?.src ?? '/design/hero-morning.webp'} />
         <V4Footer since={company.since} />
       </MotionRoot>
       <StickyCta phone={company.phone} />

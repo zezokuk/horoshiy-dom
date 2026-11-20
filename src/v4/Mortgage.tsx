@@ -5,7 +5,8 @@
  * по семейной ипотеке. Ставка, срок, минимальный взнос и лимит — из админки («Компания → Семейная ипотека»),
  * формула — та же annuity, что на странице дома. Это прикидка: точные условия даёт банк, так и написано.
  */
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
+import { goal } from '@/components/Metrika'
 import { annuity } from '@/lib/format'
 
 export type MortgageHouse = { code: string; label: string; price: number }
@@ -16,6 +17,13 @@ const mln = (v: number) => `${(v / 1e6).toLocaleString('ru-RU', { maximumFractio
 
 export function Mortgage({ houses, family }: { houses: MortgageHouse[]; family: Family }) {
   const [code, setCode] = useState(houses[0]?.code ?? '')
+  const sentCalc = useRef(false)
+  const trackCalc = () => {
+    if (!sentCalc.current) {
+      sentCalc.current = true
+      goal('v4_mortgage_calc')
+    }
+  }
   const house = houses.find((h) => h.code === code) ?? houses[0]
   const price = house?.price ?? 0
   // с лимитом кредита дорогому дому нужен взнос больше минимального
@@ -30,11 +38,11 @@ export function Mortgage({ houses, family }: { houses: MortgageHouse[]; family: 
     <div className="v4-mort">
       <div className="v4-mort__in">
         <label htmlFor="v4-mort-house">Дом из каталога</label>
-        <select id="v4-mort-house" value={code} onChange={(e) => { setCode(e.target.value); setShare(0) }}>
+        <select id="v4-mort-house" value={code} onChange={(e) => { setCode(e.target.value); setShare(0); trackCalc() }}>
           {houses.map((h) => <option key={h.code} value={h.code}>{h.label} — {mln(h.price)}</option>)}
         </select>
         <label htmlFor="v4-mort-down">Первый взнос: <b>{down} %</b> · {rub(price * down / 100)}</label>
-        <input id="v4-mort-down" type="range" min={need} max={90} step={1} value={down} onChange={(e) => setShare(Number(e.target.value))} />
+        <input id="v4-mort-down" type="range" min={need} max={90} step={1} value={down} onChange={(e) => { setShare(Number(e.target.value)); trackCalc() }} />
         <p className="v3-note">
           {need > family.minDown
             ? `Минимальный взнос по программе — ${family.minDown} %, но кредит не больше ${mln(family.limit)}, поэтому для этого дома взнос от ${need} %.`

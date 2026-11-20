@@ -95,7 +95,7 @@ export default async function V4House({ params }: Props) {
       <JsonLd data={breadcrumbsLd([{ name: 'Главная', url: mainHref('/') }, { name: e.name, url: h.href.replace(/\/houses\/.*/, `/objects/${e.slug}`) }, { name: h.title, url: h.href }])} />
       <V4Bar phone={company.phone} always />
 
-      <MotionRoot smooth={false}>
+      <MotionRoot>
         <section className="v4-dom-hero">
           <span className="v4-ghost" aria-hidden>{(project?.name ?? 'дом').toLowerCase()}</span>
           <div className="v3-wrap">

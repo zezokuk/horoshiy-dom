@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { goal } from '@/components/Metrika'
 import { formatArea, formatMillions, plural } from '@/lib/format'
 
 export type ShowcaseType = {
@@ -92,7 +93,10 @@ export function HomeTypeShowcase({ types }: { types: ShowcaseType[] }) {
                 aria-selected={isSel}
                 aria-label={`${t.name}${t.free > 0 ? `, ${t.free} в продаже` : ''}`}
                 className={`v4-ts__num${isSel ? ' is-on' : ''}${t.free > 0 ? ' has-free' : ''}${!isMatch ? ' is-dim' : ''}`}
-                onClick={() => setSelectedSlug(t.slug)}
+                onClick={() => {
+                  setSelectedSlug(t.slug)
+                  goal('v4_type_select', { type: t.name })
+                }}
               >
                 {t.num}
               </button>

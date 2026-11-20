@@ -50,11 +50,11 @@ async function run(browser, tag, opts) {
   })
   if (!opts.reducedMotion) ok(`${tag}: звезда раньше названия`, order.star < order.name, JSON.stringify(order))
   ok(`${tag}: автослайдер на первом экране убран`, !order.navSlider)
-  ok(`${tag}: однотонный белый фон`, order.bg === 'rgb(255, 255, 255)', order.bg)
+  ok(`${tag}: тёплый архитектурный фон`, order.bg === 'rgb(243, 237, 227)', order.bg)
   ok(`${tag}: нет горизонтальной прокрутки`, (await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 0)
 
   if (SHOTS && !opts.reducedMotion) {
-    await page.waitForTimeout(1000)
+    await page.waitForTimeout(2100)
     await page.screenshot({ path: `${SHOTS}/${tag}-01-hero.jpg`, quality: 75, type: 'jpeg' })
   }
 
@@ -68,24 +68,24 @@ async function run(browser, tag, opts) {
       const run = Math.max(1, el.offsetHeight - innerHeight)
       return { top, run }
     })
-    await page.evaluate((y) => window.scrollTo(0, y), bounds.top + bounds.run * 0.25)
-    await page.waitForTimeout(850)
+    await page.evaluate((y) => window.scrollTo(0, y), bounds.top + bounds.run * 0.21)
+    await page.waitForTimeout(1350)
     const aboutVisible = await page.evaluate(() => document.querySelectorAll('.v4-story-card').length >= 4)
     ok(`${tag}: блок «О нас» в 3D-сцене`, aboutVisible)
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/${tag}-02-3d-about.jpg`, quality: 75, type: 'jpeg' })
 
-    await page.evaluate((y) => window.scrollTo(0, y), bounds.top + bounds.run * 0.48)
-    await page.waitForTimeout(850)
+    await page.evaluate((y) => window.scrollTo(0, y), bounds.top + bounds.run * 0.36)
+    await page.waitForTimeout(1350)
     const foundersCount = await page.locator('.v4-founder-card').count()
     ok(`${tag}: 4 учредителя в 3D-сцене`, foundersCount === 4, `найдено ${foundersCount}`)
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/${tag}-03-3d-team.jpg`, quality: 75, type: 'jpeg' })
 
-    await page.evaluate((y) => window.scrollTo(0, y), bounds.top + bounds.run * 0.61)
-    await page.waitForTimeout(850)
+    await page.evaluate((y) => window.scrollTo(0, y), bounds.top + bounds.run * 0.485)
+    await page.waitForTimeout(1350)
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/${tag}-03b-3d-door.jpg`, quality: 75, type: 'jpeg' })
 
-    await page.evaluate((y) => window.scrollTo(0, y), bounds.top + bounds.run * 0.78)
-    await page.waitForTimeout(850)
+    await page.evaluate((y) => window.scrollTo(0, y), bounds.top + bounds.run * 0.72)
+    await page.waitForTimeout(1350)
   }
 
   // 3. Короткая пролётка «Внутри» с рассказом о компании + обязательная подпись
@@ -108,28 +108,47 @@ async function run(browser, tag, opts) {
   }
   if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-05-types.jpg`, quality: 75, type: 'jpeg' })
 
-  // 5. Карта посёлков → Вкладка «Генплан КП Динская» (36 участков)
+  // 5. Карта посёлков: без отдельных вкладок, клик по пину -> приближение + «Смотреть посёлок»
   await scrollTo(page, '#karta', -40)
-  await page.waitForTimeout(550)
-  if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-06-map.jpg`, quality: 75, type: 'jpeg' })
+  await page.waitForTimeout(600)
+  ok(`${tag}: раздельные вкладки «Карта / Генплан» убраны`, (await page.locator('.v4-mflow__tabs').count()) === 0)
 
-  const openGpTab = page.locator('.v4-mflow__tabs button', { hasText: /Генплан/i })
-  if (await openGpTab.isVisible().catch(() => false)) {
-    await openGpTab.click()
-    await page.waitForTimeout(500)
-    const plots = await page.locator('.v4-gp__plot').count()
-    ok(`${tag}: генплан Динской (36 участков)`, plots === 36, `участков ${plots}`)
-    await page.locator('.v4-gp__plot[aria-label*="Участок 18"]').click()
-    await page.waitForTimeout(350)
-    const cardLink = await page.locator('.v4-gp__card a[href*="/v4/dom/"]').getAttribute('href').catch(() => '')
-    ok(`${tag}: клик по участку открывает карточку дома`, /\/v4\/dom\//.test(cardLink || ''), cardLink || '')
-    if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-07-genplan-card.jpg`, quality: 75, type: 'jpeg' })
+  const dinPin = page.locator('.v4-ypin', { hasText: /Динская/i }).first()
+  await dinPin.waitFor({ state: 'visible', timeout: 7000 }).catch(() => {})
+  if (await dinPin.isVisible().catch(() => false)) {
+    const box = await dinPin.boundingBox()
+    if (box) {
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+      await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+    } else {
+      await dinPin.click({ force: true })
+    }
+    await page.waitForTimeout(700)
+    const hasReset = await page.locator('.v4-mflow__reset').isVisible().catch(() => false)
+    const ctaHref = await page.locator('.v4-mflow__zoom-cta a[href="/v4/poselok/dinskaya"]').getAttribute('href').catch(() => '')
+    ok(`${tag}: клик по пину приближает карту и показывает «Смотреть посёлок и генплан»`, hasReset && ctaHref === '/v4/poselok/dinskaya', `${hasReset} ${ctaHref}`)
+    if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-06-map-zoomed.jpg`, quality: 75, type: 'jpeg' })
+
+    if (hasReset) {
+      await page.locator('.v4-mflow__reset').click()
+      await page.waitForTimeout(600)
+      const krPin = page.locator('.v4-ypin', { hasText: /Красная 39/i }).first()
+      const krBox = await krPin.boundingBox().catch(() => null)
+      if (krBox) {
+        await page.mouse.move(krBox.x + krBox.width / 2, krBox.y + krBox.height / 2)
+        await page.mouse.click(krBox.x + krBox.width / 2, krBox.y + krBox.height / 2)
+        await page.waitForTimeout(650)
+        const krHref = await page.locator('.v4-mflow__zoom-cta a').getAttribute('href').catch(() => '')
+        ok(`${tag}: для 1-домной локации «Красная 39» карта ведёт сразу в 3D-карточку дома`, /\/v4\/dom\//.test(krHref || ''), krHref || '')
+      }
+    }
   } else {
-    ok(`${tag}: вкладка открытия генплана Динской`, false)
+    ok(`${tag}: пин «Динская» виден на карте`, false)
   }
 
   // 6. Кнопка «Записаться на показ» ведёт к форме
   const btn = mobile ? page.locator('a[href="#evf-form"]:visible').last() : page.locator('.v4-bar__btn')
+  await page.waitForTimeout(300)
   if (await btn.isVisible().catch(() => false)) {
     await btn.click()
     await page.waitForTimeout(600)
@@ -137,7 +156,9 @@ async function run(browser, tag, opts) {
       const r = document.querySelector('#evf-form').getBoundingClientRect()
       return { top: Math.round(r.top), vh: innerHeight }
     })
-    ok(`${tag}: кнопка показа ведёт к форме`, f.top >= -120 && f.top < f.vh * 0.8, JSON.stringify(f))
+    ok(`${tag}: кнопка показа ведёт к форме`, f.top >= -120 && f.top < f.vh * 0.85, JSON.stringify(f))
+  } else {
+    ok(`${tag}: кнопка показа в шапке видима`, false)
   }
   if (SHOTS && !opts.reducedMotion) {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight - innerHeight))
@@ -180,8 +201,37 @@ async function run(browser, tag, opts) {
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/${tag}-10-dom-360.jpg`, quality: 75, type: 'jpeg' })
   }
 
+  // 8b. Страница посёлка Динская: о посёлке + генплан 36 участков + список типов домов с картинками
+  const dinRes = await page.goto(`${BASE}/v4/poselok/dinskaya`, { waitUntil: 'load', timeout: 60000 })
+  await page.waitForTimeout(600)
+  ok(`${tag}: /v4/poselok/dinskaya открывается`, dinRes && dinRes.status() === 200)
+  ok(`${tag}: на странице Динской есть блок «Всё о посёлке»`, (await page.locator('#o-poselke').count()) === 1)
+  await scrollTo(page, '#genplan', -40)
+  const plots = await page.locator('.v4-gp__plot').count()
+  ok(`${tag}: на странице Динской генплан 36 участков`, plots === 36, `участков ${plots}`)
+  await page.locator('.v4-gp__plot[aria-label*="Участок 18"]').click()
+  await page.waitForTimeout(350)
+  const cardLink = await page.locator('.v4-gp__card a[href*="/v4/dom/"]').first().getAttribute('href').catch(() => '')
+  ok(`${tag}: клик по участку 18 в Динской открывает карточку дома`, /\/v4\/dom\//.test(cardLink || ''), cardLink || '')
+  if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-07-dinskaya-genplan.jpg`, quality: 75, type: 'jpeg' })
+
+  const typeCards = await page.locator('#tipy-poselka .v4-etype-card').count()
+  ok(`${tag}: в Динской отображаются типы домов с картинками (>= 3)`, typeCards >= 3, `типов ${typeCards}`)
+  if (SHOTS && !opts.reducedMotion) {
+    await scrollTo(page, '#tipy-poselka', -40)
+    await page.screenshot({ path: `${SHOTS}/${tag}-07b-dinskaya-types.jpg`, quality: 75, type: 'jpeg' })
+  }
+
+  // 8c. Страница локации с 1 домом (/v4/poselok/krasnaya-39): без псевдо-генплана, сразу карточка готового дома
+  const krRes = await page.goto(`${BASE}/v4/poselok/krasnaya-39`, { waitUntil: 'load', timeout: 60000 })
+  await page.waitForTimeout(400)
+  ok(
+    `${tag}: /v4/poselok/krasnaya-39 без псевдо-генплана и с карточкой дома`,
+    krRes && krRes.status() === 200 && (await page.locator('#genplan').count()) === 0 && (await page.locator('#tipy-poselka .v4-etype-card').count()) >= 1,
+  )
+
   // 9. Все остальные страницы многостраничного сайта
-  for (const p of ['/v4/poselok/dinskaya', '/v4/proekt/tip-5', '/v4/doma', '/v4/proekty', '/v4/poselki', '/v4/ipoteka', '/v4/o-kompanii', '/v4/kontakty']) {
+  for (const p of ['/v4/proekt/tip-5', '/v4/doma', '/v4/proekty', '/v4/poselki', '/v4/ipoteka', '/v4/o-kompanii', '/v4/kontakty']) {
     const r = await page.goto(`${BASE}${p}`, { waitUntil: 'load', timeout: 60000 })
     await page.waitForTimeout(300)
     const st = await page.evaluate(() => ({

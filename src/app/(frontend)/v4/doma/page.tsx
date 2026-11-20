@@ -69,7 +69,7 @@ export default async function V4Catalog() {
     <div className="v3 v4">
       <V4Fonts />
       <V4Bar phone={company.phone} always />
-      <MotionRoot smooth={false}>
+      <MotionRoot>
         <V4PageHead
           eyebrow="Каталог домов и проектов"
           ghost="Дома"

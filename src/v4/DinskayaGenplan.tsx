@@ -1,6 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
+import { goal } from '@/components/Metrika'
 import { annuity, formatArea, formatMillions, plural } from '@/lib/format'
 import type { HouseView } from '@/lib/view'
 import planData from '@/v4/dinskaya-plan.json'
@@ -19,34 +20,12 @@ type RawPlot = {
 const PLOTS = (planData as { plots: RawPlot[] }).plots
 
 const ALL_PTS = PLOTS.flatMap((p) => p.poly)
-const PAD = 12
+const PAD = 14
 const X0 = Math.min(...ALL_PTS.map((q) => q[0])) - PAD
 const Y0 = Math.min(...ALL_PTS.map((q) => q[1])) - PAD
 const X1 = Math.max(...ALL_PTS.map((q) => q[0])) + PAD
 const Y1 = Math.max(...ALL_PTS.map((q) => q[1])) + PAD
 const FULL_BOX = { x: X0, y: Y0, w: X1 - X0, h: Y1 - Y0 }
-
-type Box = { x: number; y: number; w: number; h: number }
-
-function boxForPlots(list: RawPlot[]): Box {
-  if (!list.length) return FULL_BOX
-  const pts = list.flatMap((p) => p.poly)
-  const bx0 = Math.min(...pts.map((q) => q[0])) - 14
-  const by0 = Math.min(...pts.map((q) => q[1])) - 14
-  const bx1 = Math.max(...pts.map((q) => q[0])) + 14
-  const by1 = Math.max(...pts.map((q) => q[1])) + 14
-  // сохраняем примерную пропорцию контейнера 2:1
-  const bw = bx1 - bx0
-  const bh = by1 - by0
-  const targetRatio = 2.0
-  let w = bw
-  let h = bh
-  if (w / h < targetRatio) w = h * targetRatio
-  else h = w / targetRatio
-  const cx = (bx0 + bx1) / 2
-  const cy = (by0 + by1) / 2
-  return { x: cx - w / 2, y: cy - h / 2, w, h }
-}
 
 const shortStreet = (s: string) =>
   s.replace('ул. ', '').replace('300-летия Кубанского войска', '300-летия').replace(', уч. ', ' ')
@@ -59,27 +38,32 @@ const centerOf = (pts: number[][]) => ({
 
 const INFRA_CHIPS = [
   { icon: '🏫', label: 'Школа №3 и садик' },
-  { icon: '🛒', label: 'Продуктовые и маркетплейсы' },
+  { icon: '🛒', label: 'Магазины и пункты выдачи' },
   { icon: '🌊', label: 'Река Кочеты рядом' },
-  { icon: '🚌', label: 'Выезд к остановке и трассе' },
+  { icon: '🚌', label: 'Удобный выезд на трассу' },
 ]
 
 export function DinskayaGenplan({
   houses,
   family = { rate: 6, years: 30, minDown: 20, limit: 6_000_000 },
   estateHref = '/v4/poselok/dinskaya',
-  onBackToMap,
+  hideEstateLink = false,
 }: {
   houses: HouseView[]
   family?: { rate: number; years: number; minDown: number; limit: number }
   estateHref?: string
+  hideEstateLink?: boolean
   onBackToMap?: () => void
 }) {
   const [layer, setLayer] = useState<'aerial' | 'scheme'>('aerial')
-  const [street, setStreet] = useState<string>('all')
+  const [onlyFree, setOnlyFree] = useState<boolean>(false)
   const [zoomScale, setZoomScale] = useState<number>(1)
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const [selectedPlot, setSelectedPlot] = useState<number | null>(null)
+  const [hoverPlot, setHoverPlot] = useState<number | null>(null)
   const [compareCodes, setCompareCodes] = useState<string[]>([])
+
+  const dragRef = useRef<{ x: number; y: number; px: number; py: number; moved: boolean } | null>(null)
 
   const houseByPlot = useMemo(() => {
     const map = new Map<number, HouseView>()
@@ -89,26 +73,23 @@ export function DinskayaGenplan({
     return map
   }, [houses])
 
-  const streets = useMemo(() => {
-    const groups = new Map<string, { plots: RawPlot[]; freeCount: number; center: { x: number; y: number } }>()
+  // Улицы подписываем прямо на карте генплана (без 9 лишних кнопок приближения наверху!)
+  const streetLabels = useMemo(() => {
+    const groups = new Map<string, RawPlot[]>()
     PLOTS.forEach((p) => {
-      const g = groups.get(p.street) ?? { plots: [], freeCount: 0, center: { x: 0, y: 0 } }
-      g.plots.push(p)
-      const h = houseByPlot.get(p.n)
-      if (h?.status === 'free') g.freeCount++
-      groups.set(p.street, g)
+      const list = groups.get(p.street) ?? []
+      list.push(p)
+      groups.set(p.street, list)
     })
-    return [...groups.entries()].map(([name, g]) => {
-      const pts = g.plots.flatMap((p) => p.poly)
-      return {
-        name,
-        short: shortStreet(name),
-        plots: g.plots,
-        freeCount: g.freeCount,
-        center: centerOf(pts),
-      }
+    return [...groups.entries()].map(([name, plots]) => {
+      const pts = plots.flatMap((p) => p.poly)
+      const minY = Math.min(...pts.map((q) => q[1]))
+      const c = centerOf(pts)
+      const label = shortStreet(name)
+      const width = Math.max(38, label.length * 2.1 + 10)
+      return { name, label, x: c.x, y: minY - 6.5, width }
     })
-  }, [houseByPlot])
+  }, [])
 
   const counts = useMemo(() => {
     let free = 0
@@ -125,21 +106,19 @@ export function DinskayaGenplan({
     return { free, reserved, sold, pending }
   }, [houseByPlot])
 
-  const baseBox = useMemo(() => {
-    if (street === 'all') return FULL_BOX
-    return boxForPlots(PLOTS.filter((p) => p.street === street))
-  }, [street])
-
   const viewBox = useMemo(() => {
-    const cx = baseBox.x + baseBox.w / 2
-    const cy = baseBox.y + baseBox.h / 2
-    const w = baseBox.w / zoomScale
-    const h = baseBox.h / zoomScale
+    const cx = FULL_BOX.x + FULL_BOX.w / 2 + pan.x
+    const cy = FULL_BOX.y + FULL_BOX.h / 2 + pan.y
+    const w = FULL_BOX.w / zoomScale
+    const h = FULL_BOX.h / zoomScale
     return `${(cx - w / 2).toFixed(1)} ${(cy - h / 2).toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`
-  }, [baseBox, zoomScale])
+  }, [zoomScale, pan])
 
   const activePlot = useMemo(() => PLOTS.find((p) => p.n === selectedPlot) ?? null, [selectedPlot])
   const activeHouse = activePlot ? houseByPlot.get(activePlot.n) ?? null : null
+
+  const hoveredPlot = useMemo(() => PLOTS.find((p) => p.n === hoverPlot) ?? null, [hoverPlot])
+  const hoveredHouse = hoveredPlot ? houseByPlot.get(hoveredPlot.n) ?? null : null
 
   const activeMonthly = useMemo(() => {
     if (!activeHouse) return 0
@@ -157,11 +136,6 @@ export function DinskayaGenplan({
     setCompareCodes((prev) => (prev.includes(code) ? prev.filter((x) => x !== code) : [...prev.slice(-1), code]))
   }
 
-  const pickStreet = (s: string) => {
-    setStreet(s)
-    setZoomScale(1)
-  }
-
   const plotStatusOf = (p: RawPlot) => {
     const h = houseByPlot.get(p.n)
     if (h) return h.status
@@ -169,42 +143,42 @@ export function DinskayaGenplan({
     return 'pending'
   }
 
+  const handleSelectPlot = (n: number) => {
+    setSelectedPlot(n)
+    goal('v4_plot_click', { plot: n })
+  }
+
   const selectNearbyFree = () => {
-    const freePlots = PLOTS.filter((p) => houseByPlot.get(p.n)?.status === 'free')
-    if (freePlots[0]) {
-      setSelectedPlot(freePlots[0].n)
-      setStreet(freePlots[0].street)
-      setZoomScale(1)
-    }
+    const freePlot = PLOTS.find((p) => houseByPlot.get(p.n)?.status === 'free')
+    if (freePlot) handleSelectPlot(freePlot.n)
+  }
+
+  const resetView = () => {
+    setZoomScale(1)
+    setPan({ x: 0, y: 0 })
   }
 
   return (
     <div className="v4-gp">
+      {/* Одна чистая строка управления (убраны 3 этажа лишних кнопок по UX-аудиту!) */}
       <div className="v4-gp__toolbar">
-        <div className="v4-gp__streets" role="group" aria-label="Группы участков Динской">
-          {onBackToMap && (
-            <button type="button" className="v4-gp__back" onClick={onBackToMap}>
-              ← Все посёлки
-            </button>
-          )}
+        <div className="v4-gp__filters" role="group" aria-label="Фильтр участков">
           <button
             type="button"
-            className={`v4-gp__stab${street === 'all' ? ' is-on' : ''}`}
-            onClick={() => pickStreet('all')}
+            className={`v4-pik-btn${!onlyFree ? ' is-dark' : ''}`}
+            aria-pressed={!onlyFree}
+            onClick={() => setOnlyFree(false)}
           >
-            Вся Динская ({counts.free} в продаже)
+            <span>Все {PLOTS.length} участков</span>
           </button>
-          {streets.map((st) => (
-            <button
-              key={st.name}
-              type="button"
-              className={`v4-gp__stab${street === st.name ? ' is-on' : ''}`}
-              onClick={() => pickStreet(st.name)}
-            >
-              {st.short}
-              {st.freeCount > 0 ? <b> · {st.freeCount}</b> : null}
-            </button>
-          ))}
+          <button
+            type="button"
+            className={`v4-pik-btn${onlyFree ? ' v4-pik-btn--accent' : ''}`}
+            aria-pressed={onlyFree}
+            onClick={() => setOnlyFree(true)}
+          >
+            <span>Только в продаже · {counts.free}</span>
+          </button>
         </div>
 
         <div className="v4-gp__mode" role="group" aria-label="Подложка генплана">
@@ -217,8 +191,45 @@ export function DinskayaGenplan({
         </div>
       </div>
 
-      <div className="v4-gp__stage">
+      <div
+        className={`v4-gp__stage${zoomScale > 1 ? ' is-pannable' : ''}`}
+        onPointerDown={(e) => {
+          if (zoomScale <= 1) return
+          if ((e.target as HTMLElement).closest('aside, button, a')) return
+          dragRef.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, moved: false }
+        }}
+        onPointerMove={(e) => {
+          const d = dragRef.current
+          if (!d) return
+          const dx = e.clientX - d.x
+          const dy = e.clientY - d.y
+          if (Math.abs(dx) + Math.abs(dy) > 4) d.moved = true
+          const k = (FULL_BOX.w / zoomScale) / Math.max(400, e.currentTarget.clientWidth)
+          const limX = (FULL_BOX.w * (zoomScale - 1)) / (2 * zoomScale)
+          const limY = (FULL_BOX.h * (zoomScale - 1)) / (2 * zoomScale)
+          setPan({
+            x: Math.max(-limX, Math.min(limX, d.px - dx * k)),
+            y: Math.max(-limY, Math.min(limY, d.py - dy * k)),
+          })
+        }}
+        onPointerUp={() => { dragRef.current = null }}
+        onPointerCancel={() => { dragRef.current = null }}
+      >
         <svg viewBox={viewBox} className={`v4-gp__svg v4-gp__svg--${layer}`} role="img" aria-label="Интерактивный генплан станицы Динской — 36 участков">
+          <defs>
+            <linearGradient id="gp-free-grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#3c8d5a" />
+              <stop offset="100%" stopColor="#1f5333" />
+            </linearGradient>
+            <linearGradient id="gp-free-hot" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#2e7d4b" />
+              <stop offset="100%" stopColor="#14331f" />
+            </linearGradient>
+            <filter id="gp-shadow" x="-15%" y="-15%" width="130%" height="130%">
+              <feDropShadow dx="0" dy="0.8" stdDeviation="1.1" floodColor="#0e1b13" floodOpacity="0.32" />
+            </filter>
+          </defs>
+
           {layer === 'aerial' && (
             <image
               href="/v4/img/dinskaya-aerial.webp"
@@ -227,7 +238,7 @@ export function DinskayaGenplan({
               width={FULL_BOX.w}
               height={FULL_BOX.h}
               preserveAspectRatio="none"
-              opacity={0.94}
+              opacity={0.96}
             />
           )}
 
@@ -235,59 +246,81 @@ export function DinskayaGenplan({
             const st = plotStatusOf(p)
             const h = houseByPlot.get(p.n)
             const isSel = selectedPlot === p.n
+            const isHov = hoverPlot === p.n
+            const dimmed = onlyFree && st !== 'free'
             const c = centerOf(p.poly)
             return (
               <g
                 key={p.n}
-                className={`v4-gp__plot v4-gp__plot--${st}${isSel ? ' is-sel' : ''}`}
+                className={`v4-gp__plot v4-gp__plot--${st}${isSel ? ' is-sel' : ''}${isHov ? ' is-hov' : ''}${dimmed ? ' is-dim' : ''}`}
                 role="button"
                 tabIndex={0}
                 aria-label={`Участок ${p.n}, ${h?.title ?? p.type}, ${st === 'free' ? `свободен, ${h ? formatMillions(h.price) : ''}` : st === 'reserved' ? 'бронь' : st === 'sold' ? 'продан' : 'уточнить статус'}`}
-                onClick={() => setSelectedPlot(p.n)}
+                onMouseEnter={() => setHoverPlot(p.n)}
+                onMouseLeave={() => setHoverPlot((cur) => (cur === p.n ? null : cur))}
+                onClick={() => {
+                  if (dragRef.current?.moved) return
+                  handleSelectPlot(p.n)
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
-                    setSelectedPlot(p.n)
+                    handleSelectPlot(p.n)
                   }
                 }}
               >
                 <polygon points={ptsStr(p.poly)} />
                 {p.house && <polygon className="v4-gp__roof" points={ptsStr(p.house)} />}
-                <text x={c.x} y={c.y + 1.2} textAnchor="middle" className="v4-gp__pno">
+                <text x={c.x} y={c.y + 1.3} textAnchor="middle" className="v4-gp__pno">
                   {p.n}
                 </text>
               </g>
             )
           })}
 
-          {street === 'all' &&
-            streets.map((st) => (
-              <g
-                key={st.name}
-                className="v4-gp__glabel"
-                onClick={() => pickStreet(st.name)}
-                style={{ cursor: 'pointer' }}
-              >
-                <rect x={st.center.x - 24} y={st.center.y - 23} width={48} height={7.2} rx={3.6} />
-                <text x={st.center.x} y={st.center.y - 18.2} textAnchor="middle">
-                  {st.short}
-                </text>
-              </g>
-            ))}
+          {/* Названия улиц расположены прямо на карте генплана (чисто и без лишних кнопок) */}
+          {streetLabels.map((st) => (
+            <g key={st.name} className="v4-gp__glabel" filter="url(#gp-shadow)">
+              <rect x={st.x - st.width / 2} y={st.y - 3.6} width={st.width} height={6.8} rx={3.4} />
+              <text x={st.x} y={st.y + 1.0} textAnchor="middle">
+                {st.label}
+              </text>
+            </g>
+          ))}
         </svg>
 
-        {/* Зум + / - */}
+        {/* Мгновенный ховер-тултип по наведению на участок (без лишнего клика) */}
+        {hoveredPlot && hoveredPlot.n !== selectedPlot && (
+          <div className="v4-gp__hover-tip" aria-hidden>
+            <span className={`v4-gp__hdot v4-gp__hdot--${plotStatusOf(hoveredPlot)}`} />
+            <b>Уч. {hoveredPlot.n}</b>
+            <span>{hoveredHouse ? hoveredHouse.title : hoveredPlot.type}</span>
+            {hoveredHouse && <em>{formatArea(hoveredHouse.area)} м² · {formatMillions(hoveredHouse.price)}</em>}
+          </div>
+        )}
+
+        {/* Компактный зум + / − */}
         <div className="v4-gp__zoom">
-          <button type="button" onClick={() => setZoomScale((z) => Math.min(2.6, Number((z * 1.25).toFixed(2))))} aria-label="Приблизить генплан">+</button>
-          <button type="button" onClick={() => setZoomScale((z) => Math.max(1, Number((z / 1.25).toFixed(2))))} aria-label="Отдалить генплан">−</button>
-          {(zoomScale > 1 || street !== 'all') && (
-            <button type="button" onClick={() => { setStreet('all'); setZoomScale(1) }} aria-label="Показать все 36 участков">
+          <button type="button" onClick={() => setZoomScale((z) => Math.min(2.6, Number((z * 1.28).toFixed(2))))} aria-label="Приблизить генплан">+</button>
+          <button
+            type="button"
+            onClick={() => {
+              const next = Math.max(1, Number((zoomScale / 1.28).toFixed(2)))
+              setZoomScale(next)
+              if (next <= 1.02) setPan({ x: 0, y: 0 })
+            }}
+            aria-label="Отдалить генплан"
+          >
+            −
+          </button>
+          {zoomScale > 1.02 && (
+            <button type="button" onClick={resetView} aria-label="Сбросить масштаб">
               ↺
             </button>
           )}
         </div>
 
-        {/* Стеклянная карточка выбранного участка (по Figma 278-1246) */}
+        {/* Стеклянная карточка выбранного участка (Figma 278-1246) */}
         {activePlot && (
           <aside className="v4-gp__card" aria-live="polite">
             <button type="button" className="v4-gp__close" onClick={() => setSelectedPlot(null)} aria-label="Закрыть карточку участка">
@@ -298,8 +331,12 @@ export function DinskayaGenplan({
               <div className="v4-gp__cimg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={activeHouse.photoCard ?? activeHouse.photo} alt={activeHouse.title} />
-                <a className="v4-gp__3dtag" href={`/v4/dom/${activeHouse.code}`}>
-                  смотреть 3D-модель
+                <a
+                  className="v4-gp__3dtag"
+                  href={`/v4/dom/${activeHouse.code}`}
+                  onClick={() => goal('v4_house_open', { code: activeHouse.code, from: 'genplan_3d_badge' })}
+                >
+                  смотреть 3D-модель →
                 </a>
               </div>
             ) : (
@@ -332,11 +369,15 @@ export function DinskayaGenplan({
                 <>
                   <p className="v4-gp__cprice">{formatMillions(activeHouse.price)}</p>
                   {activeMonthly > 0 && (
-                    <p className="v4-gp__cmort">≈ {activeMonthly.toLocaleString('ru-RU')} ₽ в месяц по семейной ипотеке</p>
+                    <p className="v4-gp__cmort">≈ {activeMonthly.toLocaleString('ru-RU')} ₽/мес по семейной ипотеке 6%</p>
                   )}
                   <div className="v4-gp__cbtns">
-                    <a className="v3-btn v3-btn--main" href={`/v4/dom/${activeHouse.code}`}>
-                      Страница дома →
+                    <a
+                      className="v3-btn v3-btn--main"
+                      href={`/v4/dom/${activeHouse.code}`}
+                      onClick={() => goal('v4_house_open', { code: activeHouse.code, from: 'genplan_card' })}
+                    >
+                      3D и планировка →
                     </a>
                     <button
                       type="button"
@@ -369,7 +410,7 @@ export function DinskayaGenplan({
         )}
       </div>
 
-      {/* Легенда + инфраструктура (как в Figma 278-1110) */}
+      {/* Легенда + инфраструктура в одну аккуратную полосу */}
       <div className="v4-gp__foot">
         <ul className="v4-gp__legend">
           <li><i className="is-free" />в продаже — {counts.free}</li>
@@ -391,13 +432,18 @@ export function DinskayaGenplan({
         <div>
           <h3>Динская · {counts.free} {plural(counts.free, 'дом', 'дома', 'домов')} в продаже</h3>
           <p>
-            Нажмите на зелёный участок — откроется карточка дома. Раскладка 36 участков и углы домов — по точному плану застройщика.
-            {layer === 'aerial' ? ' Фон — визуализация окружения станицы.' : ''}
+            Наведите на любой участок для быстрой цены или нажмите, чтобы открыть карточку дома и перейти в 3D. Раскладка 36 участков — по плану застройщика.
           </p>
         </div>
-        <a className="v4-types__all" href={estateHref}>
-          Страница посёлка Динская →
-        </a>
+        {hideEstateLink ? (
+          <a className="v4-pik-btn v4-pik-btn--accent" href="#tipy-poselka">
+            <span>Типы домов в Динской ↓</span>
+          </a>
+        ) : (
+          <a className="v4-pik-btn" href={estateHref}>
+            <span>Страница посёлка Динская →</span>
+          </a>
+        )}
       </div>
 
       {compareList.length > 0 && (

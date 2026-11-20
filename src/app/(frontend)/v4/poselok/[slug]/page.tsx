@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { PlotPicker } from '@/components/home/PlotPicker'
-import { getCompany, getEstate, getHouses, plural } from '@/lib/data'
-import { formatMillions } from '@/lib/format'
+import { getCompany, getEstate, getHouses, getProjects, img, plural } from '@/lib/data'
+import { formatArea, formatMillions } from '@/lib/format'
 import { JsonLd, breadcrumbsLd, estateLd } from '@/lib/seo'
 import { mainHref } from '@/lib/site'
 import { estateSale, estateView, genplanEstate, houseView } from '@/lib/view'
@@ -11,14 +11,18 @@ import { HousePicker, type PickHouse } from '@/v3/home/HousePicker'
 import { StickyCta } from '@/v3/home/StickyCta'
 import { DinskayaGenplan } from '@/v4/DinskayaGenplan'
 import { V4Bar, V4Final, V4Fonts, V4Footer } from '@/v4/Shell'
+import { v4img } from '@/v4/images'
 import type { Region } from '@/payload-types'
 import '@/v3/v3.css'
 import '@/v4/v4.css'
 
 /**
- * v4 · страница посёлка (без старых обложек с воздушным змеем и без лишней прокрутки):
- *  - Первый экран: компактная шапка посёлка, цифры в одну строку и СРАЗУ интерактивный Генплан (для Динской — спутниковый 36 участков);
- *  - Под генпланом: компактный блок «Что рядом + Коммуникации» и сетка готовых домов в продаже с фильтром по типу в стиле ПИК.
+ * v4 · страница посёлка (без старой обложки со змеем):
+ *  1. Шапка посёлка: статус, локация, 4 ключевых факта и быстрые переходы;
+ *  2. Всё о посёлке: адрес, минуты до ключевых точек, коммуникации, инфраструктура и особенности;
+ *  3. Интерактивный генплан (для Динской — спутниковый 36 участков с ховер-ценами и 3D-переходом);
+ *  4. Типы домов в этом посёлке — визуальный список с фото, планировкой, ценами и выбором вариантов;
+ *  5. Готовые дома в продаже списком с фильтром по типу + вечерний финал.
  */
 export const dynamic = 'force-dynamic'
 
@@ -42,7 +46,7 @@ export default async function V4Estate({ params }: Props) {
   const { slug } = await params
   const e = await getEstate(slug)
   if (!e) notFound()
-  const [company, houses] = await Promise.all([getCompany(), getHouses({ estate: e.id })])
+  const [company, houses, projects] = await Promise.all([getCompany(), getHouses({ estate: e.id }), getProjects()])
   const region = (typeof e.region === 'object' ? e.region : undefined) as Region | undefined
   const v = estateView(e, houses)
   const all = houses.map(houseView)
@@ -59,15 +63,58 @@ export default async function V4Estate({ params }: Props) {
     caption: 'Изображение проекта',
   }))
   const plot = free.length && e.status !== 'planned' ? [{ name: e.name, href: v.href, estate: genplanEstate(e, all.length), houses: all }] : []
+  const showGenplan = e.slug === 'dinskaya' || free.length > 1
   const fam = { rate: company.family?.rate ?? 6, years: company.family?.years ?? 30, minDown: company.family?.minDown ?? 20, limit: company.family?.limit ?? 6_000_000 }
   const map = e.lat && e.lng ? `https://yandex.ru/maps/?pt=${e.lng},${e.lat}&z=15&l=map` : null
+
+  const projectIdOf = (h: (typeof houses)[number]) => (typeof h.project === 'object' ? h.project?.id : h.project)
+  const estateTypes = projects
+    .map((p) => {
+      const exactNum = p.name.match(/\d+/)?.[0]
+      const nameRx = exactNum ? new RegExp(`тип\\s*${exactNum}(?!\\d)`, 'i') : null
+      const mineAll = houses.filter((h) => projectIdOf(h) === p.id || (nameRx ? nameRx.test(h.title) : false))
+      if (mineAll.length === 0) return null
+      const mineFree = mineAll.filter((h) => h.status === 'free').sort((a, b) => a.price - b.price)
+      const sampleRaw = mineFree[0] ?? mineAll[0]
+      const sample = houseView(sampleRaw)
+      const prices = mineFree.map((h) => h.price ?? 0).filter((x) => x > 0)
+      const plotSizes = (mineFree.length ? mineFree : mineAll)
+        .map((h) => Number.parseFloat((h.plot ?? '').replace(',', '.')))
+        .filter((x) => Number.isFinite(x) && x > 0)
+      return {
+        slug: p.slug,
+        num: exactNum ? Number(exactNum) : 99,
+        name: p.name,
+        photo: img(p.photo, 'wide') ?? sample.photo ?? sample.photoCard,
+        plan: img(p.plan, 'wide') ?? sample.plan,
+        area: p.area ?? sample.area ?? null,
+        mansard: p.mansard ?? sample.mansard ?? null,
+        storeys: p.storeys ?? (sample.storeys === 2 ? 2 : 1),
+        bedrooms: p.bedrooms ?? sample.bedrooms ?? null,
+        totalInEstate: mineAll.length,
+        freeInEstate: mineFree.length,
+        minPrice: prices.length ? Math.min(...prices) : null,
+        minPlot: plotSizes.length ? Math.min(...plotSizes) : null,
+        firstFreeHref: mineFree[0] ? `/v4/dom/${mineFree[0].code}` : null,
+        projectHref: `/v4/proekt/${p.slug}`,
+      }
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null)
+    .sort((a, b) => a.num - b.num)
 
   const facts = [
     e.homes ? { v: String(e.homes), l: plural(e.homes, 'участок в посёлке', 'участка в посёлке', 'участков в посёлке') } : null,
     { v: String(free.length), l: `${plural(free.length, 'дом', 'дома', 'домов')} в продаже` },
     v.priceFrom ? { v: formatMillions(v.priceFrom), l: 'стоимость дома с участком от' } : null,
-    (e.nearby ?? [])[0] ? { v: e.nearby![0].value, l: `до ${e.nearby![0].label}` } : null,
+    estateTypes.length > 0
+      ? { v: String(estateTypes.length), l: plural(estateTypes.length, 'тип дома в посёлке', 'типа домов в посёлке', 'типов домов в посёлке') }
+      : (e.nearby ?? [])[0]
+        ? { v: e.nearby![0].value, l: `до ${e.nearby![0].label}` }
+        : null,
   ].filter((f): f is { v: string; l: string } => f !== null)
+
+  const hasInfo = (e.nearby ?? []).length > 0 || (e.utilities ?? []).length > 0 || (e.infrastructure ?? []).length > 0 || (e.extras ?? []).length > 0 || Boolean(e.address)
+  const engineeringItems = [...(e.utilities ?? []), ...(e.infrastructure ?? []), ...(e.extras ?? [])]
 
   return (
     <div className="v3 v4 v4-house">
@@ -75,8 +122,8 @@ export default async function V4Estate({ params }: Props) {
       {region && <JsonLd data={estateLd(e, region, free)} />}
       <JsonLd data={breadcrumbsLd([{ name: 'Главная', url: mainHref('/') }, { name: e.name, url: v.href }])} />
       <V4Bar phone={company.phone} always />
-      <MotionRoot smooth={false}>
-        {/* Компактная шапка посёлка без старой обложки + сразу генплан на первом экране */}
+      <MotionRoot>
+        {/* 1. Компактная шапка посёлка без старой обложки */}
         <section className="v4-estate-hero">
           <span className="v4-ghost" aria-hidden>{e.name.toLowerCase()}</span>
           <div className="v3-wrap">
@@ -89,7 +136,7 @@ export default async function V4Estate({ params }: Props) {
             </nav>
 
             <div className="v4-estate-top">
-              <div>
+              <div className="v4-estate-top__text">
                 <span className={`v3-status${e.status !== 'selling' ? ' v3-status--off' : ''}`}>
                   <i />
                   {estateSale(v)}
@@ -99,14 +146,30 @@ export default async function V4Estate({ params }: Props) {
                   {[e.kind || 'Коттеджный посёлок', e.place].filter(Boolean).join(' · ')}
                   {e.tagline ? ` — ${e.tagline}` : ''}
                 </p>
+                {e.description && <p className="v4-estate-desc">{e.description}</p>}
               </div>
+
               <div className="v4-pik-bar">
-                {(e.slug === 'dinskaya' || plot.length > 0) && (
-                  <a className="v4-pik-btn v4-pik-btn--accent" href="#genplan">
-                    <span>Выбрать участок на генплане ↓</span>
+                {hasInfo && (
+                  <a className="v4-pik-btn" href="#o-poselke">
+                    <span>О посёлке</span>
                   </a>
                 )}
-                {free.length > 0 && (
+                {showGenplan ? (
+                  <a className="v4-pik-btn v4-pik-btn--accent" href="#genplan">
+                    <span>Генплан посёлка ↓</span>
+                  </a>
+                ) : free.length === 1 ? (
+                  <a className="v4-pik-btn v4-pik-btn--accent" href="#tipy-poselka">
+                    <span>Готовый дом в продаже →</span>
+                  </a>
+                ) : null}
+                {estateTypes.length > 0 && (
+                  <a className="v4-pik-btn" href="#tipy-poselka">
+                    <span>{free.length === 1 ? 'Проект и планировка' : `Типы домов (${estateTypes.length})`}</span>
+                  </a>
+                )}
+                {free.length > 1 && (
                   <a className="v4-pik-btn" href="#doma">
                     <span>Дома списком ({free.length})</span>
                   </a>
@@ -123,7 +186,6 @@ export default async function V4Estate({ params }: Props) {
               </div>
             </div>
 
-            {/* Компактная строка фактов о посёлке */}
             <div className="v4-estate-facts">
               {facts.map((f) => (
                 <div className="v4-estate-fact" key={f.l}>
@@ -132,44 +194,46 @@ export default async function V4Estate({ params }: Props) {
                 </div>
               ))}
             </div>
-
-            {/* СРАЗУ НА ПЕРВОМ ЭКРАНЕ — интерактивный генплан посёлка */}
-            {e.slug === 'dinskaya' ? (
-              <div id="genplan" className="v4-estate-gp">
-                <DinskayaGenplan houses={all} family={fam} />
-              </div>
-            ) : plot.length > 0 ? (
-              <div id="genplan" className="v4-estate-gp">
-                <PlotPicker estates={plot} />
-              </div>
-            ) : null}
           </div>
         </section>
 
-        {/* Что рядом и коммуникации — компактно в 2 колонки */}
-        {((e.nearby ?? []).length > 0 || (e.utilities ?? []).length > 0) && (
-          <section className="v3-sec v4-sec" style={{ paddingTop: 24, paddingBottom: 32 }}>
+        {/* 2. Всё о посёлке: окружение, минуты и коммуникации */}
+        {hasInfo && (
+          <section className="v3-sec v4-sec v4-estate-about" id="o-poselke">
+            <div className="v3-wrap v4-head" style={{ marginBottom: 20 }}>
+              <p className="v4-num"><b>01</b> / О посёлке</p>
+              <h2 className="v3-h2" data-move="lines">Всё о <em>посёлке</em></h2>
+            </div>
             <div className="v3-wrap v4-estate-info">
-              {(e.nearby ?? []).length > 0 && (
-                <div className="v4-estate-box">
+              {((e.nearby ?? []).length > 0 || e.address || map) && (
+                <div className="v4-estate-box" data-move="up">
                   <p className="v4-num">Локация и окружение</p>
-                  <h3>Что рядом с посёлком</h3>
-                  <ul className="v4-near">
-                    {e.nearby!.map((n) => (
-                      <li key={n.label}>
-                        <span>{n.label}</span>
-                        <b>{n.value}</b>
-                      </li>
-                    ))}
-                  </ul>
+                  <h3>Что рядом в минутах</h3>
+                  {e.address && <p className="v4-estate-addr">{[e.address, e.district].filter(Boolean).join(' · ')}</p>}
+                  {(e.nearby ?? []).length > 0 && (
+                    <ul className="v4-near">
+                      {e.nearby!.map((n) => (
+                        <li key={n.label}>
+                          <span>{n.label}</span>
+                          <b>{n.value}</b>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {map && (
+                    <a className="v4-types__all" href={map} target="_blank" rel="noreferrer" style={{ marginTop: 14 }}>
+                      Открыть точку на Яндекс Картах →
+                    </a>
+                  )}
                 </div>
               )}
-              {((e.utilities ?? []).length > 0 || (e.infrastructure ?? []).length > 0) && (
-                <div className="v4-estate-box">
-                  <p className="v4-num">Инженерия</p>
+
+              {engineeringItems.length > 0 && (
+                <div className="v4-estate-box" data-move="up">
+                  <p className="v4-num">Инженерия и среда</p>
                   <h3>Коммуникации и благоустройство</h3>
                   <ul className="v4-chips-list">
-                    {[...(e.utilities ?? []), ...(e.infrastructure ?? [])].map((x) => (
+                    {engineeringItems.map((x) => (
                       <li key={x}>{x}</li>
                     ))}
                   </ul>
@@ -179,12 +243,123 @@ export default async function V4Estate({ params }: Props) {
           </section>
         )}
 
-        {/* Свободные дома в посёлке с фильтром по типу в стиле ПИК */}
-        {free.length > 0 && (
-          <section className="v3-sec v4-sec" id="doma" style={{ paddingTop: 24 }}>
+        {/* 3. Интерактивный генплан (только там, где больше 1 дома или есть полный генплан Динской) */}
+        {showGenplan && (e.slug === 'dinskaya' || plot.length > 0) && (
+          <section className="v3-sec v3-sec--mist v4-sec" id="genplan">
+            <span className="v4-ghost" aria-hidden>генплан</span>
+            <div className="v3-wrap v4-head" style={{ marginBottom: 20 }}>
+              <p className="v4-num"><b>02</b> / Генплан</p>
+              <h2 className="v3-h2" data-move="lines">Генплан посёлка <em>«{e.name}»</em></h2>
+              <p className="v3-lead" data-move="up">
+                Наведите на участок, чтобы увидеть площадь и стоимость, или нажмите для перехода в 3D-карточку дома.
+              </p>
+            </div>
+            <div className="v3-wrap">
+              {e.slug === 'dinskaya' ? (
+                <DinskayaGenplan houses={all} family={fam} hideEstateLink />
+              ) : (
+                <PlotPicker estates={plot} />
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* 4. Типы домов в этом посёлке — визуальный список с фото, планировкой и выбором */}
+        {estateTypes.length > 0 && (
+          <section className="v3-sec v3-sec--linen v4-sec" id="tipy-poselka">
+            <span className="v4-ghost" aria-hidden>типы домов</span>
+            <div className="v3-wrap v4-head" style={{ marginBottom: 22 }}>
+              <p className="v4-num"><b>03</b> / Проекты в посёлке</p>
+              <h2 className="v3-h2" data-move="lines">Типы домов <em>в «{e.name}»</em></h2>
+              <p className="v3-lead" data-move="up">
+                В этом посёлке представлено {estateTypes.length} {plural(estateTypes.length, 'типовой проект', 'типовых проекта', 'типовых проектов')}. Сравните архитектуру, планировку и бюджет.
+              </p>
+            </div>
+            <div className="v3-wrap v4-estate-types">
+              {estateTypes.map((t) => {
+                const storeyLabel =
+                  t.storeys === 2 ? '2 этажа' : t.mansard ? `с мансардой (+${formatArea(t.mansard)} м²)` : '1 этаж'
+                const specs = [
+                  t.area ? `${formatArea(t.area)} м²` : null,
+                  t.bedrooms ? `${t.bedrooms} ${plural(t.bedrooms, 'спальня', 'спальни', 'спален')}` : null,
+                  storeyLabel,
+                  t.minPlot ? `уч. от ${String(t.minPlot).replace('.', ',')} сот.` : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')
+                return (
+                  <article key={t.slug} className="v4-etype-card" data-move="up">
+                    <figure className="v4-etype-card__photo">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      {t.photo ? (
+                        <img src={t.photo} alt={`Проект «${t.name}»`} loading="lazy" />
+                      ) : (
+                        <span className="v3-card__noimg">Фото скоро</span>
+                      )}
+                      <figcaption>Изображение проекта</figcaption>
+                    </figure>
+
+                    <div className="v4-etype-card__plan">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      {t.plan ? (
+                        <img src={t.plan} alt={`Планировка «${t.name}»`} loading="lazy" />
+                      ) : (
+                        <span className="v3-card__noimg">Планировка скоро</span>
+                      )}
+                    </div>
+
+                    <div className="v4-etype-card__info">
+                      <div className="v4-etype-card__head">
+                        <h3>{t.name}</h3>
+                        {t.freeInEstate > 0 ? (
+                          <span className="v3-status">
+                            <i />
+                            {t.freeInEstate} в продаже в «{e.name}»
+                          </span>
+                        ) : (
+                          <span className="v3-status v3-status--off">
+                            <i />
+                            все {t.totalInEstate} проданы в посёлке
+                          </span>
+                        )}
+                      </div>
+                      {specs && <p className="v4-ts__specs">{specs}</p>}
+                      <p className="v4-etype-card__price">
+                        {t.minPrice ? `от ${formatMillions(t.minPrice)}` : 'Все варианты в этом посёлке проданы'}
+                      </p>
+                      <p className="v4-etype-card__note">
+                        {t.freeInEstate > 0
+                          ? `В «${e.name}» ${t.freeInEstate} ${plural(t.freeInEstate, 'свободный дом', 'свободных дома', 'свободных домов')} этого типа (всего по проекту в посёлке — ${t.totalInEstate}).`
+                          : 'Вы можете посмотреть планировку проекта и выбрать такой же тип дома в другом нашем посёлке.'}
+                      </p>
+                      <div className="v4-etype-card__btns">
+                        {t.firstFreeHref ? (
+                          <a className="v4-pik-btn v4-pik-btn--accent" href={t.firstFreeHref}>
+                            <span>Смотреть дом в 3D →</span>
+                          </a>
+                        ) : (
+                          <a className="v4-pik-btn v4-pik-btn--accent" href={t.projectHref}>
+                            <span>Смотреть проект →</span>
+                          </a>
+                        )}
+                        <a className="v4-pik-btn" href={t.projectHref}>
+                          <span>Планировка и детали →</span>
+                        </a>
+                      </div>
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* 5. Свободные дома в посёлке с фильтром по типу в стиле ПИК (скрываем дубль, если в продаже всего 1 дом — он уже крупно показан выше) */}
+        {free.length > 1 && (
+          <section className="v3-sec v4-sec" id="doma">
             <div className="v3-wrap v4-head" style={{ marginBottom: 18 }}>
-              <p className="v4-num">Готовые дома</p>
-              <h2 className="v3-h2">
+              <p className="v4-num"><b>04</b> / Дома списком</p>
+              <h2 className="v3-h2" data-move="lines">
                 {`${free.length} ${plural(free.length, 'дом', 'дома', 'домов')}`} <em>в «{e.name}»</em>
               </h2>
             </div>
@@ -198,6 +373,7 @@ export default async function V4Estate({ params }: Props) {
           company={company}
           context={`Посёлок v4: ${e.name}`}
           lead={`Покажем посёлок «${e.name}» и свободные участки вживую или по видеосвязи. Ответим про документы и ипотеку.`}
+          bg={v4img('И4')?.src ?? '/design/hero-morning.webp'}
         />
         <V4Footer since={company.since} />
       </MotionRoot>

@@ -1,9 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { formatMillions } from '@/lib/format'
-import type { HouseView } from '@/lib/view'
-import { DinskayaGenplan } from '@/v4/DinskayaGenplan'
+import { goal } from '@/components/Metrika'
+import { formatArea, formatMillions } from '@/lib/format'
 
 export type FlowEstate = {
   slug: string
@@ -20,6 +19,14 @@ export type FlowEstate = {
   cover?: string
   types: string[]
   nearby: { label: string; value: string }[]
+  singleHouse?: {
+    code: string
+    title: string
+    area: number
+    plot: string | null
+    price: number
+    href: string
+  }
 }
 
 const STATUS_LABEL = { selling: 'В продаже', soldOut: 'Построен и продан', planned: 'Скоро в продаже' } as const
@@ -46,45 +53,36 @@ function loadYmaps(): Promise<Y> {
   })
 }
 
-/**
- * Разводим координаты пинов для обзорного масштаба Яндекс.Карты,
- * чтобы близкие посёлки в Новой Адыгее и Козете («Красная 39», «Дружбы 43», «Южный ветер», «Калина»)
- * никогда не налезали друг на друга бутербродом.
- */
-function spreadLatLng(slug: string, lat: number, lng: number): [number, number] {
+/** Экранный сдвиг соседних пинов ТОЛЬКО на обзорном масштабе (сами координаты всегда честные) */
+function overviewOffset(slug: string): [number, number] {
   switch (slug) {
-    case 'dinskaya':
-      return [45.225, 39.235]
-    case 'novovelichkovskaya':
-      return [45.275, 38.84]
-    case 'krasnaya-39':
-      return [45.055, 38.815]
     case 'druzhby-43':
-      return [45.055, 39.045]
-    case 'yuzhnyy-veter':
-      return [44.955, 38.795]
+      return [-38, -28]
+    case 'krasnaya-39':
+      return [38, 22]
     case 'kalina':
-      return [44.955, 39.035]
+      return [46, -18]
+    case 'yuzhnyy-veter':
+      return [-46, 22]
     default:
-      return [lat, lng]
+      return [0, 0]
   }
 }
 
-/** Разнесённые экранные координаты для векторной карты Кубани — ноль пересечений */
 function projectPin(slug: string, lat: number, lng: number) {
   switch (slug) {
     case 'novovelichkovskaya':
-      return { x: 28, y: 24 }
+      return { x: 26, y: 22 }
     case 'dinskaya':
-      return { x: 73, y: 30 }
-    case 'krasnaya-39':
-      return { x: 28, y: 63 }
+      return { x: 74, y: 28 }
     case 'druzhby-43':
-      return { x: 56, y: 63 }
+      return { x: 26, y: 54 }
+    case 'krasnaya-39':
+      return { x: 52, y: 60 }
     case 'yuzhnyy-veter':
-      return { x: 28, y: 80 }
+      return { x: 27, y: 78 }
     case 'kalina':
-      return { x: 56, y: 80 }
+      return { x: 54, y: 80 }
     default: {
       const x = ((lng - 38.76) / (39.34 - 38.76)) * 74 + 13
       const y = (1 - (lat - 44.94) / (45.32 - 44.94)) * 68 + 16
@@ -93,26 +91,76 @@ function projectPin(slug: string, lat: number, lng: number) {
   }
 }
 
-export function MapGenplanFlow({
-  estates,
-  dinskayaHouses,
-  family,
-}: {
-  estates: FlowEstate[]
-  dinskayaHouses: HouseView[]
-  family: { rate: number; years: number; minDown: number; limit: number }
-}) {
+function ctaFor(e: FlowEstate) {
+  if (e.singleHouse) {
+    return {
+      primaryHref: e.singleHouse.href,
+      primaryLabel: 'Открыть готовый дом в 3D →',
+      secondaryHref: e.href,
+      secondaryLabel: 'О локации',
+      subtitle: `${e.place} · 1 готовый дом: ${e.singleHouse.title}, ${formatArea(e.singleHouse.area)} м² · ${formatMillions(e.singleHouse.price)}`,
+      hint: `Локация «${e.name}» · 1 готовый дом в продаже — откройте карточку дома в 3D или планировку`,
+    }
+  }
+  if (e.status === 'planned') {
+    return {
+      primaryHref: e.href,
+      primaryLabel: 'Узнать о старте продаж →',
+      subtitle: `${e.place} · Скоро старт продаж`,
+      hint: `Посёлок «${e.name}» · Откройте страницу посёлка, чтобы узнать о старте продаж`,
+    }
+  }
+  if (e.status === 'soldOut' || e.free === 0) {
+    return {
+      primaryHref: e.href,
+      primaryLabel: 'Смотреть построенный посёлок →',
+      subtitle: `${e.place} · ${e.homes ? `${e.homes} домов` : 'Все дома'} построены и проданы`,
+      hint: `Посёлок «${e.name}» · Все дома проданы — посмотрите реализованный проект`,
+    }
+  }
+  return {
+    primaryHref: e.href,
+    primaryLabel: e.slug === 'dinskaya' || e.free > 1 ? 'Смотреть посёлок и генплан →' : 'Смотреть посёлок →',
+    subtitle: `${e.place} · ${e.homes ?? e.free} участков, ${e.free} в продаже${e.priceFrom ? ` · от ${formatMillions(e.priceFrom)}` : ''}`,
+    hint: `Посёлок «${e.name}» · Нажмите «Смотреть посёлок и генплан», чтобы выбрать участок и тип дома`,
+  }
+}
+
+export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
   const defaultIdx = Math.max(0, estates.findIndex((e) => e.slug === 'dinskaya'))
-  const [view, setView] = useState<'map' | 'genplan'>('map')
   const [activeIdx, setActiveIdx] = useState<number>(defaultIdx)
+  const [zoomedSlug, setZoomedSlug] = useState<string | null>(null)
   const [mapMode, setMapMode] = useState<'wait' | 'js' | 'vector'>('wait')
 
   const boxRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
   const apiRef = useRef<{ map: Y; marks: Y[] } | null>(null)
+  const zoomedSlugRef = useRef<string | null>(null)
+  const wasZoomedRef = useRef(false)
   const [near, setNear] = useState(false)
 
+  useEffect(() => {
+    zoomedSlugRef.current = zoomedSlug
+  }, [zoomedSlug])
+
   const cur = estates[activeIdx] ?? estates[0]
+  const zoomedEstate = estates.find((e) => e.slug === zoomedSlug) ?? null
+
+  const focusEstate = useCallback(
+    (k: number) => {
+      const target = estates[k]
+      if (!target) return
+      setActiveIdx(k)
+      if (zoomedSlugRef.current === target.slug) return
+      setZoomedSlug(target.slug)
+      goal('v4_map_estate_zoom', { slug: target.slug })
+    },
+    [estates],
+  )
+
+  const resetZoom = useCallback(() => {
+    setZoomedSlug(null)
+  }, [])
 
   useEffect(() => {
     const el = boxRef.current
@@ -123,7 +171,7 @@ export function MapGenplanFlow({
   }, [])
 
   useEffect(() => {
-    if (view !== 'map' || !near || !canvasRef.current || !estates.length) return
+    if (!near || !canvasRef.current || !estates.length) return
     let dead = false
     let map: Y
     loadYmaps()
@@ -132,30 +180,31 @@ export function MapGenplanFlow({
         const touch = window.matchMedia('(pointer: coarse)').matches
         map = new ymaps.Map(
           canvasRef.current,
-          { center: [45.11, 39.02], zoom: 10, controls: ['zoomControl'], behaviors: touch ? ['multiTouch', 'dblClickZoom'] : ['drag', 'dblClickZoom', 'multiTouch'] },
-          { suppressMapOpenBlock: true, yandexMapDisablePoiInteractivity: true },
+          { center: [45.11, 39.02], zoom: 10, controls: ['zoomControl'], behaviors: touch ? ['multiTouch'] : ['drag'] },
+          { suppressMapOpenBlock: true, yandexMapDisablePoiInteractivity: true, minZoom: 9, maxZoom: 14 },
         )
         const Pin = ymaps.templateLayoutFactory.createClass(
           '<div class="v4-ypin {{ properties.cls }}"><i></i><div><b>{{ properties.name }}</b><span>{{ properties.sub }}</span></div></div>',
         )
         const marks = estates.map((e, k) => {
           const sub = e.status === 'selling' ? `${e.free} в продаже` : e.status === 'planned' ? 'скоро' : 'проданы'
-          const coords = spreadLatLng(e.slug, e.lat, e.lng)
           const m = new ymaps.Placemark(
-            coords,
+            [e.lat, e.lng],
             { name: e.name, sub, cls: `v4-ypin--${e.status}${k === activeIdx ? ' is-on' : ''}` },
-            { iconLayout: Pin, iconShape: { type: 'Rectangle', coordinates: [[-95, -52], [95, 4]] }, zIndex: k === activeIdx ? 300 : 200 - k },
+            {
+              iconLayout: Pin,
+              iconShape: { type: 'Rectangle', coordinates: [[-96, -30], [96, 30]] },
+              iconOffset: overviewOffset(e.slug),
+              zIndex: k === activeIdx ? 300 : 200 - k,
+            },
           )
           m.events.add('mouseenter', () => setActiveIdx(k))
-          m.events.add('click', () => {
-            setActiveIdx(k)
-            if (e.slug === 'dinskaya') setView('genplan')
-          })
+          m.events.add('click', () => focusEstate(k))
           map.geoObjects.add(m)
           return m
         })
         try {
-          map.setBounds(map.geoObjects.getBounds(), { checkZoomRange: true, zoomMargin: [54, 88, 64, 88] })
+          map.setBounds(map.geoObjects.getBounds(), { checkZoomRange: true, zoomMargin: [58, 92, 68, 92] })
         } catch {
           // ignore
         }
@@ -174,8 +223,8 @@ export function MapGenplanFlow({
         // ignore
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- монтируем карту один раз при переключении в режим map
-  }, [view, near, estates])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [near, estates])
 
   useEffect(() => {
     const a = apiRef.current
@@ -186,113 +235,121 @@ export function MapGenplanFlow({
     })
   }, [activeIdx, mapMode, estates])
 
-  const openEstate = useCallback(
-    (k: number) => {
-      setActiveIdx(k)
-      const target = estates[k]
-      if (target?.slug === 'dinskaya') setView('genplan')
-    },
-    [estates],
-  )
+  useEffect(() => {
+    const a = apiRef.current
+    if (!a || mapMode !== 'js') return
+    if (zoomedSlug) {
+      wasZoomedRef.current = true
+      const zEst = estates.find((e) => e.slug === zoomedSlug)
+      a.marks.forEach((m) => {
+        m.options.set('iconOffset', [0, 0])
+      })
+      if (zEst) {
+        try {
+          a.map.setCenter([zEst.lat, zEst.lng], 13, { duration: 420, checkZoomRange: true })
+        } catch {
+          // ignore
+        }
+      }
+    } else if (wasZoomedRef.current) {
+      wasZoomedRef.current = false
+      a.marks.forEach((m, k) => {
+        m.options.set('iconOffset', overviewOffset(estates[k].slug))
+      })
+      try {
+        a.map.setBounds(a.map.geoObjects.getBounds(), { checkZoomRange: true, zoomMargin: [58, 92, 68, 92], duration: 380 })
+      } catch {
+        // ignore
+      }
+    }
+  }, [zoomedSlug, mapMode, estates])
 
   if (!cur) return null
 
-  const dinskayaFree = dinskayaHouses.filter((h) => h.status === 'free').length
-
-  const switcher = (
-    <div className="v4-mflow__tabs v4-pik-bar" role="tablist" aria-label="Режим карты и посёлки">
-      <button
-        type="button"
-        role="tab"
-        aria-selected={view === 'map'}
-        className={`v4-pik-btn v4-pik-btn--map${view === 'map' ? ' is-dark' : ''}`}
-        onClick={() => setView('map')}
-      >
-        <span>Карта посёлков ({estates.length})</span>
-        <i className="v4-pik-mapdot" aria-hidden />
-      </button>
-      <button
-        type="button"
-        role="tab"
-        aria-selected={view === 'genplan'}
-        className={`v4-pik-btn${view === 'genplan' ? ' v4-pik-btn--accent' : ''}`}
-        onClick={() => setView('genplan')}
-      >
-        <span>Генплан КП «Динская» со спутника · 36 участков ({dinskayaFree} свободно)</span>
-      </button>
-      {view === 'map' &&
-        estates.map((e, k) => (
-          <button
-            key={e.slug}
-            type="button"
-            className={`v4-pik-btn${k === activeIdx ? ' is-dark' : ''}`}
-            onClick={() => openEstate(k)}
-          >
-            <span>{e.name}</span>
-          </button>
-        ))}
-    </div>
-  )
-
-  if (view === 'genplan') {
-    return (
-      <div className="v4-mflow" ref={boxRef}>
-        {switcher}
-        <DinskayaGenplan houses={dinskayaHouses} family={family} onBackToMap={() => setView('map')} />
-      </div>
-    )
-  }
+  const zPt = zoomedEstate ? projectPin(zoomedEstate.slug, zoomedEstate.lat, zoomedEstate.lng) : null
+  const curCta = ctaFor(cur)
+  const zoomCta = zoomedEstate ? ctaFor(zoomedEstate) : null
 
   return (
     <div className="v4-mflow" ref={boxRef}>
-      {switcher}
-      {/* Поле карты: Яндекс Карты + мгновенный векторный слой как запасной */}
       <div className="v4-mflow__box">
         <div className="v4-mflow__ymap" ref={canvasRef} />
 
         {mapMode !== 'js' && (
           <div className="v4-mflow__vec" role="region" aria-label="Карта посёлков под Краснодаром">
-            <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="v4-mflow__river" aria-hidden>
-              <path d="M-2,52 C22,48 40,54 62,50 C80,46 92,52 104,49" fill="none" stroke="#c5d7e0" strokeWidth="1.6" />
-              <ellipse cx="44" cy="46" rx="10" ry="7" fill="rgba(255,255,255,0.22)" />
-              <text x="44" y="46.8" textAnchor="middle" fill="rgba(255,255,255,0.88)" fontSize="3.2" fontWeight="600">
-                Краснодар
-              </text>
-            </svg>
-            <div className="v4-mflow__wm" aria-hidden>
-              <span>наши</span>
-              <span>посёлки</span>
+            <div
+              className="v4-mflow__vec-stage"
+              style={
+                zPt
+                  ? {
+                      transformOrigin: `${zPt.x}% ${zPt.y}%`,
+                      transform: 'scale(1.85)',
+                    }
+                  : undefined
+              }
+            >
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="v4-mflow__river" aria-hidden>
+                <path d="M-2,52 C22,48 40,54 62,50 C80,46 92,52 104,49" fill="none" stroke="#c5d7e0" strokeWidth="1.6" />
+                <ellipse cx="44" cy="46" rx="10" ry="7" fill="rgba(255,255,255,0.22)" />
+                <text x="44" y="46.8" textAnchor="middle" fill="rgba(255,255,255,0.88)" fontSize="3.2" fontWeight="600">
+                  Краснодар
+                </text>
+              </svg>
+              <div className="v4-mflow__wm" aria-hidden>
+                <span>наши</span>
+                <span>посёлки</span>
+              </div>
+              {estates.map((e, k) => {
+                const pt = projectPin(e.slug, e.lat, e.lng)
+                const isSel = k === activeIdx
+                return (
+                  <button
+                    key={e.slug}
+                    type="button"
+                    style={{ left: `${pt.x}%`, top: `${pt.y}%` }}
+                    className={`v4-ypin v4-ypin--${e.status}${isSel ? ' is-on' : ''}${zoomedEstate ? ' is-zoomed' : ''}`}
+                    onMouseEnter={() => setActiveIdx(k)}
+                    onFocus={() => setActiveIdx(k)}
+                    onClick={() => focusEstate(k)}
+                  >
+                    <i />
+                    <div>
+                      <b>{e.name}</b>
+                      <span>{e.status === 'selling' ? `${e.free} в продаже` : e.status === 'planned' ? 'скоро' : 'проданы'}</span>
+                    </div>
+                  </button>
+                )
+              })}
             </div>
-            {estates.map((e, k) => {
-              const pt = projectPin(e.slug, e.lat, e.lng)
-              const isSel = k === activeIdx
-              return (
-                <button
-                  key={e.slug}
-                  type="button"
-                  style={{ left: `${pt.x}%`, top: `${pt.y}%` }}
-                  className={`v4-ypin v4-ypin--${e.status}${isSel ? ' is-on' : ''}`}
-                  onMouseEnter={() => setActiveIdx(k)}
-                  onFocus={() => setActiveIdx(k)}
-                  onClick={() => openEstate(k)}
-                >
-                  <i />
-                  <div>
-                    <b>{e.name}</b>
-                    <span>{e.status === 'selling' ? `${e.free} в продаже` : e.status === 'planned' ? 'скоро' : 'проданы'}</span>
-                  </div>
-                </button>
-              )
-            })}
           </div>
         )}
 
+        {zoomedEstate && zoomCta && (
+          <>
+            <button type="button" className="v4-mflow__reset" onClick={resetZoom}>
+              ← Все посёлки
+            </button>
+            <div className="v4-mflow__zoom-cta" aria-live="polite">
+              <div>
+                <p className="v4-mflow__zmeta">{zoomCta.subtitle}</p>
+                <h4>{zoomedEstate.name}</h4>
+              </div>
+              <a className="v4-pik-btn v4-pik-btn--accent" href={zoomCta.primaryHref}>
+                <span>{zoomCta.primaryLabel}</span>
+              </a>
+            </div>
+          </>
+        )}
+
         <div className="v4-mflow__hint">
-          <span>Наведите на посёлок для справки · Нажмите на Динскую, чтобы открыть генплан 36 участков</span>
+          <span>
+            {zoomCta
+              ? zoomCta.hint
+              : 'Наведите на посёлок для справки · Нажмите на пин, чтобы приблизить и выбрать дом или посёлок'}
+          </span>
         </div>
       </div>
 
-      {/* Нижняя белая информационная полоса (по Figma 278-985) */}
       <div className="v4-mflow__strip" aria-live="polite">
         <div className="v4-mflow__sleft">
           <div className="v4-mflow__stitle">
@@ -302,12 +359,7 @@ export function MapGenplanFlow({
               {STATUS_LABEL[cur.status]}
             </span>
           </div>
-          <p className="v4-mflow__smeta">
-            {cur.place}
-            {cur.homes ? ` · ${cur.homes} домов` : ''}
-            {cur.status === 'selling' ? `, ${cur.free} в продаже` : ''}
-            {cur.priceFrom && cur.status === 'selling' ? ` · от ${formatMillions(cur.priceFrom)}` : ''}
-          </p>
+          <p className="v4-mflow__smeta">{curCta.subtitle}</p>
           {cur.types.length > 0 && (
             <div className="v4-mflow__stypes" aria-label="Типы домов в посёлке">
               {cur.types.map((t) => (
@@ -329,15 +381,14 @@ export function MapGenplanFlow({
             </ul>
           )}
           <div className="v4-mflow__scta">
-            {cur.slug === 'dinskaya' ? (
-              <button type="button" className="v4-pik-btn v4-pik-btn--accent" onClick={() => setView('genplan')}>
-                <span>Открыть генплан Динской (36 участков) →</span>
-              </button>
-            ) : (
-              <a className="v4-pik-btn v4-pik-btn--accent" href={cur.href}>
-                <span>Смотреть посёлок →</span>
+            {curCta.secondaryHref && curCta.secondaryLabel && (
+              <a className="v4-pik-btn" href={curCta.secondaryHref}>
+                <span>{curCta.secondaryLabel}</span>
               </a>
             )}
+            <a className="v4-pik-btn v4-pik-btn--accent" href={curCta.primaryHref}>
+              <span>{curCta.primaryLabel}</span>
+            </a>
           </div>
         </div>
       </div>

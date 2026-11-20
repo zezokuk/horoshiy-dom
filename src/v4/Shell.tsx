@@ -48,52 +48,57 @@ export function V4Final({ company, n, context, title = 'Приезжайте', e
 }) {
   const tel = telOf(company.phone)
   return (
-    <section className={`v3-sec v3-final v4-sec v4-final${bg ? ' v4-final--bg' : ''}`} id="pokaz" style={bg ? ({ '--final-bg': `url(${bg})` } as CSSProperties) : undefined}>
-      <span className="v4-ghost" aria-hidden>показ</span>
-      <div className="v3-wrap v3-split v4-head">
-        <div>
-          {n && <p className="v4-num"><b>{n}</b> / Запись на показ</p>}
-          <h2 className="v3-h2" data-move="lines">{title} <em>{em}</em></h2>
-          <p className="v3-lead">{lead ?? 'Покажем дом и посёлок вживую или по видеосвязи, если вы в другом городе. Ответим про участок, документы и ипотеку.'}</p>
-          {!showContacts && (
-            <>
-              <ul className="v3-offices">{(company.offices ?? []).map((o) => <li key={o.title}><b>{o.title}</b><span>{[o.address, o.hours].filter(Boolean).join(' · ')}</span></li>)}</ul>
-              {company.phone && <p className="v3-final__tel">{company.phone}</p>}
-            </>
-          )}
+    <>
+      <section className={`v3-sec v3-final v4-sec v4-final${bg ? ' v4-final--bg' : ''}`} id="pokaz" style={bg ? ({ '--final-bg': `url(${bg})` } as CSSProperties) : undefined}>
+        {!bg && <span className="v4-ghost" aria-hidden>показ</span>}
+        <div className="v3-wrap v3-split v4-head">
+          <div>
+            {n && <p className="v4-num"><b>{n}</b> / Запись на показ</p>}
+            <h2 className="v3-h2" data-move="lines">{title} <em>{em}</em></h2>
+            <p className="v3-lead" data-move="up">{lead ?? 'Покажем дом и посёлок вживую или по видеосвязи, если вы в другом городе. Ответим про участок, документы и ипотеку.'}</p>
+            {!showContacts && (
+              <>
+                <ul className="v3-offices">{(company.offices ?? []).map((o) => <li key={o.title}><b>{o.title}</b><span>{[o.address, o.hours].filter(Boolean).join(' · ')}</span></li>)}</ul>
+                {company.phone && <p className="v3-final__tel">{company.phone}</p>}
+              </>
+            )}
+          </div>
+          <div className="v3-final__form" id="evf-form">
+            <LeadForm light cta="Записаться на показ" target={{ interest: 'buy', context, phone: company.phone }} />
+            <p className="v4-form-trust">Перезвоним в рабочее время, без спама · покажем живой дом или проведём видео-тур</p>
+          </div>
         </div>
-        <div className="v3-final__form" id="evf-form">
-          <LeadForm light cta="Записаться на показ" target={{ interest: 'buy', context, phone: company.phone }} />
-        </div>
-      </div>
+      </section>
 
       {showContacts && (
-        <div className="v3-wrap v4-final__contacts">
-          <div className="v4-final__chead">
-            <span className="v4-ghost v4-ghost--inline" aria-hidden>связь</span>
-            <p className="v4-num">Наши контакты</p>
-            <h3 className="v3-h2 v4-final__ctitle">Наши <em>контакты</em></h3>
-          </div>
-          <div className="v4-contacts">
-            {(company.offices ?? []).map((o) => (
-              <div key={o.title} className="v4-contacts__card" data-move="up">
-                <p className="v4-num">Офис продаж</p>
-                <h4>{o.title}</h4>
-                <p>{o.address}</p>
-                {o.hours && <p className="v3-note">{o.hours}</p>}
-                <a className="v4-types__all" href={mapRoute(o.address)} target="_blank" rel="noreferrer">Маршрут в Яндекс Картах →</a>
+        <section className="v3-sec v4-sec v4-contacts-sec" id="kontakty">
+          <div className="v3-wrap v4-final__contacts">
+            <div className="v4-final__chead">
+              <span className="v4-ghost v4-ghost--inline" aria-hidden>связь</span>
+              <p className="v4-num">Наши контакты</p>
+              <h3 className="v3-h2 v4-final__ctitle" data-move="lines">Наши <em>контакты</em></h3>
+            </div>
+            <div className="v4-contacts">
+              {(company.offices ?? []).map((o) => (
+                <div key={o.title} className="v4-contacts__card" data-move="up">
+                  <p className="v4-num">Офис продаж</p>
+                  <h4>{o.title}</h4>
+                  <p>{o.address}</p>
+                  {o.hours && <p className="v3-note">{o.hours}</p>}
+                  <a className="v4-types__all" href={mapRoute(o.address)} target="_blank" rel="noreferrer">Маршрут в Яндекс Картах →</a>
+                </div>
+              ))}
+              <div className="v4-contacts__card v4-contacts__card--main" data-move="up">
+                <p className="v4-num">Отдел продаж</p>
+                {company.phone && <a className="v4-contacts__tel" href={tel ? `tel:${tel}` : undefined}>{company.phone}</a>}
+                {company.email && <p><a href={`mailto:${company.email}`}>{company.email}</a></p>}
+                {company.telegram && <p><a href={company.telegram} target="_blank" rel="noreferrer">Telegram-канал →</a></p>}
               </div>
-            ))}
-            <div className="v4-contacts__card v4-contacts__card--main" data-move="up">
-              <p className="v4-num">Отдел продаж</p>
-              {company.phone && <a className="v4-contacts__tel" href={tel ? `tel:${tel}` : undefined}>{company.phone}</a>}
-              {company.email && <p><a href={`mailto:${company.email}`}>{company.email}</a></p>}
-              {company.telegram && <p><a href={company.telegram} target="_blank" rel="noreferrer">Telegram-канал →</a></p>}
             </div>
           </div>
-        </div>
+        </section>
       )}
-    </section>
+    </>
   )
 }
 

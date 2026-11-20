@@ -47,8 +47,8 @@ function Head({ n, label, ghost, children, lead }: { n: string; label: string; g
       <span className="v4-ghost" aria-hidden>{ghost.toLowerCase()}</span>
       <div className="v3-wrap v4-head">
         <p className="v4-num">{n ? <><b>{n}</b> / </> : null}{label}</p>
-        <h2 className="v3-h2">{children}</h2>
-        {lead && <p className="v3-lead">{lead}</p>}
+        <h2 className="v3-h2" data-move="lines">{children}</h2>
+        {lead && <p className="v3-lead" data-move="up">{lead}</p>}
       </div>
     </>
   )
@@ -115,6 +115,8 @@ export default async function V4Home() {
       const est = estates.find((x) => x.slug === c.slug)
       const tNames = (est ? typesByEstate.get(est.id) : undefined) ?? []
       tNames.sort((a, b) => (Number(a.match(/\d+/)?.[0]) || 99) - (Number(b.match(/\d+/)?.[0]) || 99))
+      const freeMine = est ? houses.filter((h) => estateOf(h) === est.id && h.status === 'free') : []
+      const single = c.status === 'selling' && c.free === 1 && c.slug !== 'dinskaya' && freeMine[0] ? freeMine[0] : undefined
       return {
         slug: c.slug,
         name: c.name,
@@ -130,13 +132,18 @@ export default async function V4Home() {
         cover: c.coverCard || c.cover,
         types: tNames,
         nearby: nearby.get(c.slug) ?? [],
+        singleHouse: single
+          ? {
+              code: single.code,
+              title: single.title,
+              area: single.area,
+              plot: single.plot ?? null,
+              price: single.price,
+              href: `/v4/dom/${single.code}`,
+            }
+          : undefined,
       }
     })
-
-  const dinskayaEstate = estates.find((e) => e.slug === 'dinskaya')
-  const dinskayaHouses = dinskayaEstate
-    ? houses.filter((h) => estateOf(h) === dinskayaEstate.id).map(houseView)
-    : []
 
   // Рассказ про компанию внутри дома (Figma 278-829): включается сразу при въезде в дверь без лишнего пустого кадра
   const tip5 = projects.find((p) => p.slug === 'tip-5')
@@ -208,7 +215,7 @@ export default async function V4Home() {
       {faqLd(faq as typeof company.faq) && <JsonLd data={faqLd(faq as typeof company.faq)!} />}
       <V4Bar phone={company.phone} />
 
-      <MotionRoot smooth={false}>
+      <MotionRoot>
         <V4Motion />
 
         {/* 1 → 2 → 3 в одном sticky-контейнере: Ночь/Утро → 3D-дом («О нас» + 4 учредителя) → въезд в дверь + пролётка «про нас» */}
@@ -240,20 +247,20 @@ export default async function V4Home() {
           </section>
         )}
 
-        {/* 5. Карта посёлков + Спутниковый генплан Динской 36 участков (Figma 278-948..1246) */}
+        {/* 5. Карта посёлков (наведение → справка, клик → приближение → Смотреть посёлок) */}
         {flowEstates.length > 0 && (
-          <section className="v3-sec v4-sec v4-sec--map" id="karta">
+          <section className="v3-sec v3-sec--mist v4-sec v4-sec--map" id="karta">
             <span id="poselki" />
             <Head
               n="05"
-              label="Посёлки и генплан"
+              label="Посёлки на карте"
               ghost="карта"
-              lead="Наведите на посёлок для справки или сразу переключитесь на спутниковый генплан Динской (36 участков)."
+              lead="Наведите на посёлок для справки, нажмите — карта приблизится, и откройте страницу посёлка с генпланом и типами домов."
             >
-              Выбрать дом <em>на карте</em>
+              Выбрать посёлок <em>на карте</em>
             </Head>
-            <div className="v3-wrap">
-              <MapGenplanFlow estates={flowEstates} dinskayaHouses={dinskayaHouses} family={fam} />
+            <div className="v3-wrap" data-move="up">
+              <MapGenplanFlow estates={flowEstates} />
             </div>
           </section>
         )}
@@ -268,7 +275,7 @@ export default async function V4Home() {
           >
             Ипотека <em>на дом</em>
           </Head>
-          <div className="v3-wrap">
+          <div className="v3-wrap" data-move="up">
             {mortHouses.length > 0 && <Mortgage houses={mortHouses} family={fam} />}
             <div className="v4-mort-more">
               <a className="v4-pik-btn" href="/v4/ipoteka">Все программы, 5 шагов сделки и частые вопросы →</a>
@@ -277,8 +284,8 @@ export default async function V4Home() {
           </div>
         </section>
 
-        {/* 7. Показ + 3 карточки контактов + Футер (Figma 278-1658, 278-1791) */}
-        <V4Final company={company} n="07" context="Главная v4: запись на показ" showContacts />
+        {/* 7. Вечерний финал (рифма к рассвету, как в коммерческом визуале Клода) + 3 карточки контактов + Футер */}
+        <V4Final company={company} n="07" context="Главная v4: запись на показ" bg={v4img('И4')?.src ?? '/design/hero-morning.webp'} showContacts />
         <V4Footer since={company.since} />
       </MotionRoot>
       <StickyCta phone={company.phone} />
