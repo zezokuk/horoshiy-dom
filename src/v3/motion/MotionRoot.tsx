@@ -174,23 +174,21 @@ export function MotionRoot({ children, smooth = true }: { children: ReactNode; s
       })
     }, el)
 
-    // 5. «Строки поднимаются» — запускаем ровно один раз после готовности шрифтов, чтобы переносы строк не ломались
+    // 5. «Строки поднимаются» — надёжная анимация появления заголовков без ломких масок SplitText
     let linesCtx: gsap.Context | null = null
     const armLines = () => {
       if (dead || reduced) return
       linesCtx = gsap.context(() => {
         gsap.utils.toArray<HTMLElement>('[data-move="lines"]').forEach((node) => {
-          const split = SplitText.create(node, { type: 'lines', mask: 'lines', linesClass: 'v3-line' })
-          splits.push(split)
           gsap.fromTo(
-            split.lines,
-            { yPercent: 105 },
+            node,
+            { opacity: 0, y: 24 },
             {
-              yPercent: 0,
+              opacity: 1,
+              y: 0,
               duration: 0.72,
-              stagger: 0.08,
               ease: 'power3.out',
-              scrollTrigger: { trigger: node, start: 'top 88%', once: true },
+              scrollTrigger: { trigger: node, start: 'top 90%', once: true },
             },
           )
         })

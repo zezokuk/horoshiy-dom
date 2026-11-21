@@ -78,6 +78,8 @@ export function HouseStory3D({
   const walkLayerRef = useRef<HTMLDivElement>(null)
   const walkExitRef = useRef<HTMLDivElement>(null)
   const footHintRef = useRef<HTMLSpanElement>(null)
+  const footBtnRef = useRef<HTMLAnchorElement>(null)
+  const scrollCueRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   const advRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -122,6 +124,12 @@ export function HouseStory3D({
     const fine = window.matchMedia('(pointer: fine)').matches
     if (videoRef.current && walkVideo) {
       videoRef.current.src = wide ? walkVideo.src : (walkVideo.phone ?? walkVideo.src)
+      videoRef.current.load()
+      videoRef.current.addEventListener('loadedmetadata', () => {
+        if (videoRef.current) {
+          try { videoRef.current.currentTime = 0.05 } catch { /* ignore */ }
+        }
+      }, { once: true })
     }
 
     let targetP = 0
@@ -277,6 +285,7 @@ export function HouseStory3D({
         if (aboutLayerRef.current) {
           aboutLayerRef.current.style.opacity = aboutOp.toFixed(3)
           aboutLayerRef.current.style.pointerEvents = aboutOp > 0.25 ? 'auto' : 'none'
+          aboutLayerRef.current.style.visibility = aboutOp > 0.005 ? 'visible' : 'hidden'
         }
         if (aboutOp > 0.01) {
           advRefs.current.forEach((card, k) => {
@@ -298,6 +307,7 @@ export function HouseStory3D({
         if (teamLayerRef.current) {
           teamLayerRef.current.style.opacity = teamOp.toFixed(3)
           teamLayerRef.current.style.pointerEvents = teamOp > 0.25 ? 'auto' : 'none'
+          teamLayerRef.current.style.visibility = teamOp > 0.005 ? 'visible' : 'hidden'
         }
         if (teamOp > 0.01) {
           founderRefs.current.forEach((fc, k) => {
@@ -347,6 +357,23 @@ export function HouseStory3D({
         footHintRef.current.style.opacity = band(curP, 0.12, 0.17, 0.43, 0.49).toFixed(3)
       }
 
+      // Мотивация для скролла снизу видна ТОЛЬКО на первом экране, плавно уходит при начале скролла (правка 5)
+      if (changedP && scrollCueRef.current) {
+        const cueFade = 1 - smooth(0.005, 0.055, curP)
+        scrollCueRef.current.style.opacity = cueFade.toFixed(3)
+        scrollCueRef.current.style.transform = `translate3d(-50%, ${(smooth(0.0, 0.055, curP) * 16).toFixed(1)}px, 0)`
+        scrollCueRef.current.style.pointerEvents = cueFade > 0.15 ? 'auto' : 'none'
+        scrollCueRef.current.style.visibility = cueFade > 0.005 ? 'visible' : 'hidden'
+      }
+
+      // Кнопка «К выбору дома ↓» появляется со 2-го экрана (3D / «О нас», со 2-го экрана, правка 5)
+      if (changedP && footBtnRef.current) {
+        const btnOp = smooth(0.065, 0.125, curP)
+        footBtnRef.current.style.opacity = btnOp.toFixed(3)
+        footBtnRef.current.style.pointerEvents = btnOp > 0.3 ? 'auto' : 'none'
+        footBtnRef.current.style.visibility = btnOp > 0.005 ? 'visible' : 'hidden'
+      }
+
       // Плавная интерполяция видео на пролётке
       if (walkOp > 0.01 && hasVid && vid && targetVidTime >= 0) {
         const vidAlpha = 1 - Math.exp(-7.5 * dt)
@@ -361,6 +388,7 @@ export function HouseStory3D({
         if (walkLayerRef.current) {
           walkLayerRef.current.style.opacity = walkOp.toFixed(3)
           walkLayerRef.current.style.pointerEvents = walkOp > 0.25 ? 'auto' : 'none'
+          walkLayerRef.current.style.visibility = walkOp > 0.005 ? 'visible' : 'hidden'
         }
 
         if (walkOp > 0.01) {
@@ -605,7 +633,7 @@ export function HouseStory3D({
                 key={r.title}
                 ref={(el) => { cardRefs.current[idx] = el }}
                 className="v4-walk__card"
-                style={{ opacity: idx === 0 ? 1 : 0, visibility: idx === 0 ? 'visible' : 'hidden' }}
+                style={{ opacity: 0, visibility: 'hidden' }}
               >
                 <h3>{r.title}{r.area && <small> · {r.area}</small>}</h3>
                 <p>{r.text}</p>
@@ -619,9 +647,38 @@ export function HouseStory3D({
           <div ref={walkExitRef} className="v4-walk__exit" aria-hidden />
         </div>
 
+        {/* Мотивация для скролла снизу на первом экране (правка 5) */}
+        <div
+          ref={scrollCueRef}
+          className="v4-hero__scroll-cue"
+          onClick={() => {
+            const el = document.getElementById('o-nas-3d')
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth' })
+            } else {
+              window.scrollBy({ top: window.innerHeight * 0.92, behavior: 'smooth' })
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Листайте вниз к знакомству с домом"
+        >
+          <span className="v4-hero__scroll-mouse" aria-hidden="true">
+            <i className="v4-hero__scroll-wheel" />
+          </span>
+          <span className="v4-hero__scroll-txt">Листайте вниз</span>
+          <span className="v4-hero__scroll-arrow" aria-hidden="true">↓</span>
+        </div>
+
         <div className="v4-story3d__foot">
           <span ref={footHintRef} style={{ opacity: 0 }}>Поведите мышью — 3D-дом откликается</span>
-          <a href="#tipy">К выбору дома ↓</a>
+          <a
+            ref={footBtnRef}
+            href="#tipy"
+            style={{ opacity: fallback ? 1 : 0, visibility: fallback ? 'visible' : 'hidden', pointerEvents: fallback ? 'auto' : 'none' }}
+          >
+            К выбору дома ↓
+          </a>
         </div>
       </div>
     </section>

@@ -42,6 +42,19 @@ export function Mortgage({ houses, family }: { houses: MortgageHouse[]; family: 
           {houses.map((h) => <option key={h.code} value={h.code}>{h.label} — {mln(h.price)}</option>)}
         </select>
         <label htmlFor="v4-mort-down">Первый взнос: <b>{down} %</b> · {rub(price * down / 100)}</label>
+        <div className="v4-mort__presets" role="group" aria-label="Быстрый выбор первого взноса">
+          {[20, 30, 50, 70].map((pct) => (
+            <button
+              key={pct}
+              type="button"
+              className={`v4-mort__preset${down === Math.max(need, pct) ? ' is-active' : ''}`}
+              disabled={pct < need}
+              onClick={() => { setShare(pct); trackCalc() }}
+            >
+              {pct}%
+            </button>
+          ))}
+        </div>
         <input id="v4-mort-down" type="range" min={need} max={90} step={1} value={down} onChange={(e) => { setShare(Number(e.target.value)); trackCalc() }} />
         <p className="v3-note">
           {need > family.minDown
@@ -57,6 +70,10 @@ export function Mortgage({ houses, family }: { houses: MortgageHouse[]; family: 
           <div><dt>Ставка</dt><dd>{family.rate.toLocaleString('ru-RU')} %</dd></div>
           <div><dt>Срок</dt><dd>{family.years} лет</dd></div>
         </dl>
+        <a href="#evf-form" className="v4-mort__cta">
+          <span>Одобрить эту ипотеку</span>
+          <span aria-hidden>→</span>
+        </a>
         <p className="v3-note">Расчёт по семейной ипотеке, прикидка. Ставку и одобрение подбирает банк — менеджер поможет с программой и документами.</p>
       </div>
     </div>

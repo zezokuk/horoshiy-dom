@@ -33,6 +33,7 @@ export function HomeTypeShowcase({ types }: { types: ShowcaseType[] }) {
   const [bedrooms, setBedrooms] = useState<number | 'all'>('all')
   const [storey, setStorey] = useState<StoreyFilter>('all')
   const [onlyAvailable, setOnlyAvailable] = useState<boolean>(false)
+  const [zoomPlan, setZoomPlan] = useState<boolean>(false)
 
   const matchingSlugs = useMemo(() => {
     return new Set(
@@ -185,10 +186,20 @@ export function HomeTypeShowcase({ types }: { types: ShowcaseType[] }) {
           <figcaption>Изображение проекта</figcaption>
         </figure>
 
-        <div className="v4-ts__plan">
+        <div
+          className={`v4-ts__plan${active.plan ? ' v4-ts__plan--clickable' : ''}`}
+          onClick={() => active.plan && setZoomPlan(true)}
+          role={active.plan ? 'button' : undefined}
+          tabIndex={active.plan ? 0 : undefined}
+          onKeyDown={(e) => e.key === 'Enter' && active.plan && setZoomPlan(true)}
+          title={active.plan ? 'Нажмите, чтобы развернуть планировку' : undefined}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {active.plan ? (
-            <img src={active.plan} alt={`Планировка «${active.name}»`} loading="lazy" />
+            <>
+              <img src={active.plan} alt={`Планировка «${active.name}»`} loading="lazy" />
+              <span className="v4-ts__plan-zoom-hint" aria-hidden>🔍 Увеличить планировку</span>
+            </>
           ) : (
             <span className="v3-card__noimg">Планировка скоро</span>
           )}
@@ -227,6 +238,24 @@ export function HomeTypeShowcase({ types }: { types: ShowcaseType[] }) {
           </div>
         </div>
       </article>
+
+      {/* Модальное окно с детальной планировкой */}
+      {zoomPlan && active.plan && (
+        <div className="v4-plan-modal" onClick={() => setZoomPlan(false)} role="dialog" aria-modal="true" aria-label={`Планировка ${active.name}`}>
+          <div className="v4-plan-modal__content" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="v4-plan-modal__close" onClick={() => setZoomPlan(false)} aria-label="Закрыть">
+              ✕
+            </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={active.plan} alt={`Планировка «${active.name}»`} />
+            <div className="v4-plan-modal__caption">
+              <h4>{active.name}</h4>
+              <p>{specs} {active.fromPrice ? ` · от ${formatMillions(active.fromPrice)}` : ''}</p>
+              <a className="v4-pik-btn v4-pik-btn--accent" href={active.href}>Смотреть страницу проекта →</a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
