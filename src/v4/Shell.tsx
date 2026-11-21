@@ -41,7 +41,7 @@ export function V4Bar({ phone, always = false, home = '/v4' }: { phone?: string 
 
 const mapRoute = (address: string) => `https://yandex.ru/maps/?text=${encodeURIComponent(address)}`
 
-/** Финал: «Приезжайте на показ» — форма, офисы (опционально карточками как в Figma), телефон. */
+/** Финал: с фоном — кубанский вечерний закат со светящимися окнами + форма и контакты. */
 export function V4Final({ company, n, context, title = 'Приезжайте', em = 'на показ', lead, bg, showContacts = false }: {
   company: Company; n?: string; context: string; title?: string; em?: string; lead?: string
   bg?: string; showContacts?: boolean
@@ -49,25 +49,79 @@ export function V4Final({ company, n, context, title = 'Приезжайте', e
   const tel = telOf(company.phone)
   return (
     <>
-      <section className={`v3-sec v3-final v4-sec v4-final${bg ? ' v4-final--bg' : ''}`} id="pokaz" style={bg ? ({ '--final-bg': `url(${bg})` } as CSSProperties) : undefined}>
-        {!bg && <span className="v4-ghost" aria-hidden>показ</span>}
-        <div className="v3-wrap v3-split v4-head">
-          <div>
-            {n && <p className="v4-num"><b>{n}</b> / Запись на показ</p>}
-            <h2 className="v3-h2" data-move="lines">{title} <em>{em}</em></h2>
-            <p className="v3-lead" data-move="up">{lead ?? 'Покажем дом и посёлок вживую или по видеосвязи, если вы в другом городе. Ответим про участок, документы и ипотеку.'}</p>
-            {!showContacts && (
-              <>
-                <ul className="v3-offices">{(company.offices ?? []).map((o) => <li key={o.title}><b>{o.title}</b><span>{[o.address, o.hours].filter(Boolean).join(' · ')}</span></li>)}</ul>
-                {company.phone && <p className="v3-final__tel">{company.phone}</p>}
-              </>
-            )}
+      <section className={`v3-sec v3-final v4-sec v4-final${bg ? ' v4-final--cinema' : ''}`} id="pokaz">
+        {!bg ? (
+          <>
+            <span className="v4-ghost" aria-hidden>показ</span>
+            <div className="v3-wrap v3-split v4-head">
+              <div>
+                {n && <p className="v4-num"><b>{n}</b> / Запись на показ</p>}
+                <h2 className="v3-h2" data-move="lines">{title} <em>{em}</em></h2>
+                <p className="v3-lead" data-move="up">{lead ?? 'Покажем дом и посёлок вживую или по видеосвязи, если вы в другом городе. Ответим про участок, документы и ипотеку.'}</p>
+                {!showContacts && (
+                  <>
+                    <ul className="v3-offices">{(company.offices ?? []).map((o) => <li key={o.title}><b>{o.title}</b><span>{[o.address, o.hours].filter(Boolean).join(' · ')}</span></li>)}</ul>
+                    {company.phone && <p className="v3-final__tel">{company.phone}</p>}
+                  </>
+                )}
+              </div>
+              <div className="v3-final__form" id="evf-form">
+                <LeadForm light cta="Записаться на показ" target={{ interest: 'buy', context, phone: company.phone }} />
+                <p className="v4-form-trust">Перезвоним в рабочее время, без спама · покажем живой дом или проведём видео-тур</p>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="evf evf--css v4-final__cinema">
+            <div className="evf__pane v4-final__pane">
+              <div className="evf__frame v4-final__frame" aria-hidden>
+                <picture>
+                  <source media="(max-width: 759px)" srcSet="/design/hero-morning-phone.webp" />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={bg} alt="" loading="lazy" decoding="async" />
+                </picture>
+                <i className="evf__dim v4-final__dim" />
+                <i className="evf__sky v4-final__sky" />
+                <i className="v4-final__sun-glow" />
+                <i className="evf__win evf__win--l" />
+                <i className="evf__win evf__win--door" />
+                <i className="evf__win evf__win--r" />
+                <i className="evf__spill" />
+              </div>
+              <i className="evf__scrim v4-final__scrim" aria-hidden />
+              <div className="evf__copy v4-final__copy">
+                <p className="v4-final__eyebrow">{n ? <><b>{n}</b> / </> : null}Вечер в своём доме · Кубань</p>
+                <h2 className="v3-h2 v4-final__hero-h2" data-move="lines">
+                  {title === 'Приезжайте' ? <>Ваша история <em>начинается здесь</em></> : <>{title} <em>{em}</em></>}
+                </h2>
+              </div>
+            </div>
+
+            <div className="v3-wrap v3-split v4-head v4-final__panel">
+              <div className="v4-final__left">
+                <p className="v3-lead" data-move="up">
+                  {lead ?? 'Выберите готовый дом — мы покажем его вживую на закате, когда в посёлке зажигаются окна, или проведём видео-тур и ответим на вопросы по участку, документам и ипотеке.'}
+                </p>
+                <div className="v4-final__badges">
+                  <span>Готовые дома с участком</span>
+                  <span>Семейная ипотека 6%</span>
+                  <span>Гарантия 5 лет</span>
+                </div>
+                {!showContacts && (
+                  <>
+                    <ul className="v3-offices">{(company.offices ?? []).map((o) => <li key={o.title}><b>{o.title}</b><span>{[o.address, o.hours].filter(Boolean).join(' · ')}</span></li>)}</ul>
+                    {company.phone && <p className="v3-final__tel">{company.phone}</p>}
+                  </>
+                )}
+              </div>
+              <div className="v3-final__form" id="evf-form">
+                <p className="v4-final__form-title">Записаться на показ дома</p>
+                <LeadForm light cta="Записаться на показ" target={{ interest: 'buy', context, phone: company.phone }} />
+                <p className="v4-form-trust">Перезвоним в рабочее время, без спама · покажем живой дом или проведём видео-тур</p>
+              </div>
+            </div>
           </div>
-          <div className="v3-final__form" id="evf-form">
-            <LeadForm light cta="Записаться на показ" target={{ interest: 'buy', context, phone: company.phone }} />
-            <p className="v4-form-trust">Перезвоним в рабочее время, без спама · покажем живой дом или проведём видео-тур</p>
-          </div>
-        </div>
+        )}
       </section>
 
       {showContacts && (

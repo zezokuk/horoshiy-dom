@@ -70,6 +70,7 @@ export function HouseStory3D({
   const canvasRef = useRef<HTMLDivElement>(null)
   const heroLayerRef = useRef<HTMLDivElement>(null)
   const nightLayerRef = useRef<HTMLDivElement>(null)
+  const sunriseRef = useRef<HTMLDivElement>(null)
   const heroCopyRef = useRef<HTMLDivElement>(null)
   const vignetteRef = useRef<HTMLDivElement>(null)
   const aboutLayerRef = useRef<HTMLDivElement>(null)
@@ -162,7 +163,7 @@ export function HouseStory3D({
       root.classList.toggle('past-hero', window.scrollY > window.innerHeight * 0.35 || targetP > 0.06)
     }
 
-    // Падает звезда (0.5..2.3с), зажигаются тёплые окна (1.7с), затем мягкий рассвет (3.6..6.4с)
+    // Падает звезда (0.45..2.5с), зажигаются тёплые окна (1.7с), затем мягкий рассвет (3.6..6.4с)
     const dawnTimer = window.setTimeout(() => {
       const t0 = performance.now()
       const step = (t: number) => {
@@ -172,9 +173,15 @@ export function HouseStory3D({
           dayFlag = true
           setIsDay(true)
         }
+        const dawnP = Math.max(autoDawn, clamp01(targetP / 0.055))
         if (nightLayerRef.current) {
-          const dawnP = Math.max(autoDawn, clamp01(targetP / 0.06))
           nightLayerRef.current.style.opacity = String(1 - dawnP)
+          nightLayerRef.current.style.setProperty('--dawn', dawnP.toFixed(3))
+        }
+        if (sunriseRef.current) {
+          const sunWave = Math.sin(clamp01(dawnP) * Math.PI)
+          sunriseRef.current.style.opacity = (sunWave * 0.92).toFixed(3)
+          sunriseRef.current.style.setProperty('--dawn', dawnP.toFixed(3))
         }
         if (k < 1) autoRaf = requestAnimationFrame(step)
       }
@@ -215,7 +222,7 @@ export function HouseStory3D({
       const dt = Math.min(0.05, Math.max(0.004, (now - lastFrameT) / 1000))
       lastFrameT = now
 
-      const speed = curP > 0.48 ? 4.4 : 6.2
+      const speed = curP > 0.47 ? 3.5 : 5.8
       const alpha = 1 - Math.exp(-speed * dt)
       const nextP = curP < 0 ? targetP : curP + (targetP - curP) * alpha
       const diffP = Math.abs(targetP - nextP)
@@ -236,6 +243,12 @@ export function HouseStory3D({
       }
       if (nightLayerRef.current) {
         nightLayerRef.current.style.opacity = (1 - dawnP).toFixed(3)
+        nightLayerRef.current.style.setProperty('--dawn', dawnP.toFixed(3))
+      }
+      if (sunriseRef.current) {
+        const sunWave = Math.sin(clamp01(dawnP) * Math.PI)
+        sunriseRef.current.style.opacity = (sunWave * 0.92).toFixed(3)
+        sunriseRef.current.style.setProperty('--dawn', dawnP.toFixed(3))
       }
 
       const walkOp = smooth(0.49, 0.535, curP)
@@ -259,20 +272,19 @@ export function HouseStory3D({
       }
 
       if (changedP) {
-        // 1 -> 2: Кинематографичный переход в 3D (тёплая радиальная дымка растворяет пейзаж вокруг дома)
-        const morphP = smooth(0.01, 0.135, curP)
-        const heroFade = 1 - smooth(0.045, 0.14, curP)
+        // 1 -> 2: Дом остаётся строго на том же месте и уровне без скейла (1:1 совпадение с 3D-домом)
+        const heroFade = 1 - smooth(0.015, 0.08, curP)
         if (heroLayerRef.current) {
           heroLayerRef.current.style.opacity = heroFade.toFixed(3)
-          heroLayerRef.current.style.transform = `scale(${(1 + morphP * 0.035).toFixed(4)})`
+          heroLayerRef.current.style.transform = 'none'
           heroLayerRef.current.style.pointerEvents = heroFade > 0.25 ? 'auto' : 'none'
         }
         if (vignetteRef.current) {
-          const ring = smooth(0.005, 0.11, curP)
+          const ring = smooth(0.005, 0.075, curP)
           vignetteRef.current.style.opacity = ring.toFixed(3)
           const inner = Math.round(62 - ring * 34)
           const outer = Math.round(95 - ring * 38)
-          vignetteRef.current.style.background = `radial-gradient(ellipse at 50% 64%, rgba(235,227,214,0) ${inner}%, rgba(235,227,214,0.96) ${outer}%, #ebe3d6 100%)`
+          vignetteRef.current.style.background = `radial-gradient(ellipse at 54% 66%, rgba(247,246,241,0) ${inner}%, rgba(247,246,241,0.96) ${outer}%, #f7f6f1 100%)`
         }
         if (heroCopyRef.current) {
           const copyFade = 1 - smooth(0.0, 0.075, curP)
@@ -323,27 +335,28 @@ export function HouseStory3D({
         }
       }
 
-      // 3D-рендер с живым mouse-parallax и точным въездом в входную дверь
+      // Дневной 3D-рендер с точным 1:1 выравниванием уровня 2D→3D, ландшафтом и въездом в входную дверь
       if (changed3d && curP < 0.56) {
-        const settle2 = smooth(0.015, 0.14, curP)
-        const turnRight = band(curP, 0.11, 0.19, 0.25, 0.32)
+        const settle2 = smooth(0.055, 0.165, curP)
+        const turnRight = band(curP, 0.10, 0.18, 0.25, 0.32)
         const turnLeft = band(curP, 0.30, 0.365, 0.41, 0.46)
         const doorAlign = smooth(0.425, 0.485, curP)
         const doorEnter = smooth(0.445, 0.525, curP)
-        const mouseWeight = (1 - doorAlign) * smooth(0.06, 0.14, curP)
+        const mouseWeight = (1 - doorAlign) * smooth(0.08, 0.16, curP)
 
-        const yaw = (turnRight * 0.52 - turnLeft * 0.36) * (1 - doorAlign) + curMx * 0.075 * mouseWeight
+        const yaw = (turnRight * 0.48 - turnLeft * 0.34) * (1 - doorAlign) + curMx * 0.07 * mouseWeight
         handles.pivot.rotation.y = yaw
 
-        const baseDist = 26.2 + settle2 * 1.4 - turnRight * 0.4 + turnLeft * 0.5
+        const baseDist = 29.7 - settle2 * 1.5 - turnRight * 0.3 + turnLeft * 0.4
         const camZ = baseDist * (1 - doorEnter) + (TYPE5_DOOR.z + 0.34) * doorEnter
-        const orbitX = (turnRight * 1.1 - turnLeft * 0.9) * (1 - doorAlign) + curMx * 0.55 * mouseWeight
-        const camX = orbitX + TYPE5_DOOR.x * doorAlign
-        const baseY = 2.65 + settle2 * 0.95 + turnRight * 0.35 - curMy * 0.35 * mouseWeight
+        const initX = -1.1 * (1 - settle2)
+        const orbitX = initX + (turnRight * 0.95 - turnLeft * 0.85) * (1 - doorAlign) + curMx * 0.5 * mouseWeight
+        const camX = orbitX * (1 - doorAlign) + TYPE5_DOOR.x * doorAlign
+        const baseY = 2.2 + settle2 * 1.35 + turnRight * 0.3 - curMy * 0.32 * mouseWeight
         const camY = baseY * (1 - doorAlign) + (TYPE5_DOOR.y + 0.04) * doorAlign
 
-        const lookX = TYPE5_DOOR.x * doorAlign
-        const lookY = (2.85 - settle2 * 0.45) * (1 - doorAlign) + TYPE5_DOOR.y * doorAlign
+        const lookX = initX * (1 - doorAlign) + TYPE5_DOOR.x * doorAlign
+        const lookY = (5.73 - settle2 * 3.25) * (1 - doorAlign) + TYPE5_DOOR.y * doorAlign
         const lookZ = (TYPE5_DOOR.z - 0.8) * doorEnter
 
         handles.camera.position.set(camX, camY, camZ)
@@ -475,7 +488,9 @@ export function HouseStory3D({
       <span id="zachem" className="v4-story3d__anchor-walk" />
 
       <div className="v4-story3d__pin">
-        <div className="v4-story3d__bg" aria-hidden />
+        <div className="v4-story3d__bg" aria-hidden>
+          <div className="v4-story3d__bg-day" />
+        </div>
 
         <div ref={canvasRef} className="v4-story3d__canvas" />
         {(!loaded || fallback) && (
@@ -485,16 +500,19 @@ export function HouseStory3D({
           </div>
         )}
 
-        {/* Слой 1: Первый экран (Ночь → яркая звезда → тёплые окна → утро → мягкая белая дымка в 3D) */}
+        {/* Слой 1: Первый экран (Ночь → звезда за крышей → тёплые окна → солнечный рассвет → мягкий вход в 3D) */}
         <div ref={heroLayerRef} className="v4-story3d__hero">
           <div className="v4-story3d__day">
             <Pic src="/design/hero-morning.webp" phone="/design/hero-morning-phone.webp" alt="Кирпичный дом «Тип 5» утром" priority />
           </div>
+          <div ref={sunriseRef} className="v4-hero__sunrise" aria-hidden />
           <div ref={nightLayerRef} className={`hn__night${nightSrc ? '' : ' hn__night--css'}`} aria-hidden>
             <Pic src={nightSrc ?? '/design/hero-morning.webp'} phone={nightPhone ?? (nightSrc ? undefined : '/design/hero-morning-phone.webp')} alt="" />
             <i className="hn__windows v4-hero__lights" />
-            <i className="hn__stars" />
-            <i className="hn__star" />
+            <div className="v4-hero__sky-mask">
+              <i className="hn__stars" />
+              <i className="hn__star" />
+            </div>
           </div>
           <i className="hn__scrim" aria-hidden />
           <div ref={vignetteRef} className="v4-story3d__vignette" aria-hidden />
@@ -568,7 +586,14 @@ export function HouseStory3D({
             <div className="v4-founders v4-founders--compact">
               {FOUNDERS.map((f, idx) => (
                 <article key={f.id} ref={(el) => { founderRefs.current[idx] = el }} className="v4-founder-card">
-                  <div className="v4-founder-card__ava" aria-hidden>{f.initials}</div>
+                  <div className="v4-founder-card__ava" aria-hidden>
+                    {f.photo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={f.photo} alt="" loading="lazy" />
+                    ) : (
+                      f.initials
+                    )}
+                  </div>
                   <div>
                     <h3>{f.name}</h3>
                     <p className="v4-founder-card__role">{f.role}</p>

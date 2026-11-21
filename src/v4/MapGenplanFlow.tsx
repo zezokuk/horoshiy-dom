@@ -289,7 +289,7 @@ export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
               }
             >
               <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="v4-mflow__river" aria-hidden>
-                <path d="M-2,52 C22,48 40,54 62,50 C80,46 92,52 104,49" fill="none" stroke="#c5d7e0" strokeWidth="1.6" />
+                <path d="M-2,52 C22,48 40,54 62,50 C80,46 92,52 104,49" fill="none" stroke="rgba(235, 224, 204, 0.42)" strokeWidth="1.6" />
                 <ellipse cx="44" cy="46" rx="10" ry="7" fill="rgba(255,255,255,0.22)" />
                 <text x="44" y="46.8" textAnchor="middle" fill="rgba(255,255,255,0.88)" fontSize="3.2" fontWeight="600">
                   Краснодар

@@ -49,12 +49,12 @@ export function V4Motion() {
         )
       })
 
-      // 3. Мягкий вход вечернего финала (рифма к рассвету)
-      const finalSec = document.querySelector<HTMLElement>('.v4-final--bg')
+      // 3. Мягкий наезд закатного финала (рифма к рассвету)
+      const finalSec = document.querySelector<HTMLElement>('.v4-final__cinema')
       if (finalSec) {
         gsap.fromTo(
           finalSec,
-          { '--final-zoom': 1.08 } as gsap.TweenVars,
+          { '--final-zoom': 1.07 } as gsap.TweenVars,
           {
             '--final-zoom': 1,
             ease: 'none',

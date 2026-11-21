@@ -50,7 +50,7 @@ async function run(browser, tag, opts) {
   })
   if (!opts.reducedMotion) ok(`${tag}: звезда раньше названия`, order.star < order.name, JSON.stringify(order))
   ok(`${tag}: автослайдер на первом экране убран`, !order.navSlider)
-  ok(`${tag}: тёплый архитектурный фон`, order.bg === 'rgb(243, 237, 227)', order.bg)
+  ok(`${tag}: свежий светлый архитектурный фон`, order.bg === 'rgb(250, 249, 245)', order.bg)
   ok(`${tag}: нет горизонтальной прокрутки`, (await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 0)
 
   if (SHOTS && !opts.reducedMotion) {

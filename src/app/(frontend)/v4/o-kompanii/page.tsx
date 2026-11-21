@@ -59,7 +59,14 @@ export default async function V4About() {
           <div className="v3-wrap v4-founders" style={{ marginTop: 28 }}>
             {FOUNDERS.map((person) => (
               <article key={person.id} className="v4-founder-card" data-move="up">
-                <div className="v4-founder-card__ava" aria-hidden>{person.initials}</div>
+                <div className="v4-founder-card__ava" aria-hidden>
+                  {person.photo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={person.photo} alt="" loading="lazy" />
+                  ) : (
+                    person.initials
+                  )}
+                </div>
                 <div>
                   <h3>{person.name}</h3>
                   <p className="v4-founder-card__role">{person.role}</p>

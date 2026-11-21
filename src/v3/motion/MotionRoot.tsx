@@ -15,11 +15,10 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { SplitText } from 'gsap/SplitText'
 import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
 
-gsap.registerPlugin(ScrollTrigger, SplitText)
+gsap.registerPlugin(ScrollTrigger)
 
 type Motion = { gsap: typeof gsap; ScrollTrigger: typeof ScrollTrigger; lenis: Lenis | null; reduced: boolean }
 const MotionContext = createContext<Motion>({ gsap, ScrollTrigger, lenis: null, reduced: false })
@@ -52,7 +51,6 @@ export function MotionRoot({ children, smooth = true }: { children: ReactNode; s
     }
     setState({ gsap, ScrollTrigger, lenis, reduced })
 
-    const splits: SplitText[] = []
     let dead = false
 
     const ctx = gsap.context(() => {
@@ -212,7 +210,6 @@ export function MotionRoot({ children, smooth = true }: { children: ReactNode; s
       dead = true
       clearTimeout(resizeTimer)
       window.removeEventListener('resize', onResize)
-      splits.forEach((s) => s.revert())
       linesCtx?.revert()
       ctx.revert()
       if (tick) gsap.ticker.remove(tick)

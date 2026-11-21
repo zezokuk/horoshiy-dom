@@ -65,7 +65,7 @@ export function createHouseScene(
 
   const scene = new THREE.Scene()
   if (opts.studioFog) {
-    scene.fog = new THREE.Fog('#ebe3d6', 42, 86)
+    scene.fog = new THREE.Fog('#f2efe8', 32, 76)
   }
 
   // Студийная карта окружения (RoomEnvironment) — даёт объём кирпичу и живые блики стёклам и кровле
@@ -98,12 +98,16 @@ export function createHouseScene(
   porchLight.position.set(TYPE5_DOOR.x, 2.55, TYPE5_DOOR.z + 0.5)
   scene.add(porchLight)
 
-  // Контактная мягкая тень на земле под домом
-  const ground = new THREE.Mesh(new THREE.CircleGeometry(24, 48), new THREE.ShadowMaterial({ opacity: 0.16 }))
+  // Контактная мягкая тень на земле поверх газона модели (Y = 0.20 после центрирования)
+  const ground = new THREE.Mesh(new THREE.CircleGeometry(36, 48), new THREE.ShadowMaterial({ opacity: 0.18 }))
   ground.rotation.x = -Math.PI / 2
-  ground.position.y = -0.01
+  ground.position.y = opts.studioFog ? 0.202 : -0.01
   ground.receiveShadow = true
   scene.add(ground)
+
+  if (opts.studioFog) {
+    addKubanLandscape(scene)
+  }
 
   const pivot = new THREE.Group()
   scene.add(pivot)
@@ -252,4 +256,140 @@ export function applyHouseLighting(h: HouseSceneHandles, mode: DayTime) {
       m.emissiveIntensity = 2.8
     })
   }
+}
+
+/** Создаёт кубанский жилой ландшафт вокруг 3D-участка: луг до горизонта, подъезд, туи, деревья и дальние дома. */
+function addKubanLandscape(scene: THREE.Scene) {
+  const g = new THREE.Group()
+
+  // Бесшовный луг вокруг участка ±7.8м (поверхность газона GLB лежит на Y = 0.20)
+  const meadow = new THREE.Mesh(
+    new THREE.RingGeometry(7.72, 76, 64),
+    new THREE.MeshStandardMaterial({ color: '#789458', roughness: 0.96, metalness: 0 }),
+  )
+  meadow.rotation.x = -Math.PI / 2
+  meadow.position.y = 0.19
+  meadow.receiveShadow = true
+  g.add(meadow)
+
+  // Аккуратный светлый бордюр по периметру участка 15.6 × 15.6
+  const curbMat = new THREE.MeshStandardMaterial({ color: '#d8cfc0', roughness: 0.88 })
+  for (const [w, d, x, z] of [
+    [15.9, 0.14, 0, -7.85],
+    [0.14, 15.9, -7.85, 0],
+    [0.14, 15.9, 7.85, 0],
+  ] as const) {
+    const curb = new THREE.Mesh(new THREE.BoxGeometry(w, 0.08, d), curbMat)
+    curb.position.set(x, 0.21, z)
+    curb.receiveShadow = true
+    g.add(curb)
+  }
+
+  // Подъезд к калитке и спокойная улица посёлка перед фасадом
+  const stoneMat = new THREE.MeshStandardMaterial({ color: '#cfc6b6', roughness: 0.9 })
+  const driveway = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.025, 1.5), stoneMat)
+  driveway.position.set(1.15, 0.198, 8.45)
+  driveway.receiveShadow = true
+  g.add(driveway)
+
+  const streetMat = new THREE.MeshStandardMaterial({ color: '#c4bba9', roughness: 0.94 })
+  const street = new THREE.Mesh(new THREE.BoxGeometry(92, 0.02, 2.8), streetMat)
+  street.position.set(0, 0.195, 10.4)
+  street.receiveShadow = true
+  g.add(street)
+
+  const streetCurbMat = new THREE.MeshStandardMaterial({ color: '#ded6c8', roughness: 0.88 })
+  for (const cz of [9.0, 11.8]) {
+    const sc = new THREE.Mesh(new THREE.BoxGeometry(92, 0.05, 0.12), streetCurbMat)
+    sc.position.set(0, 0.205, cz)
+    sc.receiveShadow = true
+    g.add(sc)
+  }
+
+  // Туи и кипарисы по бокам и позади участка
+  const trunkMat = new THREE.MeshStandardMaterial({ color: '#5b4838', roughness: 0.92 })
+  const thujaMats = [
+    new THREE.MeshStandardMaterial({ color: '#436139', roughness: 0.9 }),
+    new THREE.MeshStandardMaterial({ color: '#4f6f43', roughness: 0.9 }),
+  ]
+  const thujas: readonly [number, number, number][] = [
+    [-9.2, -2.0, 2.5],
+    [-9.2, -5.5, 2.7],
+    [9.2, -1.5, 2.4],
+    [9.2, -5.0, 2.8],
+    [8.8, 3.2, 2.2],
+  ]
+  thujas.forEach(([x, z, h], idx) => {
+    const t = new THREE.Group()
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.11, 0.55, 8), trunkMat)
+    trunk.position.y = 0.28
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(0.52, h, 10), thujaMats[idx % thujaMats.length])
+    cone.position.y = 0.45 + h * 0.5
+    cone.castShadow = true
+    cone.receiveShadow = true
+    t.add(trunk, cone)
+    t.position.set(x, 0.19, z)
+    g.add(t)
+  })
+
+  // Лиственные кубанские деревья вокруг участка (мягкое обрамление без плоской 2D-накладки)
+  const leafMats = [
+    new THREE.MeshStandardMaterial({ color: '#5c7b48', roughness: 0.9 }),
+    new THREE.MeshStandardMaterial({ color: '#6b8b54', roughness: 0.9 }),
+    new THREE.MeshStandardMaterial({ color: '#4d6a3c', roughness: 0.92 }),
+  ]
+  const trees: readonly [number, number, number][] = [
+    [-13.5, -6.0, 1.05],
+    [-17.0, 1.5, 0.92],
+    [-11.5, -13.0, 1.15],
+    [13.5, -7.5, 1.08],
+    [16.5, 1.0, 0.95],
+    [11.5, -14.0, 1.18],
+    [0.0, -16.5, 1.1],
+  ]
+  trees.forEach(([x, z, sc], idx) => {
+    const tree = new THREE.Group()
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.26, 1.8, 8), trunkMat)
+    trunk.position.y = 0.9
+    trunk.castShadow = true
+    tree.add(trunk)
+
+    const mat = leafMats[idx % leafMats.length]
+    for (const [px, py, pz, r] of [
+      [0, 2.65, 0, 1.65],
+      [-0.75, 2.35, 0.35, 1.25],
+      [0.72, 2.4, -0.3, 1.3],
+    ] as const) {
+      const crown = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 2), mat)
+      crown.position.set(px, py, pz)
+      crown.castShadow = true
+      crown.receiveShadow = true
+      tree.add(crown)
+    }
+    tree.scale.setScalar(sc)
+    tree.position.set(x, 0.19, z)
+    g.add(tree)
+  })
+
+  // Два мягких силуэта соседских кирпичных домов в утренней дымке
+  const neighborBrick = new THREE.MeshStandardMaterial({ color: '#b57a5e', roughness: 0.88 })
+  const neighborRoof = new THREE.MeshStandardMaterial({ color: '#3e434a', roughness: 0.75 })
+  for (const [nx, nz, rot] of [
+    [-23, -5, 0.08],
+    [23, -4, -0.1],
+  ] as const) {
+    const nb = new THREE.Group()
+    const body = new THREE.Mesh(new THREE.BoxGeometry(8.5, 2.9, 8.5), neighborBrick)
+    body.position.y = 1.45
+    body.receiveShadow = true
+    const roof = new THREE.Mesh(new THREE.ConeGeometry(6.8, 2.3, 4), neighborRoof)
+    roof.rotation.y = Math.PI / 4
+    roof.position.y = 2.9 + 1.15
+    nb.add(body, roof)
+    nb.rotation.y = rot
+    nb.position.set(nx, 0.19, nz)
+    g.add(nb)
+  }
+
+  scene.add(g)
 }

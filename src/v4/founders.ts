@@ -4,7 +4,7 @@ export type Founder = {
   initials: string
   role: string
   quote: string
-  /** Заполняется после подтверждения соотнесения фото с ФИО (файлы уже лежат в public/v4/img/founders/) */
+  /** Единая студийная серия портретов учредителей в public/v4/img/founders/ */
   photo?: string
 }
 
@@ -14,6 +14,7 @@ export const FOUNDERS: Founder[] = [
     name: 'Ивановский Антон Юрьевич',
     initials: 'АИ',
     role: 'Учредитель',
+    photo: '/v4/img/founders/ivanovsky.jpg',
     quote: 'Отвечаем не за одну коробку, а за всю улицу — чтобы через пять лет здесь было так же спокойно, как в день покупки.',
   },
   {
@@ -21,6 +22,7 @@ export const FOUNDERS: Founder[] = [
     name: 'Волков Александр Анатольевич',
     initials: 'АВ',
     role: 'Учредитель',
+    photo: '/v4/img/founders/volkov.jpg',
     quote: 'Хороший дом начинается с ощущения: зашёл на крыльцо, вдохнул воздух — и понял, что возвращаться хочется именно сюда.',
   },
   {
@@ -28,6 +30,7 @@ export const FOUNDERS: Founder[] = [
     name: 'Колтунов Борис Михайлович',
     initials: 'БК',
     role: 'Финансовый директор, соинвестор',
+    photo: '/v4/img/founders/koltunov.jpg',
     quote: 'Цена, статус участка и условия ипотеки на сайте — точно такие же, как у нас на столе в отделе продаж.',
   },
   {
@@ -35,6 +38,7 @@ export const FOUNDERS: Founder[] = [
     name: 'Тлевцежев Бислан Муратович',
     initials: 'БТ',
     role: 'Директор по строительству',
+    photo: '/v4/img/founders/tlevcezhev.jpg',
     quote: 'Кирпич, фундамент, разводка — всё можно увидеть и проверить до сделки. Строим так, как строят для своей семьи.',
   },
 ]
