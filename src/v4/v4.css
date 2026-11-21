@@ -328,20 +328,38 @@ html.past-hero .v4-bar, .v4-bar--always { transform: none }
 @media (max-width: 1024px) { .v4-founders { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
 @media (max-width: 860px) {
   .v4-story3d, .v4-story3d.hn { height: 640vh }
-  .v4-story3d__about { grid-template-columns: 1fr; padding-top: 64px; gap: 10px }
-  .v4-story3d__col-r { justify-self: stretch; width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)) }
-  .v4-story3d__glass-list { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  .v4-story3d__foot { left: 12px; right: 12px; bottom: 76px; justify-content: flex-end }
+  .v4-story3d__foot > span { display: none }
+  .v4-story3d__foot a { white-space: nowrap; padding: 8px 16px; font-size: 12px }
+  .v4-story3d__about { grid-template-columns: 1fr; padding-top: 60px; padding-bottom: 84px; gap: 8px; align-content: center }
+  .v4-story3d__col-l { max-width: none }
+  .v4-story3d__title-box { padding: 11px 14px }
+  .v4-story3d__h2 { font-size: 23px; margin-top: 4px }
+  .v4-story3d__glass-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px }
   .v4-story3d__glass-list .v4-story-card:nth-child(n+3) { display: none }
-  .v4-story-stat { padding: 10px 12px }
-  .v4-story-stat b { font-size: 18px }
+  .v4-story-card { padding: 10px 12px }
+  .v4-story-card b { font-size: 12.5px; margin-bottom: 2px }
+  .v4-story-card p { font-size: 11.5px; line-height: 1.32 }
+  .v4-story3d__col-r { justify-self: stretch; width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px }
+  .v4-story-stat { padding: 8px 11px; flex-direction: column; gap: 2px }
+  .v4-story-stat b { font-size: 17px }
+  .v4-story-stat span { font-size: 10px; line-height: 1.2 }
+  .v4-story-stat:nth-child(5) { grid-column: 1 / -1; flex-direction: row; align-items: baseline; gap: 10px }
+  .v4-story3d__team { padding-top: 58px; padding-bottom: 82px; gap: 8px }
+  .v4-story3d__team-head { padding: 11px 14px }
+  .v4-story3d__team-sub { font-size: 12px; line-height: 1.32; margin-top: 4px }
   .v4-founders--compact { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px }
-  .v4-founders--compact .v4-founder-card { padding: 12px }
+  .v4-founders--compact .v4-founder-card { padding: 10px; gap: 6px; border-radius: 14px }
+  .v4-founders--compact .v4-founder-card__ava { width: 58px; height: 72px; border-radius: 10px }
+  .v4-founders--compact .v4-founder-card h3 { font-size: 12.5px; line-height: 1.18 }
+  .v4-founders--compact .v4-founder-card__role { font-size: 10.5px; line-height: 1.2; margin-top: 2px }
   .v4-founders--compact .v4-founder-card__q { display: none }
+  .v4-story3d__invite { bottom: 78px; padding: 7px 15px; white-space: nowrap }
 }
 @media (max-width: 520px) {
   .v4-founders { grid-template-columns: 1fr }
   .v4-founders--compact { grid-template-columns: repeat(2, minmax(0, 1fr)) }
-  .v4-story3d__col-r { grid-template-columns: 1fr }
+  .v4-story3d__col-r { grid-template-columns: repeat(2, minmax(0, 1fr)) }
 }
 
 /* ---------- Экран 3: Короткая пролётка «Внутри» с рассказом о компании (Figma 278-829) ---------- */
@@ -381,9 +399,11 @@ html.past-hero .v4-bar, .v4-bar--always { transform: none }
   .v4-walk__ui { top: 68px; left: 12px; right: 12px; padding: 10px 12px }
   .v4-walk__bars { gap: 6px; font-size: 10px }
   .v4-walk__bars li { min-width: 0; flex: 1 }
-  .v4-walk__cards { left: 12px; right: 12px; bottom: 132px; width: calc(100% - 24px) }
-  .v4-walk__disclaimer { left: 12px; right: 12px; bottom: 68px; max-width: calc(100% - 24px); border-radius: 12px; font-size: 11px }
-  .v4-story3d__foot { left: 12px; right: 12px }
+  .v4-walk__cards { left: 12px; right: 12px; bottom: 128px; width: calc(100% - 24px) }
+  .v4-walk__card { padding: 15px 17px; border-radius: 16px }
+  .v4 .v4-walk__card h3 { font-size: 22px; margin-bottom: 5px }
+  .v4-walk__card p { font-size: 13px; line-height: 1.42 }
+  .v4-walk__disclaimer { left: 12px; right: 158px; bottom: 76px; width: auto; max-width: none; border-radius: 12px; font-size: 10.5px; padding: 6px 10px; line-height: 1.25 }
   .v4-fly img { transform-origin: var(--pfx, 50%) var(--pfy, 50%) }
 }
 @media (prefers-reduced-motion: reduce) { .v4-walk__ui, .v4-walk__cards, .v4-walk__exit { display: none } .v4-grow--fly { height: 78svh !important } }
@@ -400,7 +420,7 @@ html.past-hero .v4-bar, .v4-bar--always { transform: none }
 
 /* ---------- Экран 4: Типы готовых домов 1..12 + чистый подбор по участку ---------- */
 .v4-sec--types { overflow: visible }
-.v4-ts { margin-top: 28px; display: grid; gap: 14px; position: relative }
+.v4-ts { margin-top: 28px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; position: relative }
 .v4-ts__bar { background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px 8px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; box-shadow: 0 6px 20px rgba(23,34,27,.035) }
 .v4-ts__bar-label { font: 500 14px var(--f-ui); color: var(--moss); white-space: nowrap }
 .v4-ts__nums { display: flex; flex-wrap: wrap; gap: 6px }
@@ -521,6 +541,19 @@ html.past-hero .v4-bar, .v4-bar--always { transform: none }
   .v4-ts__card { grid-template-columns: 1fr }
 }
 @media (max-width: 640px) {
+  .v4-ts__bar { border-radius: 18px; padding: 12px 14px; gap: 10px }
+  .v4-ts__nums { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; width: 100%; justify-items: center }
+  .v4-ts__controls { gap: 8px }
+  .v4-ts__controls-left, .v4-ts__controls-right { width: 100% }
+  .v4-ts__controls-left .v4-pik-rooms { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100% }
+  .v4-ts__controls-left .v4-pik-circle { width: 100%; min-width: 0; padding: 0 6px; font-size: 13px }
+  .v4 .v4-ts__pop-btn { width: 100%; justify-content: space-between }
+  .v4-ts__controls-right { display: grid; grid-template-columns: 1fr; gap: 8px }
+  .v4 .v4-ts__controls-right .v4-pik-btn { width: 100%; justify-content: space-between }
+  .v4 .v4-ts__controls-right .v4-pik-btn--accent { justify-content: center }
+  .v4-ts__actions, .v4-ts__next-links { width: 100% }
+  .v4 .v4-ts__actions .v4-pik-btn, .v4 .v4-ts__next-links .v4-pik-btn { width: 100%; justify-content: center }
+  .v4 .v4-ts__actions .v4-pik-btn--map, .v4 .v4-ts__next-links .v4-pik-btn--map { justify-content: space-between }
   .v4 .v4-ts__pop-wrap { position: static }
   .v4 .v4-ts__popover { left: 0; right: 0; width: 100%; max-width: 100%; box-sizing: border-box; padding: 16px }
 }
@@ -554,8 +587,9 @@ html.past-hero .v4-bar, .v4-bar--always { transform: none }
   .v4-mflow__hint { display: none }
 }
 @media (max-width: 640px) {
-  .v4-mflow__zoom-cta { left: 12px; right: 12px; bottom: 12px; flex-direction: column; align-items: stretch; gap: 10px }
-  .v4-mflow__zoom-cta .v4-pik-btn { justify-content: center }
+  .v4-mflow__box { height: 400px; border-radius: 20px }
+  .v4-mflow__zoom-cta { left: 12px; right: 12px; bottom: 12px; padding: 12px 14px; border-radius: 16px; flex-direction: column; align-items: stretch; gap: 8px }
+  .v4 .v4-mflow__zoom-cta .v4-pik-btn { justify-content: center }
 }
 
 .v4-mflow__strip { margin-top: 16px; background: #fff; border: 1px solid var(--line); border-radius: 24px; padding: clamp(20px, 3vw, 30px); display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .95fr); gap: 24px; align-items: center; box-shadow: 0 10px 28px rgba(23,34,27,.05) }
@@ -757,6 +791,13 @@ html.past-hero .v4-bar, .v4-bar--always { transform: none }
   .v4-final__pane { height: clamp(380px, 60svh, 520px) }
   .v4-final__copy { top: 8cqh }
   .v4-final__panel { margin-top: -64px; gap: 24px }
+}
+@media (max-width: 640px) {
+  .v4 .v4-mort-more .v4-pik-btn { width: 100%; height: auto; min-height: 42px; padding: 10px 16px; white-space: normal; text-align: center }
+  .v4 .v4-mort__cta { width: 100%; box-sizing: border-box }
+  .v4-final__pane { height: 340px }
+  .v4 .v4-final__hero-h2 { font-size: clamp(28px, 8vw, 40px) }
+  .v4-final__panel { margin-top: -44px; padding-bottom: 44px }
 }
 .v4-contacts-sec { padding-top: clamp(48px, 6vw, 84px); background: var(--linen) }
 .v4-final__contacts { position: relative }
@@ -1060,3 +1101,11 @@ html:has(.v4) .cookie { font-family: var(--font-onest), var(--font-manrope), Ari
 html:has(.v4) .cookie .btn { background: #2e6b45; border-color: #2e6b45; color: #fff; border-radius: 999px; font-weight: 600 }
 html:has(.v4) .cookie .btn:hover { background: #225436 }
 @media (min-width: 861px) { html:has(.v4) .cookie { right: auto; max-width: 440px; bottom: 20px; left: 20px } }
+@media (max-width: 860px) {
+  html:has(.v4) .cookie {
+    left: 10px; right: 10px; bottom: 72px; max-width: none;
+    padding: 10px 12px; gap: 10px; font-size: 11.5px; line-height: 1.3;
+    border-radius: 14px; flex-direction: row; align-items: center; justify-content: space-between;
+  }
+  html:has(.v4) .cookie .btn { padding: 8px 14px; font-size: 12px; flex: none }
+}
