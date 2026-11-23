@@ -7,6 +7,7 @@ import { byEstateStatus, estateSale, estateView, houseView } from '@/lib/view'
 import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { StickyCta } from '@/v3/home/StickyCta'
 import BuyerHero from '@/v4/BuyerHero'
+import { HouseWalk } from '@/v4/HouseWalk'
 import { FeaturedHouses, type FeaturedHouse } from '@/v4/FeaturedHouses'
 import { housePhotography } from '@/v4/housePhotography'
 import { MapGenplanFlow, type FlowEstate } from '@/v4/MapGenplanFlow'
@@ -118,6 +119,9 @@ export default async function V4Home() {
   const fam = { rate: company.family?.rate ?? 6, years: company.family?.years ?? 30, minDown: company.family?.minDown ?? 20, limit: company.family?.limit ?? 6_000_000 }
   const mortHouses: MortgageHouse[] = free.map((h) => ({ code: h.code, label: `${h.title}, ${h.estateName}`, price: h.price }))
 
+  const rooms = projects.find(p => p.slug === 'tip-5')?.rooms
+  const walkAreas = [null, ...['Прихожая', 'Кухня-гостиная', 'Терраса'].map(name => rooms?.find(r => r.name === name)?.area ?? null)]
+  const walkHouse = free.find(h => h.code === 'di-tip5')
   const faq = company.faq ?? []
 
   return (
@@ -132,6 +136,11 @@ export default async function V4Home() {
 
         <BuyerHero phone={company.phone} priceFrom={priceFrom ? formatMillions(priceFrom) : undefined} />
         <FeaturedHouses houses={featured} count={free.length} />
+        <HouseWalk
+          areas={walkAreas}
+          href={walkHouse ? '/v4/dom/' + walkHouse.code : '/v4/proekt/tip-5'}
+          linkText={walkHouse ? 'Посмотреть дом в Динской' : 'Посмотреть проект «Тип 5»'}
+        />
 
         {flowEstates.length > 0 && (
           <section className="v3-sec v3-sec--mist v4-sec v4-sec--map" id="karta">
