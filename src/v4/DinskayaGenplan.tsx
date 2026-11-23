@@ -336,7 +336,7 @@ export function DinskayaGenplan({
                   href={`/v4/dom/${activeHouse.code}`}
                   onClick={() => goal('v4_house_open', { code: activeHouse.code, from: 'genplan_3d_badge' })}
                 >
-                  смотреть 3D-модель →
+                  Смотреть дом →
                 </a>
               </div>
             ) : (
@@ -377,7 +377,7 @@ export function DinskayaGenplan({
                       href={`/v4/dom/${activeHouse.code}`}
                       onClick={() => goal('v4_house_open', { code: activeHouse.code, from: 'genplan_card' })}
                     >
-                      3D и планировка →
+                      Фото и планировка →
                     </a>
                     <button
                       type="button"
@@ -432,7 +432,7 @@ export function DinskayaGenplan({
         <div>
           <h3>Динская · {counts.free} {plural(counts.free, 'дом', 'дома', 'домов')} в продаже</h3>
           <p>
-            Наведите на любой участок для быстрой цены или нажмите, чтобы открыть карточку дома и перейти в 3D. Раскладка 36 участков — по плану застройщика.
+            Наведите на любой участок для быстрой цены или нажмите, чтобы посмотреть дом и его планировку. Раскладка 36 участков — по плану застройщика.
           </p>
         </div>
         {hideEstateLink ? (

@@ -1,0 +1,58 @@
+.fh {
+  background: var(--paper);
+  color: var(--ink);
+  padding: clamp(24px, 3.2vw, 56px) 0 clamp(42px, 5.6vw, 96px);
+  scroll-margin-top: 68px;
+}
+.fh-wrap { width: min(100% - clamp(40px, 8vw, 152px), 1600px); margin-inline: auto; }
+.fh-head, .fh-switch, .fh-switch > div, .fh-all, .fh-open { display: flex; align-items: center; }
+.fh-head { justify-content: space-between; gap: 14px; margin-bottom: clamp(18px, 2vw, 34px); }
+.fh h2, .fh h3, .fh p, .fh dl, .fh dd { margin: 0; }
+.fh h2, .fh h3 { font-family: var(--f-emo); color: var(--forest); font-weight: 500; }
+.fh h2 { font-size: clamp(44px, 5.2vw, 90px); line-height: 1; letter-spacing: -.052em; }
+.fh h2 em { font-weight: 500; }
+.fh .fh-all { gap: 12px; color: var(--forest); font-weight: 550; font-size: 14px; border-bottom: 1px solid #adb6a8; padding: 8px 0; }
+.fh-spread { display: grid; grid-template-columns: minmax(0, 1.95fr) minmax(290px, 1fr); background: #eeeee6; }
+.fh-photo { display: block; position: relative; overflow: hidden; background: #d9dbd0; min-height: 380px; }
+.fh-photo img { position: absolute; width: 100%; height: 100%; inset: 0; object-fit: cover; transition: transform .55s ease; }
+@media (hover:hover) { .fh-photo:hover img { transform: scale(1.02); } }
+.fh-source { position: absolute; bottom: 14px; left: 16px; max-width: calc(100% - 32px); background: #142219db; color: #fff; padding: 5px 10px; font: 450 12px/1.4 var(--f-ui); }
+.fh-sheet { display: flex; flex-direction: column; justify-content: space-between; padding: clamp(24px, 3.1vw, 54px); }
+.fh .fh-place { font: 600 12px/1.4 var(--f-ui); text-transform: uppercase; letter-spacing: .13em; color: #4e604e; }
+.fh h3 { font-size: clamp(48px, 4.6vw, 78px); letter-spacing: -.045em; line-height: 1.05; margin-top: 12px; }
+.fh .fh-price { font: 500 clamp(24px, 2.15vw, 39px)/1.25 var(--f-ui); color: var(--forest); margin: 12px 0 26px; letter-spacing: -.04em; }
+.fh dl > div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid #cdd2c5; font: 500 14px/1.3 var(--f-ui); }
+.fh dt { color: #526152; font-weight: 430; }
+.fh .fh-open { width: fit-content; gap: 28px; justify-content: space-between; background: var(--forest); color: white; padding: 12px 20px; border-radius: 2px; margin-top: 22px; font: 550 15px/1.4 var(--f-ui); }
+.fh .fh-open:hover { background: var(--leaf); }
+.fh-switch { margin-top: 26px; justify-content: space-between; border-top: 1px solid #cdd2c5; padding-top: 12px; }
+.fh-switch > span { font: 450 12px/1.4 var(--f-ui); color: #616d61; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+.fh-switch b { color: var(--forest); }
+.fh-switch > div { gap: 5px; }
+.fh-switch button { border: 1px solid #9da999; border-radius: 50%; width: 42px; height: 42px; display: grid; place-items: center; color: var(--forest); background: transparent; cursor: pointer; }
+.fh-switch button:hover { background: #dce2d6; }
+.fh a:focus-visible, .fh button:focus-visible { outline: 3px solid var(--leaf); outline-offset: 3px; }
+@media(max-width: 760px) {
+  .fh { scroll-margin-top: 59px; padding-top: 24px; }
+  .fh-wrap { width: calc(100% - 32px); }
+  .fh h2 { font-size: clamp(35px, 8.4vw, 58px); }
+  .fh .fh-all { gap: 5px; font-size: 12px; white-space: nowrap; }
+  .fh-all svg { width: 16px; }
+  .fh-spread { position: relative; display: flex; flex-direction: column; }
+  .fh-photo { min-height: 0; aspect-ratio: 1.5; }
+  .fh-source { bottom: 8px; left: 8px; font-size: 10px; }
+  .fh-sheet { padding: 18px; }
+  .fh h3 { margin-top: 4px; font-size: 43px; }
+  .fh .fh-price { margin: 5px 0 16px; }
+  .fh .fh-open { margin-top: 14px; }
+  .fh dl { display: flex; flex-wrap: wrap; gap: 12px 24px; border-top: 1px solid #cdd2c5; padding-top: 12px; }
+  .fh dl > div { display: grid; gap: 3px; padding: 0; border: 0; }
+  .fh dt { font-size: 12px; }
+  .fh .fh-open { width: 100%; min-height: 46px; }
+  .fh-switch { position: absolute; right: 8px; top: 8px; padding: 0 2px 0 12px; margin: 0; border: 0; border-radius: 24px; gap: 8px; background: #faf9f5f5; }
+  .fh-switch button { border: 0; width: 44px; height: 44px; }
+  .fh-switch > div { gap: 0; }
+  .fh-switch > span { font-size: 11px; }
+  html:has(.buyer-hero):not(:has(.v3-sticky[data-on="true"])) .cookie { bottom: 10px; }
+}
+@media(prefers-reduced-motion: reduce) { .fh-photo img { transition: none; } }

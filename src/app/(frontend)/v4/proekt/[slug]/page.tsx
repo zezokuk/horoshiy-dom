@@ -74,7 +74,7 @@ export default async function V4Project({ params }: Props) {
             <figcaption>Изображение проекта</figcaption>
           </figure>
           <div className="v4-dom__panel">
-            <nav className="v4-dom__crumbs" aria-label="Навигация"><a href="/v4">Главная</a><span aria-hidden>/</span><a href="/v4#tipy">Проекты</a></nav>
+            <nav className="v4-dom__crumbs" aria-label="Навигация"><a href="/v4">Главная</a><span aria-hidden>/</span><a href="/v4/proekty">Проекты</a></nav>
             <h1>{p.name}</h1>
             <p className="v4-dom__where">{[p.area ? `${formatArea(p.area)} м²` : null, p.bedrooms ? `${p.bedrooms} ${plural(p.bedrooms, 'спальня', 'спальни', 'спален')}` : null, p.storeys === 2 ? 'два этажа' : p.mansard ? 'с мансардой' : 'один этаж'].filter(Boolean).join(' · ')}</p>
             {mine.length > 0 ? (

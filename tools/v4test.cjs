@@ -38,75 +38,31 @@ async function run(browser, tag, opts) {
   await page.waitForTimeout(700)
   const mobile = !!opts.isMobile
 
-  // 1. Первый экран: звезда раньше названия, нет слайдера, белый фон сайта
-  const order = await page.evaluate(() => {
-    const d = (el) => (el ? parseFloat(getComputedStyle(el).animationDelay) : NaN)
-    return {
-      star: d(document.querySelector('.hn__star')),
-      name: d(document.querySelector('.v4-hero__title .v3-hero2__name > span')),
-      navSlider: !!document.querySelector('.hn__nav'),
-      bg: getComputedStyle(document.querySelector('.v3.v4')).backgroundColor,
-    }
-  })
-  if (!opts.reducedMotion) ok(`${tag}: звезда раньше названия`, order.star < order.name, JSON.stringify(order))
-  ok(`${tag}: автослайдер на первом экране убран`, !order.navSlider)
-  ok(`${tag}: свежий светлый архитектурный фон`, order.bg === 'rgb(250, 249, 245)', order.bg)
-  ok(`${tag}: нет горизонтальной прокрутки`, (await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 0)
-
-  if (SHOTS && !opts.reducedMotion) {
-    await page.waitForTimeout(2100)
-    await page.screenshot({ path: `${SHOTS}/${tag}-01-hero.jpg`, quality: 75, type: 'jpeg' })
+  // Первый экран ведёт к предложению конкретного дома.
+  const home = await page.evaluate(() => ({
+    hasDawn: getComputedStyle(document.querySelector('.buyer-hero__night')).animationName.includes('buyer-dawn'),
+    hasStar: getComputedStyle(document.querySelector('.buyer-hero__stars i')).animationName.includes('buyer-star'),
+    next: document.querySelector('.buyer-hero').nextElementSibling?.id,
+    bg: getComputedStyle(document.querySelector('.v3.v4')).backgroundColor,
+    fits: document.documentElement.scrollWidth <= innerWidth,
+  }))
+  if (!opts.reducedMotion) ok(`${tag}: на первом экране звезда и рассвет`, home.hasDawn && home.hasStar)
+  ok(`${tag}: после первого экрана сразу дома`, home.next === 'doma')
+  ok(`${tag}: светлый фон и нет горизонтальной прокрутки`, home.bg === 'rgb(250, 249, 245)' && home.fits)
+  if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-01-hero.jpg`, quality: 75 })
+  await page.locator('.buyer-hero__action').click()
+  ok(`${tag}: «Выбрать дом» ведёт к витрине`, new URL(page.url()).hash === '#doma')
+  const openHouse = page.locator('.fh-open')
+  const firstHouse = await openHouse.getAttribute('href')
+  const nextHouse = page.locator('.fh-switch button').last()
+  if (await nextHouse.count()) {
+    await nextHouse.click()
+    ok(`${tag}: переключатель выбирает другой дом`, firstHouse !== await openHouse.getAttribute('href'))
+    await page.locator('.fh-switch button').first().click()
   }
-
-  // 2. Единая сцена 1→2→3: 3D-дом («О нас» → «Наша команда» → въезд в дверь)
-  const has3d = await page.locator('.v4-story3d').count()
-  ok(`${tag}: единая 3D-сцена .v4-story3d присутствует`, has3d === 1)
-  if (has3d && !opts.reducedMotion) {
-    const bounds = await page.evaluate(() => {
-      const el = document.querySelector('.v4-story3d')
-      const top = el.getBoundingClientRect().top + scrollY
-      const run = Math.max(1, el.offsetHeight - innerHeight)
-      return { top, run }
-    })
-    await page.evaluate((y) => window.scrollTo(0, y), bounds.top + bounds.run * 0.21)
-    await page.waitForTimeout(1350)
-    const aboutVisible = await page.evaluate(() => document.querySelectorAll('.v4-story-card').length >= 4)
-    ok(`${tag}: блок «О нас» в 3D-сцене`, aboutVisible)
-    if (SHOTS) await page.screenshot({ path: `${SHOTS}/${tag}-02-3d-about.jpg`, quality: 75, type: 'jpeg' })
-
-    await page.evaluate((y) => window.scrollTo(0, y), bounds.top + bounds.run * 0.36)
-    await page.waitForTimeout(1350)
-    const foundersCount = await page.locator('.v4-founder-card').count()
-    ok(`${tag}: 4 учредителя в 3D-сцене`, foundersCount === 4, `найдено ${foundersCount}`)
-    if (SHOTS) await page.screenshot({ path: `${SHOTS}/${tag}-03-3d-team.jpg`, quality: 75, type: 'jpeg' })
-
-    await page.evaluate((y) => window.scrollTo(0, y), bounds.top + bounds.run * 0.485)
-    await page.waitForTimeout(1350)
-    if (SHOTS) await page.screenshot({ path: `${SHOTS}/${tag}-03b-3d-door.jpg`, quality: 75, type: 'jpeg' })
-
-    await page.evaluate((y) => window.scrollTo(0, y), bounds.top + bounds.run * 0.72)
-    await page.waitForTimeout(1350)
-  }
-
-  // 3. Короткая пролётка «Внутри» с рассказом о компании + обязательная подпись
-  const walkDisc = await page.locator('.v4-walk__disclaimer').textContent().catch(() => '')
-  ok(`${tag}: подпись про 3D-тур и пример интерьера`, /3D-тур.*пример/i.test(walkDisc || ''))
-  const hasBridge = await page.locator('.v4-bridge-sec').count()
-  ok(`${tag}: лишний слайд «У каждого утра» убран`, hasBridge === 0)
-  if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-04-vnutri.jpg`, quality: 75, type: 'jpeg' })
-
-  // 4. Типы готовых домов 1..12
-  await scrollTo(page, '#tipy', -40)
-  const typeBtns = await page.locator('.v4-ts__num').count()
-  ok(`${tag}: витрина типов домов (12 кнопок)`, typeBtns === 12, `кнопок ${typeBtns}`)
-  const tip5Btn = page.locator('.v4-ts__num', { hasText: /^5$/ })
-  if (await tip5Btn.count()) {
-    await tip5Btn.click()
-    await page.waitForTimeout(250)
-    const h3 = await page.locator('.v4-ts__top h3').textContent()
-    ok(`${tag}: выбор типа переключает карточку`, /Тип 5/i.test(h3 || ''), h3 || '')
-  }
-  if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-05-types.jpg`, quality: 75, type: 'jpeg' })
+  ok(`${tag}: фото и кнопка открывают один дом`, firstHouse.startsWith('/v4/dom/') && await page.locator('.fh-photo').getAttribute('href') === firstHouse)
+  ok(`${tag}: у кадра есть подпись, у дома цена`, !!(await page.locator('.fh-source').textContent()) && (await page.locator('.fh-price').innerText()).includes('₽'))
+  if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-02-featured.jpg`, quality: 75 })
 
   // 5. Карта посёлков: без отдельных вкладок, клик по пину -> приближение + «Смотреть посёлок»
   await scrollTo(page, '#karta', -40)
@@ -139,7 +95,7 @@ async function run(browser, tag, opts) {
         await page.mouse.click(krBox.x + krBox.width / 2, krBox.y + krBox.height / 2)
         await page.waitForTimeout(650)
         const krHref = await page.locator('.v4-mflow__zoom-cta a').getAttribute('href').catch(() => '')
-        ok(`${tag}: для 1-домной локации «Красная 39» карта ведёт сразу в 3D-карточку дома`, /\/v4\/dom\//.test(krHref || ''), krHref || '')
+        ok(`${tag}: для 1-домной локации «Красная 39» карта ведёт сразу в карточку дома`, /\/v4\/dom\//.test(krHref || ''), krHref || '')
       }
     }
   } else {
@@ -169,7 +125,7 @@ async function run(browser, tag, opts) {
   // 7. Reduced motion проверка
   if (opts.reducedMotion) {
     const hidden = await page.evaluate(() =>
-      [...document.querySelectorAll('.v4 h2, .v4-foot__word span, .v4-hero__title, .v4-founder-card')].filter((e) => {
+      [...document.querySelectorAll('.v4 h2, .v4-foot__word span, .buyer-hero__title, .fh-facts')].filter((e) => {
         const s = getComputedStyle(e)
         return s.visibility === 'hidden' || s.opacity === '0'
       }).length,
@@ -177,29 +133,27 @@ async function run(browser, tag, opts) {
     ok(`${tag}: при «уменьшить движение» ничего не спрятано`, hidden === 0, `спрятано ${hidden}`)
   }
 
-  // 8. Страница дома (Тип 5, уч. 18) — 3D сразу активна, сутки, 360°, солнце, 2x2 инфо, FAQ + форма
-  const domRes = await page.goto(`${BASE}/v4/dom/di-18-tip5-v3`, { waitUntil: 'load', timeout: 60000 })
-  await page.waitForTimeout(800)
-  ok(`${tag}: /v4/dom/di-18-tip5-v3 открывается`, domRes && domRes.status() === 200)
-  const domCheck = await page.evaluate(() => ({
-    price: !!document.querySelector('.v4-dom__price'),
-    sun: !!document.querySelector('.v4-sun'),
-    info4: document.querySelectorAll('.v4-dom-icard').length === 4,
-    faq: document.querySelectorAll('.v4-faq details').length > 0,
-    form: !!document.querySelector('#evf-form'),
+  // Покупатель открывает тот же объект, который выбрал на главной.
+  await openHouse.click()
+  await page.waitForURL(`**${firstHouse}`)
+  const house = await page.evaluate(() => ({
+    price: document.querySelector('.hd-price')?.textContent.includes('₽'),
+    plan: !!document.querySelector('#plan img'),
+    mortgage: !!document.querySelector('#ipoteka .v4-mort'),
+    form: !!document.querySelector('#evf-form form'),
     noScrollX: document.documentElement.scrollWidth <= innerWidth,
   }))
-  ok(`${tag}: страница дома содержит цену, солнце, 4 блока, FAQ и форму`, Object.values(domCheck).every(Boolean), JSON.stringify(domCheck))
-
-  if (!opts.reducedMotion) {
-    await page.locator('.v4-stage__daybar button', { hasText: /ночь/i }).click()
-    await page.waitForTimeout(450)
-    if (SHOTS) await page.screenshot({ path: `${SHOTS}/${tag}-09-dom-night.jpg`, quality: 75, type: 'jpeg' })
-    await page.locator('.v4-stage__modes button', { hasText: /360° внутри/i }).click()
-    await page.waitForTimeout(300)
-    ok(`${tag}: 360° тур открывается`, await page.locator('.v4-pano').isVisible())
-    if (SHOTS) await page.screenshot({ path: `${SHOTS}/${tag}-10-dom-360.jpg`, quality: 75, type: 'jpeg' })
-  }
+  ok(`${tag}: у дома есть цена, планировка, расчёт ипотеки и форма`, Object.values(house).every(Boolean), JSON.stringify(house))
+  const frame = page.locator('.hd-gallery-stage > img')
+  const firstSrc = await frame.getAttribute('src')
+  await page.getByRole('button', { name: 'Следующий кадр' }).click()
+  ok(`${tag}: галерея переключает снимок`, firstSrc !== await frame.getAttribute('src'))
+  await page.getByRole('button', { name: 'Развернуть изображение' }).click()
+  ok(`${tag}: галерея открывается на весь экран`, await page.locator('.hd-lightbox[open]').isVisible())
+  await page.getByRole('button', { name: 'Закрыть галерею' }).click()
+  if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-09-house.jpg`, quality: 75 })
+  await page.locator('.hd-visit').click()
+  ok(`${tag}: из дома можно записаться на показ`, new URL(page.url()).hash === '#evf-form' && await page.locator('#evf-form input[name="phone"]').isVisible())
 
   // 8b. Страница посёлка Динская: о посёлке + генплан 36 участков + список типов домов с картинками
   const dinRes = await page.goto(`${BASE}/v4/poselok/dinskaya`, { waitUntil: 'load', timeout: 60000 })

@@ -71,7 +71,7 @@ export function Mortgage({ houses, family }: { houses: MortgageHouse[]; family: 
           <div><dt>Срок</dt><dd>{family.years} лет</dd></div>
         </dl>
         <a href="#evf-form" className="v4-mort__cta">
-          <span>Одобрить эту ипотеку</span>
+          <span>Обсудить ипотеку на показе</span>
           <span aria-hidden>→</span>
         </a>
         <p className="v3-note">Расчёт по семейной ипотеке, прикидка. Ставку и одобрение подбирает банк — менеджер поможет с программой и документами.</p>

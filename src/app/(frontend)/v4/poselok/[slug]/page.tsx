@@ -251,7 +251,7 @@ export default async function V4Estate({ params }: Props) {
               <p className="v4-num"><b>02</b> / Генплан</p>
               <h2 className="v3-h2" data-move="lines">Генплан посёлка <em>«{e.name}»</em></h2>
               <p className="v3-lead" data-move="up">
-                Наведите на участок, чтобы увидеть площадь и стоимость, или нажмите для перехода в 3D-карточку дома.
+                Наведите на участок, чтобы увидеть площадь и стоимость, или нажмите, чтобы открыть дом.
               </p>
             </div>
             <div className="v3-wrap">
@@ -335,7 +335,7 @@ export default async function V4Estate({ params }: Props) {
                       <div className="v4-etype-card__btns">
                         {t.firstFreeHref ? (
                           <a className="v4-pik-btn v4-pik-btn--accent" href={t.firstFreeHref}>
-                            <span>Смотреть дом в 3D →</span>
+                            <span>Смотреть дом →</span>
                           </a>
                         ) : (
                           <a className="v4-pik-btn v4-pik-btn--accent" href={t.projectHref}>

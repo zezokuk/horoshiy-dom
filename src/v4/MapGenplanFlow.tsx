@@ -95,11 +95,11 @@ function ctaFor(e: FlowEstate) {
   if (e.singleHouse) {
     return {
       primaryHref: e.singleHouse.href,
-      primaryLabel: 'Открыть готовый дом в 3D →',
+      primaryLabel: 'Открыть дом →',
       secondaryHref: e.href,
       secondaryLabel: 'О локации',
       subtitle: `${e.place} · 1 готовый дом: ${e.singleHouse.title}, ${formatArea(e.singleHouse.area)} м² · ${formatMillions(e.singleHouse.price)}`,
-      hint: `Локация «${e.name}» · 1 готовый дом в продаже — откройте карточку дома в 3D или планировку`,
+      hint: `Локация «${e.name}» · 1 готовый дом в продаже — посмотрите фотографии и планировку`,
     }
   }
   if (e.status === 'planned') {
