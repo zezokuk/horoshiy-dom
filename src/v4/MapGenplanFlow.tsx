@@ -99,7 +99,7 @@ function ctaFor(e: FlowEstate) {
       secondaryHref: e.href,
       secondaryLabel: 'О локации',
       subtitle: `${e.place} · 1 готовый дом: ${e.singleHouse.title}, ${formatArea(e.singleHouse.area)} м² · ${formatMillions(e.singleHouse.price)}`,
-      hint: `Локация «${e.name}» · 1 готовый дом в продаже — посмотрите фотографии и планировку`,
+      hint: `Локация «${e.name}» · Нажмите на «${e.name}» ещё раз, чтобы открыть фотографии и планировку дома`,
     }
   }
   if (e.status === 'planned') {
@@ -107,7 +107,7 @@ function ctaFor(e: FlowEstate) {
       primaryHref: e.href,
       primaryLabel: 'Узнать о старте продаж →',
       subtitle: `${e.place} · Скоро старт продаж`,
-      hint: `Посёлок «${e.name}» · Откройте страницу посёлка, чтобы узнать о старте продаж`,
+      hint: `Посёлок «${e.name}» · Нажмите на «${e.name}» ещё раз, чтобы узнать о старте продаж`,
     }
   }
   if (e.status === 'soldOut' || e.free === 0) {
@@ -115,14 +115,14 @@ function ctaFor(e: FlowEstate) {
       primaryHref: e.href,
       primaryLabel: 'Смотреть построенный посёлок →',
       subtitle: `${e.place} · ${e.homes ? `${e.homes} домов` : 'Все дома'} построены и проданы`,
-      hint: `Посёлок «${e.name}» · Все дома проданы — посмотрите реализованный проект`,
+      hint: `Посёлок «${e.name}» · Нажмите на «${e.name}» ещё раз, чтобы посмотреть реализованный посёлок`,
     }
   }
   return {
     primaryHref: e.href,
     primaryLabel: e.slug === 'dinskaya' || e.free > 1 ? 'Смотреть посёлок и генплан →' : 'Смотреть посёлок →',
     subtitle: `${e.place} · ${e.homes ?? e.free} участков, ${e.free} в продаже${e.priceFrom ? ` · от ${formatMillions(e.priceFrom)}` : ''}`,
-    hint: `Посёлок «${e.name}» · Нажмите «Смотреть посёлок и генплан», чтобы выбрать участок и тип дома`,
+    hint: `Посёлок «${e.name}» · Нажмите на «${e.name}» ещё раз или на название, чтобы открыть посёлок и генплан`,
   }
 }
 
@@ -151,7 +151,11 @@ export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
       const target = estates[k]
       if (!target) return
       setActiveIdx(k)
-      if (zoomedSlugRef.current === target.slug) return
+      if (zoomedSlugRef.current === target.slug) {
+        window.location.assign(ctaFor(target).primaryHref)
+        return
+      }
+      zoomedSlugRef.current = target.slug
       setZoomedSlug(target.slug)
       goal('v4_map_estate_zoom', { slug: target.slug })
     },
@@ -159,6 +163,7 @@ export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
   )
 
   const resetZoom = useCallback(() => {
+    zoomedSlugRef.current = null
     setZoomedSlug(null)
   }, [])
 
@@ -332,7 +337,11 @@ export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
             <div className="v4-mflow__zoom-cta" aria-live="polite">
               <div>
                 <p className="v4-mflow__zmeta">{zoomCta.subtitle}</p>
-                <h4>{zoomedEstate.name}</h4>
+                <h4>
+                  <a className="v4-mflow__title-link" href={zoomCta.primaryHref}>
+                    {zoomedEstate.name}
+                  </a>
+                </h4>
               </div>
               <a className="v4-pik-btn v4-pik-btn--accent" href={zoomCta.primaryHref}>
                 <span>{zoomCta.primaryLabel}</span>
@@ -345,7 +354,7 @@ export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
           <span>
             {zoomCta
               ? zoomCta.hint
-              : 'Наведите на посёлок для справки · Нажмите на пин, чтобы приблизить и выбрать дом или посёлок'}
+              : 'Наведите на посёлок для справки · Нажмите на пин, чтобы приблизить; нажмите ещё раз — открыть посёлок'}
           </span>
         </div>
       </div>
@@ -353,7 +362,11 @@ export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
       <div className="v4-mflow__strip" aria-live="polite">
         <div className="v4-mflow__sleft">
           <div className="v4-mflow__stitle">
-            <h3>{cur.name}</h3>
+            <h3>
+              <a className="v4-mflow__title-link" href={curCta.primaryHref}>
+                {cur.name}
+              </a>
+            </h3>
             <span className={`v3-status v4-mflow__badge v4-mflow__badge--${cur.status}`}>
               <i />
               {STATUS_LABEL[cur.status]}

@@ -85,13 +85,13 @@
   right: var(--hero-gutter);
   top: max(106px, 16%);
   color: var(--hero-white);
-  font: 500 clamp(82px, min(13.8vw, 20svh), 210px)/.93 var(--f-emo);
+  font: 500 clamp(82px, min(13.8vw, 20svh), 210px)/.94 var(--f-emo);
   text-align: center;
   text-transform: none;
-  letter-spacing: -.062em;
+  letter-spacing: -.02em;
   animation: buyer-title 1.25s .15s cubic-bezier(.19,.75,.2,1) both;
 }
-.buyer-hero__title em { font-weight: 500; }
+.v4 .buyer-hero__title em { font-weight: 500; font-style: italic; color: inherit; }
 html.no-motion .buyer-hero * { animation: none !important; }
 html.no-motion .buyer-hero__night, html.no-motion .buyer-hero__stars, html.no-motion .buyer-hero__windows { display: none; }
 .buyer-hero__foot { bottom: max(32px, 5.1%); align-items: flex-end; }

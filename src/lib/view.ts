@@ -79,6 +79,14 @@ const url = (m: number | Media | null | undefined, size?: 'card' | 'wide') =>
   m && typeof m === 'object' ? (size && m.sizes?.[size]?.url) || m.url || undefined : undefined
 const obj = <T>(v: unknown): T | null => (v && typeof v === 'object' ? (v as T) : null)
 
+const WEED_AND_TOY_PHOTO_RX = /(?:photo-(?:16420342|16420352|14427948|14427965|12042894|12050447)|type5-(?:day|evening|night)\.webp)/i
+
+/** Подменяет устаревшие фото с сорняками и 3D-пластик на чистый фасад из фотосессии клиента. */
+export function cleanPhotoUrl(u: string | undefined): string | undefined {
+  if (!u) return u
+  return WEED_AND_TOY_PHOTO_RX.test(u) ? '/v4/houses/type5-front.webp' : u
+}
+
 export function regionView(r: Region): RegionView {
   return {
     slug: r.slug,
@@ -112,8 +120,8 @@ export function houseView(h: House): HouseView {
     bedrooms: h.bedrooms ?? null,
     bathrooms: h.bathrooms ?? null,
     features: h.features ?? [],
-    photo: url(h.photo, 'wide') ?? url(project?.photo, 'wide'),
-    photoCard: url(h.photo, 'card') ?? url(project?.photo, 'card'),
+    photo: cleanPhotoUrl(url(h.photo, 'wide') ?? url(project?.photo, 'wide')),
+    photoCard: cleanPhotoUrl(url(h.photo, 'card') ?? url(project?.photo, 'card')),
     plan: url(h.plan, 'wide') ?? url(project?.plan, 'wide'),
     estateSlug: estate?.slug ?? '',
     estateName: estate?.name ?? '',

@@ -6,7 +6,7 @@ import { getCompany, getHouse, getHouses, img } from '@/lib/data'
 import { STATUS_LABEL, formatArea, formatMillions, formatPrice } from '@/lib/format'
 import { JsonLd, breadcrumbsLd, houseLd } from '@/lib/seo'
 import { mainHref } from '@/lib/site'
-import { houseView } from '@/lib/view'
+import { cleanPhotoUrl, houseView } from '@/lib/view'
 import { HouseDetailGallery } from '@/v4/HouseDetailGallery'
 import { housePhotography } from '@/v4/housePhotography'
 import { Mortgage } from '@/v4/Mortgage'
@@ -45,9 +45,9 @@ export default async function HouseDetail({ params }: Props) {
   const address = addressParts.join(' · ')
   const location = estate.slug === 'dinskaya' ? 'Дом в Динской' : 'Кирпичный дом'
   const slides = [...housePhotography(h.code)]
-  const photo = h.photo || img(project?.photo, 'wide')
+  const photo = h.photo || cleanPhotoUrl(img(project?.photo, 'wide'))
   if (!slides.length) {
-    const projectFrame = project?.slug === 'tip-5' ? '/v4/img/type5-day.webp' : v4img(SLIDE_CODE[project?.slug ?? ''])?.src
+    const projectFrame = project?.slug === 'tip-5' ? '/v4/houses/type5-front.webp' : v4img(SLIDE_CODE[project?.slug ?? ''])?.src
     if (projectFrame) slides.push({ src: projectFrame, alt: `Фасад дома по проекту «${typeName}»`, caption: `Визуализация проекта «${typeName}»` })
     if (photo) slides.push({ src: photo, alt: `Фасад из презентации «${h.title}»`, caption: `Изображение проекта «${typeName}»` })
   }
@@ -60,6 +60,7 @@ export default async function HouseDetail({ params }: Props) {
     { label: 'Площадь дома', value: `${formatArea(h.area)} м²` },
     ...(h.plot ? [{ label: 'Участок', value: h.plot }] : []),
     ...(h.bedrooms ? [{ label: 'Спальни', value: String(h.bedrooms) }] : []),
+    { label: 'Отделка', value: 'Предчистовая' },
   ]
   const context = `${canVisit ? 'Показ дома' : 'Подбор похожего дома'}: ${h.title}, ${estate.name}`
 
@@ -95,6 +96,9 @@ export default async function HouseDetail({ params }: Props) {
               {Boolean(h.mansard) && <div><dt>Мансарда</dt><dd>{formatArea(h.mansard!)} м²</dd></div>}
               {Boolean(h.bedrooms) && <div><dt>Спальни</dt><dd>{h.bedrooms}</dd></div>}
               {Boolean(h.bathrooms) && <div><dt>Санузлы</dt><dd>{h.bathrooms}</dd></div>}
+              <div><dt>Отделка</dt><dd>Предчистовая (White Box)</dd></div>
+              <div><dt>Стены</dt><dd>370 мм (блок + утеплитель + кирпич)</dd></div>
+              <div><dt>Инженерия</dt><dd>15 кВт · вода · септик 9 м³ · газ</dd></div>
             </dl>
             {h.features.length > 0 && <p className="hd-features">{h.features.join(' · ')}</p>}
           </div>
@@ -103,7 +107,7 @@ export default async function HouseDetail({ params }: Props) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={h.plan} loading="lazy" alt={`Планировка дома «${h.title}»`} />
             </a>
-            <figcaption>Планировка · {type}<a href={h.plan} target="_blank" rel="noreferrer">Развернуть ↗</a></figcaption>
+            <figcaption>Планировка · {type}<span><a href={h.plan} download>Скачать планировку ↓</a> · <a href={h.plan} target="_blank" rel="noreferrer">Развернуть ↗</a></span></figcaption>
           </figure>}
         </section>}
         {family && canVisit && <section className="hd-section hd-mortgage" id="ipoteka">

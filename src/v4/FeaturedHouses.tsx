@@ -12,6 +12,10 @@ export type FeaturedHouse = {
   area: number
   plot: string | null
   mansard: number | null
+  bedrooms?: number | null
+  projectName?: string
+  monthlyPay?: number | null
+  familyRate?: number
   image?: string
   caption: string
   alt: string
@@ -49,7 +53,9 @@ export function FeaturedHouses({ houses, count }: { houses: FeaturedHouse[]; cou
             <dl>
               <div><dt>Площадь дома</dt><dd>{formatArea(house.area)} м²</dd></div>
               {house.plot && <div><dt>Участок</dt><dd>{house.plot}</dd></div>}
+              {house.bedrooms && <div><dt>Спальни</dt><dd>{house.bedrooms}</dd></div>}
               {house.mansard && <div><dt>Мансарда</dt><dd>+{formatArea(house.mansard)} м²</dd></div>}
+              {house.monthlyPay && <div><dt>Ипотека {house.familyRate ?? 6}%</dt><dd>от {house.monthlyPay.toLocaleString('ru-RU')} ₽/мес</dd></div>}
             </dl>
             <a className="fh-open" href={href}>Открыть дом <Arrow /></a>
           </div>

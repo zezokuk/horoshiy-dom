@@ -10,13 +10,13 @@
 .hd-status i { width: 8px; height: 8px; background: var(--leaf); border-radius: 100%; }
 .hd-status[data-status="reserved"] i { background: #957347; }
 .hd-status[data-status="sold"] i { background: #899086; }
-.hd-page .hd-identity h1 { max-width: 9ch; margin: 18px 0 14px; font: 500 clamp(49px, 5vw, 88px)/.88 var(--f-emo); color: var(--forest); letter-spacing: -.052em; }
+.v4.hd-page .hd-identity h1 { max-width: 9ch; margin: 18px 0 14px; font: 500 clamp(49px, 5vw, 88px)/.92 var(--f-emo); color: var(--forest); letter-spacing: -.02em; }
 .hd-address { color: var(--moss); font-size: clamp(14px, 1.2vw, 18px); line-height: 1.45; }
 .hd-offer { grid-area: offer; min-width: 0; }
 .hd-metrics { display: flex; flex-wrap: wrap; gap: 16px 24px; padding: 20px 0; border-block: 1px solid var(--line); margin: clamp(16px, 2.1vw, 36px) 0; }
 .hd-metrics dt, .hd-price-note { font-size: 12px; line-height: 1.5; color: var(--moss); }
-.hd-metrics dd { font: 500 clamp(17px, 1.45vw, 23px)/1.4 var(--f-ui); letter-spacing: -.04em; margin: 3px 0 0; }
-.hd-price { font: 500 clamp(30px, 2.8vw, 47px)/1.12 var(--f-ui); letter-spacing: -.056em; color: var(--forest); font-variant-numeric: tabular-nums; }
+.hd-metrics dd { font: 500 clamp(17px, 1.45vw, 23px)/1.4 var(--f-ui); letter-spacing: -.015em; margin: 3px 0 0; }
+.hd-price { font: 600 clamp(30px, 2.8vw, 47px)/1.12 var(--f-ui); letter-spacing: -.025em; color: var(--forest); font-variant-numeric: tabular-nums; }
 .hd-page .hd-price-note { margin-top: 4px; }
 .hd-page .hd-visit { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 20px; border-radius: 4px; padding: 15px 19px; background: var(--forest); color: white; font: 550 15px/1.4 var(--f-ui); }
 .hd-visit:hover { background: var(--leaf-d); }
@@ -55,7 +55,7 @@ html:has(.hd-lightbox[open]) { overflow: hidden; }
 .hd-lightbox .hd-gallery-arrows button { color: white; border-color: #718173; }
 .hd-section { padding-block: clamp(44px, 5vw, 80px); border-top: 1px solid var(--line); }
 .hd-page :is(#plan, #ipoteka, #evf-form) { scroll-margin-top: 83px; }
-.hd-page .hd-section h2, .hd-page .hd-book h2 { font: 500 clamp(40px, 4.5vw, 76px)/.99 var(--f-emo); letter-spacing: -.045em; color: var(--forest); }
+.v4.hd-page .hd-section h2, .v4.hd-page .hd-book h2 { font: 500 clamp(40px, 4.5vw, 76px)/.99 var(--f-emo); letter-spacing: -.02em; color: var(--forest); }
 .hd-layout, .hd-book { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(32px, 8vw, 120px); align-items: center; }
 .hd-spec { margin: 28px 0 0; }
 .hd-spec div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); }

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { getCompany, getHouses, getProjects, img, plural } from '@/lib/data'
 import { formatMillions } from '@/lib/format'
-import { houseView } from '@/lib/view'
+import { cleanPhotoUrl, houseView } from '@/lib/view'
 import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { HousePicker, type PickHouse, type PickProjectType } from '@/v3/home/HousePicker'
 import { StickyCta } from '@/v3/home/StickyCta'
@@ -10,9 +10,9 @@ import '@/v3/v3.css'
 import '@/v4/v4.css'
 
 /**
- * v4 · совмещённый каталог «Дома в продаже + 12 типов проектов»:
+ * v4 · совмещённый каталог «Дома в продаже + планировки проектов»:
  * фильтры-капсулы в стиле ПИК (выбор номера типа 1..12, диапазон цен от/до, посёлки, кнопка «На карте» и счётчик)
- * + переключение между готовыми домами на участках и всеми 12 типовыми проектами.
+ * + переключение между готовыми домами на участках и типами проектов с планировками.
  */
 export const dynamic = 'force-dynamic'
 
@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const from = houses.length ? Math.min(...houses.map((h) => h.price)) : 0
   return {
     title: { absolute: `Купить дом с участком под Краснодаром — ${houses.length} ${plural(houses.length, 'дом', 'дома', 'домов')} в продаже${from ? ` от ${formatMillions(from)}` : ''} · Хороший дом` },
-    description: 'Готовые кирпичные дома с участком в Динской и Новой Адыгее и все 12 типовых проектов: цены и статусы из прайса застройщика, фильтр по типу, посёлку и бюджету.',
+    description: 'Готовые кирпичные дома с участком в Динской и Новой Адыгее и 15+ планировок: цены и статусы из прайса застройщика, фильтр по типу, посёлку и бюджету.',
     robots: { index: false, follow: false },
     alternates: { canonical: '/catalog' },
   }
@@ -55,7 +55,7 @@ export default async function V4Catalog() {
         area: p.area ?? null,
         bedrooms: p.bedrooms ?? null,
         storeys: p.storeys === 2 ? '2 этажа' : p.mansard ? `1 этаж + мансарда` : '1 этаж',
-        photo: img(p.photo, 'wide'),
+        photo: cleanPhotoUrl(img(p.photo, 'wide')),
         plan: img(p.plan, 'wide'),
         free: mine.length,
         fromPrice: prices.length ? Math.min(...prices) : null,
@@ -74,8 +74,8 @@ export default async function V4Catalog() {
           eyebrow="Каталог домов и проектов"
           ghost="Дома"
           title="Дома в продаже"
-          em="и 12 типов"
-          lead={`${free.length} ${plural(free.length, 'готовый кирпичный дом', 'готовых кирпичных дома', 'готовых кирпичных домов')} с участком (${places.join(', ')}) и 12 собственных типовых проектов. Выберите номер типа или подберите по бюджету и посёлку.`}
+          em="и планировки"
+          lead={`${free.length} ${plural(free.length, 'готовый кирпичный дом', 'готовых кирпичных дома', 'готовых кирпичных домов')} с участком (${places.join(', ')}) и 15+ собственных планировок. Выберите тип или подберите по бюджету и посёлку.`}
         />
         <section className="v3-sec v4-sec" style={{ paddingTop: 0 }}>
           <div className="v3-wrap">

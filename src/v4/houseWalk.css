@@ -35,9 +35,9 @@
 .house-walk__clock { font-variant-numeric: tabular-nums; font-weight: 450; }
 .house-walk__clock i { font-style: normal; margin-inline: 4px; }
 .house-walk__caption { position: absolute; left: var(--walk-gutter); bottom: clamp(24px,3.4vw,62px); max-width: calc(100% - 120px); transition: opacity .5s; }
-.house-walk .house-walk__caption h2 { color: inherit; font: 500 clamp(62px,8.3vw,154px)/.92 var(--f-emo); letter-spacing: -.055em; margin: 0; }
+.v4 .house-walk .house-walk__caption h2 { color: inherit; font: 500 clamp(62px,8.3vw,154px)/.94 var(--f-emo); letter-spacing: -.02em; margin: 0; }
 .house-walk__caption[data-crossing="true"] { opacity: 0; }
-.house-walk__caption h2 em { font-weight: inherit; }
+.v4 .house-walk__caption h2 em { font-weight: inherit; font-style: italic; color: inherit; }
 .house-walk .house-walk__caption p { color: inherit; margin: 14px 0 0; font: 450 12px/1.5 var(--f-ui); }
 .house-walk__play {
   position: absolute; right: var(--walk-gutter); bottom: clamp(24px,3.4vw,62px);

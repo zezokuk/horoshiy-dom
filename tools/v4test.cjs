@@ -81,7 +81,7 @@ async function run(browser, tag, opts) {
     }
     await page.waitForTimeout(700)
     const hasReset = await page.locator('.v4-mflow__reset').isVisible().catch(() => false)
-    const ctaHref = await page.locator('.v4-mflow__zoom-cta a[href="/v4/poselok/dinskaya"]').getAttribute('href').catch(() => '')
+    const ctaHref = await page.locator('.v4-mflow__zoom-cta a[href="/v4/poselok/dinskaya"]').first().getAttribute('href').catch(() => '')
     ok(`${tag}: клик по пину приближает карту и показывает «Смотреть посёлок и генплан»`, hasReset && ctaHref === '/v4/poselok/dinskaya', `${hasReset} ${ctaHref}`)
     if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-06-map-zoomed.jpg`, quality: 75, type: 'jpeg' })
 
@@ -94,7 +94,7 @@ async function run(browser, tag, opts) {
         await page.mouse.move(krBox.x + krBox.width / 2, krBox.y + krBox.height / 2)
         await page.mouse.click(krBox.x + krBox.width / 2, krBox.y + krBox.height / 2)
         await page.waitForTimeout(650)
-        const krHref = await page.locator('.v4-mflow__zoom-cta a').getAttribute('href').catch(() => '')
+        const krHref = await page.locator('.v4-mflow__zoom-cta a').first().getAttribute('href').catch(() => '')
         ok(`${tag}: для 1-домной локации «Красная 39» карта ведёт сразу в карточку дома`, /\/v4\/dom\//.test(krHref || ''), krHref || '')
       }
     }

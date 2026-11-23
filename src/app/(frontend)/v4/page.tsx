@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { getCompany, getEstates, getHouses, getProjects, getRegions } from '@/lib/data'
-import { formatMillions } from '@/lib/format'
+import { annuity, formatMillions } from '@/lib/format'
 import { JsonLd, faqLd, organizationLd } from '@/lib/seo'
 import { byEstateStatus, estateSale, estateView, houseView } from '@/lib/view'
 import { MotionRoot } from '@/v3/motion/MotionRoot'
@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const from = prices.length ? ` от ${formatMillions(Math.min(...prices))}` : ''
   return {
     title: { absolute: 'Купить кирпичный дом с участком под Краснодаром — Хороший дом' },
-    description: `Готовые кирпичные дома с участком в Динской и Новой Адыгее${from}. 12 проектов, семейная ипотека, предчистовая отделка, гарантия 5 лет. Строим с 2014 года.`,
+    description: `Готовые кирпичные дома с участком в Динской и Новой Адыгее${from}. 15+ планировок, 200+ построенных домов, семейная ипотека 6%, предчистовая отделка, гарантия 5 лет. Строим с 2014 года.`,
     robots: { index: false, follow: false },
     alternates: { canonical: '/' },
   }
@@ -46,6 +46,8 @@ export default async function V4Home() {
   const projectOf = (h: (typeof houses)[number]) => (typeof h.project === 'object' ? h.project?.id : h.project)
   const estateOf = (h: (typeof houses)[number]) => (typeof h.estate === 'object' ? h.estate?.id : h.estate)
 
+  const fam = { rate: company.family?.rate ?? 6, years: company.family?.years ?? 30, minDown: company.family?.minDown ?? 20, limit: company.family?.limit ?? 6_000_000 }
+
   // Keep the editorial selection tied to live inventory. Sold or reserved homes fall out immediately.
   const selected = [
     ...featuredCodes.flatMap(code => free.filter(h => h.code === code)),
@@ -56,11 +58,17 @@ export default async function V4Home() {
     // The listing opens on the masonry and porch; the detail opens on the complete facade.
     const shot = h.code === 'di-tip5' ? frames[1] ?? frames[0] : frames[0]
     const [type, ...address] = h.title.split(', ')
+    const need = h.price ? Math.max(fam.minDown, Math.ceil(((h.price - fam.limit) / h.price) * 100)) : fam.minDown
+    const monthlyPay = h.price ? Math.round(annuity(h.price * (1 - need / 100), fam.rate, fam.years)) : null
     return {
       code: h.code,
       location: [h.estateName, address.join(', ').replace('уч. ', 'участок ')].filter(Boolean).join(' · '),
       title: h.mansard ? 'Дом с мансардой' : h.storeys === 2 ? 'Двухэтажный дом' : 'Одноэтажный дом',
       price: h.price, area: h.area, plot: h.plot, mansard: h.mansard,
+      bedrooms: h.bedrooms,
+      projectName: type,
+      monthlyPay,
+      familyRate: fam.rate,
       image: shot?.src ?? h.photo,
       caption: shot?.caption ?? 'Изображение проекта',
       alt: shot?.alt ?? 'Дом по проекту «' + type + '»',
@@ -116,7 +124,6 @@ export default async function V4Home() {
       }
     })
 
-  const fam = { rate: company.family?.rate ?? 6, years: company.family?.years ?? 30, minDown: company.family?.minDown ?? 20, limit: company.family?.limit ?? 6_000_000 }
   const mortHouses: MortgageHouse[] = free.map((h) => ({ code: h.code, label: `${h.title}, ${h.estateName}`, price: h.price }))
 
   const rooms = projects.find(p => p.slug === 'tip-5')?.rooms

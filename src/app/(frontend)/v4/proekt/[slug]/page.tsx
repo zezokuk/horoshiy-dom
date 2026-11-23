@@ -5,7 +5,7 @@ import { getCompany, getHouses, getProject, img, plural } from '@/lib/data'
 import { formatArea, formatMillions } from '@/lib/format'
 import { JsonLd, breadcrumbsLd } from '@/lib/seo'
 import { mainHref } from '@/lib/site'
-import { houseView, roomsView } from '@/lib/view'
+import { cleanPhotoUrl, houseView, roomsView } from '@/lib/view'
 import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { HousePicker, type PickHouse } from '@/v3/home/HousePicker'
 import { StickyCta } from '@/v3/home/StickyCta'
@@ -42,7 +42,7 @@ export default async function V4Project({ params }: Props) {
   if (!p) notFound()
   const [company, all] = await Promise.all([getCompany(), getHouses({ status: 'free' })])
   const mine = all.filter((h) => (typeof h.project === 'object' ? h.project?.id : h.project) === p.id).map(houseView).sort((a, b) => a.price - b.price)
-  const photo = img(p.photo, 'wide')
+  const photo = cleanPhotoUrl(img(p.photo, 'wide'))
   const render = (p.slug === 'tip-5' ? v4img('П1')?.src : undefined) ?? img(p.render, 'wide')
   const plan = img(p.plan, 'wide')
   const rooms = render ? roomsView(p) : []

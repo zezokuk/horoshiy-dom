@@ -31,15 +31,17 @@ const unbounded = Unbounded({ variable: '--font-unbounded', subsets: ['latin', '
 const cormorantDisplay = Cormorant({
   variable: '--font-cormorant-display',
   subsets: ['latin', 'cyrillic'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '500', '600', '700'],
   style: ['normal', 'italic'],
-  preload: false,
+  display: 'swap',
+  preload: true,
 })
 const onest = Onest({
   variable: '--font-onest',
   subsets: ['latin', 'cyrillic'],
   weight: ['400', '500', '600', '700'],
-  preload: false,
+  display: 'swap',
+  preload: true,
 })
 const V2 = ['listva', 'shalfey']
 

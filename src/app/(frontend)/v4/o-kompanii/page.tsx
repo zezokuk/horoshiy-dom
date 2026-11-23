@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { getCompany, getEstates, getHouses, getProjects, img, plural } from '@/lib/data'
+import { getCompany, getEstates, getHouses, img, plural } from '@/lib/data'
 import { estateView } from '@/lib/view'
 import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { StickyCta } from '@/v3/home/StickyCta'
@@ -26,21 +26,24 @@ export const metadata: Metadata = {
 const SKIP = ['Не хуже особняков', 'Дом за 6 месяцев']
 
 export default async function V4About() {
-  const [company, estates, projects, houses] = await Promise.all([getCompany(), getEstates(), getProjects(), getHouses()])
+  const [company, estates, houses] = await Promise.all([getCompany(), getEstates(), getHouses()])
   const views = estates.map((e) => estateView(e, houses))
-  const sold = views.filter((v) => v.status === 'soldOut')
-  const builtSold = sold.reduce((s, v) => s + (v.homes ?? 0), 0)
   const live = views.filter((v) => v.status !== 'planned')
   const f = company.founder
   const founderPhoto = img(f?.photo, 'card')
   const facts = [
-    company.since ? { v: String(company.since), l: 'первый дом — таунхаус' } : null,
-    builtSold ? { v: String(builtSold), l: `${plural(builtSold, 'дом', 'дома', 'домов')} построено и продано в ${sold.map((s) => `«${s.name}»`).join(' и ')}` } : null,
-    { v: String(live.length), l: `${plural(live.length, 'посёлок', 'посёлка', 'посёлков')} под Краснодаром` },
-    { v: String(projects.length), l: `${plural(projects.length, 'проект', 'проекта', 'проектов')} — только свои` },
-    { v: '5 лет', l: 'гарантия на капитальные дефекты' },
-  ].filter((x): x is { v: string; l: string } => x !== null)
-  const principles = (company.advantages ?? []).filter((a) => !SKIP.includes(a.title))
+    { v: '200+', l: 'готовых домов построено и сдано с 2014 года' },
+    { v: '15+', l: 'собственных планировок одно- и двухэтажных домов' },
+    { v: String(company.since || 2014), l: 'год основания — строим только на своей земле' },
+    { v: String(live.length), l: `${plural(live.length, 'посёлок', 'посёлка', 'посёлков')} под Краснодаром и в Адыгее` },
+    { v: '5 лет', l: 'гарантия на конструктив и капитальные дефекты' },
+  ]
+  const principles = (company.advantages ?? [])
+    .filter((a) => !SKIP.includes(a.title))
+    .map((a) => ({
+      ...a,
+      text: (a.text ?? '').replace(/12\s+типовых\s+проектов/gi, 'Более 15 собственных планировок'),
+    }))
 
   return (
     <div className="v3 v4">

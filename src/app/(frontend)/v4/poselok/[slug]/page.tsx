@@ -5,7 +5,7 @@ import { getCompany, getEstate, getHouses, getProjects, img, plural } from '@/li
 import { formatArea, formatMillions } from '@/lib/format'
 import { JsonLd, breadcrumbsLd, estateLd } from '@/lib/seo'
 import { mainHref } from '@/lib/site'
-import { estateSale, estateView, genplanEstate, houseView } from '@/lib/view'
+import { cleanPhotoUrl, estateSale, estateView, genplanEstate, houseView } from '@/lib/view'
 import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { HousePicker, type PickHouse } from '@/v3/home/HousePicker'
 import { StickyCta } from '@/v3/home/StickyCta'
@@ -85,7 +85,7 @@ export default async function V4Estate({ params }: Props) {
         slug: p.slug,
         num: exactNum ? Number(exactNum) : 99,
         name: p.name,
-        photo: img(p.photo, 'wide') ?? sample.photo ?? sample.photoCard,
+        photo: cleanPhotoUrl(img(p.photo, 'wide')) ?? sample.photo ?? sample.photoCard,
         plan: img(p.plan, 'wide') ?? sample.plan,
         area: p.area ?? sample.area ?? null,
         mansard: p.mansard ?? sample.mansard ?? null,
@@ -113,6 +113,7 @@ export default async function V4Estate({ params }: Props) {
         : null,
   ].filter((f): f is { v: string; l: string } => f !== null)
 
+  const hasGenplan = showGenplan && (e.slug === 'dinskaya' || plot.length > 0)
   const hasInfo = (e.nearby ?? []).length > 0 || (e.utilities ?? []).length > 0 || (e.infrastructure ?? []).length > 0 || (e.extras ?? []).length > 0 || Boolean(e.address)
   const engineeringItems = [...(e.utilities ?? []), ...(e.infrastructure ?? []), ...(e.extras ?? [])]
 
@@ -150,12 +151,7 @@ export default async function V4Estate({ params }: Props) {
               </div>
 
               <div className="v4-pik-bar">
-                {hasInfo && (
-                  <a className="v4-pik-btn" href="#o-poselke">
-                    <span>О посёлке</span>
-                  </a>
-                )}
-                {showGenplan ? (
+                {hasGenplan ? (
                   <a className="v4-pik-btn v4-pik-btn--accent" href="#genplan">
                     <span>Генплан посёлка ↓</span>
                   </a>
@@ -164,6 +160,11 @@ export default async function V4Estate({ params }: Props) {
                     <span>Готовый дом в продаже →</span>
                   </a>
                 ) : null}
+                {hasInfo && (
+                  <a className="v4-pik-btn" href="#o-poselke">
+                    <span>О посёлке</span>
+                  </a>
+                )}
                 {estateTypes.length > 0 && (
                   <a className="v4-pik-btn" href="#tipy-poselka">
                     <span>{free.length === 1 ? 'Проект и планировка' : `Типы домов (${estateTypes.length})`}</span>
@@ -197,11 +198,32 @@ export default async function V4Estate({ params }: Props) {
           </div>
         </section>
 
-        {/* 2. Всё о посёлке: окружение, минуты и коммуникации */}
+        {/* 2. Сразу интерактивный генплан (если больше 1 дома или есть полный генплан Динской) */}
+        {hasGenplan && (
+          <section className="v3-sec v3-sec--mist v4-sec v4-estate-genplan" id="genplan">
+            <span className="v4-ghost" aria-hidden>генплан</span>
+            <div className="v3-wrap v4-head" style={{ marginBottom: 20 }}>
+              <p className="v4-num"><b>01</b> / Генплан</p>
+              <h2 className="v3-h2" data-move="lines">Генплан посёлка <em>«{e.name}»</em></h2>
+              <p className="v3-lead" data-move="up">
+                Наведите на участок, чтобы увидеть площадь и стоимость, или нажмите, чтобы открыть дом.
+              </p>
+            </div>
+            <div className="v3-wrap">
+              {e.slug === 'dinskaya' ? (
+                <DinskayaGenplan houses={all} family={fam} hideEstateLink />
+              ) : (
+                <PlotPicker estates={plot} />
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* 3. Всё о посёлке: окружение, минуты и коммуникации */}
         {hasInfo && (
           <section className="v3-sec v4-sec v4-estate-about" id="o-poselke">
             <div className="v3-wrap v4-head" style={{ marginBottom: 20 }}>
-              <p className="v4-num"><b>01</b> / О посёлке</p>
+              <p className="v4-num"><b>{hasGenplan ? '02' : '01'}</b> / О посёлке</p>
               <h2 className="v3-h2" data-move="lines">Всё о <em>посёлке</em></h2>
             </div>
             <div className="v3-wrap v4-estate-info">
@@ -238,27 +260,6 @@ export default async function V4Estate({ params }: Props) {
                     ))}
                   </ul>
                 </div>
-              )}
-            </div>
-          </section>
-        )}
-
-        {/* 3. Интерактивный генплан (только там, где больше 1 дома или есть полный генплан Динской) */}
-        {showGenplan && (e.slug === 'dinskaya' || plot.length > 0) && (
-          <section className="v3-sec v3-sec--mist v4-sec" id="genplan">
-            <span className="v4-ghost" aria-hidden>генплан</span>
-            <div className="v3-wrap v4-head" style={{ marginBottom: 20 }}>
-              <p className="v4-num"><b>02</b> / Генплан</p>
-              <h2 className="v3-h2" data-move="lines">Генплан посёлка <em>«{e.name}»</em></h2>
-              <p className="v3-lead" data-move="up">
-                Наведите на участок, чтобы увидеть площадь и стоимость, или нажмите, чтобы открыть дом.
-              </p>
-            </div>
-            <div className="v3-wrap">
-              {e.slug === 'dinskaya' ? (
-                <DinskayaGenplan houses={all} family={fam} hideEstateLink />
-              ) : (
-                <PlotPicker estates={plot} />
               )}
             </div>
           </section>

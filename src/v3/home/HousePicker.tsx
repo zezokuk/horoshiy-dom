@@ -123,7 +123,7 @@ export function HousePicker({
               className={`v4-pik-btn${mode === 'types' ? ' is-dark' : ''}`}
               onClick={() => setMode('types')}
             >
-              <span>12 типов и планировки</span>
+              <span>Типы и планировки</span>
             </button>
           </div>
         )}
@@ -214,7 +214,7 @@ export function HousePicker({
         <span className="v4-pik-btn v4-pik-btn--accent" aria-live="polite">
           <span>
             {mode === 'types'
-              ? `${projectTypes.length} типовых проектов`
+              ? '15+ планировок проектов'
               : `${list.length} ${word(list.length)}`}
           </span>
         </span>

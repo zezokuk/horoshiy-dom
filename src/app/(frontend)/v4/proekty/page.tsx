@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { getCompany, getHouses, getProjects, img, plural } from '@/lib/data'
+import { cleanPhotoUrl } from '@/lib/view'
 import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { StickyCta } from '@/v3/home/StickyCta'
 import { TypeList, type TypeView } from '@/v4/TypeList'
@@ -11,8 +12,8 @@ import '@/v4/v4.css'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: { absolute: 'Проекты кирпичных домов: от 85 до 168 м² — одноэтажные, с мансардой, двухэтажные · Хороший дом' },
-  description: '12 проектов кирпичных домов с планировками и площадями комнат. Дома каждого проекта, которые продаются сейчас под Краснодаром.',
+  title: { absolute: 'Планировки и проекты кирпичных домов: от 85 до 168 м² — одноэтажные, с мансардой, двухэтажные · Хороший дом' },
+  description: '15+ планировок кирпичных домов с площадями комнат. Готовые дома каждого проекта, которые продаются сейчас под Краснодаром.',
   robots: { index: false, follow: false },
   alternates: { canonical: '/projects' },
 }
@@ -25,7 +26,7 @@ export default async function V4Projects() {
       const prices = mine.map((h) => h.price ?? 0).filter((x) => x > 0)
       return {
         slug: p.slug, name: p.name, area: p.area ?? null, storeys: p.storeys ?? null, bedrooms: p.bedrooms ?? null,
-        photo: img(p.photo, 'wide'), thumb: img(p.photo, 'card'), free: mine.length, from: prices.length ? Math.min(...prices) : null,
+        photo: cleanPhotoUrl(img(p.photo, 'wide')), thumb: cleanPhotoUrl(img(p.photo, 'card')), free: mine.length, from: prices.length ? Math.min(...prices) : null,
         href: `/v4/proekt/${p.slug}`,
       }
     })
@@ -37,7 +38,7 @@ export default async function V4Projects() {
       <V4Fonts />
       <V4Bar phone={company.phone} always />
       <MotionRoot smooth={false}>
-        <V4PageHead eyebrow="Проекты" ghost="Проекты" title={`${types.length} ${plural(types.length, 'проект', 'проекта', 'проектов')}:`}
+        <V4PageHead eyebrow="Проекты и планировки" ghost="Проекты" title="15+ планировок:"
           em={areas.length ? `от ${Math.min(...areas).toLocaleString('ru-RU')} до ${Math.max(...areas).toLocaleString('ru-RU')} м²` : undefined}
           lead="Одноэтажные, с мансардой и двухэтажные. Строим только по своим проектам и только в своих посёлках. Наведите на строку — покажем дом." />
         <section className="v3-sec v3-sec--linen v4-sec" style={{ paddingTop: 40 }}>

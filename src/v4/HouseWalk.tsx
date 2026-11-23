@@ -137,7 +137,7 @@ export function HouseWalk({ href, linkText, areas }: { href: string; linkText: s
       />
       <div className="house-walk__shade" />
       <div className="house-walk__top">
-        <span>Проект «Тип 5» <i /> Визуализация</span>
+        <span>Проект «Тип 5» <i /> Пример интерьера · сдаётся в предчистовой отделке White Box</span>
         <span className="house-walk__clock" aria-hidden="true">{timestamp(time)} <i>/</i> {timestamp(duration)}</span>
       </div>
       <div className="house-walk__caption" data-intro={chapter === 0} data-crossing={chapter === 0 && time > 2}>
