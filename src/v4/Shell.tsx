@@ -43,9 +43,9 @@ export function V4Bar({ phone, always = false, home = '/v4' }: { phone?: string 
 const mapRoute = (address: string) => `https://yandex.ru/maps/?text=${encodeURIComponent(address)}`
 
 /** Финал: с фоном — кубанский вечерний закат со светящимися окнами + форма и контакты. */
-export function V4Final({ company, n, context, title = 'Приезжайте', em = 'на показ', lead, bg, showContacts = false }: {
+export function V4Final({ company, n, context, title = 'Приезжайте', em = 'на показ', lead, bg, showContacts = false, hideOffices = false }: {
   company: Company; n?: string; context: string; title?: string; em?: string; lead?: string
-  bg?: string; showContacts?: boolean
+  bg?: string; showContacts?: boolean; hideOffices?: boolean
 }) {
   const tel = telOf(company.phone)
   return (
@@ -59,7 +59,7 @@ export function V4Final({ company, n, context, title = 'Приезжайте', e
                 {n && <p className="v4-num"><b>{n}</b> / Запись на показ</p>}
                 <h2 className="v3-h2" data-move="lines">{title} <em>{em}</em></h2>
                 <p className="v3-lead" data-move="up">{lead ?? 'Покажем дом и посёлок вживую или по видеосвязи, если вы в другом городе. Ответим про участок, документы и ипотеку.'}</p>
-                {!showContacts && (
+                {!showContacts && !hideOffices && (
                   <>
                     <ul className="v3-offices">{(company.offices ?? []).map((o) => <li key={o.title}><b>{o.title}</b><span>{[o.address, o.hours].filter(Boolean).join(' · ')}</span></li>)}</ul>
                     {company.phone && <p className="v3-final__tel">{company.phone}</p>}
@@ -68,7 +68,7 @@ export function V4Final({ company, n, context, title = 'Приезжайте', e
               </div>
               <div className="v3-final__form" id="evf-form">
                 <LeadForm light cta="Записаться на показ" target={{ interest: 'buy', context, phone: company.phone }} />
-                <p className="v4-form-trust">Перезвоним в рабочее время, без спама · покажем живой дом или проведём видео-тур</p>
+                <p className="v4-form-trust">Перезвоним в рабочее время, без спама · покажем живой дом или проведём видеотур</p>
               </div>
             </div>
           </>
@@ -118,7 +118,7 @@ export function V4Final({ company, n, context, title = 'Приезжайте', e
               <div className="v3-final__form" id="evf-form">
                 <p className="v4-final__form-title">Записаться на показ дома</p>
                 <LeadForm light cta="Записаться на показ" target={{ interest: 'buy', context, phone: company.phone }} />
-                <p className="v4-form-trust">Перезвоним в рабочее время, без спама · покажем живой дом или проведём видео-тур</p>
+                <p className="v4-form-trust">Перезвоним в рабочее время, без спама · покажем живой дом или проведём видеотур</p>
               </div>
             </div>
           </div>
@@ -179,9 +179,11 @@ export function V4PageHead({ eyebrow, ghost, title, em, lead }: { eyebrow: strin
   return (
     <section className="v3-sec v4-sec v4-page-head">
       <span className="v4-ghost" aria-hidden>{ghost.toLowerCase()}</span>
-      <div className="v3-wrap v4-head">
-        <nav className="v4-dom__crumbs" aria-label="Навигация"><a href="/v4">Главная</a><span aria-hidden>/</span><span>{eyebrow}</span></nav>
-        <h1 className="v3-h2 v4-page-head__h1" data-move="lines">{title}{em ? <> <em>{em}</em></> : null}</h1>
+      <div className={`v3-wrap v4-head${lead ? ' v4-page-head__grid' : ''}`}>
+        <div>
+          <nav className="v4-dom__crumbs" aria-label="Навигация"><a href="/v4">Главная</a><span aria-hidden>/</span><span>{eyebrow}</span></nav>
+          <h1 className="v3-h2 v4-page-head__h1" data-move="lines">{title}{em ? <> <em>{em}</em></> : null}</h1>
+        </div>
         {lead && <p className="v3-lead" data-move="up">{lead}</p>}
       </div>
     </section>

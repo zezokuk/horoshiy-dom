@@ -49,7 +49,7 @@ export default async function V4Catalog() {
     estate: h.estateName,
     photo: h.photoCard ?? h.photo,
     href: `/v4/dom/${h.code}`,
-    caption: 'Изображение проекта',
+    caption: /tip[-_]?12|тип\s*12/i.test(h.code + ' ' + h.title) ? 'Визуализация проекта' : 'Изображение проекта',
   }))
 
   const projectOf = (h: (typeof houses)[number]) => (typeof h.project === 'object' ? h.project?.id : h.project)
@@ -66,6 +66,7 @@ export default async function V4Catalog() {
       const estatesSummary = [...byEstate.entries()]
         .map(([name, cnt]) => `${name} (${cnt})`)
         .join(', ')
+      const featured = mine.find((h) => h.estateSlug === 'dinskaya') ?? mine[0]
       return {
         slug: p.slug,
         num: numMatch ? Number(numMatch[0]) : 99,
@@ -77,7 +78,7 @@ export default async function V4Catalog() {
         plan: img(p.plan, 'wide'),
         free: mine.length,
         fromPrice: prices.length ? Math.min(...prices) : null,
-        href: `/v4/proekt/${p.slug}`,
+        href: featured ? `/v4/dom/${featured.code}` : `/v4/proekt/${p.slug}`,
         estatesSummary: estatesSummary || undefined,
       }
     })

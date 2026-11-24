@@ -1,18 +1,45 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { goal } from '@/components/Metrika'
 import './countryLife.css'
 
-const MOMENTS = [
+type LifeMoment = {
+  id: string
+  tag: string
+  hint?: string
+  title: string
+  text: string
+  image: string
+  alt: string
+  speed: number
+  size: 'tall' | 'wide' | 'compact' | 'medium'
+  storyEyebrow: string
+  storyTitle: string
+  storyEm: string
+  storyLead: string
+  storyFact: string
+  storyCta: string
+}
+
+const MOMENTS: readonly LifeMoment[] = [
   {
     id: 'dog',
     tag: '01 · Простор участка',
+    hint: 'Мечтаете о собаке?',
     title: 'Газон, поливалка и счастливая собака',
     text: 'Когда утро начинается не с лифта и парковки во дворе-колодце, а с босых шагов по своей траве.',
     image: '/v4/life/dog-lawn.webp',
-    alt: 'Зелёный газон во дворе собственного кирпичного дома в солнечный день',
+    alt: 'Дети и золотистый ретривер на зелёном газоне собственного кирпичного дома',
     speed: -18,
     size: 'tall',
+    storyEyebrow: 'В своём доме можно позволить себе всё',
+    storyTitle: 'Хотите большую собаку?',
+    storyEm: 'Начните со своего двора',
+    storyLead:
+      'В городской квартире мечту о ретривере откладывают годами: тесно в коридоре, лифт по утрам и прогулки вдоль парковки. На своих сотках достаточно просто открыть дверь на террасу — и выпустить друга бегать по траве.',
+    storyFact: 'Участки ИЖС от 4 до 7,5 соток · закрытый забор по периметру уже готов',
+    storyCta: 'Подобрать дом с участком →',
   },
   {
     id: 'bbq',
@@ -23,6 +50,13 @@ const MOMENTS = [
     alt: 'Открытая терраса кирпичного дома с накрытым столом и видом на зелёный сад',
     speed: 14,
     size: 'wide',
+    storyEyebrow: 'В своём доме можно позволить себе всё',
+    storyTitle: 'Ужины и гости до темноты —',
+    storyEm: 'без брони столика и соседей за стеной',
+    storyLead:
+      'Тёплый южный вечер, запах гриля, большой стол на собственной террасе и разговоры без оглядки на часы. Из кухни-гостиной во двор ведёт отдельный выход.',
+    storyFact: 'Просторные кухни-гостиные до 27 м² с прямым выходом на террасу',
+    storyCta: 'Смотреть дома с террасой →',
   },
   {
     id: 'garden',
@@ -33,6 +67,13 @@ const MOMENTS = [
     alt: 'Утренний завтрак и кофе на террасе с видом на участок',
     speed: -12,
     size: 'compact',
+    storyEyebrow: 'В своём доме можно позволить себе всё',
+    storyTitle: 'Собственный сад, шезлонги',
+    storyEm: 'и абсолютная тишина утром',
+    storyLead:
+      'Посадить черешню или лаванду под окном, поставить качели для детей или бассейн на лето — на своей земле правила устанавливаете только вы.',
+    storyFact: 'Собственная земля ИЖС · прописка, газ и 15 кВт электричества',
+    storyCta: 'Выбрать готовый дом →',
   },
   {
     id: 'kids',
@@ -43,11 +84,29 @@ const MOMENTS = [
     alt: 'Уютное кирпичное крыльцо с открытой дверью в светлую гостиную',
     speed: 18,
     size: 'medium',
+    storyEyebrow: 'В своём доме можно позволить себе всё',
+    storyTitle: 'Своя парковка у крыльца —',
+    storyEm: 'забудьте про круги вокруг двора в 22:00',
+    storyLead:
+      'Ворота, калитка и бетонированное место под автомобиль уже входят в участок. Дети спокойно играют во дворе, а сумки из багажника до кухни — пять шагов.',
+    storyFact: 'Готовые жилые улицы в Динской и Новой Адыгее без сквозного проезда',
+    storyCta: 'Посмотреть дома в продаже →',
   },
-] as const
+]
 
 export function CountryLifeStory() {
   const secRef = useRef<HTMLElement>(null)
+  const [activeId, setActiveId] = useState<string | null>(null)
+  const activeMoment = MOMENTS.find((m) => m.id === activeId) ?? null
+
+  useEffect(() => {
+    if (!activeId) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveId(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [activeId])
 
   useEffect(() => {
     const el = secRef.current
@@ -110,11 +169,40 @@ export function CountryLifeStory() {
 
         <div className="cl-story__grid">
           {MOMENTS.map((m) => (
-            <article key={m.id} data-life-card data-speed={m.speed} className={`cl-card cl-card--${m.size}`}>
+            <article
+              key={m.id}
+              data-life-card
+              data-speed={m.speed}
+              className={`cl-card cl-card--${m.size} cl-card--interactive`}
+              role="button"
+              tabIndex={0}
+              aria-label={`${m.title} — открыть историю`}
+              onClick={() => {
+                setActiveId(m.id)
+                goal(`v4_life_${m.id}`)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  setActiveId(m.id)
+                  goal(`v4_life_${m.id}`)
+                }
+              }}
+            >
               <div className="cl-card__media">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={m.image} alt={m.alt} loading="lazy" decoding="async" />
+                <img src={m.image} alt={m.alt} decoding="async" />
                 <span className="cl-card__tag">{m.tag}</span>
+                {m.hint ? (
+                  <span className="cl-card__hint">
+                    <i aria-hidden />
+                    {m.hint}
+                  </span>
+                ) : (
+                  <span className="cl-card__plus" aria-hidden>
+                    +
+                  </span>
+                )}
               </div>
               <div className="cl-card__body">
                 <h3>{m.title}</h3>
@@ -135,6 +223,53 @@ export function CountryLifeStory() {
           </a>
         </div>
       </div>
+
+      {activeMoment && (
+        <div
+          className="cl-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cl-modal-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setActiveId(null)
+          }}
+        >
+          <div className="cl-modal">
+            <button
+              type="button"
+              className="cl-modal__close"
+              aria-label="Закрыть историю"
+              onClick={() => setActiveId(null)}
+            >
+              ✕
+            </button>
+            <div className="cl-modal__media">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={activeMoment.image} alt={activeMoment.alt} />
+            </div>
+            <div className="cl-modal__body">
+              <p className="cl-modal__eyebrow">{activeMoment.storyEyebrow}</p>
+              <h3 id="cl-modal-title">
+                {activeMoment.storyTitle} <em>{activeMoment.storyEm}</em>
+              </h3>
+              <p className="cl-modal__lead">{activeMoment.storyLead}</p>
+              <p className="cl-modal__fact">{activeMoment.storyFact}</p>
+              <div className="cl-modal__actions">
+                <a
+                  className="v4-pik-btn v4-pik-btn--accent"
+                  href="#doma"
+                  onClick={() => setActiveId(null)}
+                >
+                  <span>{activeMoment.storyCta}</span>
+                </a>
+                <button type="button" className="cl-modal__stay" onClick={() => setActiveId(null)}>
+                  Продолжить просмотр
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }

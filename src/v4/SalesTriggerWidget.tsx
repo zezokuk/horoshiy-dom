@@ -4,15 +4,9 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { goal } from '@/components/Metrika'
 import './salesTrigger.css'
 
-const PROMPTS = [
-  'Помочь подобрать дом под ваш бюджет?',
-  'Есть готовые дома с заездом в этом месяце — показать?',
-  'Отвечу по газу, участку и ипотеке от 6%',
-  'Записать на живой показ или видео-тур?',
-] as const
-
-const OFFER_SEEN_KEY = 'hd_offer_seen_v4'
-const OFFER_CLOSED_KEY = 'hd_offer_closed_v4'
+const SESSION_START_KEY = 'hd_v4_session_started_at'
+const OFFER_SEEN_KEY = 'hd_offer_seen_v5'
+const OFFER_DELAY_MS = 120_000 // ровно 2 минуты нахождения на сайте
 
 function formatPhone(raw: string) {
   const d = raw.replace(/\D/g, '').replace(/^8/, '7').slice(0, 11)
@@ -27,8 +21,6 @@ function formatPhone(raw: string) {
 
 export function SalesTriggerWidget({ phone }: { phone?: string | null }) {
   const [visible, setVisible] = useState(false)
-  const [promptIdx, setPromptIdx] = useState(0)
-  const [bubbleHidden, setBubbleHidden] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
 
   // 3-шаговый мини-подбор
@@ -39,76 +31,70 @@ export function SalesTriggerWidget({ phone }: { phone?: string | null }) {
   const [pickPhone, setPickPhone] = useState('')
   const [pickState, setPickState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
 
-  // Отложенное спецпредложение «В Новый год — в свой дом»
+  // Отложенное спецпредложение через 2 минуты изучения сайта
   const [offerOpen, setOfferOpen] = useState(false)
-  const [offerBadge, setOfferBadge] = useState(false)
   const [offerPhone, setOfferPhone] = useState('')
   const [offerState, setOfferState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
 
   useEffect(() => {
-    const startAt = Date.now()
-    let offered = sessionStorage.getItem(OFFER_SEEN_KEY) === '1'
-    if (sessionStorage.getItem(OFFER_CLOSED_KEY) === '1') {
-      setOfferBadge(true)
+    let startedAt = Number(sessionStorage.getItem(SESSION_START_KEY) || 0)
+    if (!startedAt) {
+      startedAt = Date.now()
+      sessionStorage.setItem(SESSION_START_KEY, String(startedAt))
     }
+    let offered = sessionStorage.getItem(OFFER_SEEN_KEY) === '1'
 
-    const triggerOffer = () => {
-      if (offered) return
+    const openOfferNow = () => {
       offered = true
       sessionStorage.setItem(OFFER_SEEN_KEY, '1')
+      setPickerOpen(false)
       setOfferOpen(true)
       goal('v4_special_offer_show')
     }
 
-    const checkScroll = () => {
-      const y = window.scrollY
-      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
-      const depth = y / maxScroll
-      setVisible(y > Math.min(520, window.innerHeight * 0.72))
-
-      if (!offered && Date.now() - startAt >= 45_000 && depth >= 0.4) {
-        triggerOffer()
-      }
+    // Быстрый показ для демо по ?offer=1 или Alt+O
+    if (new URLSearchParams(window.location.search).get('offer') === '1') {
+      openOfferNow()
     }
 
-    const timer = window.setInterval(() => {
-      if (!offered && Date.now() - startAt >= 45_000) {
-        const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
-        if (window.scrollY / maxScroll >= 0.4) {
-          triggerOffer()
-        }
-      }
-    }, 3000)
+    const checkScroll = () => {
+      setVisible(window.scrollY > Math.min(480, window.innerHeight * 0.68))
+    }
 
-    const onLeave = (e: MouseEvent) => {
-      if (e.clientY <= 8 && window.scrollY > 220 && !offered && window.innerWidth >= 900) {
-        triggerOffer()
+    const elapsed = Date.now() - startedAt
+    const waitMs = Math.max(800, OFFER_DELAY_MS - elapsed)
+    const offerTimer = !offered
+      ? window.setTimeout(() => {
+          if (!offered && !document.hidden) {
+            openOfferNow()
+          }
+        }, waitMs)
+      : undefined
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOfferOpen(false)
+        setPickerOpen(false)
+      }
+      if (e.altKey && (e.key === 'o' || e.key === 'O' || e.key === 'щ' || e.key === 'Щ')) {
+        e.preventDefault()
+        openOfferNow()
       }
     }
 
     checkScroll()
     window.addEventListener('scroll', checkScroll, { passive: true })
-    document.addEventListener('mouseleave', onLeave)
+    window.addEventListener('keydown', onKey)
     return () => {
-      window.clearInterval(timer)
+      if (offerTimer) window.clearTimeout(offerTimer)
       window.removeEventListener('scroll', checkScroll)
-      document.removeEventListener('mouseleave', onLeave)
+      window.removeEventListener('keydown', onKey)
     }
   }, [])
 
-  useEffect(() => {
-    if (!visible || bubbleHidden || pickerOpen) return
-    const id = window.setInterval(() => {
-      setPromptIdx((i) => (i + 1) % PROMPTS.length)
-    }, 20_000)
-    return () => window.clearInterval(id)
-  }, [visible, bubbleHidden, pickerOpen])
-
   const closeOffer = () => {
     sessionStorage.setItem(OFFER_SEEN_KEY, '1')
-    sessionStorage.setItem(OFFER_CLOSED_KEY, '1')
     setOfferOpen(false)
-    setOfferBadge(true)
   }
 
   async function submitPicker(e: FormEvent) {
@@ -156,7 +142,6 @@ export function SalesTriggerWidget({ phone }: { phone?: string | null }) {
       goal('v4_special_offer_submit')
       setOfferState('done')
       sessionStorage.setItem(OFFER_SEEN_KEY, '1')
-      sessionStorage.setItem(OFFER_CLOSED_KEY, '1')
     } catch {
       setOfferState('error')
     }
@@ -165,29 +150,6 @@ export function SalesTriggerWidget({ phone }: { phone?: string | null }) {
   return (
     <>
       <div className={`st-dock${visible ? ' is-visible' : ''}`} aria-live="polite">
-        {visible && !bubbleHidden && !pickerOpen && (
-          <div className="st-bubble" role="status">
-            <button
-              type="button"
-              className="st-bubble__text"
-              onClick={() => {
-                setPickerOpen(true)
-                setBubbleHidden(true)
-              }}
-            >
-              {PROMPTS[promptIdx]}
-            </button>
-            <button
-              type="button"
-              className="st-bubble__close"
-              aria-label="Свернуть подсказку"
-              onClick={() => setBubbleHidden(true)}
-            >
-              ✕
-            </button>
-          </div>
-        )}
-
         {pickerOpen && (
           <div className="st-popover" role="dialog" aria-label="Быстрый подбор дома">
             <div className="st-popover__head">
@@ -280,27 +242,27 @@ export function SalesTriggerWidget({ phone }: { phone?: string | null }) {
                 </button>
               </form>
             )}
+            {pickState !== 'done' && (
+              <button
+                type="button"
+                className="st-popover__promo"
+                onClick={() => {
+                  setPickerOpen(false)
+                  setOfferOpen(true)
+                }}
+              >
+                <span>Дом месяца в Новой Адыгее</span>
+                <b>13,5 млн ₽ →</b>
+              </button>
+            )}
           </div>
         )}
 
         <div className="st-pills">
-          {offerBadge && !offerOpen && (
-            <button
-              type="button"
-              className="st-offer-chip"
-              onClick={() => setOfferOpen(true)}
-              title="Открыть спецпредложение −1,5 млн ₽"
-            >
-              −1,5 млн ₽
-            </button>
-          )}
           <button
             type="button"
             className={`st-helper${pickerOpen ? ' is-open' : ''}`}
-            onClick={() => {
-              setPickerOpen((v) => !v)
-              setBubbleHidden(true)
-            }}
+            onClick={() => setPickerOpen((v) => !v)}
             aria-expanded={pickerOpen}
           >
             <span className="st-dot" aria-hidden />
@@ -310,7 +272,15 @@ export function SalesTriggerWidget({ phone }: { phone?: string | null }) {
       </div>
 
       {offerOpen && (
-        <div className="st-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="st-offer-title">
+        <div
+          className="st-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="st-offer-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) closeOffer()
+          }}
+        >
           <div className="st-modal">
             <button type="button" className="st-modal__close" onClick={closeOffer} aria-label="Закрыть спецпредложение">
               ✕
@@ -318,14 +288,14 @@ export function SalesTriggerWidget({ phone }: { phone?: string | null }) {
             <div className="st-modal__media">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/v4/houses/type10-entry.webp" alt="Готовый кирпичный дом в Новой Адыгее" />
-              <span className="st-modal__save">Выгода 1 500 000 ₽</span>
+              <span className="st-modal__save">Закрытые условия декабря</span>
             </div>
             <div className="st-modal__body">
-              <p className="st-modal__eyebrow">Персональное спецпредложение · акция</p>
+              <p className="st-modal__eyebrow">Специальный лот · Новая Адыгея</p>
               <h2 id="st-offer-title">
                 В Новый год — <em>в свой дом</em>
               </h2>
-              <p className="st-modal__place">Готовый кирпичный дом · ИЖС · Газ · Новая Адыгея</p>
+              <p className="st-modal__place">Готовый кирпичный дом с участком ИЖС и газом — один лот на специальных условиях до конца месяца.</p>
 
               <div className="st-modal__pricebox">
                 <div>

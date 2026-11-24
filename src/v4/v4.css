@@ -190,7 +190,11 @@ html.past-hero .v4-bar, .v4-bar--always { transform: none }
 .v4 .v3-h2 { font-family: var(--f-emo); font-weight: 500; text-transform: none; font-size: clamp(34px, 4.1vw, 54px); line-height: 1.06; letter-spacing: -.015em; color: var(--umber); max-width: 22ch; margin: 10px 0 14px }
 .v4 .v3-h2 em { text-transform: none; font-style: italic; font-weight: 500; color: var(--leaf) }
 .v4 .v3-lead { font-size: 16px; line-height: 1.55; color: var(--moss); max-width: 58ch }
-.v4-page-head { padding-top: calc(68px + clamp(40px, 6vw, 88px)) }
+.v4-page-head { padding-top: calc(68px + clamp(32px, 4.8vw, 68px)); padding-bottom: clamp(24px, 3vw, 42px) !important }
+.v4-page-head + .v4-sec { padding-top: clamp(24px, 3.2vw, 46px) }
+.v4-page-head__grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr); gap: clamp(20px, 4vw, 56px); align-items: end }
+.v4-page-head__grid .v3-lead { margin: 0 0 6px; max-width: 48ch }
+@media (max-width: 900px) { .v4-page-head__grid { grid-template-columns: 1fr; gap: 12px } }
 
 /* ---------- Единая бесшовная сцена 1 → 2 → 3 (Ночь/Утро → дневной 3D с ландшафтом → длинная плавная пролётка «про нас») ---------- */
 .v4-story3d { position: relative; height: 880vh; background: #f4f3ee }
@@ -738,10 +742,15 @@ html.past-hero .v4-bar, .v4-bar--always { transform: none }
 .v4 .v4-mort__cta span { color: #1b3a24 !important }
 .v4-mort__out .v3-note { color: rgba(255,255,255,.78); margin: 0 }
 .v4-mort-more { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px }
-.v4 .v4-progs { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 12px; margin-top: 20px }
-.v4-progs li { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 4px }
+.v4 .v4-progs { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 22px }
+@media (max-width: 960px) { .v4 .v4-progs { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+@media (max-width: 580px) { .v4 .v4-progs { grid-template-columns: 1fr } }
+.v4-progs li { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 20px 22px; display: grid; gap: 6px; box-shadow: 0 8px 24px rgba(23,34,27,.04) }
 .v4-progs b { font: 600 16px var(--f-ui); color: var(--ink) }
-.v4-progs span { font-size: 14px; color: var(--moss) }
+.v4-progs span { font-size: 14px; color: var(--moss); line-height: 1.48 }
+.v4-faq-split { display: grid; grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); gap: clamp(24px, 4.5vw, 60px); align-items: start }
+.v4-faq-split .v4-faq { margin-top: 0 }
+@media (max-width: 900px) { .v4-faq-split { grid-template-columns: 1fr; gap: 20px } }
 .v4-steps-wrap { margin-top: clamp(44px, 6vw, 76px) }
 .v4 .v4-steps { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 0; margin-top: 26px }
 .v4-steps li { padding: 20px 20px 20px 0; border-top: 1px solid var(--ink) }
@@ -807,7 +816,7 @@ html.past-hero .v4-bar, .v4-bar--always { transform: none }
   color: var(--ink);
 }
 .v4-final__form-title { margin: 0 0 12px; font: 500 26px/1.1 var(--f-emo); color: var(--forest) }
-.v4-form-trust { margin-top: 10px; font-size: 12px; line-height: 1.4; color: var(--moss); text-align: center }
+.v4-form-trust { margin-top: 10px; font-size: 12px; line-height: 1.4; color: var(--moss); text-align: center; text-wrap: balance }
 @media (max-width: 960px) {
   .v4-final__pane { height: clamp(380px, 60svh, 520px) }
   .v4-final__copy { top: 8cqh }
@@ -927,6 +936,11 @@ html.past-hero .v4-bar, .v4-bar--always { transform: none }
 .v4-estate-genplan { padding-top: clamp(32px, 4.5vw, 56px); padding-bottom: clamp(40px, 5vw, 68px) }
 .v4-estate-hero .v3-wrap { position: relative; z-index: 1 }
 .v4-estate-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; margin-bottom: 20px }
+.v4-estate-top--split { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap: clamp(20px, 4vw, 52px); align-items: end; margin-bottom: 24px }
+.v4-estate-top--split .v4-estate-desc { margin-top: 6px; max-width: 56ch }
+.v4-estate-about--below { padding-block: clamp(36px, 4.5vw, 58px) !important }
+.v4-estate-about--below + .v4-estate-about { padding-top: clamp(16px, 2.5vw, 28px) !important }
+@media (max-width: 860px) { .v4-estate-top--split { grid-template-columns: 1fr; gap: 12px } }
 .v4-estate-top__text { max-width: 68ch }
 .v4-estate-desc { margin-top: 10px; font-size: 15px; line-height: 1.55; color: var(--moss); max-width: 62ch }
 .v4-estate-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px }

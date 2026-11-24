@@ -22,8 +22,10 @@ const interiorFrames: HouseFrame[] = [
 
 const type5: HouseFrame[] = [
   { src: '/v4/houses/type5-front.webp', alt: 'Главный фасад кирпичного дома с крытым крыльцом', caption: 'Главный фасад · Дом по проекту «Тип 5»' },
-  { src: '/v4/houses/type5-side.webp', alt: 'Боковой фасад с высоким окном и входом под навесом', caption: 'Боковой фасад · Дом по проекту «Тип 5»' },
-  { src: '/v4/houses/type5-entry.webp', alt: 'Крыльцо и кирпичная кладка со стороны калитки', caption: 'Вход и двор · Дом по проекту «Тип 5»' },
+  { src: '/v4/houses/type5-side.webp', alt: 'Боковой фасад с высоким окном и входом под навесом', caption: 'Боковой фасад · Вид со двора и кладка' },
+  { src: '/v4/houses/type5-entry.webp', alt: 'Крыльцо и кирпичная кладка со стороны калитки', caption: 'Входная группа · Крыльцо и калитка' },
+  { src: '/v4/img/in-porch.webp', alt: 'Подход к дому, благоустроенная дорожка и участок', caption: 'Участок и подход · Благоустроенный двор' },
+  { src: '/v4/img/in-hall.webp', alt: 'Пример интерьера светлой прихожей с выходом в гостиную', caption: 'Пример интерьера · Прихожая (дом сдаётся в White Box)' },
   ...interiorFrames,
 ]
 
@@ -47,8 +49,11 @@ const photosByCode: Record<string, HouseFrame[]> = {
   ],
 }
 
-export function housePhotography(code: string): readonly HouseFrame[] {
-  return photosByCode[code] ?? []
+export function housePhotography(code: string, projectSlug?: string | null): readonly HouseFrame[] {
+  if (photosByCode[code]) return photosByCode[code]
+  if (projectSlug?.startsWith('tip-5') || /tip5/i.test(code)) return type5
+  if (projectSlug?.startsWith('tip-6') || /tip6/i.test(code)) return type6v3
+  return []
 }
 
 export function fallbackHouseFrames(typeName: string, primaryPhoto?: string | null, extraPhoto?: string | null): HouseFrame[] {

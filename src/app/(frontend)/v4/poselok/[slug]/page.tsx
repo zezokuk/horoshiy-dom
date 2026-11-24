@@ -173,10 +173,12 @@ export default async function V4Estate({ params }: Props) {
 
             <section className="v3-sec v4-sec v4-estate-about--below">
               <div className="v3-wrap">
-                <div className="v4-estate-top">
-                  <div className="v4-estate-top__text">
+                <div className="v4-estate-top v4-estate-top--split">
+                  <div className="v4-estate-top__head">
                     <p className="v4-num"><b>01</b> / Паспорт посёлка</p>
                     <h2 className="v3-h2" data-move="lines">Посёлок <em>«{e.name}»</em></h2>
+                  </div>
+                  <div className="v4-estate-top__copy">
                     <p className="v4-dom__where">
                       {[e.kind || 'Коттеджный посёлок', e.place].filter(Boolean).join(' · ')}
                       {e.tagline ? ` — ${e.tagline}` : ''}
