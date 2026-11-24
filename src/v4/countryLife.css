@@ -21,7 +21,7 @@
   font: 500 clamp(40px, 4.8vw, 76px)/.98 var(--f-emo);
   letter-spacing: -.02em;
   color: var(--forest);
-  margin: 10px 0 0;
+  margin: 0;
   max-width: 18ch;
 }
 .v4 .cl-story__h2 em { font-style: italic; font-weight: 500; color: var(--leaf); }
@@ -38,23 +38,13 @@
   gap: clamp(16px, 2vw, 28px);
   align-items: start;
 }
-.cl-card {
-  background: #ffffff;
-  border: 1px solid var(--line);
-  border-radius: 22px;
-  overflow: hidden;
-  box-shadow: 0 14px 36px rgba(23, 34, 27, .06);
-  transform: translate3d(0, var(--life-y, 0px), 0);
-  transition: transform .35s cubic-bezier(.2, .75, .2, 1), box-shadow .3s ease, border-color .25s ease;
-  will-change: transform;
-}
-.cl-card:hover { border-color: rgba(46, 107, 69, .38); box-shadow: 0 22px 48px rgba(23, 34, 27, .11); }
+.cl-card { min-width: 0; }
 .cl-card--tall { grid-column: span 5; }
 .cl-card--wide { grid-column: span 7; margin-top: clamp(0px, 2.4vw, 34px); }
-.cl-card--compact { grid-column: span 6; margin-top: clamp(0px, -1vw, -12px); }
-.cl-card--medium { grid-column: span 6; margin-top: clamp(0px, 1.6vw, 22px); }
+.cl-card--compact { grid-column: 2 / span 5; }
+.cl-card--medium { grid-column: 7 / span 6; margin-top: clamp(0px, 1.6vw, 22px); }
 
-.cl-card__media { position: relative; overflow: hidden; background: #e6e4dc; }
+.cl-card__media { position: relative; overflow: hidden; background: #e6e4dc; border-radius: 6px; }
 .cl-card--tall .cl-card__media { aspect-ratio: 4 / 3.4; }
 .cl-card--wide .cl-card__media { aspect-ratio: 16 / 9.6; }
 .cl-card--compact .cl-card__media { aspect-ratio: 16 / 10; }
@@ -62,20 +52,13 @@
 
 .cl-card__media img {
   width: 100%; height: 100%; object-fit: cover; display: block;
-  transform: scale(1.03);
-  transition: transform 1.1s cubic-bezier(.22, .78, .2, 1);
 }
 .cl-card--tall .cl-card__media img {
   object-position: 92% center;
 }
-.cl-card.is-inview .cl-card__media img { transform: scale(1); }
-@media (hover: hover) { .cl-card:hover .cl-card__media img { transform: scale(1.045); } }
-.cl-card__tag {
-  position: absolute; left: 14px; top: 14px; padding: 6px 13px; border-radius: 999px;
-  background: rgba(250, 249, 245, .92); backdrop-filter: blur(10px);
-  border: 1px solid rgba(27, 58, 36, .14); font: 600 11.5px/1.2 var(--f-ui); letter-spacing: .04em; color: var(--forest);
-}
-.cl-card__body { padding: clamp(18px, 2vw, 26px); display: grid; gap: 6px; }
+.cl-card.is-inview .cl-card__media img { animation: country-photo-settle 1.2s cubic-bezier(.2,.7,.25,1) both; }
+@keyframes country-photo-settle { from { transform: scale(1.035); } to { transform: none; } }
+.cl-card__body { padding: 14px 0 8px; display: grid; gap: 5px; }
 .v4 .cl-card__body h3 { margin: 0; font: 500 clamp(24px, 2.2vw, 32px)/1.08 var(--f-emo); color: var(--ink); }
 .cl-card__body p { margin: 0; font: 400 14.5px/1.52 var(--f-ui); color: var(--moss); max-width: 52ch; }
 
@@ -83,12 +66,6 @@
   margin-top: clamp(26px, 3.2vw, 44px); padding-top: 20px; border-top: 1px solid var(--line);
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
 }
-.cl-story__pills { display: flex; flex-wrap: wrap; gap: 8px; }
-.cl-story__pills span {
-  padding: 7px 14px; border-radius: 999px; background: #ffffff; border: 1px solid var(--line);
-  font: 500 13px/1.2 var(--f-ui); color: var(--forest);
-}
-
 /* Selling блок ипотеки на главной: светлые архитектурные карточки без массивной тёмной плашки */
 .v4-home-mort { display: grid; gap: 20px; margin-top: 18px; }
 .v4-home-mort__intro {
@@ -127,5 +104,7 @@
   .v4-home-mort__metrics, .v4-home-mort__grid { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cl-card, .cl-card__media img { transform: none !important; transition: none !important; }
+  .cl-card, .cl-card__media img { transform: none !important; transition: none !important; animation: none !important; }
 }
+
+html.no-motion .cl-card.is-inview .cl-card__media img { animation: none; }

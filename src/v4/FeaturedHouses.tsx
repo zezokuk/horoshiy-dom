@@ -15,6 +15,8 @@ export type FeaturedHouse = {
   bedrooms?: number | null
   projectName?: string
   monthlyPay?: number | null
+  mortgageDown?: number
+  mortgageYears?: number
   familyRate?: number
   image?: string
   caption: string
@@ -48,18 +50,12 @@ export function FeaturedHouses({ houses, count }: { houses: FeaturedHouse[]; cou
     if (!el) return
     const cards = Array.from(el.querySelectorAll<HTMLElement>('.fh-slide'))
     if (!cards.length) return
-    const scrollCenter = el.scrollLeft + el.clientWidth * 0.36
-    let best = 0
-    let bestDist = Infinity
-    cards.forEach((card, i) => {
-      const dist = Math.abs(card.offsetLeft - scrollCenter + card.offsetWidth * 0.3)
-      if (dist < bestDist) {
-        bestDist = dist
-        best = i
-      }
-    })
-    setIndex(Math.min(best, Math.max(0, houses.length - 1)))
-  }, [houses.length])
+    const left = el.getBoundingClientRect().left
+    const index = cards.reduce((nearest, card, i) => (
+      Math.abs(card.getBoundingClientRect().left - left) < Math.abs(cards[nearest].getBoundingClientRect().left - left) ? i : nearest
+    ), 0)
+    setIndex(index)
+  }, [])
 
   useEffect(() => {
     const el = trackRef.current
@@ -75,7 +71,8 @@ export function FeaturedHouses({ houses, count }: { houses: FeaturedHouse[]; cou
     const cards = el.querySelectorAll<HTMLElement>('.fh-slide')
     const target = cards[nextIdx]
     if (target) {
-      el.scrollTo({ left: target.offsetLeft, behavior: 'smooth' })
+      const left = el.scrollLeft + target.getBoundingClientRect().left - el.getBoundingClientRect().left
+      el.scrollTo({ left, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
       setIndex(nextIdx)
     }
   }
@@ -88,7 +85,7 @@ export function FeaturedHouses({ houses, count }: { houses: FeaturedHouse[]; cou
             <h2 id="fh-title">
               Дома <em>в продаже</em>
             </h2>
-            <p className="fh-sub">Листайте вправо, чтобы сравнить готовые дома и планировки</p>
+            <p className="fh-sub">Цена каждого дома включает участок.</p>
           </div>
           <div className="fh-head-right">
             {houses.length > 1 && (
@@ -106,7 +103,7 @@ export function FeaturedHouses({ houses, count }: { houses: FeaturedHouse[]; cou
                 </div>
               </div>
             )}
-            <a className="fh-all" href="/v4/doma">
+            <a className="fh-all" href="/v4/doma?view=houses">
               {count ? 'Все ' + count + ' ' + plural(count, 'дом', 'дома', 'домов') : 'В каталог'} <Arrow />
             </a>
           </div>
@@ -118,6 +115,7 @@ export function FeaturedHouses({ houses, count }: { houses: FeaturedHouse[]; cou
             className="fh-rail"
             role="region"
             aria-label="Свободные дома в продаже"
+            onDragStart={e => e.preventDefault()}
             onMouseDown={(e) => {
               const el = trackRef.current
               if (!el || e.button !== 0) return
@@ -200,33 +198,32 @@ export function FeaturedHouses({ houses, count }: { houses: FeaturedHouse[]; cou
                         )}
                         {house.monthlyPay && (
                           <div>
-                            <dt>Ипотека {house.familyRate ?? 6}%</dt>
-                            <dd>от {house.monthlyPay.toLocaleString('ru-RU')} ₽/мес</dd>
+                            <dt>Семейная ипотека · {house.familyRate}%</dt>
+                            <dd><a href={href + '#ipoteka'} aria-label={'Рассчитать ипотеку, ' + house.location}>≈ {house.monthlyPay.toLocaleString('ru-RU')} ₽/мес</a></dd>
                           </div>
                         )}
                       </dl>
+                      {house.monthlyPay && <p className="fh-terms">При взносе {house.mortgageDown}% на {house.mortgageYears} {plural(house.mortgageYears ?? 0, 'год', 'года', 'лет')}</p>}
                     </div>
                     <div className="fh-card-foot">
                       <a className="fh-open" href={href}>
                         Открыть дом <Arrow />
                       </a>
-                      <span className="fh-card-idx">
-                        {String(i + 1).padStart(2, '0')} / {String(houses.length).padStart(2, '0')}
-                      </span>
+
                     </div>
                   </div>
                 </article>
               )
             })}
 
-            <a className="fh-more-card" href="/v4/doma">
+            <a className="fh-more-card" href="/v4/doma?view=houses">
               <span className="fh-more-eyebrow">Каталог и планировки</span>
               <h3>
                 Все свободные дома <em>в каталоге</em>
               </h3>
               <p>
                 {count
-                  ? `${count} ${plural(count, 'готовый дом', 'готовых дома', 'готовых домов')} в продаже и 15+ собственных планировок с выбором по посёлку и бюджету.`
+                  ? `${count} ${plural(count, 'готовый дом', 'готовых дома', 'готовых домов')} в продаже. Подберите по посёлку и бюджету.`
                   : 'Все готовые дома и планировки с выбором по посёлку и бюджету.'}
               </p>
               <span className="fh-more-btn">

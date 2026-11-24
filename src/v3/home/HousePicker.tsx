@@ -1,6 +1,8 @@
 'use client'
 
-import { useMemo, useRef, useState, type FormEvent } from 'react'
+import { useMemo, useRef, useState } from 'react'
+import { LeadForm } from '@/components/LeadForm'
+import { plural } from '@/lib/format'
 import '@/v4/catalogV4.css'
 
 export type PickHouse = {
@@ -46,29 +48,20 @@ const typeNumOf = (title: string): number | null => {
   return m ? Number(m[1]) : null
 }
 
-function formatRuPhone(raw: string) {
-  const d = raw.replace(/\D/g, '').replace(/^8/, '7').slice(0, 11)
-  const n = d.startsWith('7') ? d.slice(1) : d
-  let out = '+7'
-  if (n.length) out += ` (${n.slice(0, 3)}`
-  if (n.length >= 3) out += `) ${n.slice(3, 6)}`
-  if (n.length >= 6) out += `-${n.slice(6, 8)}`
-  if (n.length >= 8) out += `-${n.slice(8, 10)}`
-  return out
-}
-
 export function HousePicker({
   houses,
   projectTypes = [],
   catalogHref,
   grid = false,
   typeFilter = false,
+  initialMode = 'types',
 }: {
   houses: PickHouse[]
   projectTypes?: PickProjectType[]
   catalogHref: string
   grid?: boolean
   typeFilter?: boolean
+  initialMode?: 'types' | 'houses'
 }) {
   const estates = useMemo(() => [...new Set(houses.map((h) => h.estate))], [houses])
   const availableTypeNums = useMemo(() => {
@@ -84,12 +77,10 @@ export function HousePicker({
   }, [houses, projectTypes])
 
   // Когда переданы уникальные типы проектов (/v4/doma), по умолчанию открыт путь «Выбрать тип дома» без дублей
-  const [mode, setMode] = useState<'types' | 'houses'>(projectTypes.length > 0 ? 'types' : 'houses')
+  const [mode, setMode] = useState<'types' | 'houses'>(projectTypes.length > 0 ? initialMode : 'houses')
   const [estate, setEstate] = useState<string>('all')
   const [budget, setBudget] = useState('all')
   const [typeNum, setTypeNum] = useState<number | 'all'>('all')
-  const [waitPhone, setWaitPhone] = useState('')
-  const [waitState, setWaitState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   const strip = useRef<HTMLDivElement>(null)
 
   const b = BUDGETS.find((x) => x.id === budget)!
@@ -107,33 +98,9 @@ export function HousePicker({
     [projectTypes, typeNum],
   )
 
-  const minPrice = list.length ? Math.min(...list.map((h) => h.price)) : 7_900_000
-  const maxPrice = list.length ? Math.max(...list.map((h) => h.price)) : 12_900_000
-  const scroll = (dir: number) => strip.current?.scrollBy({ left: dir * strip.current.clientWidth * 0.8, behavior: 'smooth' })
-
-  async function submitWaitlist(e: FormEvent) {
-    e.preventDefault()
-    if (waitPhone.replace(/\D/g, '').length < 11) return
-    setWaitState('sending')
-    try {
-      const res = await fetch('/api/leads/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: 'Лист ожидания · Нововеличковская',
-          phone: waitPhone,
-          interest: 'future',
-          estate: 'novovelichkovskaya',
-          context: 'Каталог v4: лист ожидания Нововеличковская (скоро старт продаж)',
-          page: window.location.href,
-        }),
-      })
-      if (!res.ok) throw new Error('status')
-      setWaitState('done')
-    } catch {
-      setWaitState('error')
-    }
-  }
+  const minPrice = list.length ? Math.min(...list.map((h) => h.price)) : 0
+  const maxPrice = list.length ? Math.max(...list.map((h) => h.price)) : 0
+  const scroll = (dir: number) => strip.current?.scrollBy({ left: dir * strip.current.clientWidth * 0.8, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
 
   return (
     <div className="v3-pick v4-catalog-pick">
@@ -147,7 +114,7 @@ export function HousePicker({
               className={`v4-pik-btn${mode === 'types' ? ' is-dark' : ''}`}
               onClick={() => setMode('types')}
             >
-              <span>Выбрать тип дома</span>
+              <span>Проекты и планировки</span>
             </button>
             <button
               type="button"
@@ -156,7 +123,7 @@ export function HousePicker({
               className={`v4-pik-btn${mode === 'houses' ? ' is-dark' : ''}`}
               onClick={() => setMode('houses')}
             >
-              <span>Где купить (по посёлкам) · {houses.length}</span>
+              <span>Готовые дома · {houses.length}</span>
             </button>
           </div>
         )}
@@ -188,7 +155,7 @@ export function HousePicker({
 
         {mode === 'houses' && (
           <>
-            <div className="v4-pik-pricepill" role="group" aria-label="Диапазон цены">
+            {list.length > 0 && <div className="v4-pik-pricepill" role="group" aria-label="Диапазон цены">
               <span className="v4-pik-pricepill__half">
                 <small>от</small> <b>{minPrice.toLocaleString('ru-RU')} ₽</b>
               </span>
@@ -196,7 +163,7 @@ export function HousePicker({
               <span className="v4-pik-pricepill__half">
                 <small>до</small> <b>{maxPrice.toLocaleString('ru-RU')} ₽</b>
               </span>
-            </div>
+            </div>}
 
             {BUDGETS.slice(1).map((x) => (
               <button
@@ -266,7 +233,7 @@ export function HousePicker({
             <b>Проект «{activeProject.name}»</b>
             <span>
               {activeProject.area ? `${activeProject.area} м² · ` : ''}
-              {activeProject.bedrooms ? `${activeProject.bedrooms} спальни · ` : ''}
+              {activeProject.bedrooms ? `${activeProject.bedrooms} ${plural(activeProject.bedrooms, 'спальня', 'спальни', 'спален')} · ` : ''}
               {activeProject.storeys}
             </span>
           </div>
@@ -303,7 +270,7 @@ export function HousePicker({
                   {p.area ? ` · ${p.area.toLocaleString('ru-RU')} м²` : ''}
                 </h3>
                 <p>
-                  {p.bedrooms ? `${p.bedrooms} спальни · ` : ''}
+                  {p.bedrooms ? `${p.bedrooms} ${plural(p.bedrooms, 'спальня', 'спальни', 'спален')} · ` : ''}
                   {p.storeys}
                 </p>
                 {p.estatesSummary && <p className="v4-type-card__where">Где купить сейчас: {p.estatesSummary}</p>}
@@ -326,27 +293,7 @@ export function HousePicker({
                   Готовим новые участки ИЖС с проверенными проектами кирпичных домов. Оставьте номер — первыми сообщим о старте продаж и открытии бронирования по стартовым ценам.
                 </p>
               </div>
-              {waitState === 'done' ? (
-                <div className="v4-pik-waitlist__done">
-                  Готово! Мы добавили ваш номер в лист ожидания по посёлку «Нововеличковская».
-                </div>
-              ) : (
-                <form className="v4-pik-waitlist__form" onSubmit={submitWaitlist}>
-                  <input
-                    type="tel"
-                    inputMode="tel"
-                    placeholder="+7 (___) ___-__-__"
-                    aria-label="Телефон для записи в лист ожидания Нововеличковской"
-                    value={waitPhone}
-                    onChange={(e) => setWaitPhone(formatRuPhone(e.target.value))}
-                    required
-                  />
-                  <button type="submit" className="v4-pik-btn v4-pik-btn--accent" disabled={waitState === 'sending'}>
-                    <span>{waitState === 'sending' ? 'Отправляем…' : 'В лист ожидания'}</span>
-                  </button>
-                  {waitState === 'error' && <small>Не удалось отправить — попробуйте ещё раз.</small>}
-                </form>
-              )}
+              <LeadForm light cta="Встать в лист ожидания" target={{ estate: 'novovelichkovskaya', interest: 'future', context: 'Лист ожидания · Нововеличковская' }} />
             </div>
           )}
 
@@ -396,7 +343,9 @@ export function HousePicker({
                 )}
               </div>
             ) : (
-              <p className="v3-empty">Под этот выбор свободных домов сейчас нет. Сбросьте фильтр или оставьте телефон ниже — подберём из новых.</p>
+              <div className="v3-empty"><p>Свободных домов с такими параметрами пока нет.</p>
+                <button type="button" className="v4-pik-btn" onClick={() => { setBudget('all'); setEstate('all'); setTypeNum('all') }}>Сбросить фильтры</button>
+              </div>
             ))}
         </>
       )}

@@ -54,7 +54,7 @@
 }
 .house-walk__top span:first-child { display: inline-flex; align-items: center; gap: 12px; }
 .house-walk__top span:first-child i { width: 28px; height: 1px; background: currentColor; }
-.house-walk__clock { font-variant-numeric: tabular-nums; font-weight: 450; }
+.house-walk__clock { white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 450; }
 .house-walk__clock i { font-style: normal; margin-inline: 4px; }
 .house-walk__caption { position: absolute; left: var(--walk-gutter); bottom: clamp(24px,3.4vw,62px); max-width: calc(100% - 120px); transition: opacity .5s; }
 .v4 .house-walk .house-walk__caption h2 { color: inherit; font: 500 clamp(62px,8.3vw,154px)/.94 var(--f-emo); letter-spacing: -.02em; margin: 0; }
@@ -100,7 +100,7 @@
   .house-walk__top span:first-child { gap: 7px; }
   .house-walk__top span:first-child i { width: 14px; }
   .house-walk__caption { max-width: calc(100% - 94px); }
-  .house-walk .house-walk__caption h2 { font-size: clamp(46px,11.8vw,80px); }
+  .v4 .house-walk .house-walk__caption h2 { font-size: clamp(40px,11vw,70px); }
   .house-walk .house-walk__caption p { font-size: 11px; margin-top: 10px; }
   .house-walk__deck { flex-wrap: wrap; gap: 0; padding: 12px var(--walk-gutter) 8px; }
   .house-walk__chapters { flex-basis: 100%; gap: 7px; }
@@ -128,7 +128,7 @@ html.no-motion .house-walk__room { animation: none; }
   .house-walk__thumb { display: none; }
 }
 @media (max-width: 640px) and (max-aspect-ratio: 63/100) {
-  .house-walk__caption[data-intro="true"] { bottom: auto; top: 17%; max-width: calc(100% - 40px); color: #173223; }
+  .house-walk__caption[data-intro="true"] { bottom: auto; top: 22%; inset-inline: var(--walk-gutter); max-width: none; text-align: center; color: #173223; }
   .house-walk__caption[data-intro="true"] h2,
   .house-walk__caption[data-intro="true"] p { text-shadow: 0 1px 7px #fff6e6b3; }
 }

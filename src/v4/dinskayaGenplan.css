@@ -107,27 +107,6 @@
   fill: #17221b;
 }
 
-/* Пины инфраструктуры */
-.np-gp__infra-pin {
-  cursor: pointer;
-}
-.np-gp__infra-pin circle {
-  fill: #ffffff;
-  stroke: #1b3a24;
-  stroke-width: 1.1;
-  transition: transform .18s ease, fill .18s ease;
-}
-.np-gp__infra-pin.is-on circle,
-.np-gp__infra-pin:hover circle {
-  fill: #e8f2eb;
-  stroke: #2e6b45;
-  stroke-width: 1.5;
-}
-.np-gp__infra-pin text {
-  font-size: 7.5px;
-  pointer-events: none;
-}
-
 /* Верхний левый контрол: пилюля «Показать список (17)» + ховер-тултип */
 .np-gp__top-left {
   position: absolute;
@@ -342,29 +321,8 @@
   cursor: pointer;
   box-shadow: 0 8px 22px rgba(14, 24, 18, .12);
 }
-.np-gp__switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.np-gp__switch-track {
-  position: relative;
-  width: 34px;
-  height: 20px;
-  border-radius: 999px;
-  background: #cdd2c5;
-  transition: background .2s ease;
-}
-.np-gp__switch-track::after {
-  content: '';
-  position: absolute;
-  left: 2px;
-  top: 2px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #ffffff;
-  transition: transform .2s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, .18);
-}
-.np-gp__switch input:checked + .np-gp__switch-track { background: var(--leaf); }
-.np-gp__switch input:checked + .np-gp__switch-track::after { transform: translateX(14px); }
+.np-gp__switch[aria-expanded="true"] { color: white; background: var(--forest); }
+.np-gp__switch span { font-size: 16px; line-height: 1; }
 
 .np-gp__mode {
   display: inline-flex;
@@ -415,10 +373,8 @@
   place-items: center;
   font-size: 12px;
 }
-.np-gp__infra-top { display: flex; align-items: center; gap: 10px; padding-right: 26px; }
-.np-gp__infra-top > span { font-size: 22px; }
-.np-gp__infra-top b { display: block; font: 600 14px/1.2 var(--f-ui); color: var(--forest); }
-.np-gp__infra-top small { display: block; font: 600 12px/1.3 var(--f-fact); color: var(--leaf); }
+.np-gp__infra-card h3 { margin: 0 32px 10px 0; color: var(--forest); font: 500 26px/1.05 var(--f-emo); }
+.np-gp__infra-card ul { padding-left: 16px; margin: 0; font: 400 14px/1.65 var(--f-ui); color: var(--ink); }
 .np-gp__infra-card p { margin: 8px 0 0; font: 400 13px/1.45 var(--f-ui); color: var(--moss); }
 
 /* Правая шторка выбранного участка (slide-over с фиксированной кнопкой внизу) */
@@ -540,4 +496,47 @@
   .np-gp__drawer { position: static; width: 100%; margin-top: 10px; box-shadow: 0 10px 28px rgba(23, 34, 27, .08); }
   .np-gp__bottom-bar { position: static; margin-top: 10px; }
   .np-gp__infra-card { position: static; width: 100%; margin-top: 10px; }
+}
+
+/* Keep the full plotted extent visible before the buyer chooses to zoom. */
+.np-gp__stage {
+  height: auto;
+  background: var(--paper);
+  border-color: var(--line);
+}
+.np-gp__svg { aspect-ratio: 518 / 260; height: auto; overflow: hidden; }
+.np-gp__stage.is-pannable { cursor: auto; }
+.np-gp__stage.is-pannable .np-gp__svg { cursor: grab; touch-action: none; }
+.np-gp__stage.is-pannable .np-gp__svg.is-dragging { cursor: grabbing; }
+.np-gp__canvas {
+  transform-box: view-box;
+  transform-origin: center;
+  transition: transform .34s cubic-bezier(.22,.75,.25,1);
+}
+.np-gp__svg.is-dragging .np-gp__canvas { transition: none; }
+.np-gp__zoom button:disabled { opacity: .65; cursor: default; }
+.np-gp :is(button, a, [role='button']):focus-visible,
+.np-gp__switch:has(:focus-visible) { outline: 3px solid var(--forest); outline-offset: 2px; }
+.np-gp__plot:focus-visible .np-gp__poly { stroke: #fff; stroke-width: 2; }
+.np-gp__legend .is-pending { background: #fff; border: 1px solid var(--moss); }
+.np-gp__drawer { scroll-margin-block: 76px; }
+.np-gp__list-items, .np-gp__drawer-scroll { overscroll-behavior: contain; }
+@media (max-width: 860px) {
+  .np-gp__stage { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; }
+  .np-gp__top-left, .np-gp__zoom { position: static; max-width: none; grid-row: 1; }
+  .np-gp__zoom { grid-column: 2; flex-direction: row; }
+  .np-gp__pill { min-height: 40px; box-sizing: border-box; }
+  .np-gp__zoom button { width: 38px; height: 38px; }
+  .np-gp__svg, .np-gp__bottom-bar, .np-gp__infra-card, .np-gp__drawer, .np-gp__list-drawer { grid-column: 1 / -1; }
+  .np-gp__svg { grid-row: 2; width: 100%; }
+  .np-gp__list-drawer { grid-row: 3; }
+  .np-gp__bottom-bar { justify-content: flex-start; gap: 8px; }
+  .np-gp__legend { padding-inline: 0; gap: 4px 12px; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+  .np-gp__switch, .np-gp__mode button { min-height: 36px; box-sizing: border-box; }
+  .np-gp__drawer-close { width: 44px; height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .np-gp__canvas, .np-gp__plot, .np-gp__pin circle, .np-gp__pill,
+  .np-gp__switch { transition: none; }
+  .np-gp__list-drawer, .np-gp__drawer { animation: none; }
 }

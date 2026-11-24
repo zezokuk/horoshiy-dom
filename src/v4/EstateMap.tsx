@@ -14,20 +14,20 @@ export type MapEstate = {
   nearby: { label: string; value: string }[]
 }
 const STATUS = { selling: 'В продаже', soldOut: 'Построен и продан', planned: 'Скоро в продаже' } as const
-const KEY = process.env.NEXT_PUBLIC_YMAPS_KEY
+const KEY = process.env.NEXT_PUBLIC_YMAPS_KEY?.trim()
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Yandex Maps 2.1 ships no types
 type Y = any
 declare global { interface Window { ymaps?: Y } }
 
-function loadYmaps(): Promise<Y> {
+function loadYmaps(key: string): Promise<Y> {
   return new Promise((resolve, reject) => {
     const ready = () => (window.ymaps ? window.ymaps.ready(() => resolve(window.ymaps)) : reject(new Error('ymaps: empty')))
     if (window.ymaps?.ready) return ready()
     let s = document.querySelector<HTMLScriptElement>('script[data-ymaps]')
     if (!s) {
       s = document.createElement('script')
-      s.src = `https://api-maps.yandex.ru/2.1/?lang=ru_RU${KEY ? `&apikey=${KEY}` : ''}`
+      s.src = `https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=${encodeURIComponent(key)}`
       s.async = true
       s.dataset.ymaps = '1'
       document.head.appendChild(s)
@@ -46,23 +46,23 @@ export function EstateMap({ estates }: { estates: MapEstate[] }) {
   const api = useRef<{ map: Y; marks: Y[] } | null>(null)
   const [i, setI] = useState(0)
   const [zoomed, setZoomed] = useState(false) // false — all estates on the screen, true — the chosen one close up
-  const [mode, setMode] = useState<'wait' | 'js' | 'frame'>('wait')
+  const [mode, setMode] = useState<'wait' | 'js' | 'frame'>(KEY ? 'wait' : 'frame')
   const [near, setNear] = useState(false)
   const cur = estates[i]
 
   useEffect(() => {
     const el = box.current
-    if (!el) return
+    if (!KEY || !el) return
     const io = new IntersectionObserver(([e]) => e.isIntersecting && (setNear(true), io.disconnect()), { rootMargin: '400px 0px' })
     io.observe(el)
     return () => io.disconnect()
   }, [])
 
   useEffect(() => {
-    if (!near || !canvas.current || !estates.length) return
+    if (!KEY || !near || !canvas.current || !estates.length) return
     let dead = false
     let map: Y
-    loadYmaps()
+    loadYmaps(KEY)
       .then((ymaps) => {
         if (dead || !canvas.current) return
         const touch = window.matchMedia('(pointer: coarse)').matches

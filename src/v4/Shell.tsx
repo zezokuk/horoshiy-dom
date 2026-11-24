@@ -6,6 +6,7 @@ import type { CSSProperties } from 'react'
 import { LeadForm } from '@/components/LeadForm'
 import type { Company } from '@/payload-types'
 import { V4MobileNav } from '@/v4/V4MobileNav'
+import { getHouse } from '@/lib/data'
 import { SalesTriggerWidget } from '@/v4/SalesTriggerWidget'
 
 export const NAV = [
@@ -22,7 +23,7 @@ export function V4Fonts() {
   return null
 }
 
-export function V4Bar({ phone, always = false, home = '/v4' }: { phone?: string | null; always?: boolean; home?: string }) {
+export function V4Bar({ phone, always = false, home = '/v4', bookingHref = '#evf-form' }: { phone?: string | null; always?: boolean; home?: string; bookingHref?: string }) {
   const tel = telOf(phone)
   return (
     <header className={`v4-bar${always ? ' v4-bar--always' : ''}`}>
@@ -32,8 +33,8 @@ export function V4Bar({ phone, always = false, home = '/v4' }: { phone?: string 
         <nav aria-label="Разделы сайта">{NAV.map((x) => <a key={x.href} href={x.href}>{x.label}</a>)}</nav>
         <div className="v3-row v4-bar__actions">
           {tel && <a className="v4-bar__tel" href={`tel:${tel}`}>{phone}</a>}
-          <a className="v3-btn v3-btn--main v4-bar__btn" href="#evf-form">Записаться на показ</a>
-          <V4MobileNav nav={NAV} phone={phone} tel={tel} />
+          <a className="v3-btn v3-btn--main v4-bar__btn" href={bookingHref}>Записаться на показ</a>
+          <V4MobileNav bookingHref={bookingHref} nav={NAV} phone={phone} tel={tel} />
         </div>
       </div>
     </header>
@@ -68,7 +69,7 @@ export function V4Final({ company, n, context, title = 'Приезжайте', e
               </div>
               <div className="v3-final__form" id="evf-form">
                 <LeadForm light cta="Записаться на показ" target={{ interest: 'buy', context, phone: company.phone }} />
-                <p className="v4-form-trust">Перезвоним в рабочее время, без спама · покажем живой дом или проведём видео-тур</p>
+                {process.env.NEXT_PUBLIC_CLIENT_PREVIEW !== '1' && <p className="v4-form-trust">Менеджер перезвонит в рабочее время и согласует время просмотра.</p>}
               </div>
             </div>
           </>
@@ -78,7 +79,6 @@ export function V4Final({ company, n, context, title = 'Приезжайте', e
               <div className="evf__frame v4-final__frame" aria-hidden>
                 <picture>
                   <source media="(max-width: 759px)" srcSet="/design/hero-morning-phone.webp" />
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={bg} alt="" loading="lazy" decoding="async" />
                 </picture>
                 <i className="evf__dim v4-final__dim" />
@@ -93,7 +93,7 @@ export function V4Final({ company, n, context, title = 'Приезжайте', e
               <div className="evf__copy v4-final__copy">
                 <p className="v4-final__eyebrow">{n ? <><b>{n}</b> / </> : null}Вечер в своём доме · Кубань</p>
                 <h2 className="v3-h2 v4-final__hero-h2" data-move="lines">
-                  {title === 'Приезжайте' ? <>Ваша история <em>начинается здесь</em></> : <>{title} <em>{em}</em></>}
+                  {<>{title} <em>{em}</em></>}
                 </h2>
               </div>
             </div>
@@ -118,7 +118,7 @@ export function V4Final({ company, n, context, title = 'Приезжайте', e
               <div className="v3-final__form" id="evf-form">
                 <p className="v4-final__form-title">Записаться на показ дома</p>
                 <LeadForm light cta="Записаться на показ" target={{ interest: 'buy', context, phone: company.phone }} />
-                <p className="v4-form-trust">Перезвоним в рабочее время, без спама · покажем живой дом или проведём видео-тур</p>
+                {process.env.NEXT_PUBLIC_CLIENT_PREVIEW !== '1' && <p className="v4-form-trust">Менеджер перезвонит в рабочее время и согласует время просмотра.</p>}
               </div>
             </div>
           </div>
@@ -130,7 +130,7 @@ export function V4Final({ company, n, context, title = 'Приезжайте', e
           <div className="v3-wrap v4-final__contacts">
             <div className="v4-final__chead">
               <span className="v4-ghost v4-ghost--inline" aria-hidden>связь</span>
-              <p className="v4-num">Наши контакты</p>
+
               <h3 className="v3-h2 v4-final__ctitle" data-move="lines">Наши <em>контакты</em></h3>
             </div>
             <div className="v4-contacts">
@@ -159,17 +159,20 @@ export function V4Final({ company, n, context, title = 'Приезжайте', e
 
 const FOOT = 'Хороший дом'
 
-export function V4Footer({ since, phone }: { since?: number | null; phone?: string | null }) {
+export async function V4Footer({ since, phone }: { since?: number | null; phone?: string | null }) {
+  const available = await getHouse('kr-tip3')
+  const offer = available?.status === 'free' && available.price > 0
+    ? { href: '/v4/dom/' + available.code, price: available.price }
+    : null
   return (
     <>
       <footer className="v4-foot" data-phone={phone ?? ''}>
         <div className="v3-wrap v4-foot__top">
           <p>Строим и продаём готовые кирпичные дома с участком в собственных посёлках на Юге России{since ? ` с ${since} года` : ''}: Динская, Новая Адыгея, Козет.</p>
-          <nav aria-label="Разделы сайта в подвале">{NAV.map((x) => <a key={x.href} href={x.href}>{x.label}</a>)}</nav>
+          <nav aria-label="Разделы сайта в подвале">{NAV.map((x) => <a key={x.href} href={x.href}>{x.label}</a>)}<SalesTriggerWidget phone={phone} offer={offer} /></nav>
         </div>
         <p className="v4-foot__word" aria-hidden>{[...FOOT].map((ch, k) => <span key={k} style={{ '--i': k } as CSSProperties}>{ch === ' ' ? ' ' : ch}</span>)}</p>
       </footer>
-      <SalesTriggerWidget phone={phone} />
     </>
   )
 }

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getCompany, getHouses, getProjects, img, plural } from '@/lib/data'
 import { formatMillions } from '@/lib/format'
 import { cleanPhotoUrl, houseView } from '@/lib/view'
+import { housePhotography } from '@/v4/housePhotography'
 import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { HousePicker, type PickHouse, type PickProjectType } from '@/v3/home/HousePicker'
 import { StickyCta } from '@/v3/home/StickyCta'
@@ -31,13 +32,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const from = houses.length ? Math.min(...houses.map((h) => h.price)) : 0
   return {
     title: { absolute: `Купить готовый кирпичный дом с участком — ${houses.length} ${plural(houses.length, 'дом', 'дома', 'домов')} в продаже${from ? ` от ${formatMillions(from)}` : ''} · Хороший дом` },
-    description: 'Готовые кирпичные дома с участком в собственных посёлках на Юге России (Динская, Новая Адыгея) и 15+ планировок: цены и статусы из прайса застройщика.',
+    description: 'Готовые кирпичные дома с участком в собственных посёлках на Юге России (Динская, Новая Адыгея) и планировки. В каталоге цены и статусы из прайса застройщика.',
     robots: { index: false, follow: false },
     alternates: { canonical: '/catalog' },
   }
 }
 
-export default async function V4Catalog() {
+export default async function V4Catalog({ searchParams }: { searchParams: Promise<{ view?: string }> }) {
+  const { view } = await searchParams
   const [company, houses, projects] = await Promise.all([getCompany(), getHouses({ status: 'free' }), getProjects()])
   const free = houses.map(houseView).sort((a, b) => a.price - b.price)
   const pick: PickHouse[] = free.map((h) => ({
@@ -47,9 +49,9 @@ export default async function V4Catalog() {
     plot: h.plot,
     price: h.price,
     estate: h.estateName,
-    photo: h.photoCard ?? h.photo,
+    photo: housePhotography(h.code)[0]?.src ?? h.photoCard ?? h.photo,
     href: `/v4/dom/${h.code}`,
-    caption: 'Изображение проекта',
+    caption: housePhotography(h.code)[0]?.caption ?? 'Изображение проекта',
   }))
 
   const projectOf = (h: (typeof houses)[number]) => (typeof h.project === 'object' ? h.project?.id : h.project)
@@ -83,7 +85,6 @@ export default async function V4Catalog() {
     })
     .sort((a, b) => Number(b.free > 0) - Number(a.free > 0) || a.num - b.num)
 
-  const places = [...new Set(free.map((h) => h.estateName))]
   return (
     <div className="v3 v4">
       <V4Fonts />
@@ -94,11 +95,11 @@ export default async function V4Catalog() {
           ghost="Дома"
           title="Дома в продаже"
           em="и планировки"
-          lead={`${free.length} ${plural(free.length, 'готовый кирпичный дом', 'готовых кирпичных дома', 'готовых кирпичных домов')} с участком (${places.join(', ')}) и 15+ собственных планировок. Выберите типовой проект или подберите готовый дом по посёлку.`}
+          lead={`${free.length} ${plural(free.length, 'дом', 'дома', 'домов')} с участком в продаже. Сравните цены, посёлки и планировки.`}
         />
         <section className="v3-sec v4-sec" style={{ paddingTop: 0 }}>
           <div className="v3-wrap">
-            <HousePicker houses={pick} projectTypes={projectTypes} catalogHref="/v4/doma" grid typeFilter />
+            <HousePicker houses={pick} projectTypes={projectTypes} catalogHref="/v4/doma" grid typeFilter initialMode={view === 'houses' ? 'houses' : 'types'} />
           </div>
         </section>
         <V4Final company={company} context="Каталог v4: запись на показ" />

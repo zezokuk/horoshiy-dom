@@ -4,12 +4,11 @@ import { useEffect, useRef } from 'react'
 import './buyerHero.css'
 
 type BuyerHeroProps = {
-  phone?: string | null
   priceFrom?: string
 }
 
 /** The day and night treatments share one photograph so the roof and windows stay registered. */
-export default function BuyerHero({ phone, priceFrom }: BuyerHeroProps) {
+export default function BuyerHero({ priceFrom }: BuyerHeroProps) {
   const scene = useRef<HTMLElement>(null)
   useEffect(() => {
     const el = scene.current
@@ -31,7 +30,6 @@ export default function BuyerHero({ phone, priceFrom }: BuyerHeroProps) {
         <div className="buyer-hero__image">
           <picture>
             <source media="(max-width: 700px)" srcSet="/design/hero-morning-phone.webp" />
-            { }
             <img src="/design/hero-morning.webp" width="1920" height="1288" alt="Фасад типового кирпичного дома с участком" fetchPriority="high" />
           </picture>
           <div className="buyer-hero__night" aria-hidden="true" />
@@ -46,23 +44,13 @@ export default function BuyerHero({ phone, priceFrom }: BuyerHeroProps) {
       </div>
       <div className="buyer-hero__stars" aria-hidden="true"><i /></div>
       <div className="buyer-hero__veil" aria-hidden="true" />
-      <header className="buyer-hero__nav">
-        <a href="/v4" className="buyer-hero__brand" aria-label="Хороший дом — главная">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/v3/logo-white.svg" width="88" height="41" alt="" />
-        </a>
-        <nav aria-label="Навигация по сайту">
-          <a href="#doma">Дома</a>
-          <a href="/v4/poselki">Посёлки</a>
-          <a href="/v4/ipoteka">Ипотека</a>
-          <a href="/v4/o-kompanii">О компании</a>
-        </nav>
-        <a className="buyer-hero__contact" href={phone ? 'tel:' + phone.replace(/[^\d+]/g, '') : '/v4/kontakty'}>{phone || 'Контакты'}</a>
-      </header>
       <h1 id="buyer-hero-title" className="buyer-hero__title">Хороший <em>дом</em></h1>
       <div className="buyer-hero__foot">
-        <p>Готовые кирпичные дома с участком<br />в собственных посёлках{priceFrom && <span> · от {priceFrom}</span>}</p>
-        <a className="buyer-hero__action" href="#doma">Выбрать дом <span aria-hidden="true">↓</span></a>
+        <p>Готовые кирпичные дома с участком<br />в наших посёлках под Краснодаром</p>
+        <div className="buyer-hero__offer">
+          {priceFrom && <span className="buyer-hero__price">от {priceFrom}</span>}
+          <a className="buyer-hero__action" href="#doma">Выбрать дом <span aria-hidden="true">↓</span></a>
+        </div>
       </div>
     </section>
   )

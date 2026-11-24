@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { goal } from '@/components/Metrika'
 import { annuity, formatArea, formatMillions, plural } from '@/lib/format'
 import type { HouseView } from '@/lib/view'
@@ -15,7 +15,7 @@ type RawPlot = {
   poly: number[][]
   area: number
   house?: number[][]
-  houseSize?: number[]
+  houseHull?: number[][]
 }
 
 const PLOTS = (planData as { plots: RawPlot[] }).plots
@@ -26,6 +26,11 @@ const Y0 = Math.min(...ALL_PTS.map((q) => q[1])) - PAD
 const X1 = Math.max(...ALL_PTS.map((q) => q[0])) + PAD
 const Y1 = Math.max(...ALL_PTS.map((q) => q[1])) + PAD
 const FULL_BOX = { x: X0, y: Y0, w: X1 - X0, h: Y1 - Y0 }
+
+function clampPan(value: number, extent: number, scale: number) {
+  const limit = extent * (1 - 1 / scale) / 2
+  return Math.max(-limit, Math.min(limit, value))
+}
 
 const cleanStreetOnly = (s: string) =>
   s
@@ -43,52 +48,17 @@ const centerOf = (pts: number[][]) => ({
   y: pts.reduce((a, b) => a + b[1], 0) / pts.length,
 })
 
-const INFRA_PINS = [
-  {
-    id: 'river',
-    icon: '🌊',
-    title: 'Река Кочеты',
-    time: '3–5 мин пешком',
-    desc: 'Зелёная береговая линия и тихие прогулки вдоль воды прямо у северной границы посёлка.',
-    x: 416,
-    y: 78,
-  },
-  {
-    id: 'forest',
-    icon: '🌲',
-    title: 'Лесополоса',
-    time: '2 мин пешком',
-    desc: 'Две густые зелёные лесополосы защищают улицы от ветра и создают приватный микроклимат.',
-    x: 458,
-    y: 132,
-  },
-  {
-    id: 'school',
-    icon: '🏫',
-    title: 'Школа №3 и детский сад',
-    time: '7 мин на авто',
-    desc: 'Муниципальная школа и детский сад станицы Динской — удобная дорога без пробок.',
-    x: 78,
-    y: 118,
-  },
-  {
-    id: 'shop',
-    icon: '🛒',
-    title: 'Магазины, аптеки, ПВЗ',
-    time: '5 мин на авто',
-    desc: 'Пятёрочка, Магнит, Ozon, Wildberries и фермерский рынок станицы рядом с выездом.',
-    x: 174,
-    y: 288,
-  },
-] as const
-
 export function DinskayaGenplan({
   houses,
+  infrastructure,
+  nearby,
   family = { rate: 6, years: 30, minDown: 20, limit: 6_000_000 },
   estateHref = '/v4/poselok/dinskaya',
   hideEstateLink = false,
 }: {
   houses: HouseView[]
+  infrastructure: string[]
+  nearby: { label: string; value: string }[]
   family?: { rate: number; years: number; minDown: number; limit: number }
   estateHref?: string
   hideEstateLink?: boolean
@@ -97,13 +67,16 @@ export function DinskayaGenplan({
   const [layer, setLayer] = useState<'aerial' | 'scheme'>('aerial')
   const [showList, setShowList] = useState<boolean>(false)
   const [showInfra, setShowInfra] = useState<boolean>(false)
-  const [activeInfra, setActiveInfra] = useState<string | null>(null)
+  const infraButton = useRef<HTMLButtonElement>(null)
   const [zoomScale, setZoomScale] = useState<number>(1)
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const [selectedPlot, setSelectedPlot] = useState<number | null>(null)
   const [hoverPlot, setHoverPlot] = useState<number | null>(null)
 
-  const dragRef = useRef<{ x: number; y: number; px: number; py: number; moved: boolean } | null>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
+  const triggerRef = useRef<Element | null>(null)
+  const suppressClick = useRef(false)
+  const dragRef = useRef<{ x: number; y: number; px: number; py: number; unitsPerPixel: number } | null>(null)
 
   const houseByPlot = useMemo(() => {
     const map = new Map<number, HouseView>()
@@ -142,19 +115,10 @@ export function DinskayaGenplan({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [houseByPlot])
 
-  const viewBox = useMemo(() => {
-    const cx = FULL_BOX.x + FULL_BOX.w / 2 + pan.x
-    const cy = FULL_BOX.y + FULL_BOX.h / 2 + pan.y
-    const w = FULL_BOX.w / zoomScale
-    const h = FULL_BOX.h / zoomScale
-    return `${(cx - w / 2).toFixed(1)} ${(cy - h / 2).toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`
-  }, [zoomScale, pan])
-
   const activePlot = useMemo(() => PLOTS.find((p) => p.n === selectedPlot) ?? null, [selectedPlot])
   const activeHouse = activePlot ? houseByPlot.get(activePlot.n) ?? null : null
   const hoveredPlot = useMemo(() => PLOTS.find((p) => p.n === hoverPlot) ?? null, [hoverPlot])
   const hoveredHouse = hoveredPlot ? houseByPlot.get(hoveredPlot.n) ?? null : null
-  const currentInfra = INFRA_PINS.find((x) => x.id === activeInfra) ?? null
 
   const activeMonthly = useMemo(() => {
     if (!activeHouse) return 0
@@ -163,14 +127,25 @@ export function DinskayaGenplan({
     return Math.round(annuity(credit, family.rate, family.years))
   }, [activeHouse, family])
 
-  const handleSelectPlot = (n: number) => {
-    setSelectedPlot(n)
-    goal('v4_plot_click', { plot: n })
+  useEffect(() => {
+    if (selectedPlot === null) return
+    closeRef.current?.focus({ preventScroll: true })
+    if (window.matchMedia('(max-width: 860px)').matches) {
+      closeRef.current?.closest('aside')?.scrollIntoView({ block: 'nearest', behavior: 'instant' })
+    }
+  }, [selectedPlot])
+
+  const closePlot = () => {
+    setSelectedPlot(null)
+    const trigger = triggerRef.current
+    if (trigger instanceof HTMLElement || trigger instanceof SVGElement) trigger.focus()
   }
 
-  const selectNearbyFree = () => {
-    const freePlot = freeRows[0]?.plot
-    if (freePlot) handleSelectPlot(freePlot.n)
+  const handleSelectPlot = (n: number, trigger?: Element) => {
+    if (trigger) triggerRef.current = trigger
+    setSelectedPlot(n)
+    setShowInfra(false)
+    goal('v4_plot_click', { plot: n })
   }
 
   const resetView = () => {
@@ -178,49 +153,56 @@ export function DinskayaGenplan({
     setPan({ x: 0, y: 0 })
   }
 
-  const featureTagOf = (p: RawPlot, h: HouseView | null) => {
-    if (h?.mansard) return 'С мансардой'
-    if (p.street.includes('101') || p.street.includes('107')) return 'У лесополосы'
-    if (p.street.includes('300-летия')) return 'Ближе к реке Кочеты'
-    return 'Готовый дом'
+  const zoomTo = (value: number) => {
+    const scale = Math.max(1, Math.min(2.6, Number(value.toFixed(2))))
+    setZoomScale(scale)
+    setPan(({ x, y }) => ({
+      x: clampPan(x, FULL_BOX.w, scale),
+      y: clampPan(y, FULL_BOX.h, scale),
+    }))
   }
 
   return (
     <div className="np-gp">
-      <div
-        className={`np-gp__stage${zoomScale > 1 ? ' is-pannable' : ''}`}
-        onPointerDown={(e) => {
-          if (zoomScale <= 1) return
-          if ((e.target as HTMLElement).closest('aside, button, a, label')) return
-          dragRef.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, moved: false }
-        }}
-        onPointerMove={(e) => {
-          const d = dragRef.current
-          if (!d) return
-          const dx = e.clientX - d.x
-          const dy = e.clientY - d.y
-          if (Math.abs(dx) + Math.abs(dy) > 4) d.moved = true
-          const k = FULL_BOX.w / zoomScale / Math.max(400, e.currentTarget.clientWidth)
-          const limX = (FULL_BOX.w * (zoomScale - 1)) / (2 * zoomScale)
-          const limY = (FULL_BOX.h * (zoomScale - 1)) / (2 * zoomScale)
-          setPan({
-            x: Math.max(-limX, Math.min(limX, d.px - dx * k)),
-            y: Math.max(-limY, Math.min(limY, d.py - dy * k)),
-          })
-        }}
-        onPointerUp={() => {
-          dragRef.current = null
-        }}
-        onPointerCancel={() => {
-          dragRef.current = null
-        }}
-      >
+      <div className={`np-gp__stage${zoomScale > 1 ? ' is-pannable' : ''}`}
+        onKeyDown={(e) => {
+          if (e.key !== 'Escape') return
+          if (selectedPlot !== null) closePlot()
+          else if (showInfra) { setShowInfra(false); infraButton.current?.focus() }
+          else if (showList) {
+            setShowList(false)
+            e.currentTarget.querySelector<HTMLButtonElement>('.np-gp__pill')?.focus()
+          }
+        }}>
         <svg
-          viewBox={viewBox}
-          preserveAspectRatio="xMidYMid slice"
+          viewBox={`${FULL_BOX.x} ${FULL_BOX.y} ${FULL_BOX.w} ${FULL_BOX.h}`}
+          preserveAspectRatio="xMidYMid meet"
           className={`np-gp__svg np-gp__svg--${layer}`}
-          role="img"
-          aria-label="Интерактивный генплан станицы Динской — 36 участков"
+          role="group"
+          aria-label="Генплан Динской, 36 участков"
+          onPointerDown={(e) => {
+            suppressClick.current = false
+            if (zoomScale <= 1 || !e.isPrimary || e.button !== 0) return
+            const pixelScale = e.currentTarget.getScreenCTM()?.a ?? 1
+            dragRef.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, unitsPerPixel: 1 / (pixelScale * zoomScale) }
+          }}
+          onPointerMove={(e) => {
+            const drag = dragRef.current
+            if (!drag || !e.isPrimary) return
+            const dx = e.clientX - drag.x
+            const dy = e.clientY - drag.y
+            if (!suppressClick.current && Math.hypot(dx, dy) < 5) return
+            suppressClick.current = true
+            e.currentTarget.setPointerCapture(e.pointerId)
+            e.currentTarget.classList.add('is-dragging')
+            setPan({
+              x: clampPan(drag.px - dx * drag.unitsPerPixel, FULL_BOX.w, zoomScale),
+              y: clampPan(drag.py - dy * drag.unitsPerPixel, FULL_BOX.h, zoomScale),
+            })
+          }}
+          onPointerUp={(e) => { dragRef.current = null; e.currentTarget.classList.remove('is-dragging') }}
+          onPointerCancel={(e) => { dragRef.current = null; e.currentTarget.classList.remove('is-dragging') }}
+          onPointerLeave={(e) => { if (!e.currentTarget.hasPointerCapture(e.pointerId)) dragRef.current = null }}
         >
           <defs>
             <filter id="np-pin-shadow" x="-30%" y="-30%" width="160%" height="160%">
@@ -228,81 +210,59 @@ export function DinskayaGenplan({
             </filter>
           </defs>
 
-          {layer === 'aerial' ? (
-            <image
-              href="/v4/img/dinskaya-aerial.webp"
-              x={FULL_BOX.x}
-              y={FULL_BOX.y}
-              width={FULL_BOX.w}
-              height={FULL_BOX.h}
-              preserveAspectRatio="none"
-            />
-          ) : (
-            <rect x={FULL_BOX.x} y={FULL_BOX.y} width={FULL_BOX.w} height={FULL_BOX.h} fill="#efeadd" />
-          )}
+          <g className="np-gp__canvas" style={{ transform: `translate(${-pan.x * zoomScale}px, ${-pan.y * zoomScale}px) scale(${zoomScale})` }}>
+            {layer === 'aerial' ? (
+              <image
+                href="/v4/img/dinskaya-aerial.webp"
+                x={FULL_BOX.x}
+                y={FULL_BOX.y}
+                width={FULL_BOX.w}
+                height={FULL_BOX.h}
+                preserveAspectRatio="none"
+              />
+            ) : (
+              <rect x={FULL_BOX.x} y={FULL_BOX.y} width={FULL_BOX.w} height={FULL_BOX.h} fill="#efeadd" />
+            )}
 
-          {PLOTS.map((p) => {
-            const st = plotStatusOf(p)
-            const h = houseByPlot.get(p.n)
-            const isSel = selectedPlot === p.n
-            const isHov = hoverPlot === p.n
-            const c = centerOf(p.poly)
-            const isFree = st === 'free'
-            return (
-              <g
-                key={p.n}
-                className={`v4-gp__plot np-gp__plot np-gp__plot--${st}${isSel ? ' is-sel' : ''}${isHov ? ' is-hov' : ''}`}
-                role="button"
-                tabIndex={0}
-                aria-label={`Участок ${p.n}, ${h?.title ?? p.type}, ${st === 'free' ? `свободен, ${h ? formatMillions(h.price) : ''}` : st === 'reserved' ? 'бронь' : st === 'sold' ? 'продан' : 'уточнить статус'}`}
-                onMouseEnter={() => setHoverPlot(p.n)}
-                onMouseLeave={() => setHoverPlot((cur) => (cur === p.n ? null : cur))}
-                onClick={() => {
-                  if (dragRef.current?.moved) return
-                  handleSelectPlot(p.n)
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    handleSelectPlot(p.n)
-                  }
-                }}
-              >
-                <polygon className="np-gp__poly" points={ptsStr(p.poly)} />
-                {layer === 'scheme' && p.house && <polygon className="np-gp__scheme-house" points={ptsStr(p.house)} />}
-                <g className={`np-gp__pin np-gp__pin--${st}${isSel ? ' is-sel' : ''}`} filter={isFree || isSel ? 'url(#np-pin-shadow)' : undefined}>
-                  <circle cx={c.x} cy={c.y} r={isSel ? 6.2 : isFree ? 5.2 : 3.8} />
-                  <text x={c.x} y={c.y + 1.45} textAnchor="middle">
-                    {p.n}
-                  </text>
+            {PLOTS.map((p) => {
+              const st = plotStatusOf(p)
+              const h = houseByPlot.get(p.n)
+              const isSel = selectedPlot === p.n
+              const isHov = hoverPlot === p.n
+              const c = centerOf(p.poly)
+              const isFree = st === 'free'
+              return (
+                <g
+                  key={p.n}
+                  className={`v4-gp__plot np-gp__plot np-gp__plot--${st}${isSel ? ' is-sel' : ''}${isHov ? ' is-hov' : ''}`}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Участок ${p.n}, ${h?.title ?? p.type}, ${st === 'free' ? `свободен, ${h ? formatMillions(h.price) : ''}` : st === 'reserved' ? 'бронь' : st === 'sold' ? 'продан' : 'уточнить статус'}`}
+                  onMouseEnter={() => setHoverPlot(p.n)}
+                  onMouseLeave={() => setHoverPlot((cur) => (cur === p.n ? null : cur))}
+                  onClick={(e) => {
+                    if (!suppressClick.current) handleSelectPlot(p.n, e.currentTarget)
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleSelectPlot(p.n, e.currentTarget)
+                    }
+                  }}
+                >
+                  <polygon className="np-gp__poly" points={ptsStr(p.poly)} />
+                  {layer === 'scheme' && p.house && <polygon className="np-gp__scheme-house" points={ptsStr(p.houseHull ?? p.house)} />}
+                  <g className={`np-gp__pin np-gp__pin--${st}${isSel ? ' is-sel' : ''}`} filter={isFree || isSel ? 'url(#np-pin-shadow)' : undefined}>
+                    <circle cx={c.x} cy={c.y} r={isSel ? 6.2 : isFree ? 5.2 : 3.8} />
+                    <text x={c.x} y={c.y + 1.45} textAnchor="middle">
+                      {p.n}
+                    </text>
+                  </g>
                 </g>
-              </g>
-            )
-          })}
+              )
+            })}
 
-          {showInfra &&
-            INFRA_PINS.map((pin) => (
-              <g
-                key={pin.id}
-                className={`np-gp__infra-pin${activeInfra === pin.id ? ' is-on' : ''}`}
-                role="button"
-                tabIndex={0}
-                aria-label={`${pin.title} — ${pin.time}`}
-                onMouseEnter={() => setActiveInfra(pin.id)}
-                onClick={() => setActiveInfra((cur) => (cur === pin.id ? null : pin.id))}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    setActiveInfra(pin.id)
-                  }
-                }}
-              >
-                <circle cx={pin.x} cy={pin.y} r={8.6} filter="url(#np-pin-shadow)" />
-                <text x={pin.x} y={pin.y + 3} textAnchor="middle">
-                  {pin.icon}
-                </text>
-              </g>
-            ))}
+          </g>
         </svg>
 
         <div className="np-gp__top-left">
@@ -310,7 +270,7 @@ export function DinskayaGenplan({
             type="button"
             className={`np-gp__pill${showList ? ' is-active' : ''}`}
             aria-expanded={showList}
-            onClick={() => setShowList((v) => !v)}
+            onClick={() => { setSelectedPlot(null); setShowInfra(false); setShowList((v) => !v) }}
           >
             <span className="np-gp__pill-icon" aria-hidden>☰</span>
             <span>{showList ? 'Скрыть список' : `Показать список (${counts.free})`}</span>
@@ -343,7 +303,7 @@ export function DinskayaGenplan({
                   <button
                     type="button"
                     className={selectedPlot === plot.n ? 'is-sel' : undefined}
-                    onClick={() => handleSelectPlot(plot.n)}
+                    onClick={(e) => handleSelectPlot(plot.n, e.currentTarget)}
                   >
                     <span className="np-gp__list-num">{plot.n}</span>
                     <span className="np-gp__list-main">
@@ -359,16 +319,13 @@ export function DinskayaGenplan({
         )}
 
         <div className="np-gp__zoom" role="group" aria-label="Масштаб генплана">
-          <button type="button" onClick={() => setZoomScale((z) => Math.min(2.6, Number((z * 1.28).toFixed(2))))} aria-label="Приблизить генплан">
+          <button type="button" disabled={zoomScale >= 2.6} onClick={() => zoomTo(zoomScale * 1.28)} aria-label="Приблизить генплан">
             +
           </button>
           <button
             type="button"
-            onClick={() => {
-              const next = Math.max(1, Number((zoomScale / 1.28).toFixed(2)))
-              setZoomScale(next)
-              if (next <= 1.02) setPan({ x: 0, y: 0 })
-            }}
+            disabled={zoomScale <= 1}
+            onClick={() => zoomTo(zoomScale / 1.28)}
             aria-label="Отдалить генплан"
           >
             −
@@ -380,42 +337,21 @@ export function DinskayaGenplan({
           )}
         </div>
 
-        {showInfra && currentInfra && (
-          <div className="np-gp__infra-card" role="status">
-            <button type="button" className="np-gp__infra-close" onClick={() => setActiveInfra(null)} aria-label="Закрыть подсказку">
-              ✕
-            </button>
-            <div className="np-gp__infra-top">
-              <span aria-hidden>{currentInfra.icon}</span>
-              <div>
-                <b>{currentInfra.title}</b>
-                <small>{currentInfra.time}</small>
-              </div>
-            </div>
-            <p>{currentInfra.desc}</p>
-          </div>
-        )}
-
         <div className="np-gp__bottom-bar">
           <ul className="np-gp__legend" aria-label="Статусы участков">
             <li><i className="is-free" />Свободно ({counts.free})</li>
             <li><i className="is-res" />Бронь ({counts.reserved})</li>
             <li><i className="is-sold" />Продано ({counts.sold})</li>
+            {counts.pending > 0 && <li><i className="is-pending" />Уточняется ({counts.pending})</li>}
           </ul>
 
           <div className="np-gp__controls">
-            <label className="np-gp__switch">
-              <input
-                type="checkbox"
-                checked={showInfra}
-                onChange={(e) => {
-                  setShowInfra(e.target.checked)
-                  if (!e.target.checked) setActiveInfra(null)
-                }}
-              />
-              <span className="np-gp__switch-track" aria-hidden />
-              <span>Инфраструктура</span>
-            </label>
+            {(infrastructure.length > 0 || nearby.length > 0) && (
+              <button type="button" ref={infraButton} className="np-gp__switch" aria-expanded={showInfra}
+                onClick={() => { setSelectedPlot(null); setShowList(false); setShowInfra(value => !value) }}>
+                Инфраструктура <span aria-hidden>{showInfra ? '−' : '+'}</span>
+              </button>
+            )}
 
             <div className="np-gp__mode" role="group" aria-label="Режим отображения">
               <button type="button" aria-pressed={layer === 'aerial'} onClick={() => setLayer('aerial')}>
@@ -428,9 +364,21 @@ export function DinskayaGenplan({
           </div>
         </div>
 
+        {showInfra && (
+          <aside className="np-gp__infra-card" aria-label="Инфраструктура Динской">
+            <button type="button" className="np-gp__infra-close" onClick={() => {
+              setShowInfra(false)
+              infraButton.current?.focus()
+            }} aria-label="Закрыть инфраструктуру">×</button>
+            <h3>Рядом с посёлком</h3>
+            <ul>{infrastructure.map(item => <li key={item}>{item}</li>)}</ul>
+            {nearby.map(item => <p key={item.label}>{item.label} · {item.value}</p>)}
+          </aside>
+        )}
+
         {activePlot && (
-          <aside className="v4-gp__card np-gp__drawer" aria-live="polite">
-            <button type="button" className="np-gp__drawer-close" onClick={() => setSelectedPlot(null)} aria-label="Закрыть карточку участка">
+          <aside className="v4-gp__card np-gp__drawer" aria-label={`Карточка участка № ${activePlot.n}`}>
+            <button type="button" ref={closeRef} className="np-gp__drawer-close" onClick={closePlot} aria-label="Закрыть карточку участка">
               ✕
             </button>
 
@@ -439,7 +387,7 @@ export function DinskayaGenplan({
                 <div className="np-gp__drawer-img">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={activeHouse.photoCard ?? activeHouse.photo} alt={activeHouse.title} />
-                  <span className="np-gp__drawer-tag">{featureTagOf(activePlot, activeHouse)}</span>
+                  <span className="np-gp__drawer-tag">Изображение проекта</span>
                 </div>
               ) : (
                 <div className="np-gp__drawer-img np-gp__drawer-img--empty">
@@ -490,7 +438,7 @@ export function DinskayaGenplan({
                     <p className="np-gp__drawer-price">{formatMillions(activeHouse.price)}</p>
                     {activeMonthly > 0 && (
                       <p className="np-gp__drawer-mort">
-                        от <b>{activeMonthly.toLocaleString('ru-RU')} ₽/мес</b> по семейной ипотеке 6%
+                        от <b>{activeMonthly.toLocaleString('ru-RU')} ₽/мес</b> по семейной ипотеке при ставке {family.rate.toLocaleString('ru-RU')}%
                       </p>
                     )}
                   </div>
@@ -515,9 +463,13 @@ export function DinskayaGenplan({
                 </a>
               ) : (
                 <div className="np-gp__drawer-pair">
-                  <button type="button" className="v3-btn v3-btn--main" onClick={selectNearbyFree}>
-                    Свободный рядом
-                  </button>
+                  {freeRows.length > 0 && <button type="button" className="v3-btn v3-btn--main" onClick={() => {
+                    closePlot()
+                    setShowList(true)
+                    requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('.np-gp__list-items button')?.focus())
+                  }}>
+                    Свободные дома
+                  </button>}
                   <a className="v4-pik-btn" href={hideEstateLink ? '#evf-form' : estateHref}>
                     <span>Уточнить</span>
                   </a>

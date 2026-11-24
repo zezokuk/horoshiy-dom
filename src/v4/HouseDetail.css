@@ -120,3 +120,12 @@ html:has(.hd-lightbox[open]) { overflow: hidden; }
   .hd-page :is(#plan,#ipoteka,#evf-form) { scroll-margin-top: 68px; }
 }
 @media (prefers-reduced-motion: reduce) { .hd-gallery-stage > img { animation: none; } }
+.hd-spec dd { max-width: 72%; text-align: right; }
+.hd-gallery .hd-stage-switch button { font: 550 13px/1.35 var(--f-ui); min-height: 32px; padding-block: 0; }
+.hd-expand, .hd-gallery-arrows button { min-width: 44px; min-height: 44px; }
+.hd-page .hd-visit { border-radius: 999px; }
+.hd-page .hd-book #hd-book-title { color: #fffcf5; }
+@media (max-width: 690px) {
+  .v4.hd-page .hd-identity h1 { max-width: none; font-size: clamp(36px, 9vw, 55px); margin: 0; line-height: 1.02; }
+  .hd-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px 16px; }
+}

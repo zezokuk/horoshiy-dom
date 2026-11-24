@@ -289,3 +289,17 @@
   .fh-photo img { transition: none; }
   .fh-rail { scroll-behavior: auto; }
 }
+.fh-rail { position: relative; scroll-behavior: auto; }
+.fh dd a { color: var(--forest); text-decoration: underline; text-decoration-color: #8f9d8b; text-underline-offset: 3px; }
+.fh .fh-terms { margin-top: 3px; font: 450 12px/1.45 var(--f-ui); color: var(--moss); }
+@media (max-width: 860px) {
+  .fh .fh-terms { margin-top: 6px; }
+  .fh-sheet { flex-grow: 1; gap: 0; }
+  .fh-spread { flex-basis: 92%; }
+  .fh-rail { padding-right: 0; scrollbar-width: none; }
+  .fh-rail::-webkit-scrollbar { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fh *, .fh *::after { transition: none; }
+  .fh-photo:hover img, .fh-more-card:hover, .fh .fh-open:hover { transform: none; }
+}

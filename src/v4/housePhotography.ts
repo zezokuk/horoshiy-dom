@@ -29,7 +29,6 @@ const type5: HouseFrame[] = [
 
 const type6v3: HouseFrame[] = [
   { src: '/v4/houses/type6v3-front.webp', alt: 'Одноэтажный кирпичный фасад с мансардным окном', caption: 'Главный фасад · Проект «Тип 6 (В3)»' },
-  { src: '/v4/houses/type5-side.webp', alt: 'Вид сбоку на кирпичную кладку и участок', caption: 'Объём дома · серия одноэтажных проектов' },
   ...interiorFrames,
 ]
 
@@ -58,9 +57,6 @@ export function fallbackHouseFrames(typeName: string, primaryPhoto?: string | nu
   }
   if (extraPhoto) pushUnique({ src: extraPhoto, alt: `Фасад дома по проекту «${typeName}»`, caption: `Главный фасад · Проект «${typeName}»` })
   if (primaryPhoto) pushUnique({ src: primaryPhoto, alt: `Фотография проекта «${typeName}»`, caption: `Изображение проекта «${typeName}»` })
-  if (list.length < 2) {
-    pushUnique({ src: '/v4/houses/type5-side.webp', alt: 'Кирпичная кладка и участок вокруг дома', caption: `Архитектура · «${typeName}»` })
-  }
   interiorFrames.forEach(pushUnique)
   return list
 }

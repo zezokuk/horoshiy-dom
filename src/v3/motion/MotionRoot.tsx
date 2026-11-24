@@ -61,14 +61,14 @@ export function MotionRoot({ children, smooth = true }: { children: ReactNode; s
         const sib = [...(node.parentElement?.children ?? [])].filter((n) => (n as HTMLElement).dataset.move === 'up')
         gsap.fromTo(
           node,
-          { y: 24, autoAlpha: 0 },
+          { y: 14, autoAlpha: 0 },
           {
             y: 0,
             autoAlpha: 1,
-            duration: 0.72,
+            duration: 0.58,
             ease: 'power3.out',
             clearProps: 'transform',
-            delay: Math.min(sib.indexOf(node), 5) * 0.06,
+            delay: Math.min(sib.indexOf(node), 3) * 0.045,
             scrollTrigger: { trigger: node, start: 'top 90%', once: true },
           },
         )
@@ -180,11 +180,11 @@ export function MotionRoot({ children, smooth = true }: { children: ReactNode; s
         gsap.utils.toArray<HTMLElement>('[data-move="lines"]').forEach((node) => {
           gsap.fromTo(
             node,
-            { opacity: 0, y: 24 },
+            { opacity: 0, y: 14 },
             {
               opacity: 1,
               y: 0,
-              duration: 0.72,
+              duration: 0.58,
               ease: 'power3.out',
               scrollTrigger: { trigger: node, start: 'top 90%', once: true },
             },

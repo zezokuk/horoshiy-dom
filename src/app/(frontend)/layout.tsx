@@ -16,8 +16,8 @@ import './dom.css'
 
 // v2 (29.10, Igor's choice): headings and estate names in Forum — the lettering of the client's covers, so the covers and
 // the page speak in one voice; text in Golos. The old pair stays for the dark palettes, not preloaded.
-const forum = Forum({ variable: '--font-forum', subsets: ['latin', 'cyrillic'], weight: '400' })
-const golos = Golos_Text({ variable: '--font-golos', subsets: ['latin', 'cyrillic'], weight: ['400', '500', '600'] })
+const forum = Forum({ variable: '--font-forum', subsets: ['latin', 'cyrillic'], weight: '400', preload: false })
+const golos = Golos_Text({ variable: '--font-golos', subsets: ['latin', 'cyrillic'], weight: ['400', '500', '600'], preload: false })
 const manrope = Manrope({ variable: '--font-manrope', subsets: ['latin', 'cyrillic'], preload: false })
 const cormorant = Cormorant_Garamond({
   variable: '--font-cormorant',
@@ -31,7 +31,7 @@ const unbounded = Unbounded({ variable: '--font-unbounded', subsets: ['latin', '
 const cormorantDisplay = Cormorant({
   variable: '--font-cormorant-display',
   subsets: ['latin', 'cyrillic'],
-  weight: ['400', '500', '600', '700'],
+  weight: 'variable',
   style: ['normal', 'italic'],
   display: 'swap',
   preload: true,
@@ -39,7 +39,7 @@ const cormorantDisplay = Cormorant({
 const onest = Onest({
   variable: '--font-onest',
   subsets: ['latin', 'cyrillic'],
-  weight: ['400', '500', '600', '700'],
+  weight: 'variable',
   display: 'swap',
   preload: true,
 })

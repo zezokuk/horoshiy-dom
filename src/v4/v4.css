@@ -164,10 +164,18 @@ html.past-hero .v4-bar, .v4-bar--always { transform: none }
 .v4 .v4-bar__btn:hover { background: var(--leaf); transform: translateY(-1px); box-shadow: 0 8px 20px rgba(46,107,69,.28) }
 .v4-mnav { display: none }
 .v4-mnav__burger { all: unset; cursor: pointer; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; font-size: 18px; color: var(--forest); background: #fff }
-.v4-mnav__backdrop { position: fixed; inset: 0; z-index: 90; background: rgba(23,34,27,.45); display: flex; justify-content: flex-end }
-.v4-mnav__drawer { width: min(320px, 86vw); height: 100%; background: var(--paper); padding: 20px 22px 28px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: -12px 0 36px rgba(0,0,0,.18) }
+.v4-mnav__drawer { position: fixed; inset: 0 0 0 auto; margin: 0; width: min(360px, 88vw); max-width: none; height: 100dvh; max-height: none; border: 0; color: var(--ink); background: var(--paper); padding: 16px 24px max(24px, env(safe-area-inset-bottom)); overflow-y: auto; overscroll-behavior: contain }
+.v4-mnav__drawer[open] { display: flex; flex-direction: column; }
+.v4-mnav__drawer::backdrop { background: rgb(15 32 22 / .45) }
+html:has(.v4-mnav__drawer[open]) { overflow: hidden }
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.no-motion) .v4-mnav__drawer[open] { animation: v4-menu-in .28s cubic-bezier(.22,.75,.24,1) both }
+  html:not(.no-motion) .v4-mnav__drawer[open]::backdrop { animation: v4-menu-shade .22s ease-out both }
+}
+@keyframes v4-menu-in { from { transform: translateX(24px); opacity: .2 } }
+@keyframes v4-menu-shade { from { opacity: 0 } }
 .v4-mnav__head { display: flex; justify-content: space-between; align-items: center; font: 600 14px var(--f-ui); text-transform: uppercase; letter-spacing: .1em; color: var(--moss); border-bottom: 1px solid var(--line); padding-bottom: 14px }
-.v4-mnav__head button { all: unset; cursor: pointer; font-size: 20px; padding: 4px 8px }
+.v4-mnav__head button { all: unset; cursor: pointer; width: 44px; height: 44px; display: grid; place-items: center }
 .v4-mnav__links { display: flex !important; flex-direction: column; gap: 6px; margin-block: 18px auto }
 .v4-mnav__links a { font: 500 22px/1.35 var(--f-emo); color: var(--ink); padding: 10px 0; border-bottom: 1px solid var(--line) }
 .v4-mnav__foot { display: grid; gap: 12px }
@@ -1132,3 +1140,20 @@ html:has(.v4) .cookie .btn:hover { background: #225436 }
   }
   html:has(.v4) .cookie .btn { padding: 8px 14px; font-size: 12px; flex: none }
 }
+
+/* Navigation, controls and prices share the interface face across all buyer pages. */
+.v4 :where(button, input, select, textarea) { font-family: var(--f-ui) }
+.v4 :where(dd, input[type="number"]) { font-variant-numeric: lining-nums tabular-nums }
+.v4 .v4-mnav__burger:focus-visible, .v4 .v4-mnav__head button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px }
+.v4 #evf-form { scroll-margin-top: 84px }
+.v4 .v4-mnav__links a { font: 500 clamp(27px, 7vw, 34px)/1.15 var(--f-emo); padding-block: 15px }
+@media (prefers-reduced-motion: reduce) {
+  .v4-bar, .v4 .v3-card, .v4 .v3-card figure img, .v4 .v3-btn { transition: none }
+}
+.v4 .form__demo { font: 450 13px/1.45 var(--f-ui); color: var(--moss); grid-column: 1 / -1 }
+.v4-legal { max-width: 800px; margin: auto; padding: clamp(90px, 10vw, 150px) 24px 80px }
+.v4-legal .intro, .v4-legal .prose { padding: 0; width: 100%; margin: 0; max-width: none }
+.v4 .v4-legal__back { display: inline-flex; align-items: center; min-height: 44px; color: var(--leaf); font: 500 14px var(--f-ui) }
+.v4 .v4-legal h1 { margin: 14px 0 32px; font: 500 clamp(36px, 5vw, 66px)/1.04 var(--f-emo); text-wrap: balance; letter-spacing: -.025em }
+.v4 .v4-legal h2 { margin: 1em 0 .36em; font: 500 clamp(26px, 3vw, 36px)/1.1 var(--f-emo) }
+.v4 .v4-legal p { margin-block: 1em; color: var(--ink); font: 400 16px/1.65 var(--f-ui) }

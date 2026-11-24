@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, type FormEvent } from 'react'
+import { usePathname } from 'next/navigation'
 import { readAttribution } from '@/lib/attribution'
 import { telHref } from '@/lib/format'
 import { mainHref } from '@/lib/site'
@@ -53,6 +54,8 @@ export function LeadForm({
   /** show «Купить готовый / Построить / Пока присматриваюсь» */
   ask?: boolean
 }) {
+  const inShowcase = usePathname()?.startsWith('/v4')
+  const preview = process.env.NEXT_PUBLIC_CLIENT_PREVIEW === '1'
   const [phone, setPhone] = useState('')
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   // with the choice shown, «Купить готовый» is picked from the start: ready houses are the main product (08.11)
@@ -96,15 +99,15 @@ export function LeadForm({
   if (state === 'done') {
     return (
       <div className={`form ${light ? 'form--light' : ''}`}>
-        <div className="form__ok">
+        <div className="form__ok" role="status">
           {/* the brand's house draws itself and a light goes on in its window */}
           <svg className="form__house" viewBox="0 0 48 44" aria-hidden>
             <path d="M3 21 24 4l21 17M9 17v24h30V17" pathLength={1} />
             <rect x="20" y="26" width="8" height="9" rx="1" />
           </svg>
-          <b>Спасибо! Заявка принята.</b>
+          <b>{preview ? 'Проверка формы пройдена' : 'Спасибо! Заявка принята.'}</b>
           <p>
-            {interest === 'future'
+            {preview ? 'Это демонстрация записи на показ. Контакты не сохраняются.' : interest === 'future'
               ? 'Сообщим о новых посёлках, акциях и старте продаж — без навязчивых звонков.'
               : `Менеджер перезвонит${target.hours ? ` в рабочее время (${target.hours.toLowerCase()})` : ' в ближайшее рабочее время'}.`}
           </p>
@@ -122,6 +125,7 @@ export function LeadForm({
       <div className="form__hp" aria-hidden="true">
         <input type="text" name="website" tabIndex={-1} autoComplete="off" />
       </div>
+      {preview && <p className="form__demo">Демонстрационная форма. Можно указать вымышленное имя и номер.</p>}
       {ask && (
         <div className="form__ask" role="radiogroup" aria-label="Что вас интересует">
           {ASK.map((a) => (
@@ -165,8 +169,8 @@ export function LeadForm({
       <label className="form__consent">
         <input type="checkbox" name="consent" required />
         <span>
-          Даю <a href={mainHref('/consent')}>согласие на обработку персональных данных</a> и
-          ознакомлен с <a href={mainHref('/privacy')}>политикой</a>
+          Даю <a href={inShowcase ? '/v4/consent' : mainHref('/consent')} target="_blank" rel="noreferrer">согласие на обработку персональных данных</a> и
+          ознакомлен с <a href={inShowcase ? '/v4/privacy' : mainHref('/privacy')} target="_blank" rel="noreferrer">политикой</a>
         </span>
       </label>
       <button

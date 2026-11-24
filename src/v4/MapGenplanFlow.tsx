@@ -30,19 +30,19 @@ export type FlowEstate = {
 }
 
 const STATUS_LABEL = { selling: 'В продаже', soldOut: 'Построен и продан', planned: 'Скоро в продаже' } as const
-const KEY = process.env.NEXT_PUBLIC_YMAPS_KEY
+const KEY = process.env.NEXT_PUBLIC_YMAPS_KEY?.trim()
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Yandex Maps 2.1 ships no types
 type Y = any
 
-function loadYmaps(): Promise<Y> {
+function loadYmaps(key: string): Promise<Y> {
   return new Promise((resolve, reject) => {
     const ready = () => (window.ymaps ? window.ymaps.ready(() => resolve(window.ymaps)) : reject(new Error('ymaps: empty')))
     if (window.ymaps?.ready) return ready()
     let s = document.querySelector<HTMLScriptElement>('script[data-ymaps]')
     if (!s) {
       s = document.createElement('script')
-      s.src = `https://api-maps.yandex.ru/2.1/?lang=ru_RU${KEY ? `&apikey=${KEY}` : ''}`
+      s.src = `https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=${encodeURIComponent(key)}`
       s.async = true
       s.dataset.ymaps = '1'
       document.head.appendChild(s)
@@ -134,7 +134,7 @@ export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
   const defaultIdx = Math.max(0, estates.findIndex((e) => e.slug === 'dinskaya'))
   const [activeIdx, setActiveIdx] = useState<number>(defaultIdx)
   const [zoomedSlug, setZoomedSlug] = useState<string | null>(null)
-  const [mapMode, setMapMode] = useState<'wait' | 'js' | 'vector'>('wait')
+  const [mapMode, setMapMode] = useState<'wait' | 'js' | 'vector'>(KEY ? 'wait' : 'vector')
 
   const boxRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
@@ -173,17 +173,17 @@ export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
 
   useEffect(() => {
     const el = boxRef.current
-    if (!el) return
+    if (!KEY || !el) return
     const io = new IntersectionObserver(([e]) => e.isIntersecting && (setNear(true), io.disconnect()), { rootMargin: '400px 0px' })
     io.observe(el)
     return () => io.disconnect()
   }, [])
 
   useEffect(() => {
-    if (!near || !canvasRef.current || !estates.length) return
+    if (!KEY || !near || !canvasRef.current || !estates.length) return
     let dead = false
     let map: Y
-    loadYmaps()
+    loadYmaps(KEY)
       .then((ymaps) => {
         if (dead || !canvasRef.current) return
         const touch = window.matchMedia('(pointer: coarse)').matches
@@ -247,6 +247,7 @@ export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
   useEffect(() => {
     const a = apiRef.current
     if (!a || mapMode !== 'js') return
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('no-motion')
     if (zoomedSlug) {
       wasZoomedRef.current = true
       const zEst = estates.find((e) => e.slug === zoomedSlug)
@@ -255,7 +256,7 @@ export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
       })
       if (zEst) {
         try {
-          a.map.setCenter([zEst.lat, zEst.lng], 13, { duration: 420, checkZoomRange: true })
+          a.map.setCenter([zEst.lat, zEst.lng], 13, { duration: reduced ? 0 : 420, checkZoomRange: true })
         } catch {
           // ignore
         }
@@ -266,7 +267,7 @@ export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
         m.options.set('iconOffset', overviewOffset(estates[k].slug))
       })
       try {
-        a.map.setBounds(a.map.geoObjects.getBounds(), { checkZoomRange: true, zoomMargin: [58, 92, 68, 92], duration: 380 })
+        a.map.setBounds(a.map.geoObjects.getBounds(), { checkZoomRange: true, zoomMargin: [58, 92, 68, 92], duration: reduced ? 0 : 380 })
       } catch {
         // ignore
       }
@@ -364,7 +365,7 @@ export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
           <span>
             {zoomCta
               ? zoomCta.hint
-              : 'Наведите на посёлок для справки · Нажмите на пин, чтобы приблизить; нажмите ещё раз — открыть посёлок'}
+              : 'Выберите посёлок на карте, чтобы увидеть дома и подробности'}
           </span>
         </div>
       </div>

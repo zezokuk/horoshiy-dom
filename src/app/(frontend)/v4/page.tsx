@@ -154,6 +154,8 @@ export default async function V4Home() {
       projectName: type,
       monthlyPay,
       familyRate: fam.rate,
+      mortgageDown: need,
+      mortgageYears: fam.years,
       image: shot?.src ?? h.photo,
       caption: shot?.caption ?? 'Изображение проекта',
       alt: shot?.alt ?? 'Дом по проекту «' + type + '»',
@@ -224,7 +226,7 @@ export default async function V4Home() {
       <MotionRoot>
         <V4Motion />
 
-        <BuyerHero phone={company.phone} priceFrom={priceFrom ? formatMillions(priceFrom) : undefined} />
+        <BuyerHero priceFrom={priceFrom ? formatMillions(priceFrom) : undefined} />
         <FeaturedHouses houses={featured} count={free.length} />
         <HouseWalk
           areas={walkAreas}
@@ -245,7 +247,7 @@ export default async function V4Home() {
 
         {/* Ипотека: светлый понятный блок без тяжёлой плашки и выдуманных процентов */}
         <section className="v3-sec v4-sec v4-sec--mort" id="ipoteka">
-          <Head>Дома подходят под <em>все виды ипотеки</em></Head>
+          <Head>Ипотека <em>на дом</em></Head>
           <div className="v3-wrap v4-home-mort" data-move="up">
             <p className="v4-home-mort__intro">
               Работаем с льготными госпрограммами и стандартной ипотекой ведущих банков. Поможем выбрать выгодную ставку под вашу семью и бесплатно сопроводим подачу документов.

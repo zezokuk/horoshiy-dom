@@ -22,6 +22,15 @@ const withPreviewNoindex = (req: NextRequest, res: NextResponse) => {
 }
 
 export function proxy(req: NextRequest) {
+  const requestPath = req.nextUrl.pathname
+  if (process.env.NEXT_PUBLIC_CLIENT_PREVIEW === '1') {
+    const isAdmin = requestPath === '/admin' || requestPath.startsWith('/admin/')
+    const isApi = requestPath === '/api' || requestPath.startsWith('/api/')
+    const isImage = requestPath.startsWith('/api/media/file/') && ['GET', 'HEAD'].includes(req.method)
+    const isForm = requestPath === '/api/leads/submit' && req.method === 'POST'
+    if (isAdmin || (isApi && !isImage && !isForm)) return new NextResponse(null, { status: 404 })
+  }
+  if (requestPath.startsWith('/api/')) return NextResponse.next()
   if (REGION_MODE !== 'subdomain') return withPreviewNoindex(req, NextResponse.next())
   const { pathname, search } = req.nextUrl
   const host = req.headers.get('host')
@@ -44,5 +53,5 @@ export function proxy(req: NextRequest) {
 
 export const config = {
   // everything except Next internals, Payload API, uploaded media and files with an extension (images, robots.txt…)
-  matcher: ['/((?!_next/|api/|media/|.*\\.[a-z0-9]+$).*)'],
+  matcher: ['/api/:path*', '/admin/:path*', '/((?!_next/|api/|media/|.*\\.[a-z0-9]+$).*)'],
 }

@@ -22,10 +22,10 @@ export const metadata: Metadata = {
 const SKIP = ['Не хуже особняков', 'Дом за 6 месяцев']
 
 const BUILT_GALLERY = [
-  { src: '/v4/houses/type5-front.webp', cap: 'Ст. Динская · жилая улица с готовыми кирпичными домами' },
-  { src: '/v4/houses/type10-front.webp', cap: 'Новая Адыгея, ул. Дружбы 43 · двухэтажные дома с участками' },
+  { src: '/v4/houses/type5-front.webp', cap: 'Дом по проекту «Тип 5» · главный фасад' },
+  { src: '/v4/houses/type10-front.webp', cap: 'Дома по проекту «Тип 10» · вид с улицы' },
   { src: '/v4/houses/type5-side.webp', cap: 'Кирпичная кладка, крыльцо и благоустроенная территория' },
-  { src: '/v4/houses/type10-entry.webp', cap: 'Готовые дома с коммуникациями и забором по периметру' },
+  { src: '/v4/houses/type10-entry.webp', cap: 'Дом по проекту «Тип 10» · вход со двора' },
 ] as const
 
 export default async function V4About() {
@@ -61,9 +61,9 @@ export default async function V4About() {
           <div className="v3-wrap v4-head v4-head--split">
             <div>
               <p className="v4-num">Команда</p>
-              <h2 className="v3-h2" data-move="lines">Четыре фамилии <em>под каждым домом</em></h2>
+              <h2 className="v3-h2" data-move="lines">Кто строит <em>ваш дом</em></h2>
             </div>
-            <p className="v3-lead">Мы сами выбираем участки, проектируем дома и следим за стройкой — поэтому отвечаем лично, а не прячемся за вывеской.</p>
+            <p className="v3-lead">Учредители «Хорошего дома» выбирают участки, проектируют дома и следят за строительством.</p>
           </div>
           <div className="v3-wrap v4-founders v4-founders--editorial" style={{ marginTop: 28 }}>
             {FOUNDERS.map((person) => (
@@ -105,7 +105,7 @@ export default async function V4About() {
           <div className="v3-wrap v4-head v4-head--split">
             <div>
               <p className="v4-num">Живые улицы</p>
-              <h2 className="v3-h2" data-move="lines">Дома, в которых <em>уже живут</em></h2>
+              <h2 className="v3-h2" data-move="lines">Дома <em>в наших посёлках</em></h2>
             </div>
             <p className="v3-lead">Собственные улицы, одинаковый архитектурный стиль, проверенные временем кирпичные фасады и реальные жилые посёлки без долгостроя.</p>
           </div>

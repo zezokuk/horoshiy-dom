@@ -167,7 +167,7 @@ export default async function V4Estate({ params }: Props) {
 
             <section className="v3-sec v3-sec--mist v4-sec v4-estate-genplan v4-estate-genplan--first" id="genplan">
               <div className="v3-wrap">
-                <DinskayaGenplan houses={all} family={fam} hideEstateLink />
+                <DinskayaGenplan houses={all} family={fam} infrastructure={e.infrastructure ?? []} nearby={e.nearby ?? []} hideEstateLink />
               </div>
             </section>
 
@@ -361,8 +361,8 @@ export default async function V4Estate({ params }: Props) {
                 return (
                   <article key={t.slug} className="v4-etype-card" data-move="up">
                     <figure className="v4-etype-card__photo">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       {t.photo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img src={t.photo} alt={`Проект «${t.name}»`} loading="lazy" />
                       ) : (
                         <span className="v3-card__noimg">Фото скоро</span>
@@ -371,8 +371,8 @@ export default async function V4Estate({ params }: Props) {
                     </figure>
 
                     <div className="v4-etype-card__plan">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       {t.plan ? (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img src={t.plan} alt={`Планировка «${t.name}»`} loading="lazy" />
                       ) : (
                         <span className="v3-card__noimg">Планировка скоро</span>

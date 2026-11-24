@@ -21,7 +21,7 @@ function PlayIcon({ playing }: { playing: boolean }) {
 }
 
 export function HouseWalk({ href, linkText, areas }: { href: string; linkText: string; areas: (number | null)[] }) {
-  const stage = useRef<HTMLElement>(null)
+  const screen = useRef<HTMLDivElement>(null)
   const video = useRef<HTMLVideoElement>(null)
   const manualPause = useRef(false)
   const pendingTime = useRef(0)
@@ -43,7 +43,7 @@ export function HouseWalk({ href, linkText, areas }: { href: string; linkText: s
   }
 
   useEffect(() => {
-    const el = stage.current
+    const el = screen.current
     const player = video.current
     if (!el || !player) return
     const framing = window.matchMedia(portraitFrame)
@@ -115,12 +115,12 @@ export function HouseWalk({ href, linkText, areas }: { href: string; linkText: s
     if (player && !player.error && player.readyState >= 1) player.currentTime = next
   }
 
-  return <section id="vnutri" ref={stage} className="house-walk" aria-label="За порогом — прогулка по дому типа 5">
+  return <section id="vnutri" className="house-walk" aria-label="За порогом — прогулка по дому типа 5">
     <div className="house-walk__leadin">
-      <p className="house-walk__leadin-kicker">Внутри готового дома</p>
-      <p className="house-walk__leadin-text">Загляните за порог: как устроено пространство от крыльца и прихожей до светлой кухни-гостиной с выходом на террасу.</p>
+      <p className="house-walk__leadin-kicker">Прогулка по проекту</p>
+      <p className="house-walk__leadin-text">В ролике показан пример обустройства. Дом сдаётся в предчистовой отделке White Box.</p>
     </div>
-    <div className="house-walk__screen">
+    <div ref={screen} className="house-walk__screen">
       <picture className="house-walk__still">
         <source media={portraitFrame} srcSet={still.portrait} />
         <img src={still.image} alt="" loading="lazy" />
@@ -141,15 +141,15 @@ export function HouseWalk({ href, linkText, areas }: { href: string; linkText: s
       />
       <div className="house-walk__shade" />
       <div className="house-walk__top">
-        <span>Проект «Тип 5» <i /> Пример интерьера · сдаётся в предчистовой отделке White Box</span>
+        <span>Проект «Тип 5» <i /> Визуализация</span>
         <span className="house-walk__clock" aria-hidden="true">{timestamp(time)} <i>/</i> {timestamp(duration)}</span>
       </div>
       <div className="house-walk__caption" data-intro={chapter === 0} data-crossing={chapter === 0 && time > 2}>
         <div className="house-walk__room" key={chapter}>
           <h2>{chapter === 0 ? <>За <em>порогом</em></> : current.name}</h2>
-          {areas[chapter] && <span>{areas[chapter].toLocaleString('ru-RU')} м²</span>}
+          {areas[chapter] != null && <span>{areas[chapter].toLocaleString('ru-RU')} м²</span>}
         </div>
-        <p>{chapter === 0 ? 'От крыльца до террасы · светлый одноэтажный дом без лишних коридоров' : current.note}</p>
+        <p>{chapter === 0 ? 'От крыльца до террасы' : current.note}</p>
       </div>
       {!failed && <button type="button" className="house-walk__play" onClick={toggle} aria-label={playing ? 'Пауза' : 'Воспроизвести прогулку'}>
         <PlayIcon playing={playing} />

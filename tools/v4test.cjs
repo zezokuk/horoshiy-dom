@@ -118,7 +118,6 @@ async function run(browser, tag, opts) {
     await scrollTo(page, '#ipoteka', -30)
     await page.waitForTimeout(300)
     await page.screenshot({ path: `${SHOTS}/${tag}-05-mortgage.jpg`, quality: 75, type: 'jpeg' })
-    ok(`${tag}: после скролла появился плавающий помощник .st-helper`, await page.locator('.st-helper').isVisible().catch(() => false))
   }
 
   // 6. Кнопка «Записаться на показ» ведёт к форме
@@ -140,6 +139,14 @@ async function run(browser, tag, opts) {
     await page.waitForTimeout(400)
     await page.screenshot({ path: `${SHOTS}/${tag}-08-footer.jpg`, quality: 75, type: 'jpeg' })
   }
+
+  // The footer always provides an entry, including when the floating widget yields to the mobile booking bar.
+  await page.locator('.st-footer-link').click()
+  const picker = page.locator('dialog.st-picker[open]')
+  ok(`${tag}: подбор открывается по кнопке и показывает выбор числа спален`,
+    await picker.isVisible() && await picker.getByRole('button', { name: '3 спальни' }).isVisible())
+  await page.keyboard.press('Escape')
+  ok(`${tag}: подбор закрывается с клавиатуры`, await picker.count() === 0)
 
   // 7. Reduced motion проверка
   if (opts.reducedMotion) {

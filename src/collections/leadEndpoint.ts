@@ -78,6 +78,8 @@ export const leadEndpoint: Endpoint = {
     const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || req.headers.get('x-real-ip') || ''
     if (!rateOk(ip)) return Response.json({ ok: false, error: 'too_many' }, { status: 429 })
 
+    if (process.env.NEXT_PUBLIC_CLIENT_PREVIEW === '1') return Response.json({ ok: true, preview: true })
+
     const utm: Record<string, string> = {}
     if (json.utm && typeof json.utm === 'object') {
       for (const [k, v] of Object.entries(json.utm as Record<string, unknown>)) {

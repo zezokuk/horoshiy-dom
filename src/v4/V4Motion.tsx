@@ -15,6 +15,7 @@ gsap.registerPlugin(ScrollTrigger)
 
 export function V4Motion() {
   useEffect(() => {
+    if (document.documentElement.classList.contains('no-motion')) return
     const mm = gsap.matchMedia()
     mm.add({ ok: '(prefers-reduced-motion: no-preference)', wide: '(min-width: 861px)' }, (c) => {
       const { ok, wide } = c.conditions as { ok: boolean; wide: boolean }
@@ -39,7 +40,7 @@ export function V4Motion() {
         if (!b) return
         gsap.fromTo(
           b,
-          { xPercent: wide ? (k % 2 ? 28 : -28) : 0, autoAlpha: 0 },
+          { xPercent: wide ? (k % 2 ? 5 : -5) : 0, autoAlpha: 0 },
           {
             xPercent: 0,
             autoAlpha: 1,
@@ -71,8 +72,8 @@ export function V4Motion() {
           { yPercent: 112 },
           {
             yPercent: 0,
-            stagger: 0.045,
-            duration: 0.85,
+            stagger: 0.025,
+            duration: 0.65,
             ease: 'power3.out',
             scrollTrigger: { trigger: foot, start: 'top 95%', once: true },
           },

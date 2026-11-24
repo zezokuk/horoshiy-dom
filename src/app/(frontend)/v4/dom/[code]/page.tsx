@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { LeadForm } from '@/components/LeadForm'
 import { getCompany, getHouse, getHouses, img } from '@/lib/data'
-import { STATUS_LABEL, formatArea, formatMillions, formatPrice } from '@/lib/format'
+import { STATUS_LABEL, plural, formatArea, formatMillions, formatPrice } from '@/lib/format'
 import { JsonLd, breadcrumbsLd, houseLd } from '@/lib/seo'
 import { mainHref } from '@/lib/site'
 import { cleanPhotoUrl, houseView } from '@/lib/view'
@@ -88,7 +88,7 @@ export default async function HouseDetail({ params }: Props) {
       <V4Bar phone={company.phone} always />
       <main className="hd-wrap">
         <nav className="hd-path" aria-label="Навигация по каталогу">
-          <a href="/v4#doma">← К выбору дома</a><span aria-hidden>/</span><a href={`/v4/poselok/${estate.slug}`}>{estate.name}</a>
+          <a href="/v4/doma?view=houses">← Дома в продаже</a><span aria-hidden>/</span><a href={`/v4/poselok/${estate.slug}`}>{estate.name}</a>
         </nav>
         <div className="hd-spread">
           <div className="hd-identity">
@@ -115,7 +115,7 @@ export default async function HouseDetail({ params }: Props) {
               {Boolean(h.bathrooms) && <div><dt>Санузлы</dt><dd>{h.bathrooms}</dd></div>}
               <div><dt>Отделка</dt><dd>Предчистовая (White Box)</dd></div>
               <div><dt>Стены</dt><dd>370 мм (блок + утеплитель + кирпич)</dd></div>
-              <div><dt>Инженерия</dt><dd>15 кВт · вода · септик 9 м³ · газ</dd></div>
+              {estate.utilities?.length ? <div><dt>Коммуникации</dt><dd>{estate.utilities.join(' · ')}</dd></div> : null}
             </dl>
             {h.features.length > 0 && <p className="hd-features">{h.features.join(' · ')}</p>}
           </div>
@@ -142,24 +142,26 @@ export default async function HouseDetail({ params }: Props) {
         {related.length > 0 && <section className="hd-section hd-alternatives">
           <div className="hd-alternatives-head">
             <h2>Другие дома</h2>
-            <a className="hd-finance" href="/v4/doma">Все дома в продаже →</a>
+            <a className="hd-finance" href="/v4/doma?view=houses">Все дома в продаже →</a>
           </div>
           <div className="hd-alt-grid">
             {related.map((other) => {
               const v = houseView(other)
               const cleanV = cleanSinglePlotAddress(v.title, v.estateName, v.plotNo)
-              const cardImg = housePhotography(v.code)[0]?.src ?? v.photoCard ?? v.photo ?? '/v4/houses/type5-front.webp'
+              const frame = housePhotography(v.code)[0]
+              const cardImg = frame?.src ?? v.photoCard ?? v.photo
               return (
                 <a key={v.code} className="v3-card hd-alt-card" href={`/v4/dom/${v.code}`}>
                   <figure>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={cardImg} alt={cleanV.typePart} loading="lazy" />
-                    <figcaption>{cleanV.line}</figcaption>
+                    {cardImg ? <img src={cardImg} alt={frame?.alt ?? cleanV.typePart} loading="lazy" /> : <span className="v3-card__noimg">Фото скоро</span>}
+                    {cardImg && <figcaption>{frame?.caption ?? 'Изображение проекта'}</figcaption>}
                   </figure>
                   <div className="v3-card__body">
                     <span className="v3-status"><i />Свободен</span>
                     <h3>{cleanV.typePart} · {formatArea(v.area)} м²</h3>
-                    <p>{v.plot ? `${v.plot} · ` : ''}{v.bedrooms ? `${v.bedrooms} спальни` : cleanV.line}</p>
+                    <p>{cleanV.line}</p>
+                    <p>{[v.plot, v.bedrooms && `${v.bedrooms} ${plural(v.bedrooms, 'спальня', 'спальни', 'спален')}`].filter(Boolean).join(' · ')}</p>
                     <p className="v3-price">{formatMillions(v.price)}</p>
                   </div>
                 </a>
