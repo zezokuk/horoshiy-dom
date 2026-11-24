@@ -18,8 +18,8 @@ import '@/v4/v4.css'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: { absolute: 'Ипотека на дом в Краснодаре и Адыгее: семейная 6%, IT, сельская, военная — расчёт платежа · Хороший дом' },
-  description: 'Купить кирпичный дом с участком в ипотеку с личным брокером (одобрение 99%): семейная 6%, IT-, сельская и военная ипотека, материнский капитал во взнос.',
+  title: { absolute: 'Ипотека на готовый дом с участком: семейная 6%, IT, сельская, военная — расчёт платежа · Хороший дом' },
+  description: 'Готовые кирпичные дома с участком под все виды ипотеки: семейная 6%, IT-, сельская и военная ипотека, материнский капитал в первый взнос.',
   robots: { index: false, follow: false },
   alternates: { canonical: '/mortgage' },
 }
@@ -78,8 +78,8 @@ export default async function V4Mortgage() {
             </div>
           </section>
         )}
-        <V4Final company={company} context="Ипотека v4: запись на показ" title="Подберём" em="программу" lead="Оставьте телефон: личный ипотечный брокер (одобрение 99%) бесплатно подберёт программу — Семейная 6%, IT, Сельская, Военная или материнский капитал в первый взнос — и запишет на показ." />
-        <V4Footer since={company.since} />
+        <V4Final company={company} context="Ипотека v4: запись на показ" title="Подберём" em="программу" lead="Оставьте телефон: расскажем по условиям банков и подберём ипотечную программу под ваш случай — Семейная 6%, IT, Сельская, Военная или маткапитал в первый взнос." />
+        <V4Footer since={company.since} phone={company.phone} />
       </MotionRoot>
       <StickyCta phone={company.phone} />
     </div>

@@ -8,7 +8,7 @@ import { JsonLd, breadcrumbsLd, houseLd } from '@/lib/seo'
 import { mainHref } from '@/lib/site'
 import { cleanPhotoUrl, houseView } from '@/lib/view'
 import { HouseDetailGallery } from '@/v4/HouseDetailGallery'
-import { housePhotography } from '@/v4/housePhotography'
+import { fallbackHouseFrames, housePhotography } from '@/v4/housePhotography'
 import { Mortgage } from '@/v4/Mortgage'
 import { V4Bar, V4Footer } from '@/v4/Shell'
 import { SLIDE_CODE, v4img } from '@/v4/images'
@@ -19,13 +19,34 @@ import '@/v4/HouseDetail.css'
 export const dynamic = 'force-dynamic'
 type Props = { params: Promise<{ code: string }> }
 
+function cleanSinglePlotAddress(rawTitle: string, estateName: string, plotNo: number | null | undefined) {
+  const [typePart, ...rest] = rawTitle.split(', ')
+  const street = rest
+    .join(', ')
+    .replace(/,?\s*уч\.?\s*\d+\s*[–-]\s*\d+/gi, '')
+    .replace(/,?\s*уч\.?\s*\d+(?:\s*,\s*\d+)+/gi, '')
+    .replace(/,?\s*\d+\s*[–-]\s*\d+$/g, '')
+    .replace(/^уч\.\s*/i, '')
+    .trim()
+  const parts = [typePart]
+  if (street && !/^\d+$/.test(street)) parts.push(street)
+  if (plotNo != null) parts.push(`участок № ${plotNo}`)
+  else if (/^\d+$/.test(street)) parts.push(`участок № ${street}`)
+  return {
+    typePart,
+    line: [estateName !== 'Динская' ? estateName : 'ст. Динская', ...parts.slice(1)].filter(Boolean).join(' · '),
+    fullAddress: parts.join(' · '),
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const house = await getHouse((await params).code)
   if (!house) return {}
   const h = houseView(house)
+  const clean = cleanSinglePlotAddress(h.title, h.estateName, h.plotNo)
   return {
-    title: { absolute: `${h.title} · ${h.estateName} · ${formatMillions(h.price)} — Хороший дом` },
-    description: `${h.title}, ${formatArea(h.area)} м²${h.plot ? `, участок ${h.plot}` : ''}. ${h.estateName}. ${STATUS_LABEL[h.status]}.`,
+    title: { absolute: `${clean.typePart} · ${h.estateName}${h.plotNo != null ? ` · уч. ${h.plotNo}` : ''} · ${formatMillions(h.price)} — Хороший дом` },
+    description: `${clean.typePart}, ${formatArea(h.area)} м²${h.plot ? `, участок ${h.plot}` : ''}. ${clean.line}. ${STATUS_LABEL[h.status]}.`,
     robots: { index: false, follow: false },
     alternates: { canonical: h.href },
   }
@@ -41,17 +62,13 @@ export default async function HouseDetail({ params }: Props) {
   const [company, freeHouses] = await Promise.all([getCompany(), getHouses({ status: 'free' })])
   const related = freeHouses.filter((other) => other.code !== h.code).sort((a, b) => Math.abs(a.price - h.price) - Math.abs(b.price - h.price)).slice(0, 3)
   const typeName = project?.name || h.title.split(',')[0]
-  const [type, ...addressParts] = h.title.split(', ').map((s) => s.replace(/^уч\.\s*/i, 'Участок № '))
-  const address = addressParts.join(' · ')
+  const cleanAddr = cleanSinglePlotAddress(h.title, estate.name, h.plotNo)
   const location = estate.slug === 'dinskaya' ? 'Дом в Динской' : 'Кирпичный дом'
-  const slides = [...housePhotography(h.code)]
+  const known = [...housePhotography(h.code)]
   const photo = h.photo || cleanPhotoUrl(img(project?.photo, 'wide'))
-  if (!slides.length) {
-    const projectFrame = project?.slug === 'tip-5' ? '/v4/houses/type5-front.webp' : v4img(SLIDE_CODE[project?.slug ?? ''])?.src
-    if (projectFrame) slides.push({ src: projectFrame, alt: `Фасад дома по проекту «${typeName}»`, caption: `Визуализация проекта «${typeName}»` })
-    if (photo) slides.push({ src: photo, alt: `Фасад из презентации «${h.title}»`, caption: `Изображение проекта «${typeName}»` })
-  }
-  const gallery = h.plan ? [...slides, { src: h.plan, caption: `Планировка · ${type}`, alt: `Планировка «${h.title}»`, plan: true }] : slides
+  const projectFrame = project?.slug === 'tip-5' ? '/v4/houses/type5-front.webp' : v4img(SLIDE_CODE[project?.slug ?? ''])?.src
+  const slides = known.length ? known : fallbackHouseFrames(typeName, photo, projectFrame)
+  const gallery = h.plan ? [...slides, { src: h.plan, caption: `Планировка · ${cleanAddr.typePart}`, alt: `Планировка «${cleanAddr.typePart}»`, plan: true }] : slides
   const { rate, years, minDown, limit } = company.family ?? {}
   const family = rate != null && years && minDown != null && limit ? { rate, years, minDown, limit } : null
   const canVisit = h.status === 'free'
@@ -77,7 +94,7 @@ export default async function HouseDetail({ params }: Props) {
           <div className="hd-identity">
             <p className="hd-status" data-status={h.status}><i />{STATUS_LABEL[h.status]}</p>
             <h1>{location}</h1>
-            <p className="hd-address">{estate.slug !== 'dinskaya' && <>{estate.name} · </>}{type}{address && <> · {address}</>}</p>
+            <p className="hd-address">{cleanAddr.typePart} · {cleanAddr.line}</p>
           </div>
           {gallery.length > 0 && <HouseDetailGallery frames={gallery} />}
           <div className="hd-offer">
@@ -107,7 +124,7 @@ export default async function HouseDetail({ params }: Props) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={h.plan} loading="lazy" alt={`Планировка дома «${h.title}»`} />
             </a>
-            <figcaption>Планировка · {type}<span><a href={h.plan} download>Скачать планировку ↓</a> · <a href={h.plan} target="_blank" rel="noreferrer">Развернуть ↗</a></span></figcaption>
+            <figcaption>Планировка · {cleanAddr.typePart}<span><a href={h.plan} download>Скачать планировку ↓</a> · <a href={h.plan} target="_blank" rel="noreferrer">Развернуть ↗</a></span></figcaption>
           </figure>}
         </section>}
         {family && canVisit && <section className="hd-section hd-mortgage" id="ipoteka">
@@ -118,20 +135,40 @@ export default async function HouseDetail({ params }: Props) {
           <div className="hd-book-copy">
             <h2 id="hd-book-title">{canVisit ? 'Посмотреть дом вживую' : 'Найти похожий дом'}</h2>
             <p>{canVisit ? 'Оставьте телефон. Менеджер свяжется с вами и согласует время показа.' : 'Менеджер подберёт свободные дома с похожей площадью и стоимостью.'}</p>
-            <div className="hd-book-house">{slides[0] && <Image src={slides[0].src} width={78} height={58} unoptimized alt="" />}<div><b>{h.title}</b><span>{estate.name} · {formatMillions(h.price)}</span></div></div>
+            <div className="hd-book-house">{slides[0] && <Image src={slides[0].src} width={78} height={58} unoptimized alt="" />}<div><b>{cleanAddr.typePart} · {cleanAddr.line}</b><span>{formatMillions(h.price)}</span></div></div>
           </div>
           <div className="hd-form"><LeadForm light cta={cta} target={{ interest: 'buy', house: h.code, estate: estate.slug, region: h.regionSlug, context, phone: company.phone }} /></div>
         </section>
         {related.length > 0 && <section className="hd-section hd-alternatives">
-          <h2>Другие дома</h2>
-          <ul>{related.map((other) => {
-            const v = houseView(other)
-            return <li key={v.code}><a href={`/v4/dom/${v.code}`}><span>{v.estateName} <b>{v.title}</b></span><span>{formatArea(v.area)} м²</span><strong>{formatMillions(v.price)}</strong><span aria-hidden>↗</span></a></li>
-          })}</ul>
-          <a className="hd-finance" href="/v4/doma">Все дома в продаже →</a>
+          <div className="hd-alternatives-head">
+            <h2>Другие дома</h2>
+            <a className="hd-finance" href="/v4/doma">Все дома в продаже →</a>
+          </div>
+          <div className="hd-alt-grid">
+            {related.map((other) => {
+              const v = houseView(other)
+              const cleanV = cleanSinglePlotAddress(v.title, v.estateName, v.plotNo)
+              const cardImg = housePhotography(v.code)[0]?.src ?? v.photoCard ?? v.photo ?? '/v4/houses/type5-front.webp'
+              return (
+                <a key={v.code} className="v3-card hd-alt-card" href={`/v4/dom/${v.code}`}>
+                  <figure>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={cardImg} alt={cleanV.typePart} loading="lazy" />
+                    <figcaption>{cleanV.line}</figcaption>
+                  </figure>
+                  <div className="v3-card__body">
+                    <span className="v3-status"><i />Свободен</span>
+                    <h3>{cleanV.typePart} · {formatArea(v.area)} м²</h3>
+                    <p>{v.plot ? `${v.plot} · ` : ''}{v.bedrooms ? `${v.bedrooms} спальни` : cleanV.line}</p>
+                    <p className="v3-price">{formatMillions(v.price)}</p>
+                  </div>
+                </a>
+              )
+            })}
+          </div>
         </section>}
       </main>
-      <V4Footer since={company.since} />
+      <V4Footer since={company.since} phone={company.phone} />
     </div>
   )
 }

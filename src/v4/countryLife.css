@@ -1,0 +1,131 @@
+/* Editorial блок «Жизнь за городом» (ERA / Aurum приёмы: плавный разноскоростной параллакс без скрытия контента до скролла) */
+.cl-story {
+  background: linear-gradient(180deg, #f4f2eb 0%, var(--paper) 100%);
+  color: var(--ink);
+  padding: clamp(56px, 6.8vw, 104px) 0 clamp(52px, 6.2vw, 96px);
+  position: relative;
+  overflow: clip;
+}
+.cl-story__wrap {
+  width: min(100% - clamp(40px, 8vw, 152px), 1600px);
+  margin-inline: auto;
+}
+.cl-story__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, .85fr);
+  gap: clamp(20px, 4vw, 64px);
+  align-items: end;
+  margin-bottom: clamp(28px, 3.8vw, 52px);
+}
+.v4 .cl-story__h2 {
+  font: 500 clamp(40px, 4.8vw, 76px)/.98 var(--f-emo);
+  letter-spacing: -.02em;
+  color: var(--forest);
+  margin: 10px 0 0;
+  max-width: 18ch;
+}
+.v4 .cl-story__h2 em { font-style: italic; font-weight: 500; color: var(--leaf); }
+.cl-story__lead {
+  margin: 0;
+  font: 400 clamp(15px, 1.15vw, 18px)/1.58 var(--f-ui);
+  color: var(--moss);
+  max-width: 46ch;
+}
+
+.cl-story__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(16px, 2vw, 28px);
+  align-items: start;
+}
+.cl-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 14px 36px rgba(23, 34, 27, .06);
+  transform: translate3d(0, var(--life-y, 0px), 0);
+  transition: transform .35s cubic-bezier(.2, .75, .2, 1), box-shadow .3s ease, border-color .25s ease;
+  will-change: transform;
+}
+.cl-card:hover { border-color: rgba(46, 107, 69, .38); box-shadow: 0 22px 48px rgba(23, 34, 27, .11); }
+.cl-card--tall { grid-column: span 5; }
+.cl-card--wide { grid-column: span 7; margin-top: clamp(0px, 2.4vw, 34px); }
+.cl-card--compact { grid-column: span 6; margin-top: clamp(0px, -1vw, -12px); }
+.cl-card--medium { grid-column: span 6; margin-top: clamp(0px, 1.6vw, 22px); }
+
+.cl-card__media { position: relative; overflow: hidden; background: #e6e4dc; }
+.cl-card--tall .cl-card__media { aspect-ratio: 4 / 3.4; }
+.cl-card--wide .cl-card__media { aspect-ratio: 16 / 9.6; }
+.cl-card--compact .cl-card__media { aspect-ratio: 16 / 10; }
+.cl-card--medium .cl-card__media { aspect-ratio: 16 / 10; }
+
+.cl-card__media img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transform: scale(1.03);
+  transition: transform 1.1s cubic-bezier(.22, .78, .2, 1);
+}
+.cl-card--tall .cl-card__media img {
+  object-position: 92% center;
+}
+.cl-card.is-inview .cl-card__media img { transform: scale(1); }
+@media (hover: hover) { .cl-card:hover .cl-card__media img { transform: scale(1.045); } }
+.cl-card__tag {
+  position: absolute; left: 14px; top: 14px; padding: 6px 13px; border-radius: 999px;
+  background: rgba(250, 249, 245, .92); backdrop-filter: blur(10px);
+  border: 1px solid rgba(27, 58, 36, .14); font: 600 11.5px/1.2 var(--f-ui); letter-spacing: .04em; color: var(--forest);
+}
+.cl-card__body { padding: clamp(18px, 2vw, 26px); display: grid; gap: 6px; }
+.v4 .cl-card__body h3 { margin: 0; font: 500 clamp(24px, 2.2vw, 32px)/1.08 var(--f-emo); color: var(--ink); }
+.cl-card__body p { margin: 0; font: 400 14.5px/1.52 var(--f-ui); color: var(--moss); max-width: 52ch; }
+
+.cl-story__foot {
+  margin-top: clamp(26px, 3.2vw, 44px); padding-top: 20px; border-top: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
+}
+.cl-story__pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.cl-story__pills span {
+  padding: 7px 14px; border-radius: 999px; background: #ffffff; border: 1px solid var(--line);
+  font: 500 13px/1.2 var(--f-ui); color: var(--forest);
+}
+
+/* Selling блок ипотеки на главной: светлые архитектурные карточки без массивной тёмной плашки */
+.v4-home-mort { display: grid; gap: 20px; margin-top: 18px; }
+.v4-home-mort__intro {
+  margin: 0;
+  max-width: 64ch;
+  font: 400 16px/1.55 var(--f-ui);
+  color: var(--moss);
+}
+
+.v4-home-mort__grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px;
+}
+.v4-home-mort__prog {
+  background: #ffffff; border: 1px solid var(--line); border-radius: 20px; padding: 20px;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 10px;
+  box-shadow: 0 8px 24px rgba(23, 34, 27, .04);
+}
+.v4-home-mort__prog-badge {
+  display: inline-flex; width: fit-content; padding: 4px 10px; border-radius: 999px;
+  background: var(--mist); color: var(--forest); font: 600 11.5px/1.2 var(--f-fact);
+}
+.v4 .v4-home-mort__prog h3 { margin: 4px 0 0; font: 500 24px/1.1 var(--f-emo); color: var(--ink); }
+.v4-home-mort__prog p { margin: 0; font: 400 13.5px/1.5 var(--f-ui); color: var(--moss); }
+.v4-home-mort__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+
+@media (max-width: 1180px) {
+  .v4-home-mort__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 860px) {
+  .cl-story__wrap { width: calc(100% - 32px); }
+  .cl-story__head { grid-template-columns: 1fr; gap: 12px; }
+  .cl-story__grid { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 14px; padding-bottom: 8px; }
+  .cl-card { flex: 0 0 84%; scroll-snap-align: start; margin-top: 0 !important; transform: none !important; }
+  .cl-card__media { aspect-ratio: 16 / 10.5 !important; }
+  .v4-home-mort__metrics, .v4-home-mort__grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl-card, .cl-card__media img { transform: none !important; transition: none !important; }
+}

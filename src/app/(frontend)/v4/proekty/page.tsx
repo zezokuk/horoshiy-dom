@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: { absolute: 'Планировки и проекты кирпичных домов: от 85 до 168 м² — одноэтажные, с мансардой, двухэтажные · Хороший дом' },
-  description: '15+ планировок кирпичных домов с площадями комнат. Готовые дома каждого проекта, которые продаются сейчас под Краснодаром.',
+  description: '15+ планировок кирпичных домов с площадями комнат и готовые дома каждого проекта в собственных посёлках.',
   robots: { index: false, follow: false },
   alternates: { canonical: '/projects' },
 }
@@ -45,7 +45,7 @@ export default async function V4Projects() {
           <div className="v3-wrap"><TypeList types={types} allHref="/v4/doma" allLabel="Все дома в продаже →" /></div>
         </section>
         <V4Final company={company} context="Проекты v4: запись на показ" />
-        <V4Footer since={company.since} />
+        <V4Footer since={company.since} phone={company.phone} />
       </MotionRoot>
       <StickyCta phone={company.phone} />
     </div>

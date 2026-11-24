@@ -6,6 +6,28 @@
   position: relative;
   isolation: isolate;
 }
+.house-walk__leadin {
+  padding: clamp(20px, 2.6vw, 34px) var(--walk-gutter) clamp(16px, 2vw, 24px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px 32px;
+  border-bottom: 1px solid rgba(255, 249, 238, .1);
+}
+.house-walk__leadin-kicker {
+  margin: 0;
+  font: 600 11px/1.3 var(--f-ui);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #a9cdb5;
+}
+.house-walk__leadin-text {
+  margin: 0;
+  max-width: 66ch;
+  font: 400 clamp(14px, 1.15vw, 17px)/1.5 var(--f-ui);
+  color: rgba(248, 244, 232, .88);
+}
 .house-walk__screen {
   position: relative;
   isolation: isolate;
@@ -56,7 +78,12 @@
   font: 500 clamp(13px,1.1vw,18px)/1.35 var(--f-ui);
   color: #cacec4; background: none; padding: 8px 0; border: 0; min-height: 44px;
 }
-.house-walk__chapter-label { display: flex; align-items: center; gap: 9px; }
+.house-walk__chapter-label { display: flex; align-items: center; gap: 10px; }
+.house-walk__chapter-copy { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.house-walk__chapter-copy b { font-weight: 550; line-height: 1.2; }
+.house-walk__chapter-copy small { font: 400 11.5px/1.3 var(--f-ui); color: rgba(202, 206, 196, .78); }
+.house-walk__chapters button[aria-current] .house-walk__chapter-copy small { color: rgba(255, 249, 238, .88); }
+@media (max-width: 960px) { .house-walk__chapter-copy small { display: none; } }
 .house-walk__chapters button[aria-current], .house-walk__chapters button:hover { color: #fff9ee; }
 .house-walk__track, .house-walk__track i { display: block; height: 2px; }
 .house-walk__track { background: #48564c; margin-bottom: 11px; }

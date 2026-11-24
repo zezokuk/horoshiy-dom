@@ -124,99 +124,169 @@ export default async function V4Estate({ params }: Props) {
       <JsonLd data={breadcrumbsLd([{ name: 'Главная', url: mainHref('/') }, { name: e.name, url: v.href }])} />
       <V4Bar phone={company.phone} always />
       <MotionRoot>
-        {/* 1. Компактная шапка посёлка без старой обложки */}
-        <section className="v4-estate-hero">
-          <span className="v4-ghost" aria-hidden>{e.name.toLowerCase()}</span>
-          <div className="v3-wrap">
-            <nav className="v4-dom__crumbs" aria-label="Навигация">
-              <a href="/v4">Главная</a>
-              <span aria-hidden>/</span>
-              <a href="/v4/poselki">Посёлки</a>
-              <span aria-hidden>/</span>
-              <span>{e.name}</span>
-            </nav>
-
-            <div className="v4-estate-top">
-              <div className="v4-estate-top__text">
-                <span className={`v3-status${e.status !== 'selling' ? ' v3-status--off' : ''}`}>
-                  <i />
-                  {estateSale(v)}
-                </span>
-                <h1 className="v4-dom-h1">{e.name}</h1>
-                <p className="v4-dom__where">
-                  {[e.kind || 'Коттеджный посёлок', e.place].filter(Boolean).join(' · ')}
-                  {e.tagline ? ` — ${e.tagline}` : ''}
-                </p>
-                {e.description && <p className="v4-estate-desc">{e.description}</p>}
-              </div>
-
-              <div className="v4-pik-bar">
-                {hasGenplan ? (
-                  <a className="v4-pik-btn v4-pik-btn--accent" href="#genplan">
-                    <span>Генплан посёлка ↓</span>
-                  </a>
-                ) : free.length === 1 ? (
-                  <a className="v4-pik-btn v4-pik-btn--accent" href="#tipy-poselka">
-                    <span>Готовый дом в продаже →</span>
-                  </a>
-                ) : null}
-                {hasInfo && (
-                  <a className="v4-pik-btn" href="#o-poselke">
-                    <span>О посёлке</span>
-                  </a>
-                )}
-                {estateTypes.length > 0 && (
-                  <a className="v4-pik-btn" href="#tipy-poselka">
-                    <span>{free.length === 1 ? 'Проект и планировка' : `Типы домов (${estateTypes.length})`}</span>
-                  </a>
-                )}
-                {free.length > 1 && (
-                  <a className="v4-pik-btn" href="#doma">
-                    <span>Дома списком ({free.length})</span>
-                  </a>
-                )}
-                {map && (
-                  <a className="v4-pik-btn v4-pik-btn--map" href={map} target="_blank" rel="noreferrer">
-                    <span>Яндекс Карты</span>
-                    <i className="v4-pik-mapdot" aria-hidden />
-                  </a>
-                )}
-                <a className="v4-pik-btn" href="#evf-form">
-                  <span>Записаться на показ</span>
-                </a>
-              </div>
-            </div>
-
-            <div className="v4-estate-facts">
-              {facts.map((f) => (
-                <div className="v4-estate-fact" key={f.l}>
-                  <b>{f.v}</b>
-                  <span>{f.l}</span>
+        {/* 1. Для Динской — ультракомпактная верхняя полоса + СРАЗУ полноэкранный интерактивный генплан (картинка-хук → потом текст) */}
+        {e.slug === 'dinskaya' ? (
+          <>
+            <section className="v4-estate-hero v4-estate-hero--compact">
+              <div className="v3-wrap">
+                <nav className="v4-dom__crumbs" aria-label="Навигация">
+                  <a href="/v4">Главная</a>
+                  <span aria-hidden>/</span>
+                  <a href="/v4/poselki">Посёлки</a>
+                  <span aria-hidden>/</span>
+                  <span>{e.name}</span>
+                </nav>
+                <div className="v4-estate-compact-row">
+                  <div className="v4-estate-compact-title">
+                    <h1 className="v4-dom-h1">{e.name}</h1>
+                    <span className="v3-status">
+                      <i />
+                      {free.length} в продаже{v.priceFrom ? ` · от ${formatMillions(v.priceFrom)}` : ''}
+                    </span>
+                  </div>
+                  <div className="v4-estate-compact-links">
+                    <a className="v4-pik-btn" href="#o-poselke">
+                      <span>О посёлке</span>
+                    </a>
+                    <a className="v4-pik-btn" href="#tipy-poselka">
+                      <span>Типы домов ({estateTypes.length})</span>
+                    </a>
+                    {map && (
+                      <a className="v4-pik-btn v4-pik-btn--map" href={map} target="_blank" rel="noreferrer">
+                        <span>Яндекс Карты</span>
+                        <i className="v4-pik-mapdot" aria-hidden />
+                      </a>
+                    )}
+                    <a className="v4-pik-btn v4-pik-btn--accent" href="#evf-form">
+                      <span>Записаться на показ</span>
+                    </a>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
+              </div>
+            </section>
 
-        {/* 2. Сразу интерактивный генплан (если больше 1 дома или есть полный генплан Динской) */}
-        {hasGenplan && (
-          <section className="v3-sec v3-sec--mist v4-sec v4-estate-genplan" id="genplan">
-            <span className="v4-ghost" aria-hidden>генплан</span>
-            <div className="v3-wrap v4-head" style={{ marginBottom: 20 }}>
-              <p className="v4-num"><b>01</b> / Генплан</p>
-              <h2 className="v3-h2" data-move="lines">Генплан посёлка <em>«{e.name}»</em></h2>
-              <p className="v3-lead" data-move="up">
-                Наведите на участок, чтобы увидеть площадь и стоимость, или нажмите, чтобы открыть дом.
-              </p>
-            </div>
-            <div className="v3-wrap">
-              {e.slug === 'dinskaya' ? (
+            <section className="v3-sec v3-sec--mist v4-sec v4-estate-genplan v4-estate-genplan--first" id="genplan">
+              <div className="v3-wrap">
                 <DinskayaGenplan houses={all} family={fam} hideEstateLink />
-              ) : (
-                <PlotPicker estates={plot} />
-              )}
-            </div>
-          </section>
+              </div>
+            </section>
+
+            <section className="v3-sec v4-sec v4-estate-about--below">
+              <div className="v3-wrap">
+                <div className="v4-estate-top">
+                  <div className="v4-estate-top__text">
+                    <p className="v4-num"><b>01</b> / Паспорт посёлка</p>
+                    <h2 className="v3-h2" data-move="lines">Посёлок <em>«{e.name}»</em></h2>
+                    <p className="v4-dom__where">
+                      {[e.kind || 'Коттеджный посёлок', e.place].filter(Boolean).join(' · ')}
+                      {e.tagline ? ` — ${e.tagline}` : ''}
+                    </p>
+                    {e.description && <p className="v4-estate-desc">{e.description}</p>}
+                  </div>
+                </div>
+                <div className="v4-estate-facts">
+                  {facts.map((f) => (
+                    <div className="v4-estate-fact" key={f.l}>
+                      <b>{f.v}</b>
+                      <span>{f.l}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </>
+        ) : (
+          <>
+            {/* Для остальных посёлков — шапка + (если есть больше 1 дома) генплан */}
+            <section className="v4-estate-hero">
+              <span className="v4-ghost" aria-hidden>{e.name.toLowerCase()}</span>
+              <div className="v3-wrap">
+                <nav className="v4-dom__crumbs" aria-label="Навигация">
+                  <a href="/v4">Главная</a>
+                  <span aria-hidden>/</span>
+                  <a href="/v4/poselki">Посёлки</a>
+                  <span aria-hidden>/</span>
+                  <span>{e.name}</span>
+                </nav>
+
+                <div className="v4-estate-top">
+                  <div className="v4-estate-top__text">
+                    <span className={`v3-status${e.status !== 'selling' ? ' v3-status--off' : ''}`}>
+                      <i />
+                      {estateSale(v)}
+                    </span>
+                    <h1 className="v4-dom-h1">{e.name}</h1>
+                    <p className="v4-dom__where">
+                      {[e.kind || 'Коттеджный посёлок', e.place].filter(Boolean).join(' · ')}
+                      {e.tagline ? ` — ${e.tagline}` : ''}
+                    </p>
+                    {e.description && <p className="v4-estate-desc">{e.description}</p>}
+                  </div>
+
+                  <div className="v4-pik-bar">
+                    {hasGenplan ? (
+                      <a className="v4-pik-btn v4-pik-btn--accent" href="#genplan">
+                        <span>Генплан посёлка ↓</span>
+                      </a>
+                    ) : free.length === 1 ? (
+                      <a className="v4-pik-btn v4-pik-btn--accent" href="#tipy-poselka">
+                        <span>Готовый дом в продаже →</span>
+                      </a>
+                    ) : null}
+                    {hasInfo && (
+                      <a className="v4-pik-btn" href="#o-poselke">
+                        <span>О посёлке</span>
+                      </a>
+                    )}
+                    {estateTypes.length > 0 && (
+                      <a className="v4-pik-btn" href="#tipy-poselka">
+                        <span>{free.length === 1 ? 'Проект и планировка' : `Типы домов (${estateTypes.length})`}</span>
+                      </a>
+                    )}
+                    {free.length > 1 && (
+                      <a className="v4-pik-btn" href="#doma">
+                        <span>Дома списком ({free.length})</span>
+                      </a>
+                    )}
+                    {map && (
+                      <a className="v4-pik-btn v4-pik-btn--map" href={map} target="_blank" rel="noreferrer">
+                        <span>Яндекс Карты</span>
+                        <i className="v4-pik-mapdot" aria-hidden />
+                      </a>
+                    )}
+                    <a className="v4-pik-btn" href="#evf-form">
+                      <span>Записаться на показ</span>
+                    </a>
+                  </div>
+                </div>
+
+                <div className="v4-estate-facts">
+                  {facts.map((f) => (
+                    <div className="v4-estate-fact" key={f.l}>
+                      <b>{f.v}</b>
+                      <span>{f.l}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {hasGenplan && (
+              <section className="v3-sec v3-sec--mist v4-sec v4-estate-genplan" id="genplan">
+                <span className="v4-ghost" aria-hidden>генплан</span>
+                <div className="v3-wrap v4-head" style={{ marginBottom: 20 }}>
+                  <p className="v4-num"><b>01</b> / Генплан</p>
+                  <h2 className="v3-h2" data-move="lines">Генплан посёлка <em>«{e.name}»</em></h2>
+                  <p className="v3-lead" data-move="up">
+                    Наведите на участок, чтобы увидеть площадь и стоимость, или нажмите, чтобы открыть дом.
+                  </p>
+                </div>
+                <div className="v3-wrap">
+                  <PlotPicker estates={plot} />
+                </div>
+              </section>
+            )}
+          </>
         )}
 
         {/* 3. Всё о посёлке: окружение, минуты и коммуникации */}
@@ -376,7 +446,7 @@ export default async function V4Estate({ params }: Props) {
           lead={`Покажем посёлок «${e.name}» и свободные участки вживую или по видеосвязи. Ответим про документы и ипотеку.`}
           bg={v4img('И4')?.src ?? '/design/hero-morning.webp'}
         />
-        <V4Footer since={company.since} />
+        <V4Footer since={company.since} phone={company.phone} />
       </MotionRoot>
       <StickyCta phone={company.phone} />
     </div>

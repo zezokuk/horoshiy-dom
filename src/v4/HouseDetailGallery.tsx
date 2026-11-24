@@ -15,6 +15,8 @@ export function HouseDetailGallery({ frames }: { frames: readonly Frame[] }) {
   const frame = frames[index]
   if (!frame) return null
   const multiple = frames.length > 1
+  const firstPhotoIdx = frames.findIndex((f) => !f.plan)
+  const planIdx = frames.findIndex((f) => f.plan)
   const step = (delta: number) => setIndex((i) => (i + delta + frames.length) % frames.length)
   const keyboard = (event: KeyboardEvent) => {
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
@@ -42,6 +44,24 @@ export function HouseDetailGallery({ frames }: { frames: readonly Frame[] }) {
         <div className={'hd-gallery-stage' + (frame.plan ? ' is-plan' : '')} onTouchStart={start} onTouchEnd={end}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img key={frame.src} src={frame.src} alt={frame.alt} fetchPriority={index === 0 ? 'high' : 'auto'} />
+          {planIdx >= 0 && firstPhotoIdx >= 0 && (
+            <div className="hd-stage-switch" role="group" aria-label="Переключение фото и планировки">
+              <button
+                type="button"
+                aria-pressed={!frame.plan}
+                onClick={() => setIndex(firstPhotoIdx)}
+              >
+                Фото ({frames.filter((f) => !f.plan).length})
+              </button>
+              <button
+                type="button"
+                aria-pressed={Boolean(frame.plan)}
+                onClick={() => setIndex(planIdx)}
+              >
+                Планировка
+              </button>
+            </div>
+          )}
           <button className="hd-expand" type="button" aria-label="Развернуть изображение" onClick={() => dialog.current?.showModal()}>
             <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.6" fill="none"><path d="M4 10V4h6m4 0h6v6m0 4v6h-6m-4 0H4v-6" /></svg>
           </button>
@@ -52,10 +72,13 @@ export function HouseDetailGallery({ frames }: { frames: readonly Frame[] }) {
         </figcaption>
       </figure>
       {multiple && <div className="hd-thumbs" role="group" aria-label="Выбрать кадр">
-        {frames.map((f, i) => <button key={f.src} type="button" aria-label={`Кадр ${i + 1}. ${f.alt}`} aria-pressed={i === index} onClick={() => setIndex(i)}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={f.src} alt="" loading="lazy" />
-        </button>)}
+        {frames.map((f, i) => (
+          <button key={`${f.src}-${i}`} type="button" aria-label={`Кадр ${i + 1}. ${f.alt}`} aria-pressed={i === index} onClick={() => setIndex(i)}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={f.src} alt="" loading="lazy" />
+            <span>{f.plan ? 'Планировка' : f.caption.split('·')[0].trim()}</span>
+          </button>
+        ))}
       </div>}
       <dialog className="hd-lightbox" ref={dialog} aria-label="Галерея на весь экран">
         <div className="hd-lightbox-panel">

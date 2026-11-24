@@ -7,11 +7,11 @@ import { byEstateStatus, estateSale, estateView, houseView } from '@/lib/view'
 import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { StickyCta } from '@/v3/home/StickyCta'
 import BuyerHero from '@/v4/BuyerHero'
+import { CountryLifeStory } from '@/v4/CountryLifeStory'
 import { HouseWalk } from '@/v4/HouseWalk'
 import { FeaturedHouses, type FeaturedHouse } from '@/v4/FeaturedHouses'
 import { housePhotography } from '@/v4/housePhotography'
 import { MapGenplanFlow, type FlowEstate } from '@/v4/MapGenplanFlow'
-import { Mortgage, type MortgageHouse } from '@/v4/Mortgage'
 import { V4Bar, V4Final, V4Fonts, V4Footer } from '@/v4/Shell'
 import { V4Motion } from '@/v4/V4Motion'
 import { v4img } from '@/v4/images'
@@ -25,8 +25,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const prices = houses.filter((h) => h.status === 'free').map((h) => h.price ?? 0).filter((p) => p > 0)
   const from = prices.length ? ` от ${formatMillions(Math.min(...prices))}` : ''
   return {
-    title: { absolute: 'Купить кирпичный дом с участком под Краснодаром — Хороший дом' },
-    description: `Готовые кирпичные дома с участком в Динской и Новой Адыгее${from}. 15+ планировок, 200+ построенных домов, семейная ипотека 6%, предчистовая отделка, гарантия 5 лет. Строим с 2014 года.`,
+    title: { absolute: 'Купить готовый кирпичный дом с участком в собственных посёлках — Хороший дом' },
+    description: `Готовые кирпичные дома с участком на Юге России${from}: Динская, Новая Адыгея, Козет. 15+ планировок, 200+ построенных домов, семейная ипотека 6%, предчистовая отделка White Box, гарантия 5 лет. Строим с 2014 года.`,
     robots: { index: false, follow: false },
     alternates: { canonical: '/' },
   }
@@ -38,6 +38,68 @@ function Head({ children }: { children: ReactNode }) {
 
 const featuredCodes = ['di-tip5', 'di-tip6-v3', 'dr-tip10']
 
+const MORTGAGE_PROGRAMS = [
+  {
+    badge: 'от 6% годовых',
+    title: 'Семейная ипотека',
+    text: 'Для семей с детьми до 6 лет включительно или двумя несовершеннолетними детьми. Лимит 6 млн ₽, срок до 30 лет.',
+  },
+  {
+    badge: 'от 6% годовых',
+    title: 'IT-ипотека',
+    text: 'Для сотрудников аккредитованных IT-компаний. Пониженная ставка на покупку готового кирпичного дома с участком ИЖС.',
+  },
+  {
+    badge: 'от 3% годовых',
+    title: 'Сельская ипотека',
+    text: 'Льготная программа на загородные территории и станицы. Помогаем проверить соответствие объекта и собрать пакет.',
+  },
+  {
+    badge: 'по НИС',
+    title: 'Военная ипотека',
+    text: 'Покупка готового дома с использованием средств накопительно-ипотечной системы военнослужащих.',
+  },
+  {
+    badge: 'в первый взнос',
+    title: 'Материнский капитал',
+    text: 'Можно направить материнский капитал полностью или частично в первоначальный взнос либо на досрочное погашение.',
+  },
+] as const
+
+function estateCleanCover(slug: string): string {
+  switch (slug) {
+    case 'dinskaya':
+      return '/v4/houses/type5-front.webp'
+    case 'druzhby-43':
+      return '/v4/houses/type10-front.webp'
+    case 'krasnaya-39':
+      return '/v4/img/slide-tip-3.webp'
+    case 'novovelichkovskaya':
+      return '/v4/houses/type6v3-front.webp'
+    case 'yuzhnyy-veter':
+      return '/v4/img/slide-tip-1.webp'
+    case 'kalina':
+      return '/v4/img/slide-tip-2.webp'
+    default:
+      return '/v4/houses/type5-front.webp'
+  }
+}
+
+function cleanSingleAddress(rawTitle: string, estateName: string, plotNo: number | null | undefined): string {
+  const [, ...rest] = rawTitle.split(', ')
+  const street = rest
+    .join(', ')
+    .replace(/,?\s*уч\.?\s*\d+\s*[–-]\s*\d+/gi, '')
+    .replace(/,?\s*уч\.?\s*\d+(?:\s*,\s*\d+)+/gi, '')
+    .replace(/,?\s*\d+\s*[–-]\s*\d+$/g, '')
+    .replace(/^уч\.\s*/i, 'участок № ')
+    .trim()
+  const parts = [estateName]
+  if (street && !/^участок/i.test(street)) parts.push(street)
+  if (plotNo != null) parts.push(`участок № ${plotNo}`)
+  return parts.filter(Boolean).join(' · ')
+}
+
 export default async function V4Home() {
   const [company, estates, houses, projects, regions] = await Promise.all([getCompany(), getEstates(), getHouses(), getProjects(), getRegions()])
   const allHouses = houses.map(houseView)
@@ -48,23 +110,46 @@ export default async function V4Home() {
 
   const fam = { rate: company.family?.rate ?? 6, years: company.family?.years ?? 30, minDown: company.family?.minDown ?? 20, limit: company.family?.limit ?? 6_000_000 }
 
-  // Keep the editorial selection tied to live inventory. Sold or reserved homes fall out immediately.
-  const selected = [
-    ...featuredCodes.flatMap(code => free.filter(h => h.code === code)),
-    ...free.filter(h => !featuredCodes.includes(h.code)),
-  ].slice(0, 3)
-  const featured: FeaturedHouse[] = selected.map(h => {
+  // Подбираем 7 лучших свободных домов разных типов без повтора одного типа подряд
+  const typeKey = (title: string) => title.split(',')[0].trim().toLowerCase()
+  const pool = [
+    ...featuredCodes.flatMap((code) => free.filter((h) => h.code === code)),
+    ...free.filter((h) => !featuredCodes.includes(h.code)),
+  ]
+  const selected: typeof free = []
+  const usedTypes = new Set<string>()
+  for (const h of pool) {
+    if (selected.length >= 7) break
+    const tk = typeKey(h.title)
+    if (!usedTypes.has(tk)) {
+      usedTypes.add(tk)
+      selected.push(h)
+    }
+  }
+  for (const h of pool) {
+    if (selected.length >= 7) break
+    if (!selected.some((x) => x.code === h.code)) {
+      const prev = selected[selected.length - 1]
+      if (!prev || typeKey(prev.title) !== typeKey(h.title)) {
+        selected.push(h)
+      }
+    }
+  }
+
+  const featured: FeaturedHouse[] = selected.map((h) => {
     const frames = housePhotography(h.code)
-    // The listing opens on the masonry and porch; the detail opens on the complete facade.
     const shot = h.code === 'di-tip5' ? frames[1] ?? frames[0] : frames[0]
-    const [type, ...address] = h.title.split(', ')
+    const [type] = h.title.split(', ')
     const need = h.price ? Math.max(fam.minDown, Math.ceil(((h.price - fam.limit) / h.price) * 100)) : fam.minDown
     const monthlyPay = h.price ? Math.round(annuity(h.price * (1 - need / 100), fam.rate, fam.years)) : null
     return {
       code: h.code,
-      location: [h.estateName, address.join(', ').replace('уч. ', 'участок ')].filter(Boolean).join(' · '),
+      location: cleanSingleAddress(h.title, h.estateName, h.plotNo),
       title: h.mansard ? 'Дом с мансардой' : h.storeys === 2 ? 'Двухэтажный дом' : 'Одноэтажный дом',
-      price: h.price, area: h.area, plot: h.plot, mansard: h.mansard,
+      price: h.price,
+      area: h.area,
+      plot: h.plot,
+      mansard: h.mansard,
       bedrooms: h.bedrooms,
       projectName: type,
       monthlyPay,
@@ -75,7 +160,7 @@ export default async function V4Home() {
     }
   })
 
-  // Посёлки для карты (наведение → справка, клик по Динской или вкладке → спутниковый генплан)
+  // Посёлки для карты
   const nearby = new Map(estates.map((e) => [String(e.slug), (e.nearby ?? []).map((x) => ({ label: x.label, value: x.value }))]))
   const typesByEstate = new Map<number, string[]>()
   for (const h of houses) {
@@ -108,7 +193,7 @@ export default async function V4Home() {
         priceFrom: c.priceFrom,
         sale: `${estateSale(c)}${c.priceFrom && c.status === 'selling' ? ` · от ${formatMillions(c.priceFrom)}` : ''}`,
         href: `/v4/poselok/${c.slug}`,
-        cover: c.coverCard || c.cover,
+        cover: estateCleanCover(c.slug),
         types: tNames,
         nearby: nearby.get(c.slug) ?? [],
         singleHouse: single
@@ -124,11 +209,9 @@ export default async function V4Home() {
       }
     })
 
-  const mortHouses: MortgageHouse[] = free.map((h) => ({ code: h.code, label: `${h.title}, ${h.estateName}`, price: h.price }))
-
-  const rooms = projects.find(p => p.slug === 'tip-5')?.rooms
-  const walkAreas = [null, ...['Прихожая', 'Кухня-гостиная', 'Терраса'].map(name => rooms?.find(r => r.name === name)?.area ?? null)]
-  const walkHouse = free.find(h => h.code === 'di-tip5')
+  const rooms = projects.find((p) => p.slug === 'tip-5')?.rooms
+  const walkAreas = [null, ...['Прихожая', 'Кухня-гостиная', 'Терраса'].map((name) => rooms?.find((r) => r.name === name)?.area ?? null)]
+  const walkHouse = free.find((h) => h.code === 'di-tip5')
   const faq = company.faq ?? []
 
   return (
@@ -148,6 +231,7 @@ export default async function V4Home() {
           href={walkHouse ? '/v4/dom/' + walkHouse.code : '/v4/proekt/tip-5'}
           linkText={walkHouse ? 'Посмотреть дом в Динской' : 'Посмотреть проект «Тип 5»'}
         />
+        <CountryLifeStory />
 
         {flowEstates.length > 0 && (
           <section className="v3-sec v3-sec--mist v4-sec v4-sec--map" id="karta">
@@ -159,21 +243,42 @@ export default async function V4Home() {
           </section>
         )}
 
-        {/* 6. Ипотечный калькулятор (Figma 278-1702) */}
+        {/* Ипотека: светлый понятный блок без тяжёлой плашки и выдуманных процентов */}
         <section className="v3-sec v4-sec v4-sec--mort" id="ipoteka">
-          <Head>Рассчитать <em>ипотеку</em></Head>
-          <div className="v3-wrap" data-move="up">
-            {mortHouses.length > 0 && <Mortgage houses={mortHouses} family={fam} />}
-            <div className="v4-mort-more">
-              <a className="v4-pik-btn" href="/v4/ipoteka">Все программы, 5 шагов сделки и частые вопросы →</a>
-              <a className="v4-pik-btn" href="/v4/o-kompanii">Подробнее о компании и учредителях →</a>
+          <Head>Дома подходят под <em>все виды ипотеки</em></Head>
+          <div className="v3-wrap v4-home-mort" data-move="up">
+            <p className="v4-home-mort__intro">
+              Работаем с льготными госпрограммами и стандартной ипотекой ведущих банков. Поможем выбрать выгодную ставку под вашу семью и бесплатно сопроводим подачу документов.
+            </p>
+
+            <ul className="v4-home-mort__grid" aria-label="Доступные программы ипотеки">
+              {MORTGAGE_PROGRAMS.map((prog) => (
+                <li key={prog.title} className="v4-home-mort__prog">
+                  <div>
+                    <span className="v4-home-mort__prog-badge">{prog.badge}</span>
+                    <h3>{prog.title}</h3>
+                  </div>
+                  <p>{prog.text}</p>
+                </li>
+              ))}
+            </ul>
+
+            <div className="v4-home-mort__actions">
+              <a className="v4-pik-btn v4-pik-btn--accent" href="/v4/ipoteka">
+                <span>Рассчитать платёж →</span>
+              </a>
+              <a className="v4-pik-btn" href="#evf-form">
+                <span>Подобрать программу под ваш случай</span>
+              </a>
+              <a className="v4-pik-btn" href="/v4/o-kompanii">
+                <span>О компании и учредителях →</span>
+              </a>
             </div>
           </div>
         </section>
 
-        {/* 7. Вечерний финал (рифма к рассвету, как в коммерческом визуале Клода) + 3 карточки контактов + Футер */}
         <V4Final company={company} context="Главная v4: запись на показ" bg={v4img('И4')?.src ?? '/design/hero-morning.webp'} showContacts />
-        <V4Footer since={company.since} />
+        <V4Footer since={company.since} phone={company.phone} />
       </MotionRoot>
       <StickyCta phone={company.phone} />
     </div>

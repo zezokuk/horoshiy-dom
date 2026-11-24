@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!p) return {}
   return {
     title: { absolute: `Проект дома «${p.name}»${p.area ? `: ${formatArea(p.area)} м²` : ''}${p.bedrooms ? `, ${p.bedrooms} ${plural(p.bedrooms, 'спальня', 'спальни', 'спален')}` : ''} · Хороший дом` },
-    description: `Кирпичный дом по проекту «${p.name}»: планировка с площадями комнат и дома этого проекта, которые продаются сейчас под Краснодаром.`,
+    description: `Кирпичный дом по проекту «${p.name}»: планировка с площадями комнат и готовые дома этого проекта в собственных посёлках.`,
     robots: { index: false, follow: false },
     alternates: { canonical: mainHref(`/projects/${p.slug}`) },
   }
@@ -133,7 +133,7 @@ export default async function V4Project({ params }: Props) {
         )}
 
         <V4Final company={company} context={`Проект v4: ${p.name}`} lead={`Покажем построенный «${p.name}» вживую или по видеосвязи. Ответим про участок, документы и ипотеку.`} />
-        <V4Footer since={company.since} />
+        <V4Footer since={company.since} phone={company.phone} />
       </MotionRoot>
       <StickyCta phone={company.phone} />
     </div>

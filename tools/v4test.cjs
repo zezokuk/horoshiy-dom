@@ -30,7 +30,7 @@ async function run(browser, tag, opts) {
   page.on('pageerror', (e) => errors.push(String(e).slice(0, 180)))
   page.on('console', (m) => {
     if (m.type() === 'error' && !/favicon|yandex|metrika|mc\.yandex|WebGL|THREE\.WebGLRenderer/i.test(m.text())) {
-      errors.push(m.text().slice(0, 180))
+      errors.push(`${page.url()}: ${m.text().slice(0, 600)}`)
     }
   })
 
@@ -52,16 +52,24 @@ async function run(browser, tag, opts) {
   if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-01-hero.jpg`, quality: 75 })
   await page.locator('.buyer-hero__action').click()
   ok(`${tag}: «Выбрать дом» ведёт к витрине`, new URL(page.url()).hash === '#doma')
-  const openHouse = page.locator('.fh-open')
+  const openHouse = page.locator('.fh-open').first()
   const firstHouse = await openHouse.getAttribute('href')
   const nextHouse = page.locator('.fh-switch button').last()
   if (await nextHouse.count()) {
     await nextHouse.click()
-    ok(`${tag}: переключатель выбирает другой дом`, firstHouse !== await openHouse.getAttribute('href'))
+    await page.waitForTimeout(450)
+    const sliderChanged = await page.evaluate(() => {
+      const r = document.querySelector('.fh-rail')
+      const idx = document.querySelector('.fh-switch b')?.textContent?.trim()
+      return (r && r.scrollLeft > 40) || idx === '02'
+    })
+    ok(`${tag}: слайдер переключает дома вправо`, sliderChanged)
     await page.locator('.fh-switch button').first().click()
+    await page.waitForTimeout(450)
   }
-  ok(`${tag}: фото и кнопка открывают один дом`, firstHouse.startsWith('/v4/dom/') && await page.locator('.fh-photo').getAttribute('href') === firstHouse)
-  ok(`${tag}: у кадра есть подпись, у дома цена`, !!(await page.locator('.fh-source').textContent()) && (await page.locator('.fh-price').innerText()).includes('₽'))
+  ok(`${tag}: фото и кнопка открывают один дом`, firstHouse.startsWith('/v4/dom/') && await page.locator('.fh-photo').first().getAttribute('href') === firstHouse)
+  ok(`${tag}: у кадра есть подпись, у дома цена`, !!(await page.locator('.fh-source').first().textContent()) && (await page.locator('.fh-price').first().innerText()).includes('₽'))
+  ok(`${tag}: в #zagorodom есть 4 карточки и в #ipoteka 5 программ без калькулятора`, await page.evaluate(() => document.querySelectorAll('#zagorodom .cl-card').length === 4 && document.querySelectorAll('#ipoteka .v4-home-mort__prog').length === 5 && document.querySelectorAll('#ipoteka .v4-mort').length === 0))
   if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-02-featured.jpg`, quality: 75 })
 
   // 5. Карта посёлков: без отдельных вкладок, клик по пину -> приближение + «Смотреть посёлок»
@@ -102,6 +110,17 @@ async function run(browser, tag, opts) {
     ok(`${tag}: пин «Динская» виден на карте`, false)
   }
 
+  // Сохранить кадр CountryLifeStory + Mortgage
+  if (SHOTS && !opts.reducedMotion) {
+    await scrollTo(page, '#zagorodom', -30)
+    await page.waitForTimeout(300)
+    await page.screenshot({ path: `${SHOTS}/${tag}-03-life.jpg`, quality: 75, type: 'jpeg' })
+    await scrollTo(page, '#ipoteka', -30)
+    await page.waitForTimeout(300)
+    await page.screenshot({ path: `${SHOTS}/${tag}-05-mortgage.jpg`, quality: 75, type: 'jpeg' })
+    ok(`${tag}: после скролла появился плавающий помощник .st-helper`, await page.locator('.st-helper').isVisible().catch(() => false))
+  }
+
   // 6. Кнопка «Записаться на показ» ведёт к форме
   const btn = mobile ? page.locator('a[href="#evf-form"]:visible').last() : page.locator('.v4-bar__btn')
   await page.waitForTimeout(300)
@@ -138,12 +157,15 @@ async function run(browser, tag, opts) {
   await page.waitForURL(`**${firstHouse}`)
   const house = await page.evaluate(() => ({
     price: document.querySelector('.hd-price')?.textContent.includes('₽'),
+    cleanAddr: !/\d+[–-]\d+/.test(document.querySelector('.hd-address')?.textContent || ''),
     plan: !!document.querySelector('#plan img'),
+    altCards: document.querySelectorAll('.hd-alt-card').length >= 3,
     mortgage: !!document.querySelector('#ipoteka .v4-mort'),
     form: !!document.querySelector('#evf-form form'),
     noScrollX: document.documentElement.scrollWidth <= innerWidth,
   }))
-  ok(`${tag}: у дома есть цена, планировка, расчёт ипотеки и форма`, Object.values(house).every(Boolean), JSON.stringify(house))
+  ok(`${tag}: у дома чистый адрес, цена, планировка, ипотека, форма и 3 карточки похожих`, Object.values(house).every(Boolean), JSON.stringify(house))
+  if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-04-house.jpg`, quality: 75, type: 'jpeg' })
   const frame = page.locator('.hd-gallery-stage > img')
   const firstSrc = await frame.getAttribute('src')
   await page.getByRole('button', { name: 'Следующий кадр' }).click()
@@ -155,18 +177,24 @@ async function run(browser, tag, opts) {
   await page.locator('.hd-visit').click()
   ok(`${tag}: из дома можно записаться на показ`, new URL(page.url()).hash === '#evf-form' && await page.locator('#evf-form input[name="phone"]').isVisible())
 
-  // 8b. Страница посёлка Динская: о посёлке + генплан 36 участков + список типов домов с картинками
+  // 8b. Страница посёлка Динская: сразу генплан на 1-м экране (картинка-хук -> текст) + 36 участков + шторка + список + инфраструктура
   const dinRes = await page.goto(`${BASE}/v4/poselok/dinskaya`, { waitUntil: 'load', timeout: 60000 })
   await page.waitForTimeout(600)
   ok(`${tag}: /v4/poselok/dinskaya открывается`, dinRes && dinRes.status() === 200)
+  const genplanTop = await page.evaluate(() => Math.round(document.querySelector('#genplan')?.getBoundingClientRect().top ?? 9999))
+  ok(`${tag}: на Динской генплан сразу на первом экране`, genplanTop < (mobile ? 480 : 320), `top=${genplanTop}`)
   ok(`${tag}: на странице Динской есть блок «Всё о посёлке»`, (await page.locator('#o-poselke').count()) === 1)
   await scrollTo(page, '#genplan', -40)
   const plots = await page.locator('.v4-gp__plot').count()
   ok(`${tag}: на странице Динской генплан 36 участков`, plots === 36, `участков ${plots}`)
-  await page.locator('.v4-gp__plot[aria-label*="Участок 18"]').click()
+  await page.locator('.np-gp__pill').click()
+  await page.waitForTimeout(250)
+  ok(`${tag}: кнопка «Показать список» открывает левую панель`, await page.locator('.np-gp__list-drawer').isVisible())
+  await page.locator('.np-gp__pill').click()
+  await page.locator('.v4-gp__plot[aria-label*="Участок 18"]').click({ force: true })
   await page.waitForTimeout(350)
   const cardLink = await page.locator('.v4-gp__card a[href*="/v4/dom/"]').first().getAttribute('href').catch(() => '')
-  ok(`${tag}: клик по участку 18 в Динской открывает карточку дома`, /\/v4\/dom\//.test(cardLink || ''), cardLink || '')
+  ok(`${tag}: клик по участку 18 в Динской открывает шторку дома`, /\/v4\/dom\//.test(cardLink || ''), cardLink || '')
   if (SHOTS && !opts.reducedMotion) await page.screenshot({ path: `${SHOTS}/${tag}-07-dinskaya-genplan.jpg`, quality: 75, type: 'jpeg' })
 
   const typeCards = await page.locator('#tipy-poselka .v4-etype-card').count()
@@ -194,6 +222,9 @@ async function run(browser, tag, opts) {
       x: document.documentElement.scrollWidth <= innerWidth,
     }))
     ok(`${tag}: ${p}`, r && r.status() === 200 && st.h1 === 1 && st.form && st.x, JSON.stringify(st))
+    if (SHOTS && !opts.reducedMotion && ['/v4/doma', '/v4/o-kompanii', '/v4/kontakty'].includes(p)) {
+      await page.screenshot({ path: `${SHOTS}/${tag}-page-${p.replace('/v4/', '')}.jpg`, quality: 75, type: 'jpeg' })
+    }
   }
 
   if (mobile && SHOTS && !opts.reducedMotion) {

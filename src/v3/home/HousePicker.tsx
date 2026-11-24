@@ -1,12 +1,7 @@
 'use client'
 
-/**
- * Каталог и подбор домов в стиле референса ПИК:
- * единая горизонтальная панель из капсул-пилюль (круглые номера типов 1..12, капсула цены от/до,
- * посёлки, кнопка «На карте» с мини-иконкой и акцентная капсула-счётчик справа) +
- * совмещённый просмотр готовых домов в продаже и всех 12 типовых проектов с планировками.
- */
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, type FormEvent } from 'react'
+import '@/v4/catalogV4.css'
 
 export type PickHouse = {
   code: string
@@ -32,13 +27,14 @@ export type PickProjectType = {
   free: number
   fromPrice: number | null
   href: string
+  estatesSummary?: string
 }
 
 const BUDGETS = [
-  { id: 'all', label: 'Любая цена', min: 0, max: Infinity, fromText: '7,5 млн ₽', toText: '14,5 млн ₽' },
-  { id: 'lt9', label: 'до 9 млн ₽', min: 0, max: 9e6, fromText: '7,5 млн ₽', toText: '9,0 млн ₽' },
-  { id: '9-12', label: '9 – 12 млн ₽', min: 9e6, max: 12e6, fromText: '9,0 млн ₽', toText: '12,0 млн ₽' },
-  { id: 'gt12', label: 'от 12 млн ₽', min: 12e6, max: Infinity, fromText: '12,0 млн ₽', toText: '14,5 млн ₽' },
+  { id: 'all', label: 'Любая цена', min: 0, max: Infinity },
+  { id: 'lt9', label: 'до 9 млн ₽', min: 0, max: 9e6 },
+  { id: '9-12', label: '9 – 12 млн ₽', min: 9e6, max: 12e6 },
+  { id: 'gt12', label: 'от 12 млн ₽', min: 12e6, max: Infinity },
 ]
 
 const mln = (p: number) => `${(p / 1e6).toLocaleString('ru-RU', { maximumFractionDigits: 2 })} млн ₽`
@@ -48,6 +44,17 @@ const word = (n: number) =>
 const typeNumOf = (title: string): number | null => {
   const m = title.match(/Тип\s+(\d+)/i)
   return m ? Number(m[1]) : null
+}
+
+function formatRuPhone(raw: string) {
+  const d = raw.replace(/\D/g, '').replace(/^8/, '7').slice(0, 11)
+  const n = d.startsWith('7') ? d.slice(1) : d
+  let out = '+7'
+  if (n.length) out += ` (${n.slice(0, 3)}`
+  if (n.length >= 3) out += `) ${n.slice(3, 6)}`
+  if (n.length >= 6) out += `-${n.slice(6, 8)}`
+  if (n.length >= 8) out += `-${n.slice(8, 10)}`
+  return out
 }
 
 export function HousePicker({
@@ -76,15 +83,19 @@ export function HousePicker({
     return [...nums].sort((a, b) => a - b)
   }, [houses, projectTypes])
 
-  const [mode, setMode] = useState<'houses' | 'types'>('houses')
+  // Когда переданы уникальные типы проектов (/v4/doma), по умолчанию открыт путь «Выбрать тип дома» без дублей
+  const [mode, setMode] = useState<'types' | 'houses'>(projectTypes.length > 0 ? 'types' : 'houses')
   const [estate, setEstate] = useState<string>('all')
   const [budget, setBudget] = useState('all')
   const [typeNum, setTypeNum] = useState<number | 'all'>('all')
+  const [waitPhone, setWaitPhone] = useState('')
+  const [waitState, setWaitState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   const strip = useRef<HTMLDivElement>(null)
 
   const b = BUDGETS.find((x) => x.id === budget)!
   const list = houses.filter(
     (h) =>
+      estate !== 'Нововеличковская' &&
       (estate === 'all' || h.estate === estate) &&
       (typeNum === 'all' || typeNumOf(h.title) === typeNum) &&
       h.price >= b.min &&
@@ -98,24 +109,37 @@ export function HousePicker({
 
   const minPrice = list.length ? Math.min(...list.map((h) => h.price)) : 7_900_000
   const maxPrice = list.length ? Math.max(...list.map((h) => h.price)) : 12_900_000
-
   const scroll = (dir: number) => strip.current?.scrollBy({ left: dir * strip.current.clientWidth * 0.8, behavior: 'smooth' })
+
+  async function submitWaitlist(e: FormEvent) {
+    e.preventDefault()
+    if (waitPhone.replace(/\D/g, '').length < 11) return
+    setWaitState('sending')
+    try {
+      const res = await fetch('/api/leads/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Лист ожидания · Нововеличковская',
+          phone: waitPhone,
+          interest: 'future',
+          estate: 'novovelichkovskaya',
+          context: 'Каталог v4: лист ожидания Нововеличковская (скоро старт продаж)',
+          page: window.location.href,
+        }),
+      })
+      if (!res.ok) throw new Error('status')
+      setWaitState('done')
+    } catch {
+      setWaitState('error')
+    }
+  }
 
   return (
     <div className="v3-pick v4-catalog-pick">
-      {/* Панель фильтров в стиле ПИК (кружки типов, двойная капсула цены, посёлки, «На карте» и акцентный счётчик) */}
       <div className="v4-pik-bar" role="group" aria-label="Фильтры подбора дома">
         {projectTypes.length > 0 && (
-          <div className="v4-pik-seg" role="tablist" aria-label="Режим каталога">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === 'houses'}
-              className={`v4-pik-btn${mode === 'houses' ? ' is-dark' : ''}`}
-              onClick={() => setMode('houses')}
-            >
-              <span>Готовые дома ({houses.length})</span>
-            </button>
+          <div className="v4-pik-seg" role="tablist" aria-label="Путь выбора дома">
             <button
               type="button"
               role="tab"
@@ -123,7 +147,16 @@ export function HousePicker({
               className={`v4-pik-btn${mode === 'types' ? ' is-dark' : ''}`}
               onClick={() => setMode('types')}
             >
-              <span>Типы и планировки</span>
+              <span>Выбрать тип дома</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'houses'}
+              className={`v4-pik-btn${mode === 'houses' ? ' is-dark' : ''}`}
+              onClick={() => setMode('houses')}
+            >
+              <span>Где купить (по посёлкам) · {houses.length}</span>
             </button>
           </div>
         )}
@@ -155,18 +188,16 @@ export function HousePicker({
 
         {mode === 'houses' && (
           <>
-            {/* Двойная капсула цены в стиле ПИК: от ... | до ... */}
             <div className="v4-pik-pricepill" role="group" aria-label="Диапазон цены">
               <span className="v4-pik-pricepill__half">
-                <small>от</small> <b>{ minPrice.toLocaleString('ru-RU') } ₽</b>
+                <small>от</small> <b>{minPrice.toLocaleString('ru-RU')} ₽</b>
               </span>
               <i className="v4-pik-pricepill__div" aria-hidden />
               <span className="v4-pik-pricepill__half">
-                <small>до</small> <b>{ maxPrice.toLocaleString('ru-RU') } ₽</b>
+                <small>до</small> <b>{maxPrice.toLocaleString('ru-RU')} ₽</b>
               </span>
             </div>
 
-            {/* Быстрые капсулы бюджета */}
             {BUDGETS.slice(1).map((x) => (
               <button
                 key={x.id}
@@ -179,7 +210,6 @@ export function HousePicker({
               </button>
             ))}
 
-            {/* Капсулы посёлков */}
             {estates.length > 1 && (
               <>
                 <button
@@ -201,6 +231,16 @@ export function HousePicker({
                     <span>{e}</span>
                   </button>
                 ))}
+                {projectTypes.length > 0 && (
+                  <button
+                    type="button"
+                    className={`v4-pik-btn${estate === 'Нововеличковская' ? ' is-dark' : ''}`}
+                    aria-pressed={estate === 'Нововеличковская'}
+                    onClick={() => setEstate(estate === 'Нововеличковская' ? 'all' : 'Нововеличковская')}
+                  >
+                    <span>Нововеличковская · Скоро</span>
+                  </button>
+                )}
               </>
             )}
           </>
@@ -212,15 +252,10 @@ export function HousePicker({
         </a>
 
         <span className="v4-pik-btn v4-pik-btn--accent" aria-live="polite">
-          <span>
-            {mode === 'types'
-              ? '15+ планировок проектов'
-              : `${list.length} ${word(list.length)}`}
-          </span>
+          <span>{mode === 'types' ? `${projectTypes.length} проектов` : estate === 'Нововеличковская' ? 'Лист ожидания' : `${list.length} ${word(list.length)}`}</span>
         </span>
       </div>
 
-      {/* Если выбран конкретный номер типа — показываем компактную карточку этого типа с планировкой */}
       {mode === 'houses' && activeProject && (
         <div className="v4-type-banner">
           {activeProject.plan && (
@@ -241,7 +276,7 @@ export function HousePicker({
         </div>
       )}
 
-      {/* Режим «12 типов и планировки» прямо внутри страницы «Дома в продаже» */}
+      {/* Вкладка 1 (по умолчанию на /v4/doma): уникальные проекты без дублей фото */}
       {mode === 'types' && projectTypes.length > 0 ? (
         <div className="v3-strip v3-strip--grid">
           {projectTypes.map((p) => (
@@ -253,46 +288,117 @@ export function HousePicker({
               </figure>
               <div className="v3-card__body">
                 {p.free > 0 ? (
-                  <span className="v3-status"><i />{p.free} {word(p.free)} в продаже</span>
+                  <span className="v3-status">
+                    <i />
+                    {p.free} {word(p.free)} в наличии
+                  </span>
                 ) : (
-                  <span className="v3-status v3-status--off"><i />Под заказ</span>
+                  <span className="v3-status v3-status--off">
+                    <i />
+                    Под заказ
+                  </span>
                 )}
-                <h3>{p.name}{p.area ? ` · ${p.area.toLocaleString('ru-RU')} м²` : ''}</h3>
-                <p>{p.bedrooms ? `${p.bedrooms} спальни · ` : ''}{p.storeys}</p>
+                <h3>
+                  {p.name}
+                  {p.area ? ` · ${p.area.toLocaleString('ru-RU')} м²` : ''}
+                </h3>
+                <p>
+                  {p.bedrooms ? `${p.bedrooms} спальни · ` : ''}
+                  {p.storeys}
+                </p>
+                {p.estatesSummary && <p className="v4-type-card__where">Где купить сейчас: {p.estatesSummary}</p>}
                 <p className="v3-price">{p.fromPrice ? `от ${mln(p.fromPrice)}` : 'По запросу'}</p>
               </div>
             </a>
           ))}
         </div>
-      ) : list.length > 0 ? (
-        <div className="v3-strip-wrap">
-          <div className={`v3-strip${grid ? ' v3-strip--grid' : ''}`} ref={strip}>
-            {list.map((h) => (
-              <a key={h.code} className="v3-card" href={h.href} data-move="up">
-                <figure data-move="reveal">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {h.photo ? <img src={h.photo} alt={h.title} loading="lazy" /> : <span className="v3-card__noimg">Фото скоро</span>}
-                  <figcaption>{h.caption}</figcaption>
-                </figure>
-                <div className="v3-card__body">
-                  <span className="v3-status"><i />Свободен</span>
-                  <h3>{h.title} · {h.area.toLocaleString('ru-RU')} м²</h3>
-                  <p>{h.estate}{h.plot ? ` · ${h.plot}` : ''}</p>
-                  <p className="v3-price">{mln(h.price)}</p>
+      ) : (
+        <>
+          {projectTypes.length > 0 && (estate === 'all' || estate === 'Нововеличковская') && (
+            <div className="v4-pik-waitlist">
+              <div>
+                <span className="v4-pik-waitlist__eyebrow">
+                  <i />
+                  Скоро старт продаж
+                </span>
+                <h3>Посёлок «Нововеличковская»</h3>
+                <p>
+                  Готовим новые участки ИЖС с проверенными проектами кирпичных домов. Оставьте номер — первыми сообщим о старте продаж и открытии бронирования по стартовым ценам.
+                </p>
+              </div>
+              {waitState === 'done' ? (
+                <div className="v4-pik-waitlist__done">
+                  Готово! Мы добавили ваш номер в лист ожидания по посёлку «Нововеличковская».
                 </div>
-              </a>
-            ))}
-            {!grid && <a className="v3-card v3-card--all" href={catalogHref}>Все дома<br />в каталоге →</a>}
-          </div>
-          {!grid && (
-            <div className="v3-strip__nav">
-              <button type="button" onClick={() => scroll(-1)} aria-label="Назад">←</button>
-              <button type="button" onClick={() => scroll(1)} aria-label="Дальше">→</button>
+              ) : (
+                <form className="v4-pik-waitlist__form" onSubmit={submitWaitlist}>
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    placeholder="+7 (___) ___-__-__"
+                    aria-label="Телефон для записи в лист ожидания Нововеличковской"
+                    value={waitPhone}
+                    onChange={(e) => setWaitPhone(formatRuPhone(e.target.value))}
+                    required
+                  />
+                  <button type="submit" className="v4-pik-btn v4-pik-btn--accent" disabled={waitState === 'sending'}>
+                    <span>{waitState === 'sending' ? 'Отправляем…' : 'В лист ожидания'}</span>
+                  </button>
+                  {waitState === 'error' && <small>Не удалось отправить — попробуйте ещё раз.</small>}
+                </form>
+              )}
             </div>
           )}
-        </div>
-      ) : (
-        <p className="v3-empty">Под этот выбор свободных домов сейчас нет. Сбросьте фильтр или оставьте телефон ниже — подберём из новых.</p>
+
+          {estate !== 'Нововеличковская' &&
+            (list.length > 0 ? (
+              <div className="v3-strip-wrap">
+                <div className={`v3-strip${grid ? ' v3-strip--grid' : ''}`} ref={strip}>
+                  {list.map((h) => (
+                    <a key={h.code} className="v3-card" href={h.href} data-move="up">
+                      <figure data-move="reveal">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        {h.photo ? <img src={h.photo} alt={h.title} loading="lazy" /> : <span className="v3-card__noimg">Фото скоро</span>}
+                        <figcaption>{h.caption}</figcaption>
+                      </figure>
+                      <div className="v3-card__body">
+                        <span className="v3-status">
+                          <i />
+                          Свободен
+                        </span>
+                        <h3>
+                          {h.title} · {h.area.toLocaleString('ru-RU')} м²
+                        </h3>
+                        <p>
+                          {h.estate}
+                          {h.plot ? ` · ${h.plot}` : ''}
+                        </p>
+                        <p className="v3-price">{mln(h.price)}</p>
+                      </div>
+                    </a>
+                  ))}
+                  {!grid && (
+                    <a className="v3-card v3-card--all" href={catalogHref}>
+                      Все дома
+                      <br />в каталоге →
+                    </a>
+                  )}
+                </div>
+                {!grid && (
+                  <div className="v3-strip__nav">
+                    <button type="button" onClick={() => scroll(-1)} aria-label="Назад">
+                      ←
+                    </button>
+                    <button type="button" onClick={() => scroll(1)} aria-label="Дальше">
+                      →
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="v3-empty">Под этот выбор свободных домов сейчас нет. Сбросьте фильтр или оставьте телефон ниже — подберём из новых.</p>
+            ))}
+        </>
       )}
     </div>
   )

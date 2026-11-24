@@ -121,8 +121,12 @@ function ctaFor(e: FlowEstate) {
   return {
     primaryHref: e.href,
     primaryLabel: e.slug === 'dinskaya' || e.free > 1 ? 'Смотреть посёлок и генплан →' : 'Смотреть посёлок →',
+    hook:
+      e.slug === 'dinskaya'
+        ? `У реки Кочеты · ${e.free} готовых домов${e.priceFrom ? ` · от ${formatMillions(e.priceFrom)}` : ''}`
+        : `${e.place} · ${e.free} в продаже${e.priceFrom ? ` · от ${formatMillions(e.priceFrom)}` : ''}`,
     subtitle: `${e.place} · ${e.homes ?? e.free} участков, ${e.free} в продаже${e.priceFrom ? ` · от ${formatMillions(e.priceFrom)}` : ''}`,
-    hint: `Посёлок «${e.name}» · Нажмите на «${e.name}» ещё раз или на название, чтобы открыть посёлок и генплан`,
+    hint: `Посёлок «${e.name}» · Нажмите на «${e.name}» ещё раз или на карточку, чтобы открыть посёлок и генплан`,
   }
 }
 
@@ -281,7 +285,7 @@ export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
         <div className="v4-mflow__ymap" ref={canvasRef} />
 
         {mapMode !== 'js' && (
-          <div className="v4-mflow__vec" role="region" aria-label="Карта посёлков под Краснодаром">
+          <div className="v4-mflow__vec" role="region" aria-label="Карта наших посёлков">
             <div
               className="v4-mflow__vec-stage"
               style={
@@ -334,18 +338,24 @@ export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
             <button type="button" className="v4-mflow__reset" onClick={resetZoom}>
               ← Все посёлки
             </button>
-            <div className="v4-mflow__zoom-cta" aria-live="polite">
-              <div>
-                <p className="v4-mflow__zmeta">{zoomCta.subtitle}</p>
+            <div className="v4-mflow__zoom-cta v4-mflow__zoom-cta--rich" aria-live="polite">
+              {zoomedEstate.cover && (
+                <a className="v4-mflow__zthumb" href={zoomCta.primaryHref} tabIndex={-1} aria-hidden>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={zoomedEstate.cover} alt="" />
+                </a>
+              )}
+              <div className="v4-mflow__zinfo">
+                <p className="v4-mflow__zmeta">{'hook' in zoomCta && zoomCta.hook ? zoomCta.hook : zoomCta.subtitle}</p>
                 <h4>
                   <a className="v4-mflow__title-link" href={zoomCta.primaryHref}>
                     {zoomedEstate.name}
                   </a>
                 </h4>
+                <a className="v4-pik-btn v4-pik-btn--accent v4-mflow__zbtn" href={zoomCta.primaryHref}>
+                  <span>{zoomCta.primaryLabel}</span>
+                </a>
               </div>
-              <a className="v4-pik-btn v4-pik-btn--accent" href={zoomCta.primaryHref}>
-                <span>{zoomCta.primaryLabel}</span>
-              </a>
             </div>
           </>
         )}

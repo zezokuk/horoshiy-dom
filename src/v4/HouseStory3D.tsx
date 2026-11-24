@@ -539,7 +539,7 @@ export function HouseStory3D({
                 ))}
               </p>
               <h1 className="v4-hero__h1 v3-sr">
-                Готовые кирпичные дома с участком под Краснодаром{priceFrom ? <> · <b>от {priceFrom}</b></> : null}
+                Готовые кирпичные дома с участком в собственных посёлках{priceFrom ? <> · <b>от {priceFrom}</b></> : null}
               </h1>
             </div>
           </div>

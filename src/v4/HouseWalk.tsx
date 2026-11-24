@@ -6,10 +6,10 @@ import './houseWalk.css'
 const media = '/v4/walk/threshold'
 const portraitFrame = '(max-width: 640px) and (max-aspect-ratio: 63/100)'
 const chapters = [
-  { name: 'Крыльцо', start: 0, image: media + '-poster.webp', portrait: media + '-poster-phone.webp' },
-  { name: 'Холл', start: 5.4, image: '/v4/img/in-hall.webp', portrait: '/v4/img/in-hall-phone.webp' },
-  { name: 'Кухня-гостиная', start: 10.4, image: '/v4/img/in-kitchen.webp', portrait: '/v4/img/in-kitchen-phone.webp' },
-  { name: 'Терраса', start: 15.2, image: '/v4/img/in-terrace.webp', portrait: '/v4/img/in-terrace-phone.webp' },
+  { name: 'Крыльцо', note: 'Кирпичная кладка и тёплый навес у входа', start: 0, image: media + '-poster.webp', portrait: media + '-poster-phone.webp' },
+  { name: 'Холл', note: 'Свободный вход и место под гардеробную', start: 5.4, image: '/v4/img/in-hall.webp', portrait: '/v4/img/in-hall-phone.webp' },
+  { name: 'Кухня-гостиная', note: 'Панорамный свет для больших семейных ужинов', start: 10.4, image: '/v4/img/in-kitchen.webp', portrait: '/v4/img/in-kitchen-phone.webp' },
+  { name: 'Терраса', note: 'Шаг из гостиной прямо в собственный сад', start: 15.2, image: '/v4/img/in-terrace.webp', portrait: '/v4/img/in-terrace-phone.webp' },
 ]
 const filmLength = 17.067
 const timestamp = (seconds: number) => new Date(Math.max(0, seconds) * 1000).toISOString().slice(14, 19)
@@ -116,6 +116,10 @@ export function HouseWalk({ href, linkText, areas }: { href: string; linkText: s
   }
 
   return <section id="vnutri" ref={stage} className="house-walk" aria-label="За порогом — прогулка по дому типа 5">
+    <div className="house-walk__leadin">
+      <p className="house-walk__leadin-kicker">Внутри готового дома</p>
+      <p className="house-walk__leadin-text">Загляните за порог: как устроено пространство от крыльца и прихожей до светлой кухни-гостиной с выходом на террасу.</p>
+    </div>
     <div className="house-walk__screen">
       <picture className="house-walk__still">
         <source media={portraitFrame} srcSet={still.portrait} />
@@ -145,7 +149,7 @@ export function HouseWalk({ href, linkText, areas }: { href: string; linkText: s
           <h2>{chapter === 0 ? <>За <em>порогом</em></> : current.name}</h2>
           {areas[chapter] && <span>{areas[chapter].toLocaleString('ru-RU')} м²</span>}
         </div>
-        {chapter === 0 && <p>От крыльца до террасы</p>}
+        <p>{chapter === 0 ? 'От крыльца до террасы · светлый одноэтажный дом без лишних коридоров' : current.note}</p>
       </div>
       {!failed && <button type="button" className="house-walk__play" onClick={toggle} aria-label={playing ? 'Пауза' : 'Воспроизвести прогулку'}>
         <PlayIcon playing={playing} />
@@ -160,7 +164,10 @@ export function HouseWalk({ href, linkText, areas }: { href: string; linkText: s
             <span className="house-walk__track" aria-hidden="true"><i style={{ transform: 'scaleX(' + progress + ')' }} /></span>
             <span className="house-walk__chapter-label">
               <span className="house-walk__thumb" aria-hidden="true" style={{ backgroundPositionX: (i / (chapters.length - 1)) * 100 + '%' }} />
-              {item.name}
+              <span className="house-walk__chapter-copy" aria-hidden="true">
+                <b>{item.name}</b>
+                <small>{item.note}</small>
+              </span>
             </span>
           </button>
         })}

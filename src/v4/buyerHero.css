@@ -8,7 +8,7 @@
   max-height: 1100px;
   overflow: hidden;
   color: var(--hero-white);
-  background: #223942;
+  background: #0b1530;
 }
 .buyer-hero__landscape,
 .buyer-hero__stars,
@@ -24,30 +24,148 @@
 }
 .buyer-hero__image picture,
 .buyer-hero__image img { display: block; width: 100%; height: 100%; }
+
+/* Глубокая звёздная ночь (#0b1530), плавно уходящая в тёплый рассвет и солнечный день */
 .buyer-hero__night {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #233b57, #41556b 62%, #3e5563);
-  mix-blend-mode: multiply;
-  animation: buyer-dawn 4.6s 2.5s ease-in-out both;
+  pointer-events: none;
+  background:
+    radial-gradient(1.6px 1.6px at 14% 12%, #ffffff 55%, transparent),
+    radial-gradient(1.2px 1.2px at 23% 26%, rgba(255,250,235,.88) 55%, transparent),
+    radial-gradient(1.8px 1.8px at 34% 9%, #fff8e1 55%, transparent),
+    radial-gradient(1.1px 1.1px at 42% 22%, rgba(255,255,255,.82) 55%, transparent),
+    radial-gradient(2px 2px at 51% 14%, #fffdf2 55%, transparent),
+    radial-gradient(1.3px 1.3px at 61% 8%, rgba(255,255,255,.9) 55%, transparent),
+    radial-gradient(1.5px 1.5px at 69% 24%, #fff8e1 55%, transparent),
+    radial-gradient(1.2px 1.2px at 78% 15%, rgba(255,255,255,.85) 55%, transparent),
+    radial-gradient(1.8px 1.8px at 87% 11%, #ffffff 55%, transparent),
+    radial-gradient(1.1px 1.1px at 92% 28%, rgba(255,248,225,.78) 55%, transparent),
+    radial-gradient(1.2px 1.2px at 19% 38%, rgba(255,255,255,.68) 55%, transparent),
+    radial-gradient(1.2px 1.2px at 82% 36%, rgba(255,255,255,.72) 55%, transparent),
+    linear-gradient(180deg, rgba(6, 14, 34, .96) 0%, rgba(10, 20, 46, .92) 34%, rgba(18, 32, 64, .82) 54%, rgba(12, 22, 42, .86) 74%, rgba(7, 14, 26, .92) 100%);
+  animation: buyer-dawn 6.2s 2.2s cubic-bezier(.42, 0, .2, 1) both;
 }
-.buyer-hero__windows { position: absolute; inset: 0; pointer-events: none; animation: buyer-windows 6s ease-out both; }
-.buyer-hero__windows i { position: absolute; background: linear-gradient(to bottom right, #d7a75b, #ffe6ae 65%, #d3a05a); box-shadow: 0 0 10px 3px #ffb85a54; }
-.buyer-hero__windows i:first-child { left: 31.8%; top: 71.4%; width: 1.85%; height: 6.8%; }
-.buyer-hero__windows i:last-child { left: 60.6%; top: 69.65%; width: 4.85%; height: 8.35%; background-color: #edc388; background-image: linear-gradient(90deg, transparent 44%, #6f6249 46% 49%, transparent 51%), linear-gradient(160deg, #b89b6c, #ffe6ae 53%, #dbb06d); }
-.buyer-hero__stars { overflow: hidden; }
+
+/* Золотистый рассвет за коньком крыши при переходе от ночи к солнечному утру */
+.buyer-hero__sunrise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(40% 34% at 26% 48%, rgba(255, 232, 168, .88) 0%, rgba(255, 176, 98, .52) 38%, rgba(218, 108, 88, .20) 68%, transparent 92%),
+    linear-gradient(0deg, rgba(255, 170, 98, .28) 0%, rgba(255, 210, 142, .44) 38%, rgba(196, 134, 154, .16) 66%, transparent 92%);
+  animation: buyer-sunrise 5.2s 2.4s cubic-bezier(.42, 0, .2, 1) both;
+}
+
+/* Реалистичное многослойное свечение окон и крыльца по координатам hero-morning.webp */
+.buyer-hero__windows {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: buyer-windows 6.8s ease-in-out both;
+}
+.buyer-hero__windows .bh-win {
+  position: absolute;
+  border-radius: 1.5px;
+}
+.buyer-hero__windows .bh-win--l {
+  left: 31.38%;
+  top: 69.55%;
+  width: 2.62%;
+  height: 9.05%;
+  background: radial-gradient(72% 64% at 52% 44%, #fff3cf 0%, #ffc978 56%, #e59348 100%);
+  box-shadow: 0 0 16px 4px rgba(255, 194, 102, .52), 0 0 42px 12px rgba(255, 174, 78, .22);
+}
+.buyer-hero__windows .bh-win--r {
+  left: 60.32%;
+  top: 68.85%;
+  width: 5.42%;
+  height: 10.15%;
+  background: radial-gradient(72% 64% at 50% 45%, #fff4d2 0%, #ffca7a 56%, #e7964b 100%);
+  box-shadow: 0 0 20px 5px rgba(255, 196, 106, .56), 0 0 54px 16px rgba(255, 174, 78, .24);
+}
+/* Импосты рам и прутья кованого забора поверх света, чтобы окна выглядели живыми, а не наклейками */
+.buyer-hero__windows .bh-win--l::after,
+.buyer-hero__windows .bh-win--r::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(transparent calc(var(--rail) - 2.2%), rgba(24, 17, 13, .86) calc(var(--rail) - 2.2%) calc(var(--rail) + 1.4%), transparent calc(var(--rail) + 1.4%)),
+    repeating-linear-gradient(90deg, transparent 0 var(--gap), rgba(24, 17, 13, .82) var(--gap) calc(var(--gap) + var(--bar))) 0 100% / 100% calc(100% - var(--rail)) no-repeat,
+    var(--mullion);
+}
+.buyer-hero__windows .bh-win--l {
+  --rail: 52%;
+  --gap: 33%;
+  --bar: 8%;
+  --mullion: linear-gradient(transparent 18%, rgba(42, 28, 18, .78) 18% 21%, transparent 21%);
+}
+.buyer-hero__windows .bh-win--r {
+  --rail: 53%;
+  --gap: 16%;
+  --bar: 3.8%;
+  --mullion:
+    linear-gradient(transparent 18%, rgba(42, 28, 18, .76) 18% 21%, transparent 21%),
+    linear-gradient(90deg, transparent 48.2%, rgba(42, 28, 18, .84) 48.2% 51.4%, transparent 51.4%);
+}
+/* Тёплый фонарь и фрамуга над входной дверью в нише крыльца */
+.buyer-hero__windows .bh-win--porch {
+  left: 49.2%;
+  top: 69.5%;
+  width: 2.9%;
+  height: 1.35%;
+  border-radius: 3px;
+  background: radial-gradient(closest-side, #fff8e3 0%, #ffd28a 68%, rgba(255, 190, 98, 0) 100%);
+  box-shadow: 0 0 18px 7px rgba(255, 210, 132, .68), 0 14px 36px 14px rgba(255, 182, 92, .32);
+}
+/* Мягкий тёплый отсвет на кирпичный фасад, ступени крыльца и газон */
+.buyer-hero__windows .bh-win-spill {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(7% 8% at 50.6% 76.5%, rgba(255, 198, 116, .38) 0%, rgba(255, 180, 92, .12) 56%, transparent 82%),
+    radial-gradient(12% 8% at 63.0% 78.2%, rgba(255, 196, 112, .26) 0%, transparent 74%),
+    radial-gradient(8% 7% at 32.7% 77.8%, rgba(255, 194, 110, .22) 0%, transparent 74%),
+    radial-gradient(10% 6% at 50.8% 87.5%, rgba(255, 190, 106, .24) 0%, transparent 72%);
+}
+
+/* Падающая звезда в глубокой ночи, опускающаяся за конёк крыши дома */
+.buyer-hero__stars {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 47%, rgba(0, 0, 0, .18) 52%, transparent 55%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 47%, rgba(0, 0, 0, .18) 52%, transparent 55%);
+}
 .buyer-hero__stars i {
   position: absolute;
-  width: clamp(65px, 9vw, 160px);
-  height: 2px;
-  top: 14%;
-  left: 72%;
-  background: linear-gradient(90deg, #fffbe1, #fffbe100);
-  border-radius: 50%;
-  animation: buyer-star 1.25s .3s ease-out both;
+  width: clamp(95px, 12vw, 195px);
+  height: 1.8px;
+  top: 9%;
+  left: 66%;
+  transform-origin: left center;
+  background: linear-gradient(270deg, transparent, rgba(255, 246, 214, .92) 72%, #ffffff);
+  border-radius: 999px;
+  filter: drop-shadow(0 0 6px rgba(255, 232, 180, .85));
+  animation: buyer-star 2.1s .45s cubic-bezier(.25, .1, .25, 1) both;
 }
+.buyer-hero__stars i::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: -1.6px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fffdf5;
+  box-shadow: 0 0 12px 4px rgba(255, 238, 198, .9), 0 0 26px 8px rgba(255, 210, 140, .45);
+}
+
 .buyer-hero__veil {
-  background: linear-gradient(180deg, #07180ed9 0%, #10261798 26%, #16291b20 47%, transparent 57%, #1024191a 66%, #081b0de3 100%);
+  background: linear-gradient(180deg, rgba(7, 18, 28, .66) 0%, rgba(12, 26, 24, .36) 26%, rgba(16, 32, 22, .08) 47%, transparent 58%, rgba(12, 28, 18, .18) 68%, rgba(8, 24, 14, .82) 100%);
 }
 .buyer-hero__nav,
 .buyer-hero__foot {
@@ -89,17 +207,22 @@
   text-align: center;
   text-transform: none;
   letter-spacing: -.02em;
+  text-shadow: 0 4px 34px rgba(8, 16, 36, .38);
   animation: buyer-title 1.25s .15s cubic-bezier(.19,.75,.2,1) both;
 }
 .v4 .buyer-hero__title em { font-weight: 500; font-style: italic; color: inherit; }
 html.no-motion .buyer-hero * { animation: none !important; }
-html.no-motion .buyer-hero__night, html.no-motion .buyer-hero__stars, html.no-motion .buyer-hero__windows { display: none; }
+html.no-motion .buyer-hero__night,
+html.no-motion .buyer-hero__sunrise,
+html.no-motion .buyer-hero__stars,
+html.no-motion .buyer-hero__windows { display: none; }
 .buyer-hero__foot { bottom: max(32px, 5.1%); align-items: flex-end; }
 .buyer-hero__foot p {
   color: var(--hero-white);
   font: 400 clamp(17px, 1.55vw, 24px)/1.32 var(--f-ui);
   letter-spacing: -.025em;
   margin: 0;
+  text-shadow: 0 2px 18px rgba(8, 18, 14, .45);
 }
 .buyer-hero__foot p span { white-space: nowrap; }
 .v4 .buyer-hero__action {
@@ -120,20 +243,22 @@ html.no-motion .buyer-hero__night, html.no-motion .buyer-hero__stars, html.no-mo
 .v4 .buyer-hero__action:hover { background: #e5edcf; transform: translateY(-2px); }
 .v4 .buyer-hero a:focus-visible { outline: 3px solid #ffdb8c; outline-offset: 3px; }
 @keyframes buyer-title { from { opacity: 0; translate: 0 .15em; } to { opacity: 1; translate: 0 0; } }
-@keyframes buyer-dawn { from { opacity: 1; } to { opacity: 0; } }
-@keyframes buyer-windows { 0%, 17%, 100% { opacity: 0; } 31%, 58% { opacity: .86; } }
+@keyframes buyer-dawn { 0%, 16% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes buyer-sunrise { 0%, 100% { opacity: 0; } 38%, 58% { opacity: .82; } }
+@keyframes buyer-windows { 0%, 12% { opacity: 0; } 24%, 64% { opacity: .94; } 96%, 100% { opacity: 0; } }
 @keyframes buyer-star {
-  0% { opacity: 0; transform: rotate(-27deg) translateX(0) scaleX(.25); }
-  24% { opacity: 1; }
-  100% { opacity: 0; transform: rotate(-27deg) translateX(-24vw) scaleX(1); }
+  0% { opacity: 0; transform: rotate(-42deg) translateX(0) scaleX(.2); }
+  22% { opacity: .98; }
+  80% { opacity: .9; }
+  100% { opacity: 0; transform: rotate(-42deg) translateX(-34vw) scaleX(1); }
 }
 @media (max-width: 760px) {
-  .v4 .buyer-hero { height: 89svh; min-height: 515px; max-height: 840px; background: linear-gradient(#304a50 45%, #152b1d 83%); }
-  .buyer-hero__landscape { top: 14%; bottom: 12%; mask-image: linear-gradient(to bottom, transparent, black 22%, black 80%, transparent); }
+  .v4 .buyer-hero { height: 89svh; min-height: 515px; max-height: 840px; background: linear-gradient(180deg, #0b1530 0%, #152b1d 86%); }
+  .buyer-hero__landscape { top: 14%; bottom: 12%; mask-image: linear-gradient(to bottom, transparent, black 20%, black 82%, transparent); }
   .buyer-hero__nav { height: 66px; font-size: 13px; }
   .buyer-hero__brand img { width: 70px; }
   .buyer-hero__nav nav { display: none; }
-  .buyer-hero__veil { background: linear-gradient(180deg, #13291fcf, #1a2c274f 32%, transparent 47%, transparent 64%, #0f2011db); }
+  .buyer-hero__veil { background: linear-gradient(180deg, rgba(11, 22, 42, .78), rgba(18, 34, 28, .28) 32%, transparent 48%, transparent 64%, rgba(10, 26, 16, .88)); }
   .v4 .buyer-hero__title { top: 17%; font-size: clamp(66px, 14.2vw, 105px); }
   .buyer-hero__foot { align-items: flex-start; flex-direction: column; gap: 17px; bottom: 24px; }
   .buyer-hero__foot p { font-size: 16px; }
@@ -143,5 +268,5 @@ html.no-motion .buyer-hero__night, html.no-motion .buyer-hero__stars, html.no-mo
 @media (max-width: 370px) { .v4 .buyer-hero__title { font-size: 16.5vw; } }
 @media (prefers-reduced-motion: reduce) {
   .buyer-hero *, .buyer-hero *::after { animation: none !important; transition: none !important; }
-  .buyer-hero__night, .buyer-hero__stars, .buyer-hero__windows { display: none; }
+  .buyer-hero__night, .buyer-hero__sunrise, .buyer-hero__stars, .buyer-hero__windows { display: none; }
 }

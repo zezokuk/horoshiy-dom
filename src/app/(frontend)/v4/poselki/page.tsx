@@ -6,6 +6,7 @@ import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { StickyCta } from '@/v3/home/StickyCta'
 import { MapGenplanFlow, type FlowEstate } from '@/v4/MapGenplanFlow'
 import { V4Bar, V4Final, V4Fonts, V4Footer, V4PageHead } from '@/v4/Shell'
+import { V4Motion } from '@/v4/V4Motion'
 import { v4img } from '@/v4/images'
 import '@/v3/v3.css'
 import '@/v4/v4.css'
@@ -18,10 +19,19 @@ import '@/v4/v4.css'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: { absolute: 'Коттеджные посёлки под Краснодаром: Динская, Новая Адыгея, Козет — на карте и генплане · Хороший дом' },
-  description: 'Посёлки «Хорошего дома» под Краснодаром на карте и спутниковом генплане: что продаётся, цены, минуты до города.',
+  title: { absolute: 'Коттеджные посёлки на Юге России: Динская, Новая Адыгея, Козет — на карте и генплане · Хороший дом' },
+  description: 'Собственные коттеджные посёлки «Хорошего дома» на карте и спутниковом генплане: что продаётся, цены, минуты до инфраструктуры.',
   robots: { index: false, follow: false },
   alternates: { canonical: '/locations' },
+}
+
+const COVER_BY_SLUG: Record<string, string> = {
+  dinskaya: '/v4/houses/type5-front.webp',
+  'druzhby-43': '/v4/houses/type10-front.webp',
+  'krasnaya-39': '/v4/img/slide-tip-3.webp',
+  novovelichkovskaya: '/v4/houses/type6v3-front.webp',
+  'yuzhnyy-veter': '/v4/img/slide-tip-1.webp',
+  kalina: '/v4/img/slide-tip-2.webp',
 }
 
 export default async function V4Places() {
@@ -63,6 +73,7 @@ export default async function V4Places() {
         priceFrom: c.priceFrom,
         sale: `${estateSale(c)}${c.priceFrom && c.status === 'selling' ? ` · от ${formatMillions(c.priceFrom)}` : ''}`,
         href: `/v4/poselok/${c.slug}`,
+        cover: COVER_BY_SLUG[c.slug] ?? '/v4/houses/type5-front.webp',
         types: tNames,
         nearby: nearby.get(c.slug) ?? [],
         singleHouse: single
@@ -83,12 +94,13 @@ export default async function V4Places() {
       <V4Fonts />
       <V4Bar phone={company.phone} always />
       <MotionRoot>
+        <V4Motion />
         <V4PageHead
           eyebrow="Посёлки"
           ghost="Посёлки"
           title="Посёлки"
-          em="под Краснодаром"
-          lead="Динская, Новая Адыгея и Козет. Наведите на посёлок для справки, нажмите — карта приблизится, и откройте страницу посёлка с генпланом и типами домов."
+          em="на карте"
+          lead="Динская, Новая Адыгея и Козет — наши жилые и строящиеся локации на Юге России. Наведите на посёлок для справки, нажмите — карта приблизится, и откройте страницу с генпланом."
         />
         <section className="v3-sec v4-sec" style={{ paddingTop: 12 }}>
           <div className="v3-wrap">
@@ -133,7 +145,7 @@ export default async function V4Places() {
         </section>
 
         <V4Final company={company} context="Посёлки v4: запись на показ" bg={v4img('И4')?.src ?? '/design/hero-morning.webp'} />
-        <V4Footer since={company.since} />
+        <V4Footer since={company.since} phone={company.phone} />
       </MotionRoot>
       <StickyCta phone={company.phone} />
     </div>

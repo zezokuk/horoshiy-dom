@@ -53,7 +53,7 @@ export default async function V4Contacts() {
           {legal.length > 0 && <p className="v3-wrap v3-note">{legal.join(' · ')}</p>}
         </section>
         <V4Final company={company} context="Контакты v4: запись на показ" />
-        <V4Footer since={company.since} />
+        <V4Footer since={company.since} phone={company.phone} />
       </MotionRoot>
       <StickyCta phone={company.phone} />
     </div>

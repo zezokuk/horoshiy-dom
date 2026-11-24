@@ -1,0 +1,543 @@
+/* Интерактивный генплан Динской в стиле nordic-park.ru/genplan */
+.np-gp {
+  position: relative;
+}
+.np-gp__stage {
+  position: relative;
+  height: clamp(560px, calc(100svh - 128px), 840px);
+  border-radius: 26px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #87b269;
+  box-shadow: 0 22px 58px rgba(23, 34, 27, .10);
+}
+.np-gp__stage.is-pannable { cursor: grab; }
+.np-gp__stage.is-pannable:active { cursor: grabbing; }
+
+.np-gp__svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  user-select: none;
+}
+
+/* Контуры участков и круглые пины поверх */
+.np-gp__plot {
+  cursor: pointer;
+}
+.np-gp__poly {
+  fill: transparent;
+  stroke: rgba(255, 255, 255, .38);
+  stroke-width: .55;
+  transition: fill .2s ease, stroke .2s ease, stroke-width .2s ease;
+}
+.np-gp__plot--free .np-gp__poly {
+  fill: rgba(46, 125, 75, .14);
+  stroke: rgba(255, 255, 255, .82);
+  stroke-width: .8;
+}
+.np-gp__plot--free:hover .np-gp__poly,
+.np-gp__plot--free.is-sel .np-gp__poly {
+  fill: rgba(46, 125, 75, .34);
+  stroke: #ffffff;
+  stroke-width: 1.5;
+}
+.np-gp__plot--reserved .np-gp__poly {
+  fill: rgba(208, 136, 38, .18);
+  stroke: rgba(255, 255, 255, .6);
+}
+.np-gp__plot--sold .np-gp__poly,
+.np-gp__plot--pending .np-gp__poly {
+  fill: rgba(34, 42, 37, .14);
+  stroke: rgba(255, 255, 255, .42);
+}
+.np-gp__plot:hover .np-gp__poly,
+.np-gp__plot.is-sel .np-gp__poly {
+  stroke: #ffffff;
+  stroke-width: 1.35;
+}
+
+.np-gp__svg--scheme .np-gp__poly { fill: #e3e2d8; stroke: #a8b0a4; }
+.np-gp__svg--scheme .np-gp__plot--free .np-gp__poly { fill: #cbe5d2; stroke: #2e6b45; }
+.np-gp__svg--scheme .np-gp__plot--reserved .np-gp__poly { fill: #f3dfb8; stroke: #b8741e; }
+.np-gp__svg--scheme .np-gp__plot--sold .np-gp__poly { fill: #dcdbd3; stroke: #8c958f; }
+.np-gp__scheme-house {
+  fill: #323c35;
+  fill-opacity: .82;
+  stroke: #ffffff;
+  stroke-width: .35;
+  pointer-events: none;
+}
+
+.np-gp__pin circle {
+  transition: r .18s ease, fill .18s ease, stroke .18s ease;
+}
+.np-gp__pin--free circle {
+  fill: #2e7d4b;
+  stroke: #ffffff;
+  stroke-width: 1.15;
+}
+.np-gp__pin--free.is-sel circle,
+.np-gp__plot--free:hover .np-gp__pin--free circle {
+  fill: #1b3a24;
+  stroke: #b8f2ca;
+  stroke-width: 1.4;
+}
+.np-gp__pin--reserved circle {
+  fill: #cf8a29;
+  stroke: rgba(255, 255, 255, .92);
+  stroke-width: .9;
+}
+.np-gp__pin--sold circle {
+  fill: rgba(82, 92, 85, .82);
+  stroke: rgba(255, 255, 255, .65);
+  stroke-width: .75;
+}
+.np-gp__pin--pending circle {
+  fill: rgba(255, 255, 255, .86);
+  stroke: #4e5950;
+  stroke-width: .85;
+}
+.np-gp__pin text {
+  font: 700 4.1px var(--f-fact);
+  fill: #ffffff;
+  pointer-events: none;
+}
+.np-gp__pin--pending text {
+  fill: #17221b;
+}
+
+/* Пины инфраструктуры */
+.np-gp__infra-pin {
+  cursor: pointer;
+}
+.np-gp__infra-pin circle {
+  fill: #ffffff;
+  stroke: #1b3a24;
+  stroke-width: 1.1;
+  transition: transform .18s ease, fill .18s ease;
+}
+.np-gp__infra-pin.is-on circle,
+.np-gp__infra-pin:hover circle {
+  fill: #e8f2eb;
+  stroke: #2e6b45;
+  stroke-width: 1.5;
+}
+.np-gp__infra-pin text {
+  font-size: 7.5px;
+  pointer-events: none;
+}
+
+/* Верхний левый контрол: пилюля «Показать список (17)» + ховер-тултип */
+.np-gp__top-left {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100% - 32px);
+}
+.np-gp__pill {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .96);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(27, 58, 36, .14);
+  font: 600 13.5px/1 var(--f-ui);
+  color: var(--forest);
+  box-shadow: 0 10px 28px rgba(14, 24, 18, .18);
+  transition: background .2s, color .2s, transform .18s;
+}
+.np-gp__pill:hover { transform: translateY(-1px); border-color: var(--forest); }
+.np-gp__pill.is-active { background: var(--forest); color: #ffffff; border-color: var(--forest); }
+.np-gp__pill-icon { font-size: 14px; line-height: 1; }
+
+.np-gp__hover-tip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 15px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .95);
+  backdrop-filter: blur(12px);
+  border: 1px solid #ffffff;
+  box-shadow: 0 10px 28px rgba(14, 24, 18, .18);
+  font: 500 13px var(--f-ui);
+  color: var(--ink);
+  pointer-events: none;
+}
+.np-gp__hover-tip b { font-weight: 700; color: var(--forest); }
+.np-gp__hover-tip em { font-style: normal; font-weight: 700; color: var(--leaf); }
+.np-gp__dot { width: 9px; height: 9px; border-radius: 50%; background: var(--leaf); flex: none; }
+.np-gp__dot--reserved { background: #cf8a29; }
+.np-gp__dot--sold { background: var(--sold); }
+.np-gp__dot--pending { background: #ffffff; border: 1.5px solid var(--moss); }
+
+/* Левая выдвижная панель списка свободных участков */
+.np-gp__list-drawer {
+  position: absolute;
+  top: 66px;
+  left: 16px;
+  bottom: 68px;
+  z-index: 6;
+  width: min(360px, calc(100% - 32px));
+  background: rgba(255, 255, 255, .96);
+  backdrop-filter: blur(16px);
+  border: 1px solid #ffffff;
+  border-radius: 22px;
+  box-shadow: 0 22px 54px rgba(14, 24, 18, .24);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: v4-card .22s ease both;
+}
+.np-gp__list-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.np-gp__list-head b { display: block; font: 600 15px/1.2 var(--f-ui); color: var(--forest); }
+.np-gp__list-head span { display: block; font: 400 12px/1.3 var(--f-ui); color: var(--moss); margin-top: 2px; }
+.np-gp__list-head button {
+  all: unset;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--linen);
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  color: var(--ink);
+}
+.np-gp__list-items {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  overflow-y: auto;
+  display: grid;
+  gap: 4px;
+}
+.np-gp__list-items button {
+  all: unset;
+  cursor: pointer;
+  box-sizing: border-box;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  transition: background .16s ease;
+}
+.np-gp__list-items button:hover { background: var(--mist); }
+.np-gp__list-items button.is-sel { background: #e1efe5; }
+.np-gp__list-num {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--leaf);
+  color: #ffffff;
+  font: 700 12px/1 var(--f-fact);
+  display: grid;
+  place-items: center;
+}
+.np-gp__list-main { min-width: 0; }
+.np-gp__list-main b { display: block; font: 600 13.5px/1.2 var(--f-ui); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.np-gp__list-main small { display: block; font: 400 11.5px/1.3 var(--f-ui); color: var(--moss); margin-top: 2px; }
+.np-gp__list-price { font: 700 13.5px/1 var(--f-fact); color: var(--forest); white-space: nowrap; }
+
+/* Зум + / − справа по центру */
+.np-gp__zoom {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.np-gp__zoom button {
+  all: unset;
+  cursor: pointer;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .95);
+  border: 1px solid rgba(27, 58, 36, .14);
+  display: grid;
+  place-items: center;
+  font: 600 18px var(--f-ui);
+  color: var(--ink);
+  box-shadow: 0 8px 22px rgba(14, 24, 18, .16);
+}
+.np-gp__zoom button:hover { border-color: var(--forest); background: #ffffff; }
+
+/* Нижняя панель: легенда + свитч Инфраструктура + Вид сверху / Схема */
+.np-gp__bottom-bar {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 14px;
+  z-index: 4;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  pointer-events: none;
+}
+.np-gp__bottom-bar > * { pointer-events: auto; }
+.np-gp__legend {
+  list-style: none;
+  padding: 7px 14px;
+  margin: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .94);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(27, 58, 36, .12);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font: 500 12.5px var(--f-ui);
+  color: var(--ink);
+  box-shadow: 0 8px 22px rgba(14, 24, 18, .12);
+}
+.np-gp__legend li { display: inline-flex; align-items: center; gap: 6px; }
+.np-gp__legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.np-gp__legend .is-free { background: #2e7d4b; }
+.np-gp__legend .is-res { background: #cf8a29; }
+.np-gp__legend .is-sold { background: var(--sold); }
+
+.np-gp__controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.np-gp__switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 14px 7px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(27, 58, 36, .12);
+  font: 600 12.5px var(--f-ui);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(14, 24, 18, .12);
+}
+.np-gp__switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.np-gp__switch-track {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  border-radius: 999px;
+  background: #cdd2c5;
+  transition: background .2s ease;
+}
+.np-gp__switch-track::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: transform .2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .18);
+}
+.np-gp__switch input:checked + .np-gp__switch-track { background: var(--leaf); }
+.np-gp__switch input:checked + .np-gp__switch-track::after { transform: translateX(14px); }
+
+.np-gp__mode {
+  display: inline-flex;
+  background: rgba(255, 255, 255, .95);
+  border: 1px solid rgba(27, 58, 36, .12);
+  border-radius: 999px;
+  padding: 3px;
+  box-shadow: 0 8px 22px rgba(14, 24, 18, .12);
+}
+.np-gp__mode button {
+  all: unset;
+  cursor: pointer;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font: 600 12.5px var(--f-ui);
+  color: var(--moss);
+}
+.np-gp__mode button[aria-pressed='true'] {
+  background: var(--forest);
+  color: #ffffff;
+}
+
+/* Всплывающая карточка объекта инфраструктуры */
+.np-gp__infra-card {
+  position: absolute;
+  right: 16px;
+  bottom: 70px;
+  z-index: 6;
+  width: min(320px, calc(100% - 32px));
+  background: rgba(255, 255, 255, .97);
+  backdrop-filter: blur(14px);
+  border: 1px solid #ffffff;
+  border-radius: 18px;
+  padding: 14px 16px;
+  box-shadow: 0 18px 42px rgba(14, 24, 18, .22);
+}
+.np-gp__infra-close {
+  all: unset;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--linen);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+}
+.np-gp__infra-top { display: flex; align-items: center; gap: 10px; padding-right: 26px; }
+.np-gp__infra-top > span { font-size: 22px; }
+.np-gp__infra-top b { display: block; font: 600 14px/1.2 var(--f-ui); color: var(--forest); }
+.np-gp__infra-top small { display: block; font: 600 12px/1.3 var(--f-fact); color: var(--leaf); }
+.np-gp__infra-card p { margin: 8px 0 0; font: 400 13px/1.45 var(--f-ui); color: var(--moss); }
+
+/* Правая шторка выбранного участка (slide-over с фиксированной кнопкой внизу) */
+.np-gp__drawer {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  bottom: 14px;
+  z-index: 8;
+  width: min(390px, calc(100% - 28px));
+  background: rgba(255, 255, 255, .98);
+  backdrop-filter: blur(18px);
+  border: 1px solid #ffffff;
+  border-radius: 22px;
+  box-shadow: 0 24px 64px rgba(14, 24, 18, .28);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: v4-card .22s ease both;
+}
+.np-gp__drawer-close {
+  all: unset;
+  cursor: pointer;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .94);
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  color: var(--ink);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+}
+.np-gp__drawer-scroll { flex: 1; overflow-y: auto; }
+.np-gp__drawer-img { position: relative; aspect-ratio: 16 / 10; background: var(--linen); }
+.np-gp__drawer-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.np-gp__drawer-img--empty { display: grid; place-items: center; padding: 18px; font: 600 14px var(--f-ui); color: var(--moss); }
+.np-gp__drawer-tag {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(250, 249, 245, .94);
+  color: var(--forest);
+  font: 600 11.5px var(--f-ui);
+}
+.np-gp__drawer-body { padding: 16px 18px; display: grid; gap: 8px; }
+.np-gp__drawer-body h4 { margin: 2px 0 0; font: 500 28px/1.05 var(--f-emo); color: var(--ink); }
+.np-gp__drawer-addr { margin: 0; font: 400 13.5px/1.4 var(--f-ui); color: var(--moss); }
+.np-gp__drawer-specs {
+  margin: 6px 0 0;
+  padding: 10px 0;
+  border-block: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.np-gp__drawer-specs dt { font: 400 11.5px var(--f-ui); color: var(--moss); }
+.np-gp__drawer-specs dd { margin: 2px 0 0; font: 600 14px var(--f-fact); color: var(--ink); }
+.np-gp__drawer-pricebox { margin-top: 4px; }
+.np-gp__drawer-price { margin: 0; font: 700 30px/1.08 var(--f-fact); color: var(--forest); }
+.np-gp__drawer-mort { margin: 4px 0 0; font: 400 13px/1.4 var(--f-ui); color: var(--moss); }
+.np-gp__drawer-mort b { color: var(--ink); font-weight: 600; }
+.np-gp__drawer-note { margin: 4px 0 0; font: 400 13.5px/1.45 var(--f-ui); color: var(--moss); }
+
+.np-gp__drawer-foot {
+  padding: 12px 18px 16px;
+  border-top: 1px solid var(--line);
+  background: #ffffff;
+}
+.np-gp__drawer-cta { width: 100%; justify-content: center; box-sizing: border-box; padding: 14px 20px; }
+.np-gp__drawer-pair { display: flex; gap: 8px; }
+.np-gp__drawer-pair > * { flex: 1; justify-content: center; }
+
+/* Ультракомпактный верх Динской */
+.v4-estate-hero--compact {
+  padding: calc(68px + 14px) 0 14px;
+  border-bottom: 1px solid var(--line);
+}
+.v4-estate-hero--compact .v4-dom__crumbs { margin-bottom: 8px; }
+.v4-estate-compact-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 20px;
+}
+.v4-estate-compact-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 18px; }
+.v4-estate-compact-title h1 { margin: 0; }
+.v4-estate-compact-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.v4-estate-genplan--first { padding-top: 16px; padding-bottom: 36px; }
+.v4-estate-about--below { padding-top: 32px; }
+
+@media (max-width: 860px) {
+  .np-gp__stage {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .np-gp__svg {
+    aspect-ratio: 16 / 10.5;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+  }
+  .np-gp__hover-tip { display: none; }
+  .np-gp__top-left { top: 10px; left: 10px; }
+  .np-gp__pill { padding: 8px 14px; font-size: 12.5px; }
+  .np-gp__zoom { top: 10px; right: 10px; transform: none; flex-direction: row; }
+  .np-gp__zoom button { width: 36px; height: 36px; font-size: 16px; }
+  .np-gp__list-drawer { position: static; width: 100%; max-height: 300px; margin-top: 10px; }
+  .np-gp__drawer { position: static; width: 100%; margin-top: 10px; box-shadow: 0 10px 28px rgba(23, 34, 27, .08); }
+  .np-gp__bottom-bar { position: static; margin-top: 10px; }
+  .np-gp__infra-card { position: static; width: 100%; margin-top: 10px; }
+}

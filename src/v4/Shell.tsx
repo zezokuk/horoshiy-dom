@@ -6,6 +6,7 @@ import type { CSSProperties } from 'react'
 import { LeadForm } from '@/components/LeadForm'
 import type { Company } from '@/payload-types'
 import { V4MobileNav } from '@/v4/V4MobileNav'
+import { SalesTriggerWidget } from '@/v4/SalesTriggerWidget'
 
 export const NAV = [
   { href: '/v4/doma', label: 'Дома в продаже' },
@@ -104,7 +105,7 @@ export function V4Final({ company, n, context, title = 'Приезжайте', e
                 </p>
                 <div className="v4-final__badges">
                   <span>200+ построенных домов с 2014 года</span>
-                  <span>Семейная ипотека 6% · личный брокер</span>
+                  <span>Семейная от 6%, IT, военная и сельская ипотека</span>
                   <span>Предчистовая отделка · гарантия 5 лет</span>
                 </div>
                 {!showContacts && (
@@ -158,15 +159,18 @@ export function V4Final({ company, n, context, title = 'Приезжайте', e
 
 const FOOT = 'Хороший дом'
 
-export function V4Footer({ since }: { since?: number | null }) {
+export function V4Footer({ since, phone }: { since?: number | null; phone?: string | null }) {
   return (
-    <footer className="v4-foot">
-      <div className="v3-wrap v4-foot__top">
-        <p>Строим и продаём кирпичные дома с участком под Краснодаром{since ? ` с ${since} года` : ''}: Динская, Новая Адыгея, Козет.</p>
-        <nav aria-label="Разделы сайта в подвале">{NAV.map((x) => <a key={x.href} href={x.href}>{x.label}</a>)}</nav>
-      </div>
-      <p className="v4-foot__word" aria-hidden>{[...FOOT].map((ch, k) => <span key={k} style={{ '--i': k } as CSSProperties}>{ch === ' ' ? ' ' : ch}</span>)}</p>
-    </footer>
+    <>
+      <footer className="v4-foot" data-phone={phone ?? ''}>
+        <div className="v3-wrap v4-foot__top">
+          <p>Строим и продаём готовые кирпичные дома с участком в собственных посёлках на Юге России{since ? ` с ${since} года` : ''}: Динская, Новая Адыгея, Козет.</p>
+          <nav aria-label="Разделы сайта в подвале">{NAV.map((x) => <a key={x.href} href={x.href}>{x.label}</a>)}</nav>
+        </div>
+        <p className="v4-foot__word" aria-hidden>{[...FOOT].map((ch, k) => <span key={k} style={{ '--i': k } as CSSProperties}>{ch === ' ' ? ' ' : ch}</span>)}</p>
+      </footer>
+      <SalesTriggerWidget phone={phone} />
+    </>
   )
 }
 

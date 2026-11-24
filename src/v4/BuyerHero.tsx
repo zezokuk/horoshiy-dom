@@ -35,7 +35,13 @@ export default function BuyerHero({ phone, priceFrom }: BuyerHeroProps) {
             <img src="/design/hero-morning.webp" width="1920" height="1288" alt="Фасад типового кирпичного дома с участком" fetchPriority="high" />
           </picture>
           <div className="buyer-hero__night" aria-hidden="true" />
-          <div className="buyer-hero__windows" aria-hidden="true"><i /><i /></div>
+          <div className="buyer-hero__sunrise" aria-hidden="true" />
+          <div className="buyer-hero__windows" aria-hidden="true">
+            <i className="bh-win bh-win--l" />
+            <i className="bh-win bh-win--porch" />
+            <i className="bh-win bh-win--r" />
+            <span className="bh-win-spill" />
+          </div>
         </div>
       </div>
       <div className="buyer-hero__stars" aria-hidden="true"><i /></div>
@@ -55,7 +61,7 @@ export default function BuyerHero({ phone, priceFrom }: BuyerHeroProps) {
       </header>
       <h1 id="buyer-hero-title" className="buyer-hero__title">Хороший <em>дом</em></h1>
       <div className="buyer-hero__foot">
-        <p>Кирпичные дома с участком<br />под Краснодаром{priceFrom && <span> · от {priceFrom}</span>}</p>
+        <p>Готовые кирпичные дома с участком<br />в собственных посёлках{priceFrom && <span> · от {priceFrom}</span>}</p>
         <a className="buyer-hero__action" href="#doma">Выбрать дом <span aria-hidden="true">↓</span></a>
       </div>
     </section>
