@@ -303,3 +303,63 @@
   .fh *, .fh *::after { transition: none; }
   .fh-photo:hover img, .fh-more-card:hover, .fh .fh-open:hover { transform: none; }
 }
+.fh-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: clamp(16px, 1.8vw, 24px);
+}
+.fh-filters button {
+  cursor: pointer;
+  min-height: 38px;
+  padding: 6px 15px;
+  border-radius: 999px;
+  border: 1px solid #cdd4c7;
+  background: #fff;
+  color: var(--forest);
+  font: 500 13px/1.2 var(--f-ui);
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+.fh-filters button:hover {
+  border-color: var(--forest);
+}
+.fh-filters button.is-on {
+  background: var(--forest);
+  border-color: var(--forest);
+  color: #fffaf0;
+  font-weight: 600;
+}
+.fh-views {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  background: #e3e6dc;
+}
+.fh-views button {
+  cursor: pointer;
+  border: 0;
+  min-height: 30px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--forest);
+  font: 550 12px/1.2 var(--f-ui);
+  transition: background .18s ease, color .18s ease;
+}
+.fh-views button.is-on {
+  background: #fff;
+  color: var(--forest);
+  box-shadow: 0 2px 8px rgba(20, 34, 25, .1);
+}
+.fh-photo--plan {
+  background: #f6f4ec;
+}
+.fh-photo--plan img {
+  object-fit: contain;
+  padding: clamp(16px, 2.5vw, 32px);
+}
+@media (hover: hover) {
+  .fh-photo--plan:hover img { transform: none; }
+}

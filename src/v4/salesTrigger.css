@@ -28,7 +28,8 @@ html:has(.st-picker[open]) { overflow: hidden; }
 .v4 .st-offer-link, .v4 .st-back, .st-summary { font: 500 13px/1.45 var(--f-ui); color: var(--moss); }
 .v4 .st-offer-link { border-top: 1px solid var(--line); margin-top: 20px; padding: 16px 0 0; }
 .v4 .st-back { margin-top: 12px; min-height: 44px; }
-.v4 .st-summary { margin: -8px 0 18px; }
+.v4 .st-summary { margin: -8px 0 8px; }
+.v4 .st-honest-note { margin: 0 0 14px; font: 400 13px/1.45 var(--f-ui); color: var(--moss); }
 @media (max-width: 860px) {
   .v4 .st-helper { right: 14px; bottom: max(14px, env(safe-area-inset-bottom)); }
   body:has(.v3-sticky[data-on="true"], .cookie) .st-helper { display: none; }

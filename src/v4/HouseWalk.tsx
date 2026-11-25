@@ -14,6 +14,31 @@ const chapters = [
 const filmLength = 17.067
 const timestamp = (seconds: number) => new Date(Math.max(0, seconds) * 1000).toISOString().slice(14, 19)
 
+const ROUTE_WAYPOINTS = [
+  { p: 0, x: 35, y: 92, angle: -25 },
+  { p: 0.316, x: 44, y: 52, angle: 0 },
+  { p: 0.609, x: 104, y: 52, angle: 78 },
+  { p: 0.89, x: 154, y: 60, angle: 90 },
+  { p: 1, x: 158, y: 60, angle: 90 },
+]
+
+function cameraPose(progress: number) {
+  const clamped = Math.max(0, Math.min(1, progress))
+  for (let i = 0; i < ROUTE_WAYPOINTS.length - 1; i++) {
+    const a = ROUTE_WAYPOINTS[i]
+    const b = ROUTE_WAYPOINTS[i + 1]
+    if (clamped >= a.p && clamped <= b.p) {
+      const k = (clamped - a.p) / Math.max(0.0001, b.p - a.p)
+      return {
+        x: a.x + (b.x - a.x) * k,
+        y: a.y + (b.y - a.y) * k,
+        angle: a.angle + (b.angle - a.angle) * k,
+      }
+    }
+  }
+  return ROUTE_WAYPOINTS[ROUTE_WAYPOINTS.length - 1]
+}
+
 function PlayIcon({ playing }: { playing: boolean }) {
   return <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="currentColor">
     {playing ? <path d="M7 5h3v14H7zm7 0h3v14h-3z" /> : <path d="M7 4.5 20 12 7 19.5z" />}
@@ -33,6 +58,7 @@ export function HouseWalk({ href, linkText, areas }: { href: string; linkText: s
   const chapter = chapters.reduce((active, item, i) => time >= item.start - 0.03 ? i : active, 0)
   const current = chapters[chapter]
   const still = decoded && !failed ? chapters[0] : current
+  const pose = cameraPose(duration > 0 ? time / duration : 0)
 
   function prepare(player: HTMLVideoElement) {
     const portrait = window.matchMedia(portraitFrame).matches
@@ -151,6 +177,44 @@ export function HouseWalk({ href, linkText, areas }: { href: string; linkText: s
         </div>
         <p>{chapter === 0 ? 'От крыльца до террасы' : current.note}</p>
       </div>
+      <aside className="house-walk__minimap" aria-label="Мини-карта маршрута по планировке">
+        <div className="house-walk__minimap-head">
+          <span>План маршрута</span>
+          <b>{current.name}</b>
+        </div>
+        <svg viewBox="0 0 180 116" role="img" aria-label="Схема: крыльцо, холл, кухня-гостиная, терраса">
+          {/* Внешний контур дома */}
+          <rect x="14" y="14" width="128" height="68" rx="4" className="hw-map-shell" />
+          {/* Спальни (фоновые зоны) */}
+          <rect x="18" y="18" width="48" height="18" rx="2" className="hw-map-muted" />
+          <rect x="70" y="18" width="42" height="18" rx="2" className="hw-map-muted" />
+
+          {/* 4 кликабельные зоны маршрута */}
+          <g className={chapter === 0 ? 'hw-map-room is-active' : 'hw-map-room'} onClick={() => seek(0)}>
+            <rect x="18" y="82" width="38" height="24" rx="2" />
+            <text x="37" y="97">Крыльцо</text>
+          </g>
+          <g className={chapter === 1 ? 'hw-map-room is-active' : 'hw-map-room'} onClick={() => seek(1)}>
+            <rect x="18" y="40" width="48" height="38" rx="2" />
+            <text x="42" y="62">Холл</text>
+          </g>
+          <g className={chapter === 2 ? 'hw-map-room is-active' : 'hw-map-room'} onClick={() => seek(2)}>
+            <rect x="70" y="40" width="68" height="38" rx="2" />
+            <text x="104" y="62">Гостиная</text>
+          </g>
+          <g className={chapter === 3 ? 'hw-map-room is-active' : 'hw-map-room'} onClick={() => seek(3)}>
+            <rect x="142" y="28" width="28" height="54" rx="2" />
+            <text x="156" y="57">Сад</text>
+          </g>
+
+          {/* Линия маршрута и текущая камера */}
+          <path d="M 35 92 L 44 52 L 104 52 L 154 60" className="hw-map-path" />
+          <g className="house-walk__cam" transform={`translate(${pose.x.toFixed(1)}, ${pose.y.toFixed(1)}) rotate(${pose.angle.toFixed(1)})`}>
+            <path d="M 0 0 L -9 -22 A 24 24 0 0 1 9 -22 Z" className="hw-map-cone" />
+            <circle cx="0" cy="0" r="4.5" className="hw-map-dot" />
+          </g>
+        </svg>
+      </aside>
       {!failed && <button type="button" className="house-walk__play" onClick={toggle} aria-label={playing ? 'Пауза' : 'Воспроизвести прогулку'}>
         <PlayIcon playing={playing} />
       </button>}

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
-import { getCompany, getEstates, getHouses, getProjects, getRegions } from '@/lib/data'
+import { getCompany, getEstates, getHouses, getProjects, getRegions, img } from '@/lib/data'
 import { annuity, formatMillions } from '@/lib/format'
 import { JsonLd, faqLd, organizationLd } from '@/lib/seo'
 import { byEstateStatus, estateSale, estateView, houseView } from '@/lib/view'
@@ -135,10 +135,17 @@ export default async function V4Home() {
       }
     }
   }
+  selected.sort((a, b) => a.price - b.price)
 
+  const rawByCode = new Map(houses.map((x) => [x.code, x]))
   const featured: FeaturedHouse[] = selected.map((h) => {
     const frames = housePhotography(h.code)
     const shot = h.code === 'di-tip5' ? frames[1] ?? frames[0] : frames[0]
+    const primarySrc = shot?.src ?? h.photo
+    const altShot = frames.find((f) => f.src !== primarySrc)
+    const raw = rawByCode.get(h.code)
+    const proj = raw ? projects.find((p) => p.id === projectOf(raw)) : undefined
+    const planImage = proj?.plan ? img(proj.plan, 'card') || undefined : undefined
     const [type] = h.title.split(', ')
     const need = h.price ? Math.max(fam.minDown, Math.ceil(((h.price - fam.limit) / h.price) * 100)) : fam.minDown
     const monthlyPay = h.price ? Math.round(annuity(h.price * (1 - need / 100), fam.rate, fam.years)) : null
@@ -146,6 +153,7 @@ export default async function V4Home() {
       code: h.code,
       location: cleanSingleAddress(h.title, h.estateName, h.plotNo),
       title: h.mansard ? 'Дом с мансардой' : h.storeys === 2 ? 'Двухэтажный дом' : 'Одноэтажный дом',
+      storeyTag: h.mansard ? 'mansard' : h.storeys === 2 ? '2' : '1',
       price: h.price,
       area: h.area,
       plot: h.plot,
@@ -156,7 +164,10 @@ export default async function V4Home() {
       familyRate: fam.rate,
       mortgageDown: need,
       mortgageYears: fam.years,
-      image: shot?.src ?? h.photo,
+      image: primarySrc,
+      altImage: altShot?.src,
+      altCaption: altShot?.caption,
+      planImage,
       caption: shot?.caption ?? 'Изображение проекта',
       alt: shot?.alt ?? 'Дом по проекту «' + type + '»',
     }

@@ -133,3 +133,111 @@ html.no-motion .house-walk__room { animation: none; }
   .house-walk__caption[data-intro="true"] p { text-shadow: 0 1px 7px #fff6e6b3; }
 }
 @media(prefers-reduced-motion: reduce) { .house-walk__caption { transition: none; } }
+
+/* Интерактивная мини-карта планировки в углу экрана прогулки */
+.house-walk__minimap {
+  position: absolute;
+  right: calc(var(--walk-gutter) + clamp(68px, 6.4vw, 102px));
+  bottom: clamp(24px, 3.4vw, 62px);
+  width: 204px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(15, 29, 23, .76);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 250, 240, .2);
+  color: #fffaf0;
+  box-shadow: 0 10px 28px rgba(8, 16, 12, .35);
+}
+.house-walk__minimap-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+  font: 500 10px/1.2 var(--f-ui);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #b8d8c2;
+}
+.house-walk__minimap-head b {
+  font-weight: 600;
+  color: #fffaf0;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 11px;
+}
+.house-walk__minimap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.hw-map-shell {
+  fill: rgba(255, 250, 240, .05);
+  stroke: rgba(255, 250, 240, .28);
+  stroke-width: 1;
+}
+.hw-map-muted {
+  fill: rgba(255, 250, 240, .04);
+  stroke: rgba(255, 250, 240, .14);
+  stroke-width: .75;
+}
+.hw-map-room {
+  cursor: pointer;
+}
+.hw-map-room rect {
+  fill: rgba(255, 250, 240, .09);
+  stroke: rgba(255, 250, 240, .28);
+  stroke-width: .85;
+  transition: fill .2s ease, stroke .2s ease;
+}
+.hw-map-room text {
+  fill: rgba(255, 250, 240, .74);
+  font-family: var(--f-ui);
+  font-size: 7.5px;
+  font-weight: 500;
+  text-anchor: middle;
+  pointer-events: none;
+}
+.hw-map-room:hover rect,
+.hw-map-room.is-active rect {
+  fill: rgba(46, 107, 69, .62);
+  stroke: #f4d98d;
+  stroke-width: 1.15;
+}
+.hw-map-room.is-active text {
+  fill: #fffaf0;
+  font-weight: 700;
+}
+.hw-map-path {
+  fill: none;
+  stroke: rgba(244, 217, 141, .45);
+  stroke-width: 1.2;
+  stroke-dasharray: 2.5 2.5;
+  pointer-events: none;
+}
+.house-walk__cam {
+  pointer-events: none;
+  transition: transform .22s linear;
+}
+.hw-map-cone {
+  fill: rgba(244, 217, 141, .34);
+}
+.hw-map-dot {
+  fill: #f4d98d;
+  stroke: #15241e;
+  stroke-width: 1.5;
+}
+@media (max-width: 760px) {
+  .house-walk__minimap {
+    top: 44px;
+    right: 14px;
+    bottom: auto;
+    width: 124px;
+    padding: 6px 8px;
+  }
+  .house-walk__minimap-head { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .house-walk__cam, .hw-map-room rect { transition: none; }
+}
+html.no-motion .house-walk__cam { transition: none; }

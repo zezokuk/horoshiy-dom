@@ -71,15 +71,43 @@ html:has(.hd-lightbox[open]) { overflow: hidden; }
 .hd-plan img { width: 100%; height: clamp(220px, 27vw, 430px); object-fit: contain; }
 .hd-plan figcaption { display: flex; justify-content: space-between; gap: 12px; padding-top: 8px; font-size: 12px; color: var(--moss); }
 .hd-plan figcaption a { color: var(--forest); text-decoration: underline; }
+.hd-plan-3d { min-width: 0; }
+.hd-plan-3d .pr { display: grid; gap: 12px; }
+.hd-plan-3d .pr__tabs { display: inline-flex; width: fit-content; padding: 4px; border-radius: 999px; background: var(--linen); border: 1px solid var(--line); }
+.hd-plan-3d .pr__tabs button { all: unset; cursor: pointer; padding: 7px 16px; border-radius: 999px; font: 600 13px/1.2 var(--f-ui); color: var(--moss); transition: background-color .18s, color .18s; }
+.hd-plan-3d .pr__tabs button[aria-selected="true"] { background: var(--forest); color: #ffffff; }
+.hd-plan-3d .pr__stage { position: relative; border-radius: 20px; overflow: hidden; background: #ffffff; border: 1px solid var(--line); }
+.hd-plan-3d .pr__stage img { width: 100%; max-height: 520px; object-fit: contain; display: block; margin-inline: auto; }
+.hd-plan-3d .pr__stage--plan img { padding: 18px; }
+.hd-plan-3d .pr__room { position: absolute; transform: translate(-50%, -50%); padding: 5px 9px; border-radius: 10px; background: rgba(250, 249, 245, .92); backdrop-filter: blur(8px); border: 1px solid rgba(27, 58, 36, .18); display: grid; gap: 1px; text-align: center; pointer-events: auto; cursor: default; box-shadow: 0 6px 18px rgba(18, 28, 20, .14); transition: transform .18s, background-color .18s, color .18s; }
+.hd-plan-3d .pr__room b { font: 700 11.5px/1.1 var(--f-fact); color: var(--forest); }
+.hd-plan-3d .pr__room i { font: 500 10px/1.1 var(--f-ui); font-style: normal; color: var(--moss); }
+.hd-plan-3d .pr__room.is-on { transform: translate(-50%, -50%) scale(1.08); background: var(--forest); border-color: var(--forest); }
+.hd-plan-3d .pr__room.is-on b, .hd-plan-3d .pr__room.is-on i { color: #ffffff; }
+.hd-plan-3d .pr__list { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.hd-plan-3d .pr__list button { all: unset; cursor: pointer; padding: 6px 12px; border-radius: 999px; background: #ffffff; border: 1px solid var(--line); font: 500 12.5px/1.2 var(--f-ui); color: var(--ink); display: inline-flex; gap: 6px; align-items: baseline; }
+.hd-plan-3d .pr__list button b { font: 600 12px var(--f-fact); color: var(--forest); }
+.hd-plan-3d .pr__list button.is-on, .hd-plan-3d .pr__list button:hover { border-color: var(--forest); background: var(--mist); }
+.hd-plan-3d .pr__note { margin: 0; font: 450 12px/1.4 var(--f-ui); color: var(--moss); }
 .hd-mortgage .v4-mort { margin-top: clamp(22px, 3vw, 45px); }
-.hd-book { background: #193a27; color: #fff; padding: clamp(28px, 5vw, 80px); gap: clamp(24px, 6vw, 90px); grid-template-columns: 1fr 1fr; margin-block: 14px clamp(40px, 5vw, 80px); }
-.hd-page .hd-book h2 { color: #fffcf5; max-width: 9em; }
-.hd-page .hd-book-copy > p { color: #dfebdf; margin-top: 18px; max-width: 34ch; font-size: 16px; }
-.hd-book-house { display: flex; align-items: center; gap: 14px; border-top: 1px solid #ffffff40; padding-top: 20px; margin-top: 26px; }
-.hd-book-house img { width: 78px; height: 58px; object-fit: cover; }
+.hd-book { background: #193a27; color: #fff; border-radius: 26px; padding: clamp(28px, 4.5vw, 68px); gap: clamp(24px, 5vw, 72px); grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); margin-block: 14px clamp(40px, 5vw, 80px); box-shadow: 0 22px 54px rgba(17, 36, 24, .16); }
+.hd-book-eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 999px; background: rgba(255, 252, 245, .12); border: 1px solid rgba(255, 252, 245, .18); font: 600 11px/1.2 var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: #d8eadc; }
+.hd-book-eyebrow i { width: 6px; height: 6px; border-radius: 50%; background: #8fd4a4; }
+.hd-page .hd-book-copy > p { color: #e2ede3; margin-top: 16px; max-width: 44ch; font-size: 16px; line-height: 1.55; }
+.hd-book-perks { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 8px; }
+.hd-book-perks li { display: flex; align-items: baseline; gap: 10px; font: 400 14px/1.45 var(--f-ui); color: #d5e5d8; }
+.hd-book-perks li::before { content: '✓'; color: #9ad8ad; font-weight: 700; flex: none; }
+.hd-book-house { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; border-top: 1px solid rgba(255, 255, 255, .18); padding-top: 20px; margin-top: 22px; }
+.hd-book-house-main { display: flex; align-items: center; gap: 14px; }
+.hd-book-house img { width: 78px; height: 58px; object-fit: cover; border-radius: 10px; }
 .hd-book-house b, .hd-book-house span { display: block; font-size: 14px; }
-.hd-book-house span { font-size: 12px; color: #d7e2d7; }
-.hd-form { background: var(--paper); color: var(--ink); padding: clamp(18px, 3vw, 45px); border-radius: 4px; }
+.hd-book-house span { font-size: 12.5px; color: #cfe0d2; margin-top: 2px; }
+.hd-book-tel { font: 600 16px/1.2 var(--f-fact); color: #fffcf5; text-decoration: none; padding: 9px 16px; border-radius: 999px; border: 1px solid rgba(255, 252, 245, .26); background: rgba(255, 255, 255, .07); white-space: nowrap; transition: background-color .18s; }
+.hd-book-tel:hover { background: rgba(255, 255, 255, .16); }
+.hd-form { background: #faf9f5; color: var(--ink); padding: clamp(22px, 3vw, 38px); border-radius: 20px; box-shadow: 0 18px 42px rgba(9, 22, 14, .22); }
+.hd-form-title { font: 500 26px/1.1 var(--f-emo); color: var(--forest); margin: 0 0 14px; }
+.hd-form-trust { margin: 10px 0 0; font-size: 12px; line-height: 1.4; color: var(--moss); text-align: center; text-wrap: balance; }
+.hd-alt-render-tag { position: absolute; top: 10px; left: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(23, 34, 27, .76); backdrop-filter: blur(6px); color: #faf9f5; font: 500 11px/1.2 var(--f-ui); }
 .hd-alternatives-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 16px; }
 .hd-alt-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 24px; }
 .hd-alt-card { display: flex; flex-direction: column; text-decoration: none; }

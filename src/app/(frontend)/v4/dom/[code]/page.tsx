@@ -2,15 +2,16 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { LeadForm } from '@/components/LeadForm'
+import { PlanRender } from '@/components/PlanRender'
 import { getCompany, getHouse, getHouses, img } from '@/lib/data'
 import { STATUS_LABEL, plural, formatArea, formatMillions, formatPrice } from '@/lib/format'
 import { JsonLd, breadcrumbsLd, houseLd } from '@/lib/seo'
 import { mainHref } from '@/lib/site'
-import { cleanPhotoUrl, houseView } from '@/lib/view'
+import { cleanPhotoUrl, houseView, roomsView } from '@/lib/view'
 import { HouseDetailGallery } from '@/v4/HouseDetailGallery'
 import { fallbackHouseFrames, housePhotography } from '@/v4/housePhotography'
 import { Mortgage } from '@/v4/Mortgage'
-import { V4Bar, V4Footer } from '@/v4/Shell'
+import { V4Bar, V4Footer, telOf } from '@/v4/Shell'
 import { SLIDE_CODE, v4img } from '@/v4/images'
 import '@/v3/v3.css'
 import '@/v4/v4.css'
@@ -64,11 +65,20 @@ export default async function HouseDetail({ params }: Props) {
   const typeName = project?.name || h.title.split(',')[0]
   const cleanAddr = cleanSinglePlotAddress(h.title, estate.name, h.plotNo)
   const location = estate.slug === 'dinskaya' ? 'Дом в Динской' : 'Кирпичный дом'
-  const known = [...housePhotography(h.code)]
+  const known = [...housePhotography(h.code, project?.slug)]
+  const isType5 = Boolean(project?.slug?.startsWith('tip-5') || /tip5/i.test(h.code))
   const photo = h.photo || cleanPhotoUrl(img(project?.photo, 'wide'))
   const projectFrame = project?.slug === 'tip-5' ? '/v4/houses/type5-front.webp' : v4img(SLIDE_CODE[project?.slug ?? ''])?.src
   const slides = known.length ? known : fallbackHouseFrames(typeName, photo, projectFrame)
-  const gallery = h.plan ? [...slides, { src: h.plan, caption: `Планировка · ${cleanAddr.typePart}`, alt: `Планировка «${cleanAddr.typePart}»`, plan: true }] : slides
+  const renderSrc = (isType5 ? v4img('П1')?.src : undefined) ?? (project ? img(project.render, 'wide') : null)
+  const planSrc = h.plan || (project ? img(project.plan, 'wide') : null) || (isType5 ? '/design/plan-tip5-lines.webp' : null)
+  const rooms = renderSrc && project ? roomsView(project) : []
+  const planFrames = [
+    ...(renderSrc ? [{ src: renderSrc, caption: `Объёмная планировка · ${cleanAddr.typePart} (мебель — для примера)`, alt: `Объёмная планировка «${cleanAddr.typePart}»`, plan: true }] : []),
+    ...(planSrc ? [{ src: planSrc, caption: `Чертёж планировки · ${cleanAddr.typePart}`, alt: `Планировка «${cleanAddr.typePart}»`, plan: true }] : []),
+  ]
+  const gallery = [...slides, ...planFrames]
+  const tel = telOf(company.phone)
   const { rate, years, minDown, limit } = company.family ?? {}
   const family = rate != null && years && minDown != null && limit ? { rate, years, minDown, limit } : null
   const canVisit = h.status === 'free'
@@ -105,7 +115,7 @@ export default async function HouseDetail({ params }: Props) {
             {family && canVisit && <a className="hd-finance" href="#ipoteka">Рассчитать ипотеку <span aria-hidden>↓</span></a>}
           </div>
         </div>
-        {(h.plan || h.features.length > 0) && <section className="hd-section hd-layout" id="plan">
+        {(renderSrc || planSrc || h.features.length > 0) && <section className="hd-section hd-layout" id="plan">
           <div className="hd-section-copy">
             <h2>Внутри дома</h2>
             <dl className="hd-spec">
@@ -119,13 +129,19 @@ export default async function HouseDetail({ params }: Props) {
             </dl>
             {h.features.length > 0 && <p className="hd-features">{h.features.join(' · ')}</p>}
           </div>
-          {h.plan && <figure className="hd-plan">
-            <a href={h.plan} target="_blank" rel="noreferrer" aria-label="Открыть планировку в полном размере">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={h.plan} loading="lazy" alt={`Планировка дома «${h.title}»`} />
-            </a>
-            <figcaption>Планировка · {cleanAddr.typePart}<span><a href={h.plan} download>Скачать планировку ↓</a> · <a href={h.plan} target="_blank" rel="noreferrer">Развернуть ↗</a></span></figcaption>
-          </figure>}
+          {renderSrc ? (
+            <div className="hd-plan-3d">
+              <PlanRender render={renderSrc} plan={planSrc ?? undefined} rooms={rooms} alt={`Планировка дома «${cleanAddr.typePart}»`} />
+            </div>
+          ) : planSrc ? (
+            <figure className="hd-plan">
+              <a href={planSrc} target="_blank" rel="noreferrer" aria-label="Открыть планировку в полном размере">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={planSrc} loading="lazy" alt={`Планировка дома «${h.title}»`} />
+              </a>
+              <figcaption>Планировка · {cleanAddr.typePart}<span><a href={planSrc} download>Скачать планировку ↓</a> · <a href={planSrc} target="_blank" rel="noreferrer">Развернуть ↗</a></span></figcaption>
+            </figure>
+          ) : null}
         </section>}
         {family && canVisit && <section className="hd-section hd-mortgage" id="ipoteka">
           <h2>Ипотека на этот дом</h2>
@@ -133,11 +149,27 @@ export default async function HouseDetail({ params }: Props) {
         </section>}
         <section className="hd-book" id="evf-form" aria-labelledby="hd-book-title">
           <div className="hd-book-copy">
-            <h2 id="hd-book-title">{canVisit ? 'Посмотреть дом вживую' : 'Найти похожий дом'}</h2>
-            <p>{canVisit ? 'Оставьте телефон. Менеджер свяжется с вами и согласует время показа.' : 'Менеджер подберёт свободные дома с похожей площадью и стоимостью.'}</p>
-            <div className="hd-book-house">{slides[0] && <Image src={slides[0].src} width={78} height={58} unoptimized alt="" />}<div><b>{cleanAddr.typePart} · {cleanAddr.line}</b><span>{formatMillions(h.price)}</span></div></div>
+            <span className="hd-book-eyebrow"><i aria-hidden />Экскурсия по посёлку</span>
+            <h2 id="hd-book-title">{canVisit ? <>Посмотреть дом <em>вживую</em></> : <>Подберём похожий <em>готовый дом</em></>}</h2>
+            <p>{canVisit ? 'Оставьте телефон — менеджер встретит вас в посёлке в удобное время, откроет этот дом и покажет улицу.' : 'Менеджер подберёт свободные готовые дома с похожей планировкой и бюджетом.'}</p>
+            <ul className="hd-book-perks">
+              <li>Покажем этот дом, участок, кирпичную кладку и соседние планировки</li>
+              <li>Проверим выписки ИЖС, межевание и подключённые коммуникации</li>
+              <li>Если вы в другом городе — проведём подробный видеотур онлайн</li>
+            </ul>
+            <div className="hd-book-house">
+              <div className="hd-book-house-main">
+                {slides[0] && <Image src={slides[0].src} width={78} height={58} unoptimized alt="" />}
+                <div><b>{cleanAddr.typePart} · {cleanAddr.line}</b><span>{formatMillions(h.price)} · дом с участком</span></div>
+              </div>
+              {company.phone && <a className="hd-book-tel" href={tel ? `tel:${tel}` : undefined}>{company.phone}</a>}
+            </div>
           </div>
-          <div className="hd-form"><LeadForm light cta={cta} target={{ interest: 'buy', house: h.code, estate: estate.slug, region: h.regionSlug, context, phone: company.phone }} /></div>
+          <div className="hd-form">
+            <p className="hd-form-title">Записаться на показ или видеотур</p>
+            <LeadForm light cta={cta} target={{ interest: 'buy', house: h.code, estate: estate.slug, region: h.regionSlug, context, phone: company.phone }} />
+            <p className="hd-form-trust">Перезвоним в рабочее время без навязчивых звонков · согласуем удобный день</p>
+          </div>
         </section>
         {related.length > 0 && <section className="hd-section hd-alternatives">
           <div className="hd-alternatives-head">
@@ -150,11 +182,13 @@ export default async function HouseDetail({ params }: Props) {
               const cleanV = cleanSinglePlotAddress(v.title, v.estateName, v.plotNo)
               const frame = housePhotography(v.code)[0]
               const cardImg = frame?.src ?? v.photoCard ?? v.photo
+              const isRender = /tip[-_]?12/i.test(v.code) || /тип\s*12/i.test(v.title)
               return (
                 <a key={v.code} className="v3-card hd-alt-card" href={`/v4/dom/${v.code}`}>
                   <figure>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     {cardImg ? <img src={cardImg} alt={frame?.alt ?? cleanV.typePart} loading="lazy" /> : <span className="v3-card__noimg">Фото скоро</span>}
+                    {isRender && <span className="hd-alt-render-tag">Визуализация проекта</span>}
                     {cardImg && <figcaption>{frame?.caption ?? 'Изображение проекта'}</figcaption>}
                   </figure>
                   <div className="v3-card__body">

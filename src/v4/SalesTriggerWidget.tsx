@@ -67,6 +67,7 @@ export function SalesTriggerWidget({ phone, offer }: Props) {
           }}>{option}<span aria-hidden>→</span></button>)}
         </div> : <>
           <p className="st-summary">{bedrooms} · {payment}</p>
+          <p className="st-honest-note">Пришлём подходящие планировки с актуальными ценами и расчётом ипотеки.</p>
           <LeadForm light target={{ phone, interest: 'buy', context: `Подбор дома: ${bedrooms} · ${payment}` }} cta="Получить подборку" />
         </>}
         {step > 1 && <button type="button" className="st-back" onClick={() => setStep(step - 1)}>← Назад</button>}

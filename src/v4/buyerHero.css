@@ -71,18 +71,18 @@
   border-radius: 1.5px;
 }
 .buyer-hero__windows .bh-win--l {
-  left: 31.38%;
-  top: 69.55%;
-  width: 2.62%;
-  height: 9.05%;
+  left: 29.7%;
+  top: 53.0%;
+  width: 2.8%;
+  height: 10.1%;
   background: radial-gradient(72% 64% at 52% 44%, #fff3cf 0%, #ffc978 56%, #e59348 100%);
   box-shadow: 0 0 16px 4px rgba(255, 194, 102, .52), 0 0 42px 12px rgba(255, 174, 78, .22);
 }
 .buyer-hero__windows .bh-win--r {
-  left: 60.32%;
-  top: 68.85%;
-  width: 5.42%;
-  height: 10.15%;
+  left: 60.8%;
+  top: 53.3%;
+  width: 5.9%;
+  height: 11.4%;
   background: radial-gradient(72% 64% at 50% 45%, #fff4d2 0%, #ffca7a 56%, #e7964b 100%);
   box-shadow: 0 0 20px 5px rgba(255, 196, 106, .56), 0 0 54px 16px rgba(255, 174, 78, .24);
 }
@@ -114,9 +114,9 @@
 }
 /* Тёплый фонарь и фрамуга над входной дверью в нише крыльца */
 .buyer-hero__windows .bh-win--porch {
-  left: 49.2%;
-  top: 69.5%;
-  width: 2.9%;
+  left: 48.7%;
+  top: 53.1%;
+  width: 3.7%;
   height: 1.35%;
   border-radius: 3px;
   background: radial-gradient(closest-side, #fff8e3 0%, #ffd28a 68%, rgba(255, 190, 98, 0) 100%);
@@ -128,10 +128,10 @@
   inset: 0;
   mix-blend-mode: screen;
   background:
-    radial-gradient(7% 8% at 50.6% 76.5%, rgba(255, 198, 116, .38) 0%, rgba(255, 180, 92, .12) 56%, transparent 82%),
-    radial-gradient(12% 8% at 63.0% 78.2%, rgba(255, 196, 112, .26) 0%, transparent 74%),
-    radial-gradient(8% 7% at 32.7% 77.8%, rgba(255, 194, 110, .22) 0%, transparent 74%),
-    radial-gradient(10% 6% at 50.8% 87.5%, rgba(255, 190, 106, .24) 0%, transparent 72%);
+    radial-gradient(7% 8% at 50.5% 60.5%, rgba(255, 198, 116, .38) 0%, rgba(255, 180, 92, .12) 56%, transparent 82%),
+    radial-gradient(12% 8% at 63.7% 62.5%, rgba(255, 196, 112, .26) 0%, transparent 74%),
+    radial-gradient(8% 7% at 31.1% 61.5%, rgba(255, 194, 110, .22) 0%, transparent 74%),
+    radial-gradient(10% 6% at 50.8% 72.5%, rgba(255, 190, 106, .24) 0%, transparent 72%);
 }
 
 /* Падающая звезда в глубокой ночи, опускающаяся за конёк крыши дома */
@@ -165,7 +165,7 @@
 }
 
 .buyer-hero__veil {
-  background: linear-gradient(180deg, rgba(8, 16, 25, .75) 0%, rgba(12, 22, 29, .45) 27%, rgba(16, 32, 22, .10) 48%, transparent 58%, rgba(12, 28, 18, .18) 68%, rgba(8, 24, 14, .82) 100%);
+  background: linear-gradient(180deg, rgba(8, 16, 25, .80) 0%, rgba(12, 22, 29, .50) 28%, rgba(16, 32, 22, .12) 48%, transparent 58%, rgba(12, 28, 18, .20) 68%, rgba(8, 24, 14, .84) 100%);
 }
 /* The primary header stays available throughout the sunrise and the transition to the catalogue. */
 .v4:has(.buyer-hero) > .v4-bar {
@@ -289,6 +289,9 @@ html.no-motion .buyer-hero__windows { display: none; }
   .buyer-hero__foot p, .buyer-hero__price { font-size: 14px; }
   .v4 .buyer-hero__action { min-height: 43px; padding: 5px 6px 5px 16px; font-size: 14px; gap: 14px; }
   .buyer-hero__action span { width: 30px; height: 30px; font-size: 18px; }
+}
+@media (max-width: 700px) {
+  .buyer-hero__windows { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .buyer-hero *, .buyer-hero *::after, .v4:has(.buyer-hero) > .v4-bar { animation: none !important; transition: none !important; }

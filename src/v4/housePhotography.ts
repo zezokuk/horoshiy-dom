@@ -32,22 +32,31 @@ const type6v3: HouseFrame[] = [
   ...interiorFrames,
 ]
 
+const type10: HouseFrame[] = [
+  { src: '/v4/houses/type10-front.webp', alt: 'Два двухэтажных кирпичных дома на Дружбы', caption: 'Общий вид · Проект «Тип 10»' },
+  { src: '/v4/houses/type10-entry.webp', alt: 'Главный вход и окна второго этажа', caption: 'Главный фасад · Дом по проекту «Тип 10»' },
+  { src: '/v4/houses/type10-side.webp', alt: 'Двухэтажный кирпичный дом со стороны улицы', caption: 'Вид с улицы · Дом по проекту «Тип 10»' },
+  ...interiorFrames,
+]
+
 const photosByCode: Record<string, HouseFrame[]> = {
   // DSC_6531, DSC_6536, DSC_6533. Two variants reuse the same facade on the client's slides.
   'di-tip5': type5,
   'di-tip5-v3': type5,
   'di-18-tip5-v3': type5,
   'di-tip6-v3': type6v3,
-  'dr-tip10': [
-    { src: '/v4/houses/type10-front.webp', alt: 'Два двухэтажных кирпичных дома на Дружбы', caption: 'Общий вид · Проект «Тип 10»' },
-    { src: '/v4/houses/type10-entry.webp', alt: 'Главный вход и окна второго этажа', caption: 'Главный фасад · Дом по проекту «Тип 10»' },
-    { src: '/v4/houses/type10-side.webp', alt: 'Двухэтажный кирпичный дом со стороны улицы', caption: 'Вид с улицы · Дом по проекту «Тип 10»' },
-    ...interiorFrames,
-  ],
+  'dr-tip10': type10,
 }
 
-export function housePhotography(code: string): readonly HouseFrame[] {
-  return photosByCode[code] ?? []
+const photosBySlug: Record<string, HouseFrame[]> = {
+  'tip-5': type5,
+  'tip-5-v3': type5,
+  'tip-6-v3': type6v3,
+  'tip-10': type10,
+}
+
+export function housePhotography(code: string, projectSlug?: string): readonly HouseFrame[] {
+  return photosByCode[code] ?? (projectSlug ? photosBySlug[projectSlug] : undefined) ?? []
 }
 
 export function fallbackHouseFrames(typeName: string, primaryPhoto?: string | null, extraPhoto?: string | null): HouseFrame[] {

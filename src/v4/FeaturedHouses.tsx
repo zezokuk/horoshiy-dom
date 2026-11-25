@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { formatArea, formatMillions, plural } from '@/lib/format'
 import './featuredHouses.css'
 
@@ -8,6 +8,7 @@ export type FeaturedHouse = {
   code: string
   location: string
   title: string
+  storeyTag?: '1' | 'mansard' | '2'
   price: number
   area: number
   plot: string | null
@@ -19,9 +20,15 @@ export type FeaturedHouse = {
   mortgageYears?: number
   familyRate?: number
   image?: string
+  altImage?: string
+  altCaption?: string
+  planImage?: string
   caption: string
   alt: string
 }
+
+type StoreyFilter = 'all' | '1' | 'mansard' | '2'
+type CardView = 'facade' | 'alt' | 'plan'
 
 function Arrow({ direction = 'right' }: { direction?: 'left' | 'right' }) {
   return (
@@ -44,6 +51,21 @@ export function FeaturedHouses({ houses, count }: { houses: FeaturedHouse[]; cou
   const trackRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<{ startX: number; scrollLeft: number; moved: boolean } | null>(null)
   const [index, setIndex] = useState(0)
+  const [storeyFilter, setStoreyFilter] = useState<StoreyFilter>('all')
+  const [cardViews, setCardViews] = useState<Record<string, CardView>>({})
+
+  const filterPills = useMemo(() => {
+    const items: { id: StoreyFilter; label: string }[] = [{ id: 'all', label: 'Все дома' }]
+    if (houses.some((h) => h.storeyTag === '1')) items.push({ id: '1', label: '1 этаж' })
+    if (houses.some((h) => h.storeyTag === 'mansard')) items.push({ id: 'mansard', label: 'С мансардой' })
+    if (houses.some((h) => h.storeyTag === '2')) items.push({ id: '2', label: '2 этажа' })
+    return items
+  }, [houses])
+
+  const visibleHouses = useMemo(
+    () => (storeyFilter === 'all' ? houses : houses.filter((h) => h.storeyTag === storeyFilter)),
+    [houses, storeyFilter],
+  )
 
   const syncActive = useCallback(() => {
     const el = trackRef.current
@@ -51,10 +73,10 @@ export function FeaturedHouses({ houses, count }: { houses: FeaturedHouse[]; cou
     const cards = Array.from(el.querySelectorAll<HTMLElement>('.fh-slide'))
     if (!cards.length) return
     const left = el.getBoundingClientRect().left
-    const index = cards.reduce((nearest, card, i) => (
+    const nextIdx = cards.reduce((nearest, card, i) => (
       Math.abs(card.getBoundingClientRect().left - left) < Math.abs(cards[nearest].getBoundingClientRect().left - left) ? i : nearest
     ), 0)
-    setIndex(index)
+    setIndex(nextIdx)
   }, [])
 
   useEffect(() => {
@@ -64,10 +86,16 @@ export function FeaturedHouses({ houses, count }: { houses: FeaturedHouse[]; cou
     return () => el.removeEventListener('scroll', syncActive)
   }, [syncActive])
 
+  const selectFilter = (next: StoreyFilter) => {
+    setStoreyFilter(next)
+    setIndex(0)
+    if (trackRef.current) trackRef.current.scrollLeft = 0
+  }
+
   const scrollToSlide = (targetIdx: number) => {
     const el = trackRef.current
-    if (!el || !houses.length) return
-    const nextIdx = (targetIdx + houses.length) % houses.length
+    if (!el || !visibleHouses.length) return
+    const nextIdx = (targetIdx + visibleHouses.length) % visibleHouses.length
     const cards = el.querySelectorAll<HTMLElement>('.fh-slide')
     const target = cards[nextIdx]
     if (target) {
@@ -85,13 +113,13 @@ export function FeaturedHouses({ houses, count }: { houses: FeaturedHouse[]; cou
             <h2 id="fh-title">
               Дома <em>в продаже</em>
             </h2>
-            <p className="fh-sub">Цена каждого дома включает участок.</p>
+            <p className="fh-sub">Цена каждого дома включает участок. Подборка от самого доступного.</p>
           </div>
           <div className="fh-head-right">
-            {houses.length > 1 && (
+            {visibleHouses.length > 1 && (
               <div className="fh-switch" aria-label="Навигация по слайдеру домов">
                 <span>
-                  <b>{String(index + 1).padStart(2, '0')}</b> / {String(houses.length).padStart(2, '0')}
+                  <b>{String(index + 1).padStart(2, '0')}</b> / {String(visibleHouses.length).padStart(2, '0')}
                 </span>
                 <div>
                   <button type="button" onClick={() => scrollToSlide(index - 1)} aria-label="Предыдущий дом">
@@ -109,7 +137,23 @@ export function FeaturedHouses({ houses, count }: { houses: FeaturedHouse[]; cou
           </div>
         </div>
 
-        {houses.length > 0 ? (
+        {filterPills.length > 2 && (
+          <div className="fh-filters" role="group" aria-label="Фильтр по этажности">
+            {filterPills.map((pill) => (
+              <button
+                key={pill.id}
+                type="button"
+                className={storeyFilter === pill.id ? 'is-on' : undefined}
+                aria-pressed={storeyFilter === pill.id}
+                onClick={() => selectFilter(pill.id)}
+              >
+                {pill.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {visibleHouses.length > 0 ? (
           <div
             ref={trackRef}
             className="fh-rail"
@@ -146,28 +190,78 @@ export function FeaturedHouses({ houses, count }: { houses: FeaturedHouse[]; cou
               }
             }}
           >
-            {houses.map((house, i) => {
+            {visibleHouses.map((house, i) => {
               const href = '/v4/dom/' + encodeURIComponent(house.code)
+              const view = cardViews[house.code] ?? 'facade'
+              const isPlan = view === 'plan' && Boolean(house.planImage)
+              const activeImg = isPlan
+                ? house.planImage
+                : view === 'alt' && house.altImage
+                  ? house.altImage
+                  : house.image
+              const activeCaption = isPlan
+                ? 'Планировка · ' + (house.projectName ?? house.title)
+                : view === 'alt' && house.altCaption
+                  ? house.altCaption
+                  : house.caption
+              const hasTabs = Boolean(house.altImage || house.planImage)
+
               return (
                 <article key={house.code} className="fh-spread fh-slide">
-                  <a className="fh-photo" href={href} aria-label={'Открыть ' + house.title + ', ' + house.location}>
-                    {house.image && (
+                  <a
+                    className={isPlan ? 'fh-photo fh-photo--plan' : 'fh-photo'}
+                    href={href}
+                    aria-label={'Открыть ' + house.title + ', ' + house.location}
+                  >
+                    {activeImg && (
                       <>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={house.image}
-                          alt={house.alt}
+                          src={activeImg}
+                          alt={isPlan ? 'Планировка: ' + (house.projectName ?? house.title) : house.alt}
                           width="1350"
                           height="900"
                           loading={i < 2 ? 'eager' : 'lazy'}
                         />
                         {house.projectName && <span className="fh-badge">{house.projectName}</span>}
-                        <span className="fh-source">{house.caption}</span>
+                        <span className="fh-source">{activeCaption}</span>
                       </>
                     )}
                   </a>
                   <div className="fh-sheet">
                     <div className="fh-facts">
+                      {hasTabs && (
+                        <div className="fh-views" role="group" aria-label={'Вид карточки · ' + (house.projectName ?? house.title)}>
+                          <button
+                            type="button"
+                            className={view === 'facade' ? 'is-on' : undefined}
+                            aria-pressed={view === 'facade'}
+                            onClick={() => setCardViews((prev) => ({ ...prev, [house.code]: 'facade' }))}
+                          >
+                            Фасад
+                          </button>
+                          {house.altImage && (
+                            <button
+                              type="button"
+                              className={view === 'alt' ? 'is-on' : undefined}
+                              aria-pressed={view === 'alt'}
+                              onClick={() => setCardViews((prev) => ({ ...prev, [house.code]: 'alt' }))}
+                            >
+                              Вид
+                            </button>
+                          )}
+                          {house.planImage && (
+                            <button
+                              type="button"
+                              className={view === 'plan' ? 'is-on' : undefined}
+                              aria-pressed={view === 'plan'}
+                              onClick={() => setCardViews((prev) => ({ ...prev, [house.code]: 'plan' }))}
+                            >
+                              План
+                            </button>
+                          )}
+                        </div>
+                      )}
                       <p className="fh-place">{house.location}</p>
                       <h3>
                         <a href={href}>{house.title}</a>
@@ -209,7 +303,6 @@ export function FeaturedHouses({ houses, count }: { houses: FeaturedHouse[]; cou
                       <a className="fh-open" href={href}>
                         Открыть дом <Arrow />
                       </a>
-
                     </div>
                   </div>
                 </article>

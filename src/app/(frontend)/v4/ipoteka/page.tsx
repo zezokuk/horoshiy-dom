@@ -58,7 +58,7 @@ export default async function V4Mortgage() {
             <ul className="v4-progs">{(company.mortgage ?? []).map((m) => <li key={m.title}><b>{m.title}</b><span>{m.text}</span></li>)}</ul>
           </div>
         </section>
-        <section className="v3-sec v4-sec">
+        <section className="v3-sec v4-sec" style={{ paddingBlock: 'clamp(44px, 5vw, 72px)' }}>
           <div className="v3-wrap v4-head">
             <p className="v4-num">Как купить</p>
             <h2 className="v3-h2" data-move="lines">Пять шагов <em>до ключей</em></h2>
@@ -68,13 +68,20 @@ export default async function V4Mortgage() {
           </ol>
         </section>
         {faq.length > 0 && (
-          <section className="v3-sec v4-sec">
-            <div className="v3-wrap v4-head">
-              <p className="v4-num">Частые вопросы</p>
-              <h2 className="v3-h2" data-move="lines">Про оплату <em>коротко</em></h2>
-            </div>
-            <div className="v3-wrap v4-faq">
-              {faq.map((f, k) => <details key={f.q} open={k === 0}><summary>{f.q}</summary><p>{f.a}</p></details>)}
+          <section className="v3-sec v3-sec--linen v4-sec" style={{ paddingBlock: 'clamp(44px, 5vw, 72px)' }}>
+            <div className="v3-wrap v4-faq-split">
+              <div className="v4-head">
+                <p className="v4-num">Частые вопросы</p>
+                <h2 className="v3-h2" data-move="lines">Про оплату <em>коротко</em></h2>
+                <p className="v3-lead">Ипотечный специалист компании бесплатно подберёт банк, проверит лимиты госпрограмм и подготовит пакет документов до выхода на сделку.</p>
+              </div>
+              <div className="v4-faq">
+                {[
+                  ...faq,
+                  { q: 'Можно ли направить материнский капитал в первоначальный взнос?', a: 'Да, материнский капитал принимается как полностью, так и частично в счёт первоначального взноса либо на досрочное погашение ипотеки.' },
+                  { q: 'Сколько стоит сопровождение ипотечного специалиста?', a: 'Для покупателей наших домов подбор банка, подача заявок и сопровождение сделки полностью бесплатны — 0 ₽ комиссии.' },
+                ].map((f, k) => <details key={f.q} open={k === 0}><summary>{f.q}</summary><p>{f.a}</p></details>)}
+              </div>
             </div>
           </section>
         )}
