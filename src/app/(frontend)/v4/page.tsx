@@ -10,6 +10,7 @@ import BuyerHero from '@/v4/BuyerHero'
 import { CountryLifeStory } from '@/v4/CountryLifeStory'
 import { HouseWalk } from '@/v4/HouseWalk'
 import { FeaturedHouses, type FeaturedHouse } from '@/v4/FeaturedHouses'
+import { HandoverStories } from '@/v4/HandoverStories'
 import { housePhotography } from '@/v4/housePhotography'
 import { MapGenplanFlow, type FlowEstate } from '@/v4/MapGenplanFlow'
 import { V4Bar, V4Final, V4Fonts, V4Footer } from '@/v4/Shell'
@@ -69,19 +70,19 @@ const MORTGAGE_PROGRAMS = [
 function estateCleanCover(slug: string): string {
   switch (slug) {
     case 'dinskaya':
-      return '/v4/houses/type5-front.webp'
+      return '/v4/houses/tip5-clean.webp'
     case 'druzhby-43':
-      return '/v4/houses/type10-front.webp'
+      return '/v4/houses/tip10-clean.webp'
     case 'krasnaya-39':
       return '/v4/img/slide-tip-3.webp'
     case 'novovelichkovskaya':
-      return '/v4/houses/type6v3-front.webp'
+      return '/v4/houses/tip6-clean.webp'
     case 'yuzhnyy-veter':
-      return '/v4/img/slide-tip-1.webp'
+      return '/v4/houses/yuzhnyy-veter-real.webp'
     case 'kalina':
       return '/v4/img/slide-tip-2.webp'
     default:
-      return '/v4/houses/type5-front.webp'
+      return '/v4/houses/tip1-clean.webp'
   }
 }
 
@@ -139,12 +140,12 @@ export default async function V4Home() {
 
   const rawByCode = new Map(houses.map((x) => [x.code, x]))
   const featured: FeaturedHouse[] = selected.map((h) => {
-    const frames = housePhotography(h.code)
-    const shot = h.code === 'di-tip5' ? frames[1] ?? frames[0] : frames[0]
-    const primarySrc = shot?.src ?? h.photo
-    const altShot = frames.find((f) => f.src !== primarySrc)
     const raw = rawByCode.get(h.code)
     const proj = raw ? projects.find((p) => p.id === projectOf(raw)) : undefined
+    const frames = housePhotography(h.code, proj?.slug)
+    const shot = frames[0]
+    const primarySrc = shot?.src ?? h.photo
+    const altShot = frames.find((f) => f.src !== primarySrc)
     const planImage = proj?.plan ? img(proj.plan, 'card') || undefined : undefined
     const [type] = h.title.split(', ')
     const need = h.price ? Math.max(fam.minDown, Math.ceil(((h.price - fam.limit) / h.price) * 100)) : fam.minDown
@@ -237,7 +238,7 @@ export default async function V4Home() {
       <MotionRoot>
         <V4Motion />
 
-        <BuyerHero priceFrom={priceFrom ? formatMillions(priceFrom) : undefined} />
+        <BuyerHero phone={company.phone} priceFrom={priceFrom ? formatMillions(priceFrom) : undefined} />
         <FeaturedHouses houses={featured} count={free.length} />
         <HouseWalk
           areas={walkAreas}
@@ -255,6 +256,8 @@ export default async function V4Home() {
             </div>
           </section>
         )}
+
+        <HandoverStories />
 
         {/* Ипотека: светлый понятный блок без тяжёлой плашки и выдуманных процентов */}
         <section className="v3-sec v4-sec v4-sec--mort" id="ipoteka">

@@ -35,21 +35,21 @@ const KEY = process.env.NEXT_PUBLIC_YMAPS_KEY?.trim()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Yandex Maps 2.1 ships no types
 type Y = any
 
-function loadYmaps(key: string): Promise<Y> {
+function loadYmaps(): Promise<Y> {
   return new Promise((resolve, reject) => {
     const ready = () => (window.ymaps ? window.ymaps.ready(() => resolve(window.ymaps)) : reject(new Error('ymaps: empty')))
     if (window.ymaps?.ready) return ready()
     let s = document.querySelector<HTMLScriptElement>('script[data-ymaps]')
     if (!s) {
       s = document.createElement('script')
-      s.src = `https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=${encodeURIComponent(key)}`
+      s.src = `https://api-maps.yandex.ru/2.1/?lang=ru_RU${KEY ? `&apikey=${encodeURIComponent(KEY)}` : ''}`
       s.async = true
       s.dataset.ymaps = '1'
       document.head.appendChild(s)
     }
     s.addEventListener('load', ready)
     s.addEventListener('error', () => reject(new Error('ymaps: load')))
-    window.setTimeout(() => reject(new Error('ymaps: timeout')), 5500)
+    window.setTimeout(() => reject(new Error('ymaps: timeout')), 7500)
   })
 }
 
@@ -134,7 +134,7 @@ export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
   const defaultIdx = Math.max(0, estates.findIndex((e) => e.slug === 'dinskaya'))
   const [activeIdx, setActiveIdx] = useState<number>(defaultIdx)
   const [zoomedSlug, setZoomedSlug] = useState<string | null>(null)
-  const [mapMode, setMapMode] = useState<'wait' | 'js' | 'vector'>(KEY ? 'wait' : 'vector')
+  const [mapMode, setMapMode] = useState<'wait' | 'js' | 'vector'>('wait')
 
   const boxRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
@@ -173,17 +173,17 @@ export function MapGenplanFlow({ estates }: { estates: FlowEstate[] }) {
 
   useEffect(() => {
     const el = boxRef.current
-    if (!KEY || !el) return
+    if (!el) return
     const io = new IntersectionObserver(([e]) => e.isIntersecting && (setNear(true), io.disconnect()), { rootMargin: '400px 0px' })
     io.observe(el)
     return () => io.disconnect()
   }, [])
 
   useEffect(() => {
-    if (!KEY || !near || !canvasRef.current || !estates.length) return
+    if (!near || !canvasRef.current || !estates.length) return
     let dead = false
     let map: Y
-    loadYmaps(KEY)
+    loadYmaps()
       .then((ymaps) => {
         if (dead || !canvasRef.current) return
         const touch = window.matchMedia('(pointer: coarse)').matches

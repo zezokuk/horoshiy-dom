@@ -6,6 +6,7 @@ import { formatArea, formatMillions } from '@/lib/format'
 import { JsonLd, breadcrumbsLd, estateLd } from '@/lib/seo'
 import { mainHref } from '@/lib/site'
 import { cleanPhotoUrl, estateSale, estateView, genplanEstate, houseView } from '@/lib/view'
+import { housePhotography, projectCleanPhoto } from '@/v4/housePhotography'
 import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { HousePicker, type PickHouse } from '@/v3/home/HousePicker'
 import { StickyCta } from '@/v3/home/StickyCta'
@@ -51,17 +52,24 @@ export default async function V4Estate({ params }: Props) {
   const v = estateView(e, houses)
   const all = houses.map(houseView)
   const free = all.filter((h) => h.status === 'free').sort((a, b) => a.price - b.price)
-  const pick: PickHouse[] = free.map((h) => ({
-    code: h.code,
-    title: h.title,
-    area: h.area,
-    plot: h.plot,
-    price: h.price,
-    estate: h.estateName,
-    photo: h.photoCard ?? h.photo,
-    href: `/v4/dom/${h.code}`,
-    caption: 'Изображение проекта',
-  }))
+  const rawByCode = new Map(houses.map((x) => [x.code, x]))
+  const pick: PickHouse[] = free.map((h) => {
+    const raw = rawByCode.get(h.code)
+    const pid = raw ? (typeof raw.project === 'object' ? raw.project?.id : raw.project) : undefined
+    const pslug = projects.find((p) => p.id === pid)?.slug
+    const frames = housePhotography(h.code, pslug)
+    return {
+      code: h.code,
+      title: h.title,
+      area: h.area,
+      plot: h.plot,
+      price: h.price,
+      estate: h.estateName,
+      photo: frames[0]?.src ?? h.photoCard ?? h.photo,
+      href: `/v4/dom/${h.code}`,
+      caption: frames[0]?.caption ?? 'Изображение проекта',
+    }
+  })
   const plot = free.length && e.status !== 'planned' ? [{ name: e.name, href: v.href, estate: genplanEstate(e, all.length), houses: all }] : []
   const showGenplan = e.slug === 'dinskaya' || free.length > 1
   const fam = { rate: company.family?.rate ?? 6, years: company.family?.years ?? 30, minDown: company.family?.minDown ?? 20, limit: company.family?.limit ?? 6_000_000 }
@@ -85,7 +93,7 @@ export default async function V4Estate({ params }: Props) {
         slug: p.slug,
         num: exactNum ? Number(exactNum) : 99,
         name: p.name,
-        photo: cleanPhotoUrl(img(p.photo, 'wide')) ?? sample.photo ?? sample.photoCard,
+        photo: projectCleanPhoto(p.slug) ?? cleanPhotoUrl(img(p.photo, 'wide')) ?? sample.photo ?? sample.photoCard,
         plan: img(p.plan, 'wide') ?? sample.plan,
         area: p.area ?? sample.area ?? null,
         mansard: p.mansard ?? sample.mansard ?? null,

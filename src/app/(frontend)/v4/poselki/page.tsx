@@ -26,11 +26,11 @@ export const metadata: Metadata = {
 }
 
 const COVER_BY_SLUG: Record<string, string> = {
-  dinskaya: '/v4/houses/type5-front.webp',
-  'druzhby-43': '/v4/houses/type10-front.webp',
+  dinskaya: '/v4/houses/tip5-clean.webp',
+  'druzhby-43': '/v4/houses/tip10-clean.webp',
   'krasnaya-39': '/v4/img/slide-tip-3.webp',
-  novovelichkovskaya: '/v4/houses/type6v3-front.webp',
-  'yuzhnyy-veter': '/v4/img/slide-tip-1.webp',
+  novovelichkovskaya: '/v4/houses/tip6-clean.webp',
+  'yuzhnyy-veter': '/v4/houses/yuzhnyy-veter-real.webp',
   kalina: '/v4/img/slide-tip-2.webp',
 }
 

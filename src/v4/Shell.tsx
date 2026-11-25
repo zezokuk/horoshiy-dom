@@ -182,9 +182,11 @@ export function V4PageHead({ eyebrow, ghost, title, em, lead }: { eyebrow: strin
   return (
     <section className="v3-sec v4-sec v4-page-head">
       <span className="v4-ghost" aria-hidden>{ghost.toLowerCase()}</span>
-      <div className="v3-wrap v4-head">
-        <nav className="v4-dom__crumbs" aria-label="Навигация"><a href="/v4">Главная</a><span aria-hidden>/</span><span>{eyebrow}</span></nav>
-        <h1 className="v3-h2 v4-page-head__h1" data-move="lines">{title}{em ? <> <em>{em}</em></> : null}</h1>
+      <div className={`v3-wrap v4-head${lead ? ' v4-page-head__grid' : ''}`}>
+        <div>
+          <nav className="v4-dom__crumbs" aria-label="Навигация"><a href="/v4">Главная</a><span aria-hidden>/</span><span>{eyebrow}</span></nav>
+          <h1 className="v3-h2 v4-page-head__h1" data-move="lines">{title}{em ? <> <em>{em}</em></> : null}</h1>
+        </div>
         {lead && <p className="v3-lead" data-move="up">{lead}</p>}
       </div>
     </section>

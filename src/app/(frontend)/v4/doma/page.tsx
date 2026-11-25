@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { getCompany, getHouses, getProjects, img, plural } from '@/lib/data'
 import { formatMillions } from '@/lib/format'
 import { cleanPhotoUrl, houseView } from '@/lib/view'
-import { housePhotography } from '@/v4/housePhotography'
+import { housePhotography, projectCleanPhoto } from '@/v4/housePhotography'
 import { MotionRoot } from '@/v3/motion/MotionRoot'
 import { HousePicker, type PickHouse, type PickProjectType } from '@/v3/home/HousePicker'
 import { StickyCta } from '@/v3/home/StickyCta'
@@ -42,19 +42,29 @@ export default async function V4Catalog({ searchParams }: { searchParams: Promis
   const { view } = await searchParams
   const [company, houses, projects] = await Promise.all([getCompany(), getHouses({ status: 'free' }), getProjects()])
   const free = houses.map(houseView).sort((a, b) => a.price - b.price)
-  const pick: PickHouse[] = free.map((h) => ({
-    code: h.code,
-    title: cleanHouseShortTitle(h.title, h.plotNo),
-    area: h.area,
-    plot: h.plot,
-    price: h.price,
-    estate: h.estateName,
-    photo: housePhotography(h.code)[0]?.src ?? h.photoCard ?? h.photo,
-    href: `/v4/dom/${h.code}`,
-    caption: housePhotography(h.code)[0]?.caption ?? 'Изображение проекта',
-  }))
-
+  const rawByCode = new Map(houses.map((x) => [x.code, x]))
   const projectOf = (h: (typeof houses)[number]) => (typeof h.project === 'object' ? h.project?.id : h.project)
+  const slugOf = (h: (typeof houses)[number]) => {
+    if (typeof h.project === 'object' && h.project?.slug) return h.project.slug
+    const pid = projectOf(h)
+    return projects.find((p) => p.id === pid)?.slug
+  }
+  const pick: PickHouse[] = free.map((h) => {
+    const raw = rawByCode.get(h.code)
+    const frames = housePhotography(h.code, raw ? slugOf(raw) : undefined)
+    return {
+      code: h.code,
+      title: cleanHouseShortTitle(h.title, h.plotNo),
+      area: h.area,
+      plot: h.plot,
+      price: h.price,
+      estate: h.estateName,
+      photo: frames[0]?.src ?? h.photoCard ?? h.photo,
+      href: `/v4/dom/${h.code}`,
+      caption: frames[0]?.caption ?? 'Изображение проекта',
+    }
+  })
+
   const projectTypes: PickProjectType[] = projects
     .map((p) => {
       const mine = free.filter((h) => {
@@ -75,7 +85,7 @@ export default async function V4Catalog({ searchParams }: { searchParams: Promis
         area: p.area ?? null,
         bedrooms: p.bedrooms ?? null,
         storeys: p.storeys === 2 ? '2 этажа' : p.mansard ? '1 этаж + мансарда' : '1 этаж',
-        photo: cleanPhotoUrl(img(p.photo, 'wide')),
+        photo: projectCleanPhoto(p.slug) ?? cleanPhotoUrl(img(p.photo, 'wide')),
         plan: img(p.plan, 'wide'),
         free: mine.length,
         fromPrice: prices.length ? Math.min(...prices) : null,

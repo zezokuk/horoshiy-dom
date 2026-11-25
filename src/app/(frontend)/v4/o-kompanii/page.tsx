@@ -22,11 +22,10 @@ export const metadata: Metadata = {
 const SKIP = ['Не хуже особняков', 'Дом за 6 месяцев']
 
 const BUILT_GALLERY = [
-  { src: '/v4/houses/type5-front.webp', cap: 'Дом по проекту «Тип 5» · главный фасад' },
+  { src: '/v4/houses/tip5-clean.webp', cap: 'Готовый дом в Динской (проект «Тип 5») · реальное фото' },
   { src: '/v4/houses/vtoroy-svet.webp', cap: 'Проект со «вторым светом» · визуализация СК «Хороший дом»' },
-  { src: '/v4/houses/type10-front.webp', cap: 'Дома по проекту «Тип 10» · вид с улицы' },
-  { src: '/v4/houses/type5-side.webp', cap: 'Кирпичная кладка, крыльцо и благоустроенная территория' },
-  { src: '/v4/houses/type10-entry.webp', cap: 'Дом по проекту «Тип 10» · вход со двора' },
+  { src: '/v4/houses/yuzhnyy-veter-real.webp', cap: 'Жилая улица в КП «Южный ветер» · дома построены и заселены' },
+  { src: '/v4/houses/tip10-clean.webp', cap: 'Двухэтажный дом по проекту «Тип 10» · ул. Дружбы, 43' },
 ] as const
 
 export default async function V4About() {
